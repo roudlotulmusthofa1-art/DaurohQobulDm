@@ -23,6 +23,14 @@ else
     RSYNC_CMD="rsync"
 fi
 
+# Check if rsync is installed
+if ! command -v rsync &> /dev/null; then
+    echo "❌ ERROR FATAL: 'rsync' tidak terinstal di komputer Anda!"
+    echo "Git Bash Windows secara bawaan tidak memiliki rsync."
+    echo "Solusi: Silakan instal rsync, atau gunakan WSL (Ubuntu), atau push kode Anda ke GitHub terlebih dahulu."
+    exit 1
+fi
+
 # Ensure target directory exists on server
 $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "echo '$DEPLOY_SUDO_PASS' | sudo -S mkdir -p $DEPLOY_PATH && echo '$DEPLOY_SUDO_PASS' | sudo -S chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH"
 
