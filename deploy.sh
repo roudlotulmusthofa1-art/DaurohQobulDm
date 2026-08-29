@@ -10,6 +10,9 @@ fi
 
 echo "🚀 Starting Deployment to $DEPLOY_HOST..."
 
+# Prevent Git Bash (Windows) from translating Linux paths like /var/www/... to C:/...
+export MSYS_NO_PATHCONV=1
+
 # Check for sshpass (Windows fallback)
 if command -v sshpass &> /dev/null; then
     SSH_CMD="sshpass -p $DEPLOY_SUDO_PASS ssh -o StrictHostKeyChecking=no"
