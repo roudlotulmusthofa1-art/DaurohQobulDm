@@ -10,47 +10,19 @@ fi
 
 echo "🚀 Starting Deployment to $DEPLOY_HOST..."
 
-# Prevent Git Bash (Windows) from translating Linux paths like /var/www/... to C:/...
-export MSYS_NO_PATHCONV=1
-
 # Check for sshpass (Windows fallback)
 if command -v sshpass &> /dev/null; then
     SSH_CMD="sshpass -p $DEPLOY_SUDO_PASS ssh -o StrictHostKeyChecking=no"
-    RSYNC_CMD="sshpass -p $DEPLOY_SUDO_PASS rsync"
 else
     echo "⚠️ 'sshpass' tidak ditemukan (Mode Windows). Anda akan diminta mengetik password server manual."
     SSH_CMD="ssh -o StrictHostKeyChecking=no"
-    RSYNC_CMD="rsync"
 fi
 
-# Check if rsync is installed
-if ! command -v rsync &> /dev/null; then
-    echo "❌ ERROR FATAL: 'rsync' tidak terinstal di komputer Anda!"
-    echo "Git Bash Windows secara bawaan tidak memiliki rsync."
-    echo "Solusi: Silakan instal rsync, atau gunakan WSL (Ubuntu), atau push kode Anda ke GitHub terlebih dahulu."
-    exit 1
-fi
-
-# Ensure target directory exists on server
-$SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "echo '$DEPLOY_SUDO_PASS' | sudo -S mkdir -p $DEPLOY_PATH && echo '$DEPLOY_SUDO_PASS' | sudo -S chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH"
-
-# Sync files to server
-# --exclude: don't send these files
-$RSYNC_CMD -avz --progress \
-    --exclude='.git' \
-    --exclude='node_modules' \
-    --exclude='vendor' \
-    --exclude='.env' \
-    --exclude='.deploy.conf' \
-    --exclude='storage' \
-    --exclude='docker/db/data' \
-    -e "ssh -o StrictHostKeyChecking=no" \
-    ./ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-
-echo "🐳 Restarting Docker Containers on Server..."
+echo "📥 Menarik (Pull) kode terbaru dari GitHub ke Server..."
 
 # Execute docker command on server
 $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S git pull origin main && \
     if [ -f .env.production ]; then cp .env.production .env; fi && \
     mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs storage/app/public && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker compose up -d --build && \
