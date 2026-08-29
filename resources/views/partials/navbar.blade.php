@@ -299,7 +299,7 @@
                 <div class="w-full h-0.5 bg-slate-100 my-5"></div>
                 {{-- tombol masuk --}}
                 <div class="space-y-4">
-                    <a href="#" @click="mobilOpen = false"
+                    <a href="{{ route('login') }}" @click="mobilOpen = false"
                         class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-teal-100 hover:text-teal-700 transition">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
                         Masuk</a>
