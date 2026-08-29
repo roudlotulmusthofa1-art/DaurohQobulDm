@@ -11,11 +11,11 @@ fi
 echo "🚀 Starting Deployment to $DEPLOY_HOST..."
 
 # Ensure target directory exists on server
-ssh $DEPLOY_USER@$DEPLOY_HOST "mkdir -p $DEPLOY_PATH"
+sshpass -p "$DEPLOY_SUDO_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "echo '$DEPLOY_SUDO_PASS' | sudo -S mkdir -p $DEPLOY_PATH && echo '$DEPLOY_SUDO_PASS' | sudo -S chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH"
 
 # Sync files to server
 # --exclude: don't send these files
-rsync -avz --progress \
+sshpass -p "$DEPLOY_SUDO_PASS" rsync -avz --progress \
     --exclude='.git' \
     --exclude='node_modules' \
     --exclude='vendor' \
@@ -23,19 +23,23 @@ rsync -avz --progress \
     --exclude='.deploy.conf' \
     --exclude='storage' \
     --exclude='docker/db/data' \
+    -e "ssh -o StrictHostKeyChecking=no" \
     ./ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
 
 echo "🐳 Restarting Docker Containers on Server..."
 
 # Execute docker command on server
-ssh $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
+sshpass -p "$DEPLOY_SUDO_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     if [ -f .env.production ]; then cp .env.production .env; fi && \
-    docker compose up -d --build && \
+    mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs storage/app/public && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker compose up -d --build && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S chmod -R 777 storage bootstrap/cache && \
     echo '⏳ Waiting for system to stabilize...' && \
     sleep 8 && \
-    docker exec daurohqobuldm-app php artisan migrate --force && \
-    docker exec daurohqobuldm-app php artisan config:clear && \
-    docker exec daurohqobuldm-app php artisan cache:clear"
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app npm install --ignore-scripts && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app npm run build && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan migrate --force && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan config:clear && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan cache:clear"
 
 echo "✅ Deployment Finished & System Refreshed! Aplikasi dapat diakses di http://$DEPLOY_HOST:8080"

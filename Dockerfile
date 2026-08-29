@@ -1,4 +1,4 @@
-FROM php:8.1-fpm-alpine
+FROM php:8.4-fpm-alpine
 
 # Install system dependencies
 RUN apk add --no-cache \
@@ -11,6 +11,8 @@ RUN apk add --no-cache \
     libzip-dev \
     oniguruma-dev \
     icu-dev \
+    nodejs \
+    npm \
     $PHPIZE_DEPS
 
 # Install PHP extensions
