@@ -1,0 +1,57 @@
+@import 'tailwindcss';
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../**/*.blade.php";
+@source "../**/*.js";
+
+/*
+    Warna & font custom Ribath.
+    Tailwind v4 tidak lagi membaca tailwind.config.js secara otomatis —
+    semua token warna/font didefinisikan di sini lewat @theme, bukan di
+    tailwind.config.js. Nama variabel pakai kebab-case, jadi
+    --color-ribath-green-light menghasilkan utility bg-ribath-green-light,
+    text-ribath-green-light, dst.
+*/
+@theme {
+    --color-ribath-dark: #0E1F17;
+    --color-ribath-darker: #0A1912;
+    --color-ribath-green: #3FAE4A;
+    --color-ribath-green-light: #7ED957;
+    --color-ribath-bg: #F3F6F3;
+
+    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+html {
+    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+}
+
+[v-cloak] {
+    display: none;
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+    transition: transform 0.3s ease;
+}
+
+.slide-up-enter-from,
+.slide-up-leave-to {
+    transform: translateY(100%);
+}
+
+.slide-up-enter-to,
+.slide-up-leave-from {
+    transform: translateY(0);
+}
+
+/* Scrollbar tipis, dipakai di seluruh dashboard */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-thumb {
+    background: #d1d5db;
+    border-radius: 999px;
+}
