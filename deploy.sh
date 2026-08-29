@@ -10,12 +10,22 @@ fi
 
 echo "🚀 Starting Deployment to $DEPLOY_HOST..."
 
+# Check for sshpass (Windows fallback)
+if command -v sshpass &> /dev/null; then
+    SSH_CMD="sshpass -p $DEPLOY_SUDO_PASS ssh -o StrictHostKeyChecking=no"
+    RSYNC_CMD="sshpass -p $DEPLOY_SUDO_PASS rsync"
+else
+    echo "⚠️ 'sshpass' tidak ditemukan (Mode Windows). Anda akan diminta mengetik password server manual."
+    SSH_CMD="ssh -o StrictHostKeyChecking=no"
+    RSYNC_CMD="rsync"
+fi
+
 # Ensure target directory exists on server
-sshpass -p "$DEPLOY_SUDO_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "echo '$DEPLOY_SUDO_PASS' | sudo -S mkdir -p $DEPLOY_PATH && echo '$DEPLOY_SUDO_PASS' | sudo -S chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH"
+$SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "echo '$DEPLOY_SUDO_PASS' | sudo -S mkdir -p $DEPLOY_PATH && echo '$DEPLOY_SUDO_PASS' | sudo -S chown -R $DEPLOY_USER:$DEPLOY_USER $DEPLOY_PATH"
 
 # Sync files to server
 # --exclude: don't send these files
-sshpass -p "$DEPLOY_SUDO_PASS" rsync -avz --progress \
+$RSYNC_CMD -avz --progress \
     --exclude='.git' \
     --exclude='node_modules' \
     --exclude='vendor' \
@@ -29,7 +39,7 @@ sshpass -p "$DEPLOY_SUDO_PASS" rsync -avz --progress \
 echo "🐳 Restarting Docker Containers on Server..."
 
 # Execute docker command on server
-sshpass -p "$DEPLOY_SUDO_PASS" ssh -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
+$SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     if [ -f .env.production ]; then cp .env.production .env; fi && \
     mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs storage/app/public && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker compose up -d --build && \
