@@ -40,7 +40,7 @@
 
             {{-- Judul --}}
             <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-relaxed tracking-wide">
-                DAUROH QOBUL dm
+                DAUROH QOBUL DAR
             </h1>
             <h2
                 class="text-6xl font-bold mb-1 bg-linear-to-r from-white via-yellow-500 to-white bg-clip-text text-transparent">
