@@ -1,0 +1,7 @@
+# Konfigurasi Server Produksi
+DEPLOY_HOST="111.222.333.444"
+DEPLOY_USER="username_server_anda"
+DEPLOY_PATH="/var/www/daurohqobuldm"
+
+# Password Sudo di server produksi untuk mengatur permission folder storage
+DEPLOY_SUDO_PASS="password_sudo_server_anda"
