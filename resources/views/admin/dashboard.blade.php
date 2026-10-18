@@ -1,9 +1,3 @@
-{{--
-resources/views/admin/dashboard.blade.php
-
-Halaman Beranda/Dashboard admin — sidebar & topbar diwarisi dari
-layouts/app.blade.php. File ini HANYA berisi konten.
---}}
 @extends('layouts.admin')
 
 @section('title', 'Dashboard')
