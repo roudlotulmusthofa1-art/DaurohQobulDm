@@ -14,6 +14,10 @@ return [
     |
     */
 
+    'whatsapp' => [
+        'url'   => env('WA_API_URL', 'https://api.fonnte.com/send'),
+        'token' => env('WA_API_TOKEN'),
+    ],
     'postmark' => [
         'key' => env('POSTMARK_API_KEY'),
     ],

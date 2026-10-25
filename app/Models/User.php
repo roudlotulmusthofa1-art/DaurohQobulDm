@@ -29,4 +29,8 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+    public function pendaftaran()
+    {
+        return $this->hasOne(\App\Models\PendaftaranSiswa::class);
+    }
 }

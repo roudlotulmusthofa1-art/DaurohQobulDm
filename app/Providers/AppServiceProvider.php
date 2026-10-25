@@ -55,7 +55,6 @@ class AppServiceProvider extends ServiceProvider
                         ['route' => 'admin.tagihan.index',          'active' => 'admin.tagihan.*',          'label' => 'Tagihan'],
                     ],
                 ],
-
                 [
                     'label' => 'LAPORAN',
                     'icon'  => 'bell',
@@ -64,9 +63,14 @@ class AppServiceProvider extends ServiceProvider
                         ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => 'Laporan Keuangan'],
                     ],
                 ],
-
-                ['route' => 'admin.kalender.index', 'active' => 'admin.kalender.*', 'label' => 'PSb', 'icon' => 'calendar'],
-
+                [
+                    'label' => 'PSB',
+                    'icon'  => 'calendar',
+                    'submenu' => [
+                        ['route' => 'admin.data-masuk.index',      'active' => 'admin.data-masuk.*',      'label' => 'Data Masuk Peserta'],
+                        ['route' => 'admin.data-diterima.index',   'active' => 'admin.data-diterima.*',   'label' => 'Data Terkonfirmasi Peserta'],
+                    ],
+                ],
                 [
                     'label' => 'LANDING PAGE',
                     'icon'  => 'globe',

@@ -121,7 +121,7 @@
                         Masuk
                     </a>
 
-                    <a href="#"
+                    <a href="/psb/daftar"
                         class="px-5 py-2.5 rounded-lg bg-teal-700 text-white text-sm font-semibold hover:bg-teal-800 transition-colors shadow-sm">
                         Daftar Sekarang
                     </a>

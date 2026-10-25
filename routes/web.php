@@ -19,7 +19,7 @@ Route::middleware('guest')->group(function () {
 });
 
 
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->group(function () {
     Route::get('beranda', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
@@ -32,3 +32,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
 
 
 
+require __DIR__ . '/psb.php';
