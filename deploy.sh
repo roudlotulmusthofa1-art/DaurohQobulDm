@@ -36,4 +36,4 @@ $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan cache:clear && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan view:clear"
 
-echo "✅ Deployment Finished & System Refreshed! Aplikasi dapat diakses di http://$DEPLOY_HOST:8080"
+echo "✅ Deployment Finished & System Refreshed! Aplikasi dapat diakses di https://daurohqobul.com (atau http://$DEPLOY_HOST:8080)"
