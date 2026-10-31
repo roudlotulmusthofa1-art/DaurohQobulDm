@@ -87,6 +87,7 @@ class AppServiceProvider extends ServiceProvider
                     'submenu' => [
                         ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => 'Kelola Akun'],
                         ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => 'Role & Permission'],
+                        ['route' => 'admin.master-data.index', 'active' => 'admin.master-data.*', 'label' => 'Master Data'],
                     ],
                 ],
             ];

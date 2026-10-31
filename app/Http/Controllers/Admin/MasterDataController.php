@@ -1,0 +1,342 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\BidangIlmu;
+use App\Models\Kamar;
+use App\Models\KategoriBerita;
+use App\Models\Kelas;
+use App\Models\WaktuPelajaran;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\View\View;
+
+/**
+ * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Kategori Berita.
+ *
+ * Satu controller untuk 5 model.
+ * Definisi tab (kolom tabel & isian form) ada di method tabs() di bawah.
+ */
+class MasterDataController extends Controller
+{
+    /** Kunci tab (dipakai di URL) => Model. Urutan ini = urutan tab di halaman. */
+    public const TYPES = [
+        'bidang-ilmu' => BidangIlmu::class,
+        'waktu-pelajaran' => WaktuPelajaran::class,
+        'kelas' => Kelas::class,
+        'kamar' => Kamar::class,
+        'kategori-berita' => KategoriBerita::class,
+    ];
+
+    /** Pilihan warna: class Tailwind => hex (swatch pakai hex, jadi tak perlu safelist). */
+    private const COLORS = [
+        'bg-slate-100' => '#f1f5f9',
+        'bg-red-100' => '#fee2e2',
+        'bg-orange-100' => '#ffedd5',
+        'bg-amber-100' => '#fef3c7',
+        'bg-yellow-100' => '#fef9c3',
+        'bg-lime-100' => '#ecfccb',
+        'bg-green-100' => '#dcfce7',
+        'bg-emerald-100' => '#d1fae5',
+        'bg-teal-100' => '#ccfbf1',
+        'bg-cyan-100' => '#cffafe',
+        'bg-sky-100' => '#e0f2fe',
+        'bg-blue-100' => '#dbeafe',
+        'bg-indigo-100' => '#e0e7ff',
+        'bg-violet-100' => '#ede9fe',
+        'bg-purple-100' => '#f3e8ff',
+        'bg-pink-100' => '#fce7f3',
+        'bg-rose-100' => '#ffe4e6',
+    ];
+
+    /* =====================================================================
+     |  Halaman
+     * ===================================================================== */
+
+    /** GET /master-data — markup dirender Blade, interaksi oleh Vue. */
+    public function index(Request $request): View
+    {
+        $tab = (string) $request->query('tab');
+        $tab = array_key_exists($tab, self::TYPES) ? $tab : array_key_first(self::TYPES);
+
+        // Data awal semua tab langsung dikirim, jadi tidak ada loading saat halaman dibuka
+        $data = [];
+        foreach (self::TYPES as $key => $model) {
+            $data[$key] = $this->query($model)->get();
+        }
+
+        return view('admin.master-data.index', [
+            'tab' => $tab,
+            'tabs' => $this->tabs(),
+            'colors' => self::COLORS,
+            'data' => $data,
+        ]);
+    }
+
+    /* =====================================================================
+     |  API JSON (dipanggil Vue)
+     * ===================================================================== */
+
+    /** GET /master-data/api/{type} */
+    public function list(string $type): JsonResponse
+    {
+        return response()->json(['data' => $this->query($this->model($type))->get()]);
+    }
+
+    /** POST /master-data/api/{type} */
+    public function store(Request $request, string $type): JsonResponse
+    {
+        $model = $this->model($type);
+        $item = $model::create($request->validate($this->rules($type)));
+
+        return response()->json([
+            'message' => 'Data berhasil ditambahkan.',
+            'data' => $item->fresh(),
+        ], 201);
+    }
+
+    /** PUT /master-data/api/{type}/{id} */
+    public function update(Request $request, string $type, int $id): JsonResponse
+    {
+        $item = $this->model($type)::findOrFail($id);
+        $item->update($request->validate($this->rules($type, $item->id)));
+
+        return response()->json([
+            'message' => 'Data berhasil diperbarui.',
+            'data' => $item->fresh(),
+        ]);
+    }
+
+    /** PATCH /master-data/api/{type}/{id}/toggle — aktif / nonaktif */
+    public function toggle(string $type, int $id): JsonResponse
+    {
+        $item = $this->model($type)::findOrFail($id);
+        $item->update(['is_active' => ! $item->is_active]);
+
+        return response()->json([
+            'message' => $item->is_active ? 'Data diaktifkan.' : 'Data dinonaktifkan.',
+            'data' => $item,
+        ]);
+    }
+
+    /** DELETE /master-data/api/{type}/{id} */
+    public function destroy(string $type, int $id): JsonResponse
+    {
+        $model = $this->model($type);
+        $item = $model::findOrFail($id);
+
+        // Jangan hapus jika masih dipakai (mis. bidang ilmu yang masih punya kitab)
+        $relation = $model::countRelation();
+        if ($relation && $item->{$relation}()->exists()) {
+            return response()->json([
+                'message' => 'Data masih digunakan, tidak bisa dihapus. Nonaktifkan saja.',
+            ], 422);
+        }
+
+        $item->delete();
+
+        return response()->json(['message' => 'Data berhasil dihapus.']);
+    }
+
+    /** POST /master-data/api/{type}/reorder — body: { ids: [3, 1, 2, ...] } */
+    public function reorder(Request $request, string $type): JsonResponse
+    {
+        $model = $this->model($type);
+        $ids = $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ])['ids'];
+
+        DB::transaction(function () use ($model, $ids) {
+            foreach (array_values($ids) as $index => $id) {
+                $model::whereKey($id)->update(['urutan' => $index + 1]);
+            }
+        });
+
+        return response()->json(['message' => 'Urutan berhasil disimpan.']);
+    }
+
+    /* =====================================================================
+     |  Validasi
+     * ===================================================================== */
+
+    private function rules(string $type, ?int $id = null): array
+    {
+        $table = (new (self::TYPES[$type]))->getTable();
+        $active = ['is_active' => ['sometimes', 'boolean']];
+
+        return $active + match ($type) {
+            'bidang-ilmu', 'kategori-berita' => [
+                'nama' => ['required', 'string', 'max:100'],
+                'slug' => ['nullable', 'string', 'max:120', 'alpha_dash', Rule::unique($table, 'slug')->ignore($id)],
+                'warna' => ['nullable', 'string', Rule::in(array_keys(self::COLORS))],
+                'deskripsi' => ['nullable', 'string', 'max:1000'],
+            ],
+            'waktu-pelajaran' => [
+                'nama' => ['required', 'string', 'max:100'],
+                'jam_mulai' => ['nullable', 'date_format:H:i'],
+                'jam_selesai' => ['nullable', 'date_format:H:i', 'after:jam_mulai'],
+                'keterangan' => ['nullable', 'string', 'max:255'],
+            ],
+            'kelas' => [
+                'nama' => ['required', 'string', 'max:100'],
+                'kode' => ['nullable', 'string', 'max:30', Rule::unique($table, 'kode')->ignore($id)],
+                'tingkat' => ['nullable', 'integer', 'min:1', 'max:255'],
+                'deskripsi' => ['nullable', 'string', 'max:1000'],
+            ],
+            'kamar' => [
+                'nama' => ['required', 'string', 'max:100'],
+                'kode' => ['nullable', 'string', 'max:30', Rule::unique($table, 'kode')->ignore($id)],
+                'gedung' => ['nullable', 'string', 'max:100'],
+                'jenis' => ['required', Rule::in(['putra', 'putri'])],
+                'kapasitas' => ['required', 'integer', 'min:0', 'max:1000'],
+                'deskripsi' => ['nullable', 'string', 'max:1000'],
+            ],
+        };
+    }
+
+    /* =====================================================================
+     |  Definisi tab untuk view
+     |  Tipe kolom : name, color, text, count, badge, time-range, suffix
+     |  Tipe isian : text, number, time, textarea, select, color
+     |  Kolom Urutan, Status, dan Aksi ditambahkan otomatis di view.
+     * ===================================================================== */
+
+    private function tabs(): array
+    {
+        return [
+            'bidang-ilmu' => [
+                'label' => 'Bidang Ilmu',
+                'title' => 'Kategori Bidang Ilmu',
+                'description' => 'Kelola kategori bidang ilmu (fann) untuk kurikulum kitab. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Kategori',
+                'singular' => 'Bidang Ilmu',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'slug'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                    ['key' => 'items_count', 'label' => 'Kitab', 'type' => 'count'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Nahwu'],
+                    ['key' => 'slug', 'label' => 'Slug', 'type' => 'text', 'placeholder' => 'otomatis dari nama', 'hint' => 'Kosongkan untuk dibuat otomatis.'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-blue-100'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+
+            'waktu-pelajaran' => [
+                'label' => 'Waktu Pelajaran',
+                'title' => 'Waktu Pelajaran',
+                'description' => 'Kelola sesi/waktu pelajaran harian. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Waktu',
+                'singular' => 'Waktu Pelajaran',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name'],
+                    ['key' => 'jam', 'label' => 'Jam', 'type' => 'time-range'],
+                    ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Sesi', 'type' => 'text', 'required' => true, 'placeholder' => "cth. Ba'da Subuh"],
+                    ['key' => 'jam_mulai', 'label' => 'Jam Mulai', 'type' => 'time', 'half' => true],
+                    ['key' => 'jam_selesai', 'label' => 'Jam Selesai', 'type' => 'time', 'half' => true],
+                    ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
+                ],
+            ],
+
+            'kelas' => [
+                'label' => 'Kelas',
+                'title' => 'Daftar Kelas',
+                'description' => 'Kelola kelas/marhalah santri. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Kelas',
+                'singular' => 'Kelas',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'kode'],
+                    ['key' => 'tingkat', 'label' => 'Tingkat', 'type' => 'text'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Kelas', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Ula 1'],
+                    ['key' => 'kode', 'label' => 'Kode', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. U1'],
+                    ['key' => 'tingkat', 'label' => 'Tingkat', 'type' => 'number', 'half' => true, 'min' => 1],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+
+            'kamar' => [
+                'label' => 'Kamar',
+                'title' => 'Daftar Kamar',
+                'description' => 'Kelola kamar asrama santri beserta kapasitasnya. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Kamar',
+                'singular' => 'Kamar',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'kode'],
+                    ['key' => 'gedung', 'label' => 'Gedung', 'type' => 'text'],
+                    ['key' => 'jenis', 'label' => 'Jenis', 'type' => 'badge', 'badges' => [
+                        'putra' => 'bg-sky-50 text-sky-700 ring-sky-200',
+                        'putri' => 'bg-pink-50 text-pink-700 ring-pink-200',
+                    ]],
+                    ['key' => 'kapasitas', 'label' => 'Kapasitas', 'type' => 'suffix', 'suffix' => 'santri'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Kamar', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Kamar Abu Bakar'],
+                    ['key' => 'kode', 'label' => 'Kode', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. A-01'],
+                    ['key' => 'gedung', 'label' => 'Gedung', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. Gedung A'],
+                    ['key' => 'jenis', 'label' => 'Jenis', 'type' => 'select', 'half' => true, 'required' => true, 'default' => 'putra',
+                        'options' => ['putra' => 'Putra', 'putri' => 'Putri']],
+                    ['key' => 'kapasitas', 'label' => 'Kapasitas', 'type' => 'number', 'half' => true, 'required' => true, 'default' => 0, 'min' => 0],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+
+            'kategori-berita' => [
+                'label' => 'Kategori Berita',
+                'title' => 'Kategori Berita',
+                'description' => 'Kelola kategori untuk berita di landing page. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Kategori',
+                'singular' => 'Kategori Berita',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'slug'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                    ['key' => 'items_count', 'label' => 'Berita', 'type' => 'count'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Kegiatan'],
+                    ['key' => 'slug', 'label' => 'Slug', 'type' => 'text', 'placeholder' => 'otomatis dari nama', 'hint' => 'Kosongkan untuk dibuat otomatis.'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-green-100'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+        ];
+    }
+
+    /* =====================================================================
+     |  Helper
+     * ===================================================================== */
+
+    /** @return class-string<Model> — 404 jika tab tidak dikenal. */
+    private function model(string $type): string
+    {
+        abort_unless(array_key_exists($type, self::TYPES), 404);
+
+        return self::TYPES[$type];
+    }
+
+    /** Query terurut + jumlah kitab/berita (sebagai items_count) bila ada. */
+    private function query(string $model): Builder
+    {
+        $query = $model::query()->ordered();
+
+        if ($relation = $model::countRelation()) {
+            $query->withCount("{$relation} as items_count");
+        }
+
+        return $query;
+    }
+}
