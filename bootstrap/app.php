@@ -17,10 +17,11 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-    $middleware->redirectUsersTo('/admin/beranda');
-    $middleware->alias([
-        'peran' => \App\Http\Middleware\PeranMiddleware::class,
-    ]);
+        $middleware->trustProxies(at: '*');
+        $middleware->redirectUsersTo('/admin/beranda');
+        $middleware->alias([
+            'peran' => \App\Http\Middleware\PeranMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
