@@ -200,6 +200,7 @@ class MasterDataController extends Controller
                 'nama' => ['required', 'string', 'max:100'],
                 'kode' => ['nullable', 'string', 'max:30', Rule::unique($table, 'kode')->ignore($id)],
                 'kapasitas' => ['required', 'integer', 'min:0', 'max:1000'],
+                'kasur_per_baris' => ['nullable', 'integer', 'min:1', 'max:12'],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
             'jenis-kegiatan' => [
@@ -328,7 +329,9 @@ class MasterDataController extends Controller
                 'fields' => [
                     ['key' => 'nama', 'label' => 'Nama Kamar', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Kamar Abu Bakar'],
                     ['key' => 'kode', 'label' => 'Kode', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. A-01'],
-                    ['key' => 'kapasitas', 'label' => 'Kapasitas', 'type' => 'number', 'half' => true, 'required' => true, 'default' => 0, 'min' => 0],
+                    ['key' => 'kapasitas', 'label' => 'Kapasitas (jumlah kasur)', 'type' => 'number', 'half' => true, 'required' => true, 'default' => 0, 'min' => 0],
+                    ['key' => 'kasur_per_baris', 'label' => 'Kasur per baris (denah)', 'type' => 'number', 'half' => true, 'default' => 4, 'min' => 1,
+                        'hint' => 'Atur supaya gambar denah mirip susunan kamar aslinya.'],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
                 ],
             ],

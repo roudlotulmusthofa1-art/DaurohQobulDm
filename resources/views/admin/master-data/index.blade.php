@@ -163,7 +163,9 @@
             <div v-if="modal.open"
                 class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/40 p-4 sm:items-center"
                 @mousedown.self="modal.open = false">
-                <form id="master-data-form" class="w-full max-w-lg rounded-2xl bg-white shadow-xl" @submit.prevent="save">
+                {{-- Modal Edit Kamar dibuat lebih lebar supaya denah kasur muat --}}
+                <form id="master-data-form" class="w-full rounded-2xl bg-white shadow-xl"
+                    :class="activeKey === 'kamar' && modal.item ? 'max-w-2xl' : 'max-w-lg'" @submit.prevent="save">
                     <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                         <h3 class="text-base font-semibold text-[#0f1f1a]"
                             v-text="(modal.item ? 'Edit ' : 'Tambah ') + TABS[activeKey].singular"></h3>
@@ -180,6 +182,121 @@
                             @endforeach
                         </div>
                     @endforeach
+
+                    {{-- ================= Denah kamar (hanya saat EDIT kamar) =================
+                         Kasur dinomori 1..kapasitas. Klik kasur untuk menempatkan / mengubah santri.
+                         Perubahan di denah langsung tersimpan (tidak menunggu tombol Simpan). --}}
+                    <div v-if="activeKey === 'kamar' && modal.item" class="px-6 pt-5">
+                        <div class="rounded-2xl border border-purple-100 bg-purple-50/50 p-4">
+                            <div class="mb-3 flex items-start justify-between gap-3">
+                                <div class="flex items-start gap-2.5">
+                                    <span class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-500 text-white">
+                                        <x-master-data.icon name="bed" size="18" />
+                                    </span>
+                                    <div>
+                                        <p class="text-sm font-semibold text-[#0f1f1a]">Denah Kamar</p>
+                                        <p class="text-xs text-gray-500">Klik kasur untuk menempatkan santri. Perubahan denah langsung tersimpan.</p>
+                                    </div>
+                                </div>
+                                <span v-if="denah.data && denah.data.kamar.kapasitas"
+                                    class="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-purple-700 ring-1 ring-purple-200"
+                                    v-text="kasurTerisi() + ' / ' + denah.data.kamar.kapasitas + ' terisi'"></span>
+                            </div>
+
+                            <p v-if="denah.loading" class="py-6 text-center text-sm text-gray-500">Memuat denah…</p>
+                            <p v-else-if="denah.error && !denah.data" class="py-6 text-center text-sm text-red-600" v-text="denah.error"></p>
+
+                            <template v-else-if="denah.data">
+                                <p v-if="!denah.data.kamar.kapasitas" class="rounded-xl bg-white p-4 text-center text-sm text-gray-500">
+                                    Isi <b>Kapasitas (jumlah kasur)</b> di atas lalu klik Simpan, kemudian buka lagi untuk melihat denah.
+                                </p>
+
+                                <template v-else>
+                                    {{-- Kasur-kasur. Jumlah kolom = "Kasur per baris" --}}
+                                    <div class="grid gap-2" :style="{ gridTemplateColumns: 'repeat(' + kolomDenah() + ', minmax(0, 1fr))' }">
+                                        <button v-for="n in daftarKasur()" :key="n" type="button" @click="pilihKasur(n)"
+                                            :title="penghuniKasur(n) ? 'Kasur ' + n + ': ' + penghuniKasur(n).nama : 'Kasur ' + n + ': kosong'"
+                                            class="relative flex flex-col items-center rounded-xl border-2 px-1.5 pb-2 pt-1.5 text-center transition hover:-translate-y-0.5"
+                                            :class="[
+                                                penghuniKasur(n) ? 'border-purple-200 bg-white shadow-sm' : 'border-dashed border-gray-300 bg-white/60 hover:border-purple-300',
+                                                n > denah.data.kamar.kapasitas ? 'border-red-300 bg-red-50' : '',
+                                                denah.pilih === n ? 'ring-2 ring-purple-500 ring-offset-1' : '',
+                                            ]">
+                                            {{-- nomor kasur --}}
+                                            <span class="absolute left-1.5 top-1 text-[10px] font-semibold text-gray-400" v-text="n"></span>
+                                            {{-- bantal --}}
+                                            <span class="mb-1.5 h-1.5 w-1/2 rounded-full" :class="penghuniKasur(n) ? 'bg-purple-200' : 'bg-gray-200'"></span>
+                                            {{-- foto / inisial / tanda tambah --}}
+                                            <img v-if="penghuniKasur(n) && penghuniKasur(n).foto" :src="penghuniKasur(n).foto" alt=""
+                                                v-on:error="penghuniKasur(n).foto = null" class="h-9 w-9 rounded-full object-cover">
+                                            <span v-else-if="penghuniKasur(n)" class="flex h-9 w-9 items-center justify-center rounded-full bg-purple-100 text-xs font-bold text-purple-700"
+                                                v-text="inisial(penghuniKasur(n).nama)"></span>
+                                            <span v-else class="flex h-9 w-9 items-center justify-center text-gray-300">
+                                                <x-master-data.icon name="plus" size="18" />
+                                            </span>
+                                            <span class="mt-1 w-full truncate text-[11px] font-medium"
+                                                :class="penghuniKasur(n) ? 'text-gray-800' : 'text-gray-400'"
+                                                v-text="penghuniKasur(n) ? penghuniKasur(n).nama : 'Kosong'"></span>
+                                        </button>
+                                    </div>
+
+                                    {{-- pintu kamar --}}
+                                    <div class="mt-2 flex justify-center">
+                                        <span class="rounded-b-lg border-x-2 border-b-2 border-amber-300 bg-amber-50 px-6 py-0.5 text-[10px] font-medium text-amber-700">Pintu</span>
+                                    </div>
+
+                                    {{-- Panel kasur yang sedang dipilih --}}
+                                    <div v-if="denah.pilih" class="mt-3 rounded-xl bg-white p-3 ring-1 ring-purple-100">
+                                        <p class="mb-2 text-sm font-semibold text-[#0f1f1a]" v-text="'Kasur ' + denah.pilih"></p>
+
+                                        {{-- Kasur terisi --}}
+                                        <div v-if="penghuniKasur(denah.pilih)" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                            <p class="text-sm text-gray-700">
+                                                Ditempati <b v-text="penghuniKasur(denah.pilih).nama"></b>
+                                                <span class="text-xs text-gray-400" v-text="'(' + penghuniKasur(denah.pilih).nomor + ')'"></span>
+                                            </p>
+                                            <div class="flex gap-2">
+                                                <button type="button" :disabled="denah.busy" @click="kosongkanKasur(penghuniKasur(denah.pilih), false)"
+                                                    class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
+                                                    Kosongkan kasur</button>
+                                                <button type="button" :disabled="denah.busy" @click="kosongkanKasur(penghuniKasur(denah.pilih), true)"
+                                                    class="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-60">
+                                                    Keluarkan dari kamar</button>
+                                            </div>
+                                        </div>
+
+                                        {{-- Kasur kosong: pilih santri --}}
+                                        <div v-else class="flex flex-col gap-2 sm:flex-row">
+                                            <select v-model="denah.santriId" class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                                                <option value="">— Pilih santri —</option>
+                                                <optgroup v-if="santriTanpaKasur().length" label="Penghuni kamar ini (belum dapat kasur)">
+                                                    <option v-for="s in santriTanpaKasur()" :key="'p' + s.id" :value="s.id" v-text="s.nama"></option>
+                                                </optgroup>
+                                                <optgroup v-if="denah.data.tanpa_kamar.length" label="Santri yang belum punya kamar">
+                                                    <option v-for="s in denah.data.tanpa_kamar" :key="'t' + s.id" :value="s.id" v-text="s.nama"></option>
+                                                </optgroup>
+                                            </select>
+                                            <button type="button" :disabled="denah.busy || !denah.santriId" @click="tempatkanSantri"
+                                                class="shrink-0 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-60"
+                                                v-text="denah.busy ? 'Menyimpan…' : 'Tempatkan'"></button>
+                                        </div>
+                                        <p v-if="!penghuniKasur(denah.pilih) && !santriTanpaKasur().length && !denah.data.tanpa_kamar.length"
+                                            class="mt-2 text-xs text-gray-500">Tidak ada santri yang bisa ditempatkan (semua sudah punya kamar & kasur).</p>
+                                        <p v-if="denah.error" class="mt-2 text-xs text-red-600" v-text="denah.error"></p>
+                                    </div>
+
+                                    {{-- Penghuni yang belum dapat kasur --}}
+                                    <div v-if="santriTanpaKasur().length" class="mt-3">
+                                        <p class="mb-1.5 text-xs font-medium text-amber-700">Penghuni yang belum dapat kasur:</p>
+                                        <div class="flex flex-wrap gap-1.5">
+                                            <span v-for="s in santriTanpaKasur()" :key="'c' + s.id"
+                                                class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 ring-1 ring-amber-200" v-text="s.nama"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </template>
+                        </div>
+                    </div>
 
                     {{-- Status aktif (sama untuk semua tab) --}}
                     <div class="px-6 py-5">
@@ -260,13 +377,15 @@
         } = window.Vue;
 
         const BASE_URL = @json(url('admin/master-data/api'));
+        const DENAH_URL = @json(url('admin/master-data/kamar')); // + /{id}/denah, /{id}/kasur
         const CSRF = @json(csrf_token());
         const TABS = @json($tabs);
         const COLORS = @json($colors);
 
         /** Panggil API JSON. Melempar error berisi status & data bila gagal. */
         async function api(method, path = '', body = null) {
-            const res = await fetch(BASE_URL + path, {
+            // path boleh alamat lengkap (http...), selain itu ditempel ke BASE_URL
+            const res = await fetch(path.startsWith('http') ? path : BASE_URL + path, {
                 method,
                 credentials: 'same-origin',
                 headers: {
@@ -374,6 +493,9 @@
                         errors: {},
                         saving: false
                     });
+                    // Edit kamar -> muat denah kasurnya
+                    if (activeKey.value === 'kamar' && item) muatDenah(item.id);
+                    else denah.data = null;
                     setTimeout(() => document.querySelector(
                             '#master-data-form input:not([type=checkbox]), #master-data-form textarea')
                     ?.focus());
@@ -416,6 +538,69 @@
                         modal.saving = false;
                     }
                 }
+
+                // ---------- Denah kamar ----------
+                const denah = reactive({
+                    loading: false,
+                    error: '',
+                    data: null,     // { kamar, penghuni: [...], tanpa_kamar: [...] }
+                    pilih: null,    // nomor kasur yang sedang diklik
+                    santriId: '',   // santri yang dipilih untuk kasur kosong
+                    busy: false,
+                });
+
+                async function muatDenah(kamarId) {
+                    Object.assign(denah, { loading: true, error: '', data: null, pilih: null, santriId: '' });
+                    try {
+                        denah.data = await api('GET', `${DENAH_URL}/${kamarId}/denah`);
+                    } catch (e) {
+                        denah.error = e.message;
+                    } finally {
+                        denah.loading = false;
+                    }
+                }
+
+                // Nomor kasur 1..kapasitas (ditambah nomor lebih besar bila kapasitas pernah dikurangi)
+                function daftarKasur() {
+                    const d = denah.data;
+                    const maks = Math.max(d.kamar.kapasitas, ...d.penghuni.map((p) => p.nomor_kasur || 0));
+                    return Array.from({ length: maks }, (_, i) => i + 1);
+                }
+                // Jumlah kolom denah: ikut isian "Kasur per baris" di form (langsung terlihat saat diubah)
+                const kolomDenah = () => Math.min(Math.max(Number(modal.form.kasur_per_baris) || denah.data.kamar.kasur_per_baris || 4, 1), 12);
+                const penghuniKasur = (n) => denah.data.penghuni.find((p) => p.nomor_kasur === n) || null;
+                const santriTanpaKasur = () => denah.data.penghuni.filter((p) => !p.nomor_kasur);
+                const kasurTerisi = () => denah.data.penghuni.filter((p) => p.nomor_kasur && p.nomor_kasur <= denah.data.kamar.kapasitas).length;
+                const inisial = (nama) => (nama || '?').split(/\s+/).slice(0, 2).map((k) => k[0]).join('').toUpperCase();
+
+                function pilihKasur(n) {
+                    Object.assign(denah, { pilih: denah.pilih === n ? null : n, santriId: '', error: '' });
+                }
+
+                // Simpan hasil dari server, beri notifikasi, perbarui angka "Terisi" di tabel kamar
+                async function kirimDenah(method, url, body = null) {
+                    denah.busy = true;
+                    denah.error = '';
+                    try {
+                        const { message, ...data } = await api(method, url, body);
+                        denah.data = data;
+                        Object.assign(denah, { pilih: null, santriId: '' });
+                        notify(message);
+                        reload('kamar');
+                    } catch (e) {
+                        const errors = e.data?.errors;
+                        denah.error = errors ? Object.values(errors)[0][0] : e.message;
+                    } finally {
+                        denah.busy = false;
+                    }
+                }
+
+                const tempatkanSantri = () => kirimDenah('POST', `${DENAH_URL}/${modal.item.id}/kasur`, {
+                    santri_id: denah.santriId,
+                    nomor_kasur: denah.pilih,
+                });
+                const kosongkanKasur = (santri, keluar) => kirimDenah('DELETE',
+                    `${DENAH_URL}/${modal.item.id}/kasur/${santri.id}` + (keluar ? '?keluar=1' : ''));
 
                 // ---------- Aktif / Nonaktif ----------
                 async function toggle(row) {
@@ -526,6 +711,16 @@
                     periodeHijriyah,
                     isiHijriyah,
                     totalData,
+                    denah,
+                    daftarKasur,
+                    kolomDenah,
+                    penghuniKasur,
+                    santriTanpaKasur,
+                    kasurTerisi,
+                    inisial,
+                    pilihKasur,
+                    tempatkanSantri,
+                    kosongkanKasur,
                     selectTab,
                     openModal,
                     save,

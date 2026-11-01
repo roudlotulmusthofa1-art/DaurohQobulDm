@@ -13,12 +13,13 @@ class Kamar extends Model
 
     protected $table = 'kamar';
 
-    protected $fillable = ['nama', 'kode', 'kapasitas', 'deskripsi', 'urutan', 'is_active'];
+    protected $fillable = ['nama', 'kode', 'kapasitas', 'kasur_per_baris', 'deskripsi', 'urutan', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',
         'urutan' => 'integer',
         'kapasitas' => 'integer',
+        'kasur_per_baris' => 'integer', // untuk gambar denah kamar
     ];
 
     /** Santri yang menempati kamar ini (kolom pendaftaran_siswas.kamar_id). */

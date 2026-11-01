@@ -180,6 +180,13 @@ class PendaftaranSiswa extends Model
                 $p->kode_qr = static::buatKodeQr();
             }
         });
+
+        // Pindah kamar -> nomor kasur lama dikosongkan (kecuali nomor kasur ikut diisi, mis. dari denah kamar)
+        static::saving(function (self $p) {
+            if ($p->isDirty('kamar_id') && ! $p->isDirty('nomor_kasur')) {
+                $p->nomor_kasur = null;
+            }
+        });
     }
 
     /** Kode acak 16 karakter; diulang kalau kebetulan sudah dipakai. */

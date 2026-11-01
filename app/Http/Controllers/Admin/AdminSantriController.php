@@ -93,6 +93,13 @@ class AdminSantriController extends Controller
             $this->cekKapasitas($ubah['kamar_id'], count($data['ids']) - $sudahDiSana);
         }
 
+        if (isset($ubah['kamar_id'])) {
+            // Santri yang benar-benar pindah kamar: nomor kasur lamanya dikosongkan (denah kamar)
+            PendaftaranSiswa::whereIn('id', $data['ids'])
+                ->where(fn ($q) => $q->whereNull('kamar_id')->orWhere('kamar_id', '!=', $ubah['kamar_id']))
+                ->update(['nomor_kasur' => null]);
+        }
+
         PendaftaranSiswa::whereIn('id', $data['ids'])->update($ubah);
 
         $santri = PendaftaranSiswa::with(['kelasMaster', 'kamarMaster'])

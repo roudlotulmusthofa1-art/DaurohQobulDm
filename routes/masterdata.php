@@ -8,6 +8,7 @@
 | URL: /admin/master-data, /admin/master-data?tab=kamar, dst.
 */
 
+use App\Http\Controllers\Admin\KamarDenahController;
 use App\Http\Controllers\Admin\MasterDataController;
 use Illuminate\Support\Facades\Route;
 
@@ -18,6 +19,16 @@ Route::prefix('admin/master-data')
     ->group(function () {
         // Halaman
         Route::get('/', 'index')->name('index');
+
+        // Denah kamar (dipakai di modal Edit Kamar)
+        Route::controller(KamarDenahController::class)
+            ->prefix('kamar/{kamar}')
+            ->name('kamar.')
+            ->group(function () {
+                Route::get('denah', 'show')->name('denah');
+                Route::post('kasur', 'tempatkan')->name('kasur.tempatkan');
+                Route::delete('kasur/{santri}', 'kosongkan')->name('kasur.kosongkan');
+            });
 
         // Endpoint JSON yang dipanggil Vue
         Route::prefix('api/{type}')
