@@ -4,12 +4,17 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
         web: __DIR__.'/../routes/web.php',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            // Route Master Data di file sendiri
+            Route::middleware('web')->group(base_path('routes/masterdata.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
@@ -20,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*'),
+            // Balas JSON untuk API dan untuk permintaan fetch/AJAX yang meminta JSON (Accept: application/json)
+            fn (Request $request) => $request->is('api/*', 'admin/master-data/api/*') || $request->expectsJson(),
         );
     })->create();

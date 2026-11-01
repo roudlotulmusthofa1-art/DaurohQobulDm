@@ -7,7 +7,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 
 class PendaftaranSiswa extends Model
 {
@@ -15,10 +18,20 @@ class PendaftaranSiswa extends Model
 
     protected $guarded = ['id'];
 
+    protected $hidden = ['password'];
+
     protected $casts = [
         'tanggal_lahir' => 'date',
         'diproses_at'   => 'datetime',
         'setuju'        => 'boolean',
+        'riwayat_pondok' => 'array',
+        'riwayat_kitab' => 'array',
+        'syarat_uang_pendaftaran' => 'boolean',
+        'syarat_rekomendasi'      => 'boolean',
+        'syarat_izin_orang_tua'   => 'boolean',
+        'syarat_raport'           => 'boolean',
+        'syarat_paspor'           => 'boolean',
+        'syarat_no_paspor'        => 'string',
     ];
 
     public const MENUNGGU = 'menunggu';
@@ -46,23 +59,16 @@ class PendaftaranSiswa extends Model
         return strtolower($this->nomor_pendaftaran) . '@siswa.ribath.local';
     }
 
-    /**
-     * Terima pendaftar: buat akun di tabel users (role "siswa") lalu hubungkan.
-     * Mengembalikan kode akses (password awal, plain) untuk dikirim lewat WhatsApp.
-     *
-     * Jika sudah punya logika lama (Student::updateOrCreate + NIS otomatis),
-     * panggil di dalam transaksi ini.
-     */
-    public function terima(?string $catatan = null): string
-    {
-        $kode = Str::upper(Str::random(8));
 
-        DB::transaction(function () use ($kode, $catatan) {
-            $user = User::firstOrNew(['email' => $this->emailLogin()]);
+    public function terima(?string $catatan = null): void
+    {
+        DB::transaction(function () use ($catatan) {
+            $user = User::firstOrNew(['email' => $this->email]);
+
             $user->forceFill([
                 'name'     => $this->nama_lengkap,
-                'password' => Hash::make($kode),
-                'role'     => 'siswa',
+                'password' => $this->password, // sudah ter-hash saat mendaftar, JANGAN di-Hash::make lagi
+                'role'     => 'siswa',         // ditulis eksplisit, tidak bergantung nilai bawaan
             ])->save();
 
             $this->update([
@@ -72,8 +78,6 @@ class PendaftaranSiswa extends Model
                 'user_id'       => $user->id,
             ]);
         });
-
-        return $kode;
     }
 
     public function tolak(string $catatan): void
@@ -85,9 +89,136 @@ class PendaftaranSiswa extends Model
         ]);
     }
 
+    /** Arti kode singkat di database -> tulisan yang dibaca admin */
+    public const STATUS_PERNIKAHAN = [
+        'K' => 'Menikah (متزوج)',
+        'L' => 'Belum menikah (عازب)',
+    ];
+
+    public const PENDIDIKAN_TERAKHIR = [
+        'K' => 'Ibtidaiyah (إبتدائية)',
+        'L' => 'Tsanawiyah (ثانوية)',
+        'M' => 'Aliyah (عالية)',
+        'o' => 'Universitas (جامعة)',
+    ];
+
+    public const FAN_KITAB = [
+        'فقه',
+        'أصول الفقه',
+        'نحو',
+        'صرف',
+        'توحيد',
+        'مصطلح الحديث',
+        'تجويد',
+        'سيرة النبي',
+        'منطق',
+        'وغيرها',
+    ];
+
+    /** Kolom berkas => nama yang tampil */
+    public const BERKAS = [
+        'berkas_foto'          => 'Pas Foto',
+        'berkas_rekomendasi'   => 'Surat Rekomendasi',
+        'berkas_raport_ijazah' => 'Raport Akhir / Ijazah Terakhir',
+        'berkas_izin_belajar'  => 'Surat Izin Belajar',
+    ];
+
+    /** Kolom persyaratan => nama yang tampil (menambah syarat baru: tambah kolom di migrasi + satu baris di sini) */
+    public const SYARAT = [
+        'syarat_uang_pendaftaran' => 'Uang Pendaftaran',
+        'syarat_rekomendasi'      => 'Surat Rekomendasi',
+        'syarat_izin_orang_tua'   => 'Surat Izin Orang Tua',
+        'syarat_raport'           => 'Raport',
+        'syarat_paspor'           => 'Paspor',
+
+
+    ];
+
+    /**
+     * LAMA — tidak dipakai lagi. Pilihan kelas & kamar sekarang diambil dari
+     * Master Data (relasi kelasMaster() dan kamarMaster()). Dibiarkan agar
+     * mudah dikembalikan bila perlu.
+     */
+    public const KELAS = [
+        1 => 'Kelas 1',
+        2 => 'Kelas 2',
+        3 => 'Kelas 3',
+        4 => 'Kelas 4',
+        5 => 'Kelas 5',
+        6 => 'Kelas 6',
+        7 => 'Kelas 7',
+        8 => 'Kelas 8',
+        9 => 'Kelas 9',
+        10 => 'Kelas 10',
+    ];
+
+    /** Pilihan kamar: nomor (disimpan di database) => nama yang tampil. GANTI dengan nama kamar yang sebenarnya. */
+    public const KAMAR = [
+        1 => 'Kamar 1',
+        2 => 'Kamar 2',
+        3 => 'Kamar 3',
+        4 => 'Kamar 4',
+        5 => 'Kamar 5',
+        6 => 'Kamar 6',
+        7 => 'Kamar 7',
+        8 => 'Kamar 8',
+        9 => 'Kamar 9',
+        10 => 'Kamar 10',
+    ];
+    /** Syarat yang punya berkas unggahan (untuk memudahkan admin memeriksa) */
+    public const SYARAT_BERKAS = [
+        'syarat_rekomendasi'    => 'berkas_rekomendasi',
+        'syarat_izin_orang_tua' => 'berkas_izin_belajar',
+        'syarat_raport'         => 'berkas_raport_ijazah',
+    ];
+
+    /** Dijalankan otomatis oleh Laravel: setiap pendaftar BARU langsung diberi kode QR. */
+    protected static function booted(): void
+    {
+        static::creating(function (self $p) {
+            if (empty($p->kode_qr)) {
+                $p->kode_qr = static::buatKodeQr();
+            }
+        });
+    }
+
+    /** Kode acak 16 karakter; diulang kalau kebetulan sudah dipakai. */
+    public static function buatKodeQr(): string
+    {
+        do {
+            $kode = Str::random(16);
+        } while (static::where('kode_qr', $kode)->exists());
+
+        return $kode;
+    }
+
+    /** Gambar QR (SVG). Dipakai di view sebagai {!! $p->qr_svg !!} */
+    public function getQrSvgAttribute(): ?string
+    {
+        if (! $this->kode_qr) {
+            return null;
+        }
+
+        $renderer = new ImageRenderer(new RendererStyle(220), new SvgImageBackEnd());
+
+        return (new Writer($renderer))->writeString($this->kode_qr);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /** Kelas penempatan dari Master Data (kolom kelas_id). Pakai: $p->kelasMaster?->nama */
+    public function kelasMaster()
+    {
+        return $this->belongsTo(Kelas::class, 'kelas_id');
+    }
+
+    /** Kamar penempatan dari Master Data (kolom kamar_id). Pakai: $p->kamarMaster?->nama */
+    public function kamarMaster()
+    {
+        return $this->belongsTo(Kamar::class, 'kamar_id');
     }
 
     public function getFotoUrlAttribute(): ?string
@@ -104,6 +235,54 @@ class PendaftaranSiswa extends Model
         };
     }
 
+    /** Teks untuk chat WhatsApp: ✅ Uang Pendaftaran / ❌ Paspor / ... */
+    public function ringkasanSyarat(): string
+    {
+        return collect(self::SYARAT)
+            ->map(fn($nama, $kolom) => ($this->$kolom ? '✅ ' : '❌ ') . $nama)
+            ->implode("\n");
+    }
+
+    /** Teks penempatan untuk chat WhatsApp; kosong kalau kelas dan kamar belum dipilih */
+    public function ringkasanPenempatan(): string
+    {
+        $baris = [];
+
+        // Nama diambil dari Master Data (kelas_id / kamar_id)
+        if ($this->kelasMaster) {
+            $baris[] = 'Kelas: *' . $this->kelasMaster->nama . '*';
+        }
+
+        if ($this->kamarMaster) {
+            $baris[] = 'Kamar: *' . $this->kamarMaster->nama . '*';
+        }
+
+        return implode("\n", $baris);
+    }
+    /** Jumlah syarat yang sudah dicentang. Dipakai di view sebagai $p->syarat_terpenuhi */
+    public function getSyaratTerpenuhiAttribute(): int
+    {
+        return collect(self::SYARAT)->filter(fn($nama, $kolom) => $this->$kolom)->count();
+    }
+    /**
+     * Ubah nomor HP jadi link WhatsApp: 0812-3456 / +62 812 3456 -> https://wa.me/628123456
+     * $pesan (opsional) = isi chat yang sudah terketik; kosongkan agar admin mengetik sendiri.
+     */
+    public static function linkWa(?string $nomor, ?string $pesan = null): ?string
+    {
+        $n = preg_replace('/\D/', '', (string) $nomor); // buang semua selain angka
+
+        if ($n === '') {
+            return null;
+        }
+
+        if (str_starts_with($n, '0')) {
+            $n = '62' . substr($n, 1); // 0812... -> 62812...
+        }
+
+        return 'https://wa.me/' . $n . ($pesan ? '?text=' . rawurlencode($pesan) : '');
+    }
+
     public function scopeCari($q, ?string $kata)
     {
         return $kata
@@ -112,4 +291,6 @@ class PendaftaranSiswa extends Model
                 ->orWhere('nama_wali', 'like', "%$kata%"))
             : $q;
     }
+
+
 }

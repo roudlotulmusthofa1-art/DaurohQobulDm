@@ -29,9 +29,9 @@ class AppServiceProvider extends ServiceProvider
                     'label' => 'MANAJEMEN DATA',
                     'icon'  => 'graduation-cap',
                     'submenu' => [
-                        ['route' => 'admin.santri.index', 'active' => 'admin.santri.*', 'label' => 'Data Santri'],
-                        ['route' => 'admin.asatid.index',   'active' => 'admin.asatid.*',   'label' => 'Data Asatid'],
-                        ['route' => 'admin.kelas.index',  'active' => 'admin.kelas.*',  'label' => 'Data Kelas'],
+                        ['route' => 'admin.santri.index', 'active' => 'admin.santri.*', 'label' => 'Data Santri', 'icon' => 'user-round'],
+                        ['route' => 'admin.asatid.index',   'active' => 'admin.asatid.*',   'label' => 'Data Asatid', 'icon' => 'user-check'],
+                        ['route' => 'admin.kelas.index',  'active' => 'admin.kelas.*',  'label' => 'Data Kelas', 'icon' => 'school'],
                     ],
                 ],
 
@@ -39,10 +39,10 @@ class AppServiceProvider extends ServiceProvider
                     'label' => 'AKADEMIK',
                     'icon'  => 'users',
                     'submenu' => [
-                        ['route' => 'admin.ustadz.index',       'active' => 'admin.ustadz.*',       'label' => 'Data Ustadz'],
-                        ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => 'Kurikulum & Kitab'],
-                        ['route' => 'admin.tahun-ajaran.index', 'active' => 'admin.tahun-ajaran.*', 'label' => 'Tahun Ajaran'],
-                        ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => 'Jadwal Pelajaran'],
+                        ['route' => 'admin.ustadz.index',       'active' => 'admin.ustadz.*',       'label' => 'Data Ustadz', 'icon' => 'presentation'],
+                        ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => 'Kurikulum & Kitab', 'icon' => 'book-open'],
+                        ['route' => 'admin.tahun-ajaran.index', 'active' => 'admin.tahun-ajaran.*', 'label' => 'Tahun Ajaran', 'icon' => 'calendar-range'],
+                        ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => 'Jadwal Pelajaran', 'icon' => 'calendar-clock'],
                     ],
                 ],
 
@@ -50,34 +50,34 @@ class AppServiceProvider extends ServiceProvider
                     'label' => 'KEUANGAN',
                     'icon'  => 'wallet',
                     'submenu' => [
-                        ['route' => 'admin.biaya-pendidikan.index', 'active' => 'admin.biaya-pendidikan.*', 'label' => 'Biaya Pendidikan'],
-                        ['route' => 'admin.pembayaran.index',       'active' => 'admin.pembayaran.*',       'label' => 'Pembayaran Santri'],
-                        ['route' => 'admin.tagihan.index',          'active' => 'admin.tagihan.*',          'label' => 'Tagihan'],
+                        ['route' => 'admin.biaya-pendidikan.index', 'active' => 'admin.biaya-pendidikan.*', 'label' => 'Biaya Pendidikan', 'icon' => 'receipt'],
+                        ['route' => 'admin.pembayaran.index',       'active' => 'admin.pembayaran.*',       'label' => 'Pembayaran Santri', 'icon' => 'credit-card'],
+                        ['route' => 'admin.tagihan.index',          'active' => 'admin.tagihan.*',          'label' => 'Tagihan', 'icon' => 'file-text'],
                     ],
                 ],
                 [
                     'label' => 'LAPORAN',
                     'icon'  => 'bell',
                     'submenu' => [
-                        ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => 'Laporan Akademik'],
-                        ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => 'Laporan Keuangan'],
+                        ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => 'Laporan Akademik', 'icon' => 'chart-column'],
+                        ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => 'Laporan Keuangan', 'icon' => 'chart-pie'],
                     ],
                 ],
                 [
                     'label' => 'PSB',
                     'icon'  => 'calendar',
                     'submenu' => [
-                        ['route' => 'admin.data-masuk.index',      'active' => 'admin.data-masuk.*',      'label' => 'Data Masuk Peserta'],
-                        ['route' => 'admin.data-diterima.index',   'active' => 'admin.data-diterima.*',   'label' => 'Data Terkonfirmasi Peserta'],
+                        // admin.pendaftaran.* ikut dihitung, supaya halaman detail/edit peserta juga masuk menu ini
+                        ['route' => 'admin.data-masuk.index',      'active' => ['admin.data-masuk.*', 'admin.pendaftaran.*'], 'label' => 'Data Masuk Peserta', 'icon' => 'user-plus'],
                     ],
                 ],
                 [
                     'label' => 'LANDING PAGE',
                     'icon'  => 'globe',
                     'submenu' => [
-                        ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => 'Hero & Statistik'],
-                        ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => 'Fitur Unggulan'],
-                        ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => 'Kurikulum Terintegrasi'],
+                        ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => 'Hero & Statistik', 'icon' => 'layout-template'],
+                        ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => 'Fitur Unggulan', 'icon' => 'sparkles'],
+                        ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => 'Kurikulum Terintegrasi', 'icon' => 'layers'],
                     ],
                 ],
 
@@ -85,8 +85,9 @@ class AppServiceProvider extends ServiceProvider
                     'label' => 'SISTEM',
                     'icon'  => 'settings',
                     'submenu' => [
-                        ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => 'Kelola Akun'],
-                        ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => 'Role & Permission'],
+                        ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => 'Kelola Akun', 'icon' => 'user-cog'],
+                        ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => 'Role & Permission', 'icon' => 'shield-check'],
+                        ['route' => 'admin.master-data.index', 'active' => 'admin.master-data.*', 'label' => 'Master Data', 'icon' => 'database'],
                     ],
                 ],
             ];
@@ -116,7 +117,31 @@ class AppServiceProvider extends ServiceProvider
                 ->pluck('label')
                 ->all();
 
-            $view->with(compact('menuItemsForVue', 'initiallyOpenMenus'));
+            // ===== Breadcrumb (Beranda > Halaman), dibuat otomatis dari menu di atas =====
+            $breadcrumbs = [['label' => 'Beranda', 'url' => route('admin.dashboard')]];
+
+            // Cari submenu yang sedang aktif
+            $aktif = collect($menuItemsForVue)->pluck('submenu')->filter()->flatten(1)->firstWhere('active', true);
+
+            if ($aktif) {
+                $breadcrumbs[] = ['label' => $aktif['label'], 'url' => $aktif['url']];
+
+                // Kalau bukan halaman daftarnya (mis. detail/edit), tambahkan satu langkah lagi
+                $aksi = [
+                    'show' => 'Detail',
+                    'edit' => 'Edit',
+                    'create' => 'Tambah',
+                ][str(request()->route()?->getName())->afterLast('.')->toString()] ?? null;
+
+                if ($aksi) {
+                    $breadcrumbs[] = ['label' => $aksi, 'url' => null];
+                }
+            }
+
+            // Langkah terakhir = halaman yang sedang dibuka, tidak perlu jadi link
+            $breadcrumbs[array_key_last($breadcrumbs)]['url'] = null;
+
+            $view->with(compact('menuItemsForVue', 'initiallyOpenMenus', 'breadcrumbs'));
         });
     }
 }

@@ -13,7 +13,7 @@
 
     {{-- Vue dimuat via CDN (build global yang sudah menyertakan compiler),
          jadi bisa langsung membaca directive Vue (v-cloak, @click, dst) dari HTML Blade tanpa build step Vue. --}}
-    <script src="https://unpkg.com/vue@3.4.31/dist/vue.global.prod.js"></script>
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
 

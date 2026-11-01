@@ -1,270 +1,375 @@
-{{--
-resources/views/layouts/app.blade.php
-
-Layout utama admin Ribath — berisi SIDEBAR + TOPBAR yang dipakai bersama
-di semua halaman (dashboard, data santri, data ustadz, dst).
-Halaman turunan tinggal:
-
-@extends('layouts.app')
-
-@section('title', 'Data Santri')
-
-@section('content')
-... konten halaman ...
-@endsection
-
-@push('scripts')
-<script>
-    ... script khusus halaman ini (mis. Vue app) ... 
-</script>
-@endpush
-
-
---}}
 <!DOCTYPE html>
 <html lang="id">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>@yield('title', 'Dashboard') - Dauroh</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@yield('title', 'Dashboard') - Dauroh</title>
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-            rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
 
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        {{-- Vue 3 tetap dari CDN — cukup library-nya, tiap halaman mount app-nya sendiri --}}
-        <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    {{-- Lucide Icons --}}
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        /* Class utama scrollbar */
+        .scrollbar-custom {
+            --scrollbar-size: 6px;
+            --scrollbar-thumb: #4b5563;
+            --scrollbar-thumb-hover: #9ca3af;
+            --scrollbar-track: transparent;
 
-        <script>
-            window.createApp = Vue.createApp;
-        </script>
+            /* Firefox */
+            scrollbar-width: thin;
+            scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+        }
 
-        {{-- Lucide Icons --}}
-        <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
-<style>
-    /* Class utama scrollbar */
-    .scrollbar-custom {
-    --scrollbar-size: 6px;
-    --scrollbar-thumb: #4b5563;
-    --scrollbar-thumb-hover: #9ca3af;
-    --scrollbar-track: transparent;
-    
-    /* Firefox */
-    scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
-    }
-    
-    /* Chrome, Edge, dan Safari */
-    .scrollbar-custom::-webkit-scrollbar {
-    width: var(--scrollbar-size);
-    }
-    
-    .scrollbar-custom::-webkit-scrollbar-track {
-    background: var(--scrollbar-track);
-    border-radius: 9999px;
-    }
-    
-    .scrollbar-custom::-webkit-scrollbar-thumb {
-    background: var(--scrollbar-thumb);
-    border-radius: 9999px;
-    }
-    
-    .scrollbar-custom::-webkit-scrollbar-thumb:hover {
-    background: var(--scrollbar-thumb-hover);
-    }
-    
-    /* Pilihan ukuran */
-    .scrollbar-small {
-    --scrollbar-size: 4px;
-    }
-    
-    .scrollbar-medium {
-    --scrollbar-size: 7px;
-    }
-    
-    .scrollbar-large {
-    --scrollbar-size: 11px;
-    }
-    
-    /* Pilihan warna */
-    .scrollbar-dark {
-    --scrollbar-thumb: #374151;
-    --scrollbar-thumb-hover: #6b7280;
-    --scrollbar-track: #111827;
-    }
-    
-    .scrollbar-light {
-    --scrollbar-thumb: #9ca3af;
-    --scrollbar-thumb-hover: #e5e7eb;
-    --scrollbar-track: rgba(255, 255, 255, 0.05);
-    }
-</style>
-        @stack('styles')
-    </head>
+        /* Chrome, Edge, dan Safari */
+        .scrollbar-custom::-webkit-scrollbar {
+            width: var(--scrollbar-size);
+        }
 
-    <body class="font-sans bg-ribath-bg text-gray-800 antialiased">
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: var(--scrollbar-track);
+            border-radius: 9999px;
+        }
 
-        <div class="flex h-screen overflow-hidden">
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: var(--scrollbar-thumb);
+            border-radius: 9999px;
+        }
 
-            {{-- ============================= SIDEBAR ============================= --}}
-            <aside class="w-72 shrink-0 bg-ribath-dark text-gray-100 flex flex-col px-5 py-6 ">
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: var(--scrollbar-thumb-hover);
+        }
 
-                {{-- Logo --}}
-                <div class="w-full flex items-center justify-between ">
-                    <a href="/" class="flex items-center gap-2 px-1 ">
-                        <div
-                            class="w-12 h-12 rounded-xl bg-ribath-green-light/90 hover:bg-ribath-green-light/70 flex items-center justify-center text-ribath-darker font-bold text-lg">
-                            <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo">
-                        </div>
-                        <span class="text-white font-bold text-lg tracking-tight hover:text-gray-300">Dauroh Qobul
-                        </span>
-                    </a>
-                    <svg class=" w-6 h-6 text-gray-800 dark:text-white hover:text-gray-300 cursor-pointer"
-                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
-                        fill="currentColor" viewBox="0 0 24 24">
+        /* Pilihan ukuran */
+        .scrollbar-small {
+            --scrollbar-size: 4px;
+        }
+
+        .scrollbar-medium {
+            --scrollbar-size: 7px;
+        }
+
+        .scrollbar-large {
+            --scrollbar-size: 11px;
+        }
+
+        /* Pilihan warna */
+        .scrollbar-dark {
+            --scrollbar-thumb: rgba(255, 255, 255, 0.12);
+            --scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+            --scrollbar-track: transparent;
+        }
+
+        .scrollbar-light {
+            --scrollbar-thumb: #9ca3af;
+            --scrollbar-thumb-hover: #e5e7eb;
+            --scrollbar-track: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== Sidebar buka/tutup =====
+           data-collapsed="true" di <aside id="sidebar"> = sidebar ditutup (ikon saja).
+           .sb-teks  = bagian yang disembunyikan saat ditutup (tulisan, judul, submenu)
+           .sb-item  = tombol menu yang ikonnya dibuat ke tengah saat ditutup */
+        #sidebar[data-ready] { transition: width .2s ease, padding .2s ease; }
+        #sidebar[data-collapsed="true"] { width: 5rem; padding-left: .75rem; padding-right: .75rem; }
+        #sidebar[data-collapsed="true"] .sb-teks { display: none; }
+        #sidebar[data-collapsed="true"] .sb-logo { flex-direction: column; gap: .75rem; }
+        #sidebar[data-collapsed="true"] .sb-item { justify-content: center; padding-left: 0; padding-right: 0; }
+        #sidebar[data-collapsed="true"] .sb-user { justify-content: center; }
+        #sidebar[data-collapsed="true"] #sidebar-toggle svg { transform: rotate(180deg); }
+        /* .sb-ikon = daftar ikon submenu, hanya tampil saat sidebar ditutup */
+        .sb-ikon { display: none; }
+        #sidebar[data-collapsed="true"] .sb-ikon { display: flex; }
+    </style>
+    @stack('styles')
+</head>
+
+<body class="font-sans antialiased text-gray-800 bg-[#0b312a]">
+
+    {{-- Bingkai hijau gelap (seperti di desain) --}}
+    <div
+        class="flex h-screen min-h-0 overflow-hidden p-3 bg-[linear-gradient(180deg,#0f4238_0%,#0b332c_55%,#0a2b25_100%)]">
+
+        {{-- ============================= SIDEBAR ============================= --}}
+        <aside id="sidebar" data-collapsed="false"
+            class="w-65 h-full min-h-0 shrink-0 text-gray-100 flex flex-col pl-4 pr-5 pt-5 pb-4">
+
+            {{-- Logo --}}
+            <div class="sb-logo w-full flex items-center justify-between">
+                <a href="/" class="flex items-center gap-2.5 px-1 group">
+                    <div class="w-10 h-10 flex items-center justify-center bg-[#eff5f0d7] rounded-full">
+                        <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo" class="w-full h-full object-contain">
+                    </div>
+                    <span class="sb-teks text-white font-semibold text-[19px] tracking-tight group-hover:text-white/80">Dauroh
+                        Qobul</span>
+                </a>
+                {{-- Tombol buka/tutup sidebar (diatur script di bawah </aside>) --}}
+                <button type="button" id="sidebar-toggle" aria-controls="sidebar" aria-expanded="true"
+                    title="Tutup sidebar"
+                    class="shrink-0 rounded-md p-1 text-white/40 hover:text-white/80 hover:bg-white/5 transition-colors">
+                    <svg class="w-5 h-5 transition-transform duration-200"
+                        aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                        viewBox="0 0 24 24">
                         <path d="M13 21h6c1.1046 0 2-.8954 2-2V5c0-1.10457-.8954-2-2-2h-6v18Z" />
                         <path fill-rule="evenodd"
                             d="M11 3H5c-1.10457 0-2 .89543-2 2v14c0 1.1046.89543 2 2 2h6V3Zm-2.29295 7.7071c.39052-.3905.39052-1.02368 0-1.41421-.39053-.39052-1.02369-.39052-1.41421 0L5.29289 11.2928c-.39052.3906-.39052 1.0237 0 1.4142l1.99995 2c.39052.3905 1.02368.3905 1.41421 0 .39052-.3905.39052-1.0237 0-1.4142l-1.29284-1.2929 1.29284-1.2928Z"
                             clip-rule="evenodd" />
                     </svg>
-                </div>
-                {{-- garis putih --}}
-                <div class="my-8 h-px bg-ribath-green-light/30"></div>
+                </button>
+            </div>
 
-                <div id="sidebar-nav" class="flex-1 space-y-1 min-h-0 overflow-y-auto pr-2 scrollbar-custom::-webkit-scrollbar scrollbar-dark scrollbar-small">
-                    <nav class="flex-1 space-y-5">
-                        <template v-for="item in menuItems" :key="item.label">
+            {{-- garis tipis --}}
+            <div class="mt-5 mb-6 h-px bg-white/10"></div>
 
-                            <!-- Menu dengan submenu -->
-                            <div v-if="item.submenu && item.submenu.length">
-                                <button type="button" @click="toggle(item.label)"
-                                    class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                                    :class="isActive(item) ?
-                                        'bg-ribath-green-light text-ribath-darker font-semibold shadow-sm' :
-                                        'text-gray-400 hover:bg-white/5 hover:text-gray-100'">
-                                    <i :data-lucide="item.icon" class="w-5 h-5 shrink-0"></i>
-                                    <span class="flex-1 text-left" v-text="item.label"></span>
+            {{-- Label NAVIGATION --}}
+            <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">Navigation</p>
+
+            <div id="sidebar-nav"
+                class="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-custom scrollbar-dark scrollbar-small">
+                <nav class="space-y-2">
+                    <template v-for="item in menuItems" :key="item.label">
+
+                        <!-- Menu dengan submenu -->
+                        <div v-if="item.submenu && item.submenu.length">
+                            <button type="button" @click="toggle(item.label)" :title="item.label"
+                                class="sb-item w-full flex items-center gap-3 pl-1.5 pr-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                                :class="isActive(item) ?
+                                        'bg-white/10 text-white' :
+                                        'text-white/75 hover:bg-white/5 hover:text-white'">
+                                <span
+                                    class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-colors"
+                                    :class="isActive(item) ? 'bg-white text-[#0b332c]' : 'bg-white/10 text-white/70'">
+                                    <i :data-lucide="item.icon" class="w-4 h-4"></i>
+                                </span>
+                                <span class="sb-teks flex-1 text-left" v-text="item.label"></span>
+                                <span class="sb-teks shrink-0">
                                     <i data-lucide="chevron-down"
-                                        class="w-4 h-4 shrink-0 transition-transform duration-200"
+                                        class="w-4 h-4 shrink-0 text-white/50 transition-transform duration-200"
                                         :class="{ 'rotate-180': openMenus.includes(item.label) }"></i>
-                                </button>
+                                </span>
+                            </button>
 
-                                <div v-show="openMenus.includes(item.label)" class="mt-1 ml-8 space-y-1">
-                                    <a v-for="sub in item.submenu" :key="sub.label" :href="sub.url"
-                                        class="block px-3.5 py-2 rounded-lg text-sm transition-colors"
-                                        :class="sub.active ?
-                                            'text-ribath-darker font-semibold bg-ribath-green-light/60' :
-                                            'text-gray-400 hover:text-gray-100 hover:bg-white/5'"
-                                        v-text="sub.label">
-                                    </a>
-                                </div>
+                            <div v-show="openMenus.includes(item.label)"
+                                class="sb-teks mt-1.5 ml-6.5 pl-4 border-l border-white/10 space-y-1">
+                                <a v-for="sub in item.submenu" :key="sub.label" :href="sub.url"
+                                    class="block px-3 py-1.5 rounded-full text-[12.5px] transition-colors" :class="sub.active ?
+                                            'text-white font-semibold bg-white/10' :
+                                            'text-white/55 hover:text-white hover:bg-white/5'" v-text="sub.label">
+                                </a>
                             </div>
 
-                            <!-- Menu tanpa submenu -->
-                            <a v-else :href="item.url"
-                                class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors"
-                                :class="isActive(item) ?
-                                    'bg-ribath-green-light text-ribath-darker font-semibold shadow-sm' :
-                                    'text-gray-400 hover:bg-white/5 hover:text-gray-100'">
-                                <i :data-lucide="item.icon" class="w-5 h-5 shrink-0"></i>
-                                <span v-text="item.label"></span>
-                            </a>
-
-                        </template>
-                    </nav>
-                </div>
-
-                {{-- Kartu bantuan --}}
-                <div class="flex gap-2 mt-6 rounded-2xl bg-white/5 border border-white/10 px-4 py-2 text-center">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0E1F17&color=fff"
-                        class="w-10 h-10 rounded-full object-cover" alt="Avatar admin" />
-                        <div class=" flex flex-col items-start justify-center">
-                    <p class="text-white text-sm font-semibold">Super Admin</p>
-                    <p class="text-gray-400 text-xs  leading-relaxed">@yield('page-heading', '' . (auth()->user()->name ?? 'Admin'))</p>
-                    </div>
-                </div>
-            </aside>
-
-            {{-- ============================= KONTEN ============================= --}}
-            <div class="flex-1 overflow-y-auto">
-
-                {{-- Topbar --}}
-                <header
-                    class="flex items-center justify-between px-8 pt-7 pb-9 mb-4 border border-b border-ribath-green-light/20">
-                    <div>
-                        <h1 class="text-xl font-bold text-gray-900">@yield('page-heading', 'Selamat Datang, ' . (auth()->user()->name ?? 'Admin') . ' 👋')</h1>
-                    </div>
-
-                    <div class="flex items-center gap-4">
-                        <div class="relative hidden md:block">
-                            <svg xmlns="http://www.w3.org/2000/svg"
-                                class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                            </svg>
-                            <input type="text" placeholder="Cari Santri, Ustadz..."
-                                class="bg-white border border-gray-200 rounded-full text-sm pl-10 pr-4 py-2.5 w-64 focus:outline-none focus:ring-2 focus:ring-ribath-green/30" />
+                            {{-- Saat sidebar DITUTUP: semua submenu tampil sebagai ikon (nama muncul saat kursor diarahkan) --}}
+                            <div class="sb-ikon mt-1.5 flex-col items-center gap-1 rounded-2xl bg-white/5 py-1.5">
+                                <a v-for="sub in item.submenu" :key="'ikon-' + sub.label" :href="sub.url"
+                                    :title="sub.label" :aria-label="sub.label"
+                                    class="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+                                    :class="sub.active ? 'bg-white text-[#0b332c]' : 'text-white/60 hover:bg-white/10 hover:text-white'">
+                                    <i :data-lucide="sub.icon || 'circle'" class="w-4 h-4"></i>
+                                </a>
+                            </div>
                         </div>
 
-                        <button
-                            class="relative w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-500" fill="none"
-                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                            </svg>
-                            <span class="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-ribath-green"></span>
-                        </button>
+                        <!-- Menu tanpa submenu -->
+                        <a v-else :href="item.url" :title="item.label"
+                            class="sb-item flex items-center gap-3 pl-1.5 pr-3 py-1.5 rounded-full text-[13px] font-medium transition-colors"
+                            :class="isActive(item) ?
+                                    'bg-white/10 text-white' :
+                                    'text-white/75 hover:bg-white/5 hover:text-white'">
+                            <span
+                                class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center transition-colors"
+                                :class="isActive(item) ? 'bg-white text-[#0b332c]' : 'bg-white/10 text-white/70'">
+                                <i :data-lucide="item.icon" class="w-4 h-4"></i>
+                            </span>
+                            <span class="sb-teks" v-text="item.label"></span>
+                        </a>
 
-                        <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0E1F17&color=fff"
-                            class="w-10 h-10 rounded-full object-cover" alt="Avatar admin" />
-                    </div>
-                </header>
-
-                {{-- Di sinilah konten tiap halaman disuntikkan --}}
-                <main class="px-8 pb-10 space-y-5">
-                    @yield('content')
-                </main>
+                    </template>
+                </nav>
             </div>
-        </div>
 
-        @stack('scripts')
+            {{-- USER ACCOUNT --}}
+            <div class="mt-6">
+                <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">User Account
+                </p>
+                <div class="sb-user flex items-center gap-3 px-1">
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=4ade80&color=0b332c"
+                        class="w-10 h-10 rounded-full object-cover ring-2 ring-[#4ade80]/60" alt="Avatar admin" />
+                    <div class="sb-teks flex flex-col items-start justify-center min-w-0">
+                        <p class="text-white text-[15px] font-medium truncate">@yield('page-heading', '' .
+                            (auth()->user()->name ?? 'Admin'))</p>
+                        <p class="text-white/45 text-xs">Super Admin</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
+        {{-- Buka/tutup sidebar. Dijalankan langsung (bukan menunggu halaman selesai) supaya tidak berkedip. --}}
         <script>
-            createApp({
-                data() {
-                    return {
-                        menuItems: @json($menuItemsForVue),
-                        openMenus: @json($initiallyOpenMenus),
-                    };
-                },
-                methods: {
-                    toggle(label) {
-                        const idx = this.openMenus.indexOf(label);
-                        idx === -1 ? this.openMenus.push(label) : this.openMenus.splice(idx, 1);
-                        this.$nextTick(() => lucide.createIcons());
-                    },
-                    isActive(item) {
-                        if (item.active) return true;
-                        if (item.submenu) return item.submenu.some(sub => sub.active);
-                        return false;
-                    },
-                },
-                mounted() {
-                    lucide.createIcons();
-                },
-                updated() {
-                    lucide.createIcons();
-                },
-            }).mount('#sidebar-nav');
+            (function () {
+                const sidebar = document.getElementById('sidebar');
+                const tombol = document.getElementById('sidebar-toggle');
+
+                // tutup = true -> sidebar ditutup (ikon saja); disimpan agar tetap sama saat pindah halaman
+                window.aturSidebar = function (tutup) {
+                    sidebar.dataset.collapsed = tutup ? 'true' : 'false';
+                    tombol.setAttribute('aria-expanded', tutup ? 'false' : 'true');
+                    tombol.title = tutup ? 'Buka sidebar' : 'Tutup sidebar';
+                    try { localStorage.setItem('sidebarTertutup', tutup ? '1' : '0'); } catch (e) {}
+                };
+                window.sidebarTertutup = () => sidebar.dataset.collapsed === 'true';
+
+                let tertutup = false;
+                try { tertutup = localStorage.getItem('sidebarTertutup') === '1'; } catch (e) {}
+                window.aturSidebar(tertutup);
+
+                tombol.addEventListener('click', () => window.aturSidebar(!window.sidebarTertutup()));
+
+                // Animasi baru dinyalakan setelah tampilan pertama, jadi tidak "bergeser" saat halaman dibuka
+                requestAnimationFrame(() => requestAnimationFrame(() => (sidebar.dataset.ready = '1')));
+            })();
         </script>
 
+        {{-- ============================= KONTEN ============================= --}}
+        <div
+            class="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden rounded-[26px] bg-[#eef4f1]">
 
+            {{-- Topbar: tetap di atas, di luar area scroll, jadi sudut kanan atas tertutup rapi --}}
+            <header class="shrink-0 z-30 flex items-center justify-between px-6 pt-6 pb-5 bg-[#0b312a4e] border-b border-[#0b312a99] backdrop-blur-md">
+                <div>
+                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]">@yield('page-heading', 'Selamat
+                        Datang, ' . (auth()->user()->name ?? 'Admin') . ' 👋')</h1>
+                </div>
 
-    </body>
+                <div class="flex items-center gap-3">
+                    <div class="relative hidden md:block">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                        </svg>
+                        <input type="text" placeholder="Cari Santri, Ustadz..."
+                            class="bg-white rounded-xl text-[13px] pl-10 pr-4 py-2.5 w-64 border border-transparent focus:outline-none focus:border-[#0b332c]/20 focus:ring-2 focus:ring-[#22c55e]/20" />
+                    </div>
+
+                    <button
+                        class="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-white/70 transition-colors">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                        </svg>
+                        <span class="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[#22c55e]"></span>
+                    </button>
+
+                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0b332c&color=fff"
+                        class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
+                </div>
+            </header>
+
+            {{-- Di sinilah konten tiap halaman disuntikkan --}}
+            {{-- Hanya bagian ini yang di-scroll, scrollbar mulai di bawah header --}}
+            <main class="flex-1 min-h-0 overflow-y-auto px-6 pt-5 pb-6 space-y-4 scrollbar-custom scrollbar-small">
+                {{-- Breadcrumb: Beranda > Halaman. Datanya ($breadcrumbs) dibuat otomatis di AppServiceProvider.
+                     Halaman bisa mengganti langkah terakhir dengan @section('breadcrumb-akhir', 'Nama') --}}
+                <nav aria-label="Breadcrumb">
+                    <ol class="flex flex-wrap items-center gap-1.5 text-[13px] text-gray-500">
+                        @foreach ($breadcrumbs as $crumb)
+                            <li class="flex items-center gap-1.5">
+                                @unless ($loop->first)
+                                    <svg class="w-3.5 h-3.5 text-gray-400" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="m9 18 6-6-6-6" />
+                                    </svg>
+                                @endunless
+
+                                @if ($crumb['url'])
+                                    <a href="{{ $crumb['url'] }}" class="flex items-center gap-1.5 hover:text-[#0b332c] transition-colors">
+                                        @if ($loop->first)
+                                            <svg class="w-3.5 h-3.5" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                                                <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                            </svg>
+                                        @endif
+                                        {{ $crumb['label'] }}
+                                    </a>
+                                @else
+                                    <span class="flex items-center gap-1.5 font-medium text-[#0f1f1a]" aria-current="page">
+                                        @if ($loop->first)
+                                            <svg class="w-3.5 h-3.5" aria-hidden="true" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
+                                                <path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                                            </svg>
+                                        @endif
+                                        @if ($loop->last && trim($__env->yieldContent('breadcrumb-akhir')) !== '')
+                                            @yield('breadcrumb-akhir')
+                                        @else
+                                            {{ $crumb['label'] }}
+                                        @endif
+                                    </span>
+                                @endif
+                            </li>
+                        @endforeach
+                    </ol>
+                </nav>
+
+                @yield('content')
+            </main>
+        </div>
+    </div>
+
+    @stack('scripts')
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+                const {
+                    createApp
+                } = window.Vue;
+                createApp({
+                    data() {
+                        return {
+                            menuItems: @json($menuItemsForVue),
+                            openMenus: @json($initiallyOpenMenus),
+                        };
+                    },
+                    methods: {
+                        toggle(label) {
+                            // Sidebar sedang ditutup: buka dulu, lalu tampilkan submenu yang diklik
+                            if (window.sidebarTertutup && window.sidebarTertutup()) {
+                                window.aturSidebar(false);
+                                if (!this.openMenus.includes(label)) this.openMenus.push(label);
+                                this.$nextTick(() => lucide.createIcons());
+                                return;
+                            }
+
+                            const idx = this.openMenus.indexOf(label);
+                            idx === -1 ? this.openMenus.push(label) : this.openMenus.splice(idx, 1);
+                            this.$nextTick(() => lucide.createIcons());
+                        },
+                        isActive(item) {
+                            if (item.active) return true;
+                            if (item.submenu) return item.submenu.some(sub => sub.active);
+                            return false;
+                        },
+                    },
+                    mounted() {
+                        lucide.createIcons();
+                    },
+                    updated() {
+                        lucide.createIcons();
+                    },
+                }).mount('#sidebar-nav');
+            });
+    </script>
+
+</body>
 
 </html>

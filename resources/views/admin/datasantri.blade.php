@@ -1,7 +1,10 @@
 {{--
-View: Data Santri - mode demo.
-Semua data di bawah ini adalah data dummy JavaScript yang dikelola Vue 3.
-View tidak membutuhkan data dari controller atau database.
+View: Data Santri.
+Data dari database (AdminSantriController@index):
+- $santri     : pendaftar berstatus "diterima", lengkap dengan nama kelas & kamar dari Master Data
+- $kelasStats : jumlah santri per kelas (Master Data > Kelas)
+- $tanpaKelas : jumlah santri yang belum ditempatkan di kelas
+Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 --}}
 @extends('layouts.admin')
 
@@ -27,23 +30,27 @@ View tidak membutuhkan data dari controller atau database.
 
     {{-- ================= HEADER: DATA SANTRI ================= --}}
     <div
-        class="bg-linear-to-r from-ribath-green to-ribath-green-light rounded-2xl px-6 py-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mx-4 md:mx-10 lg:mx-20 xl:mx-50">
+        class="bg-linear-to-r from-[#07662ed0] to-[#1ef963cf] rounded-2xl px-6 py-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mx-4 md:mx-10 lg:mx-20 mt-8">
         <div>
             <h1 class="text-white text-xl font-bold">Data Santri</h1>
             <p class="text-teal-100 text-sm mt-0.5">Total @{{ totalSantri }} Santri</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
-            <button type="button" @click="kelolaMassal = !kelolaMassal"
-                class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+            {{-- Kelola Massal: munculkan centang + panel pindah kelas/kamar --}}
+            <button type="button" @click="toggleMassal"
+                class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+                :class="kelolaMassal ? 'ring-2 ring-white ring-offset-2 ring-offset-purple-600' : ''">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
                 </svg>
-                Kelola Massal
+                <span v-text="kelolaMassal ? 'Selesai Kelola' : 'Kelola Massal'"></span>
             </button>
 
-            <a href="#" @click.prevent="notifikasiDemo('Form tambah santri')"
+            {{-- Mode Detail: formulir PSB lengkap di tab baru, lalu diterima lewat Data Masuk Peserta --}}
+            <a href="{{ route('psb.daftar') }}" target="_blank" rel="noopener"
+                title="Buka formulir pendaftaran lengkap (tab baru). Setelah dikirim, terima lewat menu Data Masuk Peserta."
                 class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,7 +60,8 @@ View tidak membutuhkan data dari controller atau database.
                 Tambah Santri (Mode Detail)
             </a>
 
-            <a href="#" @click.prevent="notifikasiDemo('Form tambah cepat')"
+            {{-- Tambah Cepat: form singkat, langsung jadi santri --}}
+            <a href="#" @click.prevent="bukaTambahCepat"
                 class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -66,23 +74,82 @@ View tidak membutuhkan data dari controller atau database.
     </div>
 
     {{-- ================= GRID: STATISTIK PER KELAS ================= --}}
-    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6 mx-4 md:mx-10 lg:mx-20 xl:mx-50">
-        <div v-for="kelas in kelasStats" :key="kelas.nama"
-            class="bg-[#0E1F17]/90 border border-4 border-ribath-green-light rounded-xl p-4 shadow-sm hover:shadow-xl transition">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center mb-3" :class="kelas.warna">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" />
-                    <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
-                </svg>
+    <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6 mx-4 md:mx-10 lg:mx-20 mt-8">
+        {{-- Kartu modern: latar gradasi hijau gelap (sama seperti sidebar) + warna aksen per kelas.
+             --aksen = warna aksen kartu itu (dari WARNA_AKSEN di script bawah). --}}
+        <div v-for="kelas in kelasStats" :key="kelas.nama" :style="{ '--aksen': kelas.aksen }"
+            class="group relative overflow-hidden rounded-2xl p-4 text-white
+                   bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)]
+                   ring-1 ring-white/10 shadow-[0_8px_24px_-12px_rgba(11,51,44,.6)]
+                   transition duration-300 hover:-translate-y-1 hover:ring-(--aksen)
+                   hover:shadow-[0_18px_40px_-16px_var(--aksen)]">
+            {{-- Cahaya warna aksen di pojok kanan atas (makin terang saat disorot) --}}
+            <span class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-(--aksen) opacity-20 blur-2xl transition-opacity duration-300 group-hover:opacity-45"></span>
+            {{-- Kilau yang menyapu kartu saat disorot --}}
+            <span class="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></span>
+            {{-- Ikon besar samar sebagai hiasan --}}
+            <svg class="pointer-events-none absolute -bottom-4 -right-4 h-20 w-20 text-white/5 transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" />
+                <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
+            </svg>
+
+            <div class="relative">
+                <div class="flex items-start justify-between">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-(--aksen) text-[#0b332c] shadow-[0_6px_16px_-6px_var(--aksen)] transition-transform duration-300 group-hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" />
+                            <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
+                        </svg>
+                    </div>
+                    <span class="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/70">@{{ kelas.persen }}%</span>
+                </div>
+
+                <p class="mt-3 text-sm text-white/60 truncate" :title="kelas.nama">@{{ kelas.nama }}</p>
+                <p class="mt-0.5 text-2xl font-bold">@{{ kelas.jumlah }} <span class="text-xs font-normal text-white/45">santri</span></p>
+
+                {{-- Bar: porsi santri kelas ini dari seluruh santri --}}
+                <div class="mt-3 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                    <div class="h-full rounded-full bg-(--aksen) transition-[width] duration-700" :style="{ width: kelas.persen + '%' }"></div>
+                </div>
             </div>
-            <p class="text-sm text-gray-300">@{{ kelas.nama }}</p>
-            <p class="text-2xl font-bold text-gray-100 mt-0.5">@{{ kelas.jumlah }}</p>
         </div>
+
+        {{-- Santri yang belum dipilihkan kelas (aksen kuning sebagai peringatan) --}}
+        <div v-if="tanpaKelas > 0" style="--aksen: #fbbf24"
+            class="group relative overflow-hidden rounded-2xl p-4 text-white
+                   bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)]
+                   border border-dashed border-(--aksen)/60 shadow-[0_8px_24px_-12px_rgba(11,51,44,.6)]
+                   transition duration-300 hover:-translate-y-1 hover:ring-(--aksen)
+                   hover:shadow-[0_18px_40px_-16px_var(--aksen)]">
+            <span class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[var(--aksen)] opacity-20 blur-2xl transition-opacity duration-300 group-hover:opacity-45"></span>
+            <span class="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></span>
+
+            <div class="relative">
+                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-(--aksen) text-[#0b332c] shadow-[0_6px_16px_-6px_var(--aksen)] animate-pulse">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="12" />
+                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                    </svg>
+                </div>
+                <p class="mt-3 text-sm text-white/60">Belum ada kelas</p>
+                <p class="mt-0.5 text-2xl font-bold">@{{ tanpaKelas }} <span class="text-xs font-normal text-white/45">santri</span></p>
+                <p class="mt-3 text-[11px] text-amber-300/80">Pilih kelasnya lewat Kelola Massal</p>
+            </div>
+        </div>
+
+        {{-- Master Data masih kosong --}}
+        <a v-if="kelasStats.length === 0" href="{{ route('admin.master-data.index', ['tab' => 'kelas']) }}"
+            class="col-span-2 sm:col-span-3 lg:col-span-4 flex items-center rounded-xl border-2 border-dashed border-ribath-green-light/60 p-4 text-sm text-gray-500 hover:bg-white/60">
+            Belum ada kelas di Master Data. Klik di sini untuk menambahkan kelas.
+        </a>
     </div>
 
     {{-- ================= SEARCH + FILTER ================= --}}
-    <div class="flex flex-col sm:flex-row gap-3 mb-4 mx-4 md:mx-10 lg:mx-20 xl:mx-50">
+    <div class="flex flex-col sm:flex-row gap-3 mb-4 mx-4 md:mx-10 lg:mx-20">
         <div class="relative flex-1">
             <svg xmlns="http://www.w3.org/2000/svg"
                 class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" viewBox="0 0 24 24" fill="none"
@@ -90,7 +157,7 @@ View tidak membutuhkan data dari controller atau database.
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input type="text" v-model="pencarian" placeholder="Cari santri (nama, tempat lahir, alamat)..."
+            <input type="text" v-model="pencarian" placeholder="Cari santri (nama, no. pendaftaran, kelas, kamar, wali)..."
                 class="w-full border border-ribath-green-light rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green focus:border-transparent">
         </div>
         <button type="button" @click="filterTerbuka = !filterTerbuka"
@@ -107,14 +174,39 @@ View tidak membutuhkan data dari controller atau database.
         </button>
     </div>
 
+    {{-- ================= PANEL KELOLA MASSAL ================= --}}
+    <div v-if="kelolaMassal"
+        class="mb-4 mx-4 md:mx-10 lg:mx-20 xl:mx-50 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3">
+        <div class="flex flex-col lg:flex-row lg:items-center gap-3">
+            <p class="text-sm font-medium text-purple-800 shrink-0">
+                <span v-text="terpilih.length"></span> santri dipilih
+            </p>
+            <div class="flex flex-1 flex-col sm:flex-row gap-2">
+                <select v-model="massal.kelas_id" class="flex-1 rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm">
+                    <option :value="null">Kelas: tidak diubah</option>
+                    <option v-for="k in kelasOptions" :key="k.id" :value="k.id" v-text="k.nama"></option>
+                </select>
+                <select v-model="massal.kamar_id" class="flex-1 rounded-lg border border-purple-200 bg-white px-3 py-2 text-sm">
+                    <option :value="null">Kamar: tidak diubah</option>
+                    <option v-for="k in kamarOptions" :key="k.id" :value="k.id" v-text="k.label"></option>
+                </select>
+            </div>
+            <button type="button" @click="terapkanMassal" :disabled="massal.loading"
+                class="shrink-0 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-60"
+                v-text="massal.loading ? 'Menyimpan…' : 'Terapkan'"></button>
+        </div>
+        <p v-if="massal.error" class="mt-2 text-xs text-red-600" v-text="massal.error"></p>
+        <p class="mt-1 text-xs text-purple-700/70">Centang santri di tabel, pilih kelas dan/atau kamar tujuan, lalu klik Terapkan.</p>
+    </div>
+
     {{-- ================= TABEL SANTRI ================= --}}
     <div
-        class="bg-white border border-ribath-green-light rounded-xl overflow-hidden shadow-sm mx-4 md:mx-10 lg:mx-20 xl:mx-50">
+        class="bg-white border border-ribath-green-light rounded-xl overflow-hidden shadow-sm mx-4 md:mx-10 lg:mx-20">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="bg-ribath-green-light/30 text-left text-gray-800 border-b border-ribath-green-light/50">
-                        <th class="px-4 py-5 w-10">
+                        <th v-if="kelolaMassal" class="px-4 py-5 w-10">
                             <label class="relative inline-flex w-5 h-5 cursor-pointer">
                                 <input type="checkbox" v-model="pilihSemua" @change="toggleSemua" class="peer sr-only">
 
@@ -134,6 +226,7 @@ View tidak membutuhkan data dari controller atau database.
                         <th class="px-4 py-5 font-medium text-base">No</th>
                         <th class="px-4 py-5 font-medium text-base">Nama Santri</th>
                         <th class="px-4 py-5 font-medium text-base">Kelas</th>
+                        <th class="px-4 py-5 font-medium text-base">Kamar</th>
                         <th class="px-4 py-5 font-medium text-base">Tanggal Masuk</th>
                         <th class="px-4 py-5 font-medium text-base">Wali Santri</th>
                         <th class="px-4 py-5 font-medium text-base">Status</th>
@@ -143,7 +236,7 @@ View tidak membutuhkan data dari controller atau database.
                 <tbody>
                     <tr v-for="(santri, index) in santriTersaring" :key="santri.id"
                         class="border-b border-ribath-green-light/40 last:border-0 hover:bg-ribath-green/5 transition">
-                        <td class="px-4 py-3">
+                        <td v-if="kelolaMassal" class="px-4 py-3">
                             <label class="relative inline-flex w-4 h-4 cursor-pointer">
                                 <input type="checkbox" :value="santri.id" v-model="terpilih" class="peer sr-only">
 
@@ -171,14 +264,22 @@ View tidak membutuhkan data dari controller atau database.
                                         <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
                                     </svg>
                                 </div>
-                                <span class="text-gray-700 lowercase">@{{ santri.nama }}</span>
+                                <div>
+                                    <span class="block text-gray-700">@{{ santri.nama }}</span>
+                                    <span class="block text-xs text-gray-400">@{{ santri.nomor }}</span>
+                                </div>
                             </div>
                         </td>
                         <td class="px-4 py-3">
-                            <span class="inline-block text-xs font-medium px-2.5 py-1 rounded-md"
+                            <span v-if="santri.kelas" class="inline-block text-xs font-medium px-2.5 py-1 rounded-md"
                                 :class="warnaBadgeKelas(santri.kelas)">
                                 @{{ santri.kelas }}
                             </span>
+                            <span v-else class="text-xs text-amber-600">Belum dipilih</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-600">
+                            <span v-if="santri.kamar">@{{ santri.kamar }}</span>
+                            <span v-else class="text-xs text-amber-600">Belum dipilih</span>
                         </td>
                         <td class="px-4 py-3 text-gray-600">@{{ santri.tanggal_masuk }}</td>
                         <td class="px-4 py-3 text-gray-400">@{{ santri.wali || '-' }}</td>
@@ -190,8 +291,9 @@ View tidak membutuhkan data dari controller atau database.
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
-                                <a href="#" @click.prevent="lihatDetail(santri)"
-                                    class="text-gray-400 hover:text-teal-600 transition" title="Lihat detail">
+                                {{-- Detail = halaman pendaftaran santri (di sana kelas/kamar bisa diubah) --}}
+                                <a :href="santri.detail_url"
+                                    class="text-gray-400 hover:text-teal-600 transition" title="Lihat detail / ubah kelas & kamar">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round">
@@ -199,14 +301,18 @@ View tidak membutuhkan data dari controller atau database.
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
                                 </a>
-                                <button type="button" @click="hapusSantri(santri)"
-                                    class="text-red-400 hover:text-red-600 transition" title="Hapus">
+
+                                {{-- Tempat sampah: hapus santri (konfirmasi dulu) --}}
+                                <button type="button" @click="hapus(santri)" :disabled="menghapus === santri.id"
+                                    class="text-red-400 hover:text-red-600 transition disabled:opacity-40" title="Hapus santri">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round">
-                                        <polyline points="3 6 5 6 21 6" />
-                                        <path
-                                            d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <path d="M3 6h18" />
+                                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                                        <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                        <path d="M10 11v6" />
+                                        <path d="M14 11v6" />
                                     </svg>
                                 </button>
                             </div>
@@ -214,8 +320,8 @@ View tidak membutuhkan data dari controller atau database.
                     </tr>
 
                     <tr v-if="santriTersaring.length === 0">
-                        <td colspan="8" class="px-4 py-10 text-center text-gray-400 text-sm">
-                            Tidak ada santri yang cocok dengan pencarian.
+                        <td :colspan="kelolaMassal ? 9 : 8" class="px-4 py-10 text-center text-gray-400 text-sm">
+                            @{{ santriList.length === 0 ? 'Belum ada santri. Santri muncul di sini setelah pendaftarannya diterima.' : 'Tidak ada santri yang cocok dengan pencarian.' }}
                         </td>
                     </tr>
                 </tbody>
@@ -223,112 +329,239 @@ View tidak membutuhkan data dari controller atau database.
         </div>
     </div>
 
+
+    {{-- ================= MODAL: TAMBAH CEPAT ================= --}}
+    <div v-if="tambah.buka" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4"
+        @mousedown.self="tambah.buka = false">
+        <form class="w-full max-w-lg rounded-2xl bg-white shadow-xl" @submit.prevent="simpanTambahCepat">
+            <div class="border-b border-gray-100 px-6 py-4">
+                <h3 class="text-base font-semibold text-gray-900">Tambah Cepat Santri</h3>
+                <p class="text-xs text-gray-500">Santri langsung tersimpan dengan status <strong>Diterima</strong>. Data lengkap bisa dilengkapi nanti dari halaman detail.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-4 px-6 py-5">
+                <div class="col-span-2">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Nama Santri <span class="text-red-500">*</span></label>
+                    <input id="tambah-nama" v-model="tambah.form.nama_lengkap" type="text" required dir="auto"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green/30">
+                    <p v-if="tambah.errors.nama_lengkap" class="mt-1 text-xs text-red-600" v-text="tambah.errors.nama_lengkap[0]"></p>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Nama Wali</label>
+                    <input v-model="tambah.form.nama_wali" type="text" dir="auto"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green/30">
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">No. WA Wali</label>
+                    <input v-model="tambah.form.no_hp_wali" type="tel" placeholder="08..."
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green/30">
+                    <p v-if="tambah.errors.no_hp_wali" class="mt-1 text-xs text-red-600" v-text="tambah.errors.no_hp_wali[0]"></p>
+                </div>
+                <div class="col-span-2">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Kota</label>
+                    <input v-model="tambah.form.kota" type="text" dir="auto"
+                        class="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green/30">
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Kelas</label>
+                    <select v-model="tambah.form.kelas_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                        <option :value="null">Belum dipilih</option>
+                        <option v-for="k in kelasOptions" :key="k.id" :value="k.id" v-text="k.nama"></option>
+                    </select>
+                </div>
+                <div class="col-span-2 sm:col-span-1">
+                    <label class="mb-1 block text-sm font-medium text-gray-700">Kamar</label>
+                    <select v-model="tambah.form.kamar_id" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                        <option :value="null">Belum dipilih</option>
+                        <option v-for="k in kamarOptions" :key="k.id" :value="k.id" v-text="k.label"></option>
+                    </select>
+                    <p v-if="tambah.errors.kamar_id" class="mt-1 text-xs text-red-600" v-text="tambah.errors.kamar_id[0]"></p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-2 border-t border-gray-100 px-6 py-4">
+                <button type="button" @click="tambah.buka = false"
+                    class="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">Batal</button>
+                <button type="submit" :disabled="tambah.loading"
+                    class="rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white hover:bg-orange-600 disabled:opacity-60"
+                    v-text="tambah.loading ? 'Menyimpan...' : 'Simpan'"></button>
+            </div>
+        </form>
+    </div>
+
+    {{-- ================= NOTIFIKASI ================= --}}
+    <div v-if="toast.show" class="fixed bottom-6 right-6 z-[60] rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
+        :class="toast.error ? 'bg-red-600' : 'bg-[#0b332c]'" v-text="toast.text"></div>
 </div>
 
-@once
 @push('scripts')
-<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-<script>
-    const { createApp } = Vue;
+{{-- Vue 3 dari Vite: window.Vue disediakan resources/js/app.js (dimuat oleh layouts.admin) --}}
+<script type="module">
+    const { createApp } = window.Vue;
+
+    // Warna kotak & badge kelas, dipakai bergiliran sesuai urutan kelas di Master Data
+    // Warna aksen kartu kelas: terang, supaya kontras dengan latar hijau gelap sidebar
+    const WARNA_AKSEN = ['#60a5fa', '#4ade80', '#facc15', '#c084fc', '#f87171', '#2dd4bf', '#fb923c', '#38bdf8', '#f472b6', '#a3e635'];
+    const WARNA_BADGE = ['bg-blue-50 text-blue-600', 'bg-green-50 text-green-600', 'bg-amber-50 text-amber-600', 'bg-purple-50 text-purple-600', 'bg-red-50 text-red-600', 'bg-emerald-50 text-emerald-700', 'bg-orange-50 text-orange-600', 'bg-sky-50 text-sky-600', 'bg-pink-50 text-pink-600', 'bg-teal-50 text-teal-700'];
+
+    // Kirim data ke server (JSON). Melempar error berisi status & pesan bila gagal.
+    const CSRF = @json(csrf_token());
+    async function kirim(url, body = {}, method = 'POST') {
+        const res = await fetch(url, {
+            method,
+            credentials: 'same-origin',
+            headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
+            body: JSON.stringify(body),
+        });
+        const isJson = (res.headers.get('content-type') || '').includes('application/json');
+        const data = isJson ? await res.json() : {};
+        if (!res.ok || !isJson) {
+            const pesan = res.status === 419 ? 'Sesi habis, silakan muat ulang halaman.' : (data.message || 'Terjadi kesalahan. Coba lagi.');
+            throw Object.assign(new Error(pesan), { status: res.status, errors: data.errors || {} });
+        }
+        return data;
+    }
+
+    const URL_TAMBAH = @json(route('admin.santri.store'));
+    const URL_MASSAL = @json(route('admin.santri.massal'));
+    const formKosong = () => ({ nama_lengkap: '', nama_wali: '', no_hp_wali: '', kota: '', kelas_id: null, kamar_id: null });
 
     createApp({
         data() {
             return {
-                kelasMeta: [
-                    { nama: 'Tamhidi', warna: 'bg-blue-500' },
-                    { nama: 'Ibtida 1', warna: 'bg-green-500' },
-                    { nama: 'Ibtida 2', warna: 'bg-amber-400' },
-                    { nama: 'Tsanawiyah 1', warna: 'bg-purple-500' },
-                    { nama: 'Tsanawiyah 2', warna: 'bg-red-500' },
-                    { nama: 'Tahfidz 1', warna: 'bg-emerald-700' },
-                    { nama: 'Tahfidz 2', warna: 'bg-emerald-600' },
-                    { nama: 'Tahfidz 3', warna: 'bg-emerald-800' },
-                    { nama: 'Takhassus 1', warna: 'bg-orange-400' },
-                    { nama: 'Takhassus 2', warna: 'bg-orange-600' },
-                    { nama: 'Takhassus 3', warna: 'bg-orange-800' },
-                ],
-                santriList: [
-                    { id: 1, nama: 'Ahmad Fauzan', kelas: 'Tamhidi', tanggal_masuk: '10 Jul 2026', wali: 'H. Rahmat', status: 'aktif', punya_skema_biaya: false },
-                    { id: 2, nama: 'Bilal Ramadhan', kelas: 'Ibtida 1', tanggal_masuk: '11 Jul 2026', wali: 'Abdullah', status: 'aktif', punya_skema_biaya: true },
-                    { id: 3, nama: 'Yusuf Al Farizi', kelas: 'Ibtida 1', tanggal_masuk: '11 Jul 2026', wali: 'Hasan Basri', status: 'aktif', punya_skema_biaya: true },
-                    { id: 4, nama: 'Zaid Nur Hidayat', kelas: 'Ibtida 2', tanggal_masuk: '12 Jul 2026', wali: 'M. Hidayat', status: 'aktif', punya_skema_biaya: false },
-                    { id: 5, nama: 'Hamzah Hakim', kelas: 'Tsanawiyah 1', tanggal_masuk: '13 Jul 2026', wali: 'Abdul Hakim', status: 'aktif', punya_skema_biaya: true },
-                    { id: 6, nama: 'Fikri Maulana', kelas: 'Tahfidz 1', tanggal_masuk: '14 Jul 2026', wali: 'Maulana Yusuf', status: 'aktif', punya_skema_biaya: true },
-                    { id: 7, nama: 'Naufal Akbar', kelas: 'Tahfidz 1', tanggal_masuk: '14 Jul 2026', wali: null, status: 'aktif', punya_skema_biaya: false },
-                    { id: 8, nama: 'Rafi Pratama', kelas: 'Tahfidz 2', tanggal_masuk: '15 Jul 2026', wali: 'Dedi Pratama', status: 'aktif', punya_skema_biaya: true },
-                    { id: 9, nama: 'Salman Al Ghifari', kelas: 'Takhassus 1', tanggal_masuk: '16 Jul 2026', wali: 'Ghifari Ahmad', status: 'nonaktif', punya_skema_biaya: true },
-                    { id: 10, nama: 'Ilyas Kurniawan', kelas: 'Tahfidz 3', tanggal_masuk: '17 Jul 2026', wali: 'Agus Kurniawan', status: 'aktif', punya_skema_biaya: false },
-                ],
+                // Data asli dari controller
+                santriList: @json($santri),
+                kelasOptions: @json($kelasOptions),
+                kamarOptions: @json($kamarOptions),
                 pencarian: '',
                 filterTerbuka: false,
                 kelolaMassal: false,
                 pilihSemua: false,
                 terpilih: [],
+                massal: { kelas_id: null, kamar_id: null, loading: false, error: '' },
+                tambah: { buka: false, form: formKosong(), errors: {}, loading: false },
+                toast: { show: false, text: '', error: false },
+                menghapus: null, // id santri yang sedang dihapus
             };
         },
         computed: {
+            // Jumlah per kelas dihitung dari tabel, jadi langsung ikut berubah setelah pindah kelas
             kelasStats() {
-                return this.kelasMeta.map(kelas => ({
-                    ...kelas,
-                    jumlah: this.santriList.filter(santri => santri.kelas === kelas.nama).length,
-                }));
+                const total = this.santriList.length;
+                return this.kelasOptions.map((kelas, i) => {
+                    const jumlah = this.santriList.filter(santri => santri.kelas_id === kelas.id).length;
+                    return {
+                        nama: kelas.nama,
+                        jumlah,
+                        persen: total ? Math.round(jumlah / total * 100) : 0, // untuk bar & label %
+                        aksen: WARNA_AKSEN[i % WARNA_AKSEN.length],
+                    };
+                });
+            },
+            tanpaKelas() {
+                return this.santriList.filter(santri => !santri.kelas_id).length;
             },
             totalSantri() {
                 return this.santriList.length;
-            },
-            tanpaSkemaBiaya() {
-                return this.santriList.filter(santri => !santri.punya_skema_biaya).length;
             },
             santriTersaring() {
                 const kata = this.pencarian.toLowerCase().trim();
                 if (!kata) return this.santriList;
 
                 return this.santriList.filter(santri =>
-                    santri.nama.toLowerCase().includes(kata) ||
-                    (santri.kelas || '').toLowerCase().includes(kata) ||
-                    (santri.wali || '').toLowerCase().includes(kata)
+                    [santri.nama, santri.nomor, santri.kelas, santri.kamar, santri.wali]
+                        .some(nilai => (nilai || '').toLowerCase().includes(kata))
                 );
             },
         },
         methods: {
+            notif(text, error = false) {
+                this.toast = { show: true, text, error };
+                clearTimeout(this._toast);
+                this._toast = setTimeout(() => (this.toast.show = false), 3000);
+            },
             toggleSemua() {
                 this.terpilih = this.pilihSemua
                     ? this.santriTersaring.map(santri => santri.id)
                     : [];
             },
             warnaBadgeKelas(nama) {
-                const map = {
-                    'Tamhidi': 'bg-blue-50 text-blue-600',
-                    'Ibtida 1': 'bg-green-50 text-green-600',
-                    'Ibtida 2': 'bg-amber-50 text-amber-600',
-                    'Tsanawiyah 1': 'bg-purple-50 text-purple-600',
-                    'Tsanawiyah 2': 'bg-red-50 text-red-600',
-                    'Tahfidz 1': 'bg-emerald-50 text-emerald-700',
-                    'Tahfidz 2': 'bg-emerald-50 text-emerald-600',
-                    'Tahfidz 3': 'bg-emerald-50 text-emerald-800',
-                    'Takhassus 1': 'bg-orange-50 text-orange-600',
-                    'Takhassus 2': 'bg-orange-50 text-orange-700',
-                    'Takhassus 3': 'bg-orange-50 text-orange-800',
-                };
+                const i = this.kelasOptions.findIndex(kelas => kelas.nama === nama);
+                return i === -1 ? 'bg-gray-50 text-gray-600' : WARNA_BADGE[i % WARNA_BADGE.length];
+            },
+            // Ganti baris lama dengan versi terbaru dari server (atau tambahkan kalau baru)
+            perbaruiBaris(baris) {
+                baris.forEach(baru => {
+                    const i = this.santriList.findIndex(s => s.id === baru.id);
+                    if (i === -1) this.santriList.push(baru);
+                    else this.santriList.splice(i, 1, baru);
+                });
+            },
 
-                return map[nama] || 'bg-gray-50 text-gray-600';
-            },
-            notifikasiDemo(fitur) {
-                window.alert(fitur + ' belum diaktifkan karena halaman sedang memakai data dummy.');
-            },
-            lihatDetail(santri) {
-                window.alert('Demo detail santri: ' + santri.nama);
-            },
-            hapusSantri(santri) {
-                if (!window.confirm('Hapus data dummy "' + santri.nama + '"?')) return;
-
-                this.santriList = this.santriList.filter(item => item.id !== santri.id);
-                this.terpilih = this.terpilih.filter(id => id !== santri.id);
+            // ----- Kelola Massal -----
+            toggleMassal() {
+                this.kelolaMassal = !this.kelolaMassal;
+                this.terpilih = [];
                 this.pilihSemua = false;
+                this.massal = { kelas_id: null, kamar_id: null, loading: false, error: '' };
+            },
+            async terapkanMassal() {
+                if (!this.terpilih.length) return (this.massal.error = 'Centang minimal satu santri.');
+                if (!this.massal.kelas_id && !this.massal.kamar_id) return (this.massal.error = 'Pilih kelas atau kamar tujuan.');
+
+                this.massal.loading = true;
+                this.massal.error = '';
+                try {
+                    const res = await kirim(URL_MASSAL, { ids: this.terpilih, kelas_id: this.massal.kelas_id, kamar_id: this.massal.kamar_id });
+                    this.perbaruiBaris(res.santri);
+                    this.kamarOptions = res.kamarOptions;
+                    this.notif(res.message);
+                    this.toggleMassal();
+                } catch (e) {
+                    this.massal.error = Object.values(e.errors)[0]?.[0] || e.message;
+                } finally {
+                    this.massal.loading = false;
+                }
+            },
+
+            // ----- Hapus -----
+            async hapus(santri) {
+                if (!window.confirm(`Hapus santri "${santri.nama}"?\nBerkas unggahan dan akun login siswanya juga ikut terhapus.`)) return;
+
+                this.menghapus = santri.id;
+                try {
+                    const res = await kirim(santri.hapus_url, {}, 'DELETE');
+                    this.santriList = this.santriList.filter(s => s.id !== santri.id);
+                    this.terpilih = this.terpilih.filter(id => id !== santri.id);
+                    this.notif(res.message);
+                } catch (e) {
+                    this.notif(e.message, true);
+                } finally {
+                    this.menghapus = null;
+                }
+            },
+
+            // ----- Tambah Cepat -----
+            bukaTambahCepat() {
+                this.tambah = { buka: true, form: formKosong(), errors: {}, loading: false };
+                setTimeout(() => document.getElementById('tambah-nama')?.focus());
+            },
+            async simpanTambahCepat() {
+                this.tambah.loading = true;
+                this.tambah.errors = {};
+                try {
+                    const res = await kirim(URL_TAMBAH, this.tambah.form);
+                    this.perbaruiBaris([res.santri]);
+                    this.kamarOptions = res.kamarOptions;
+                    this.tambah.buka = false;
+                    this.notif(res.message);
+                } catch (e) {
+                    if (e.status === 422) this.tambah.errors = e.errors;
+                    else this.notif(e.message, true);
+                } finally {
+                    this.tambah.loading = false;
+                }
             },
         },
     }).mount('#data-santri-app');
 </script>
 @endpush
-@endonce
 @endsection
