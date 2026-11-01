@@ -17,11 +17,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('pendaftaran_siswas', function (Blueprint $table) {
-            // nullOnDelete: kalau kelas/kamar dihapus dari Master Data, isian santri jadi kosong (tidak error)
-            $table->foreignId('kelas_id')->nullable()->after('kamar')->constrained('kelas')->nullOnDelete();
-            $table->foreignId('kamar_id')->nullable()->after('kelas_id')->constrained('kamar')->nullOnDelete();
-        });
+        // Tanpa ->after('kamar'): di server kolom `kamar` belum ada saat migrasi ini jalan
+        // (baru disusulkan oleh migrasi 2026_11_01), dan itu membuat migrasi gagal.
+        // nullOnDelete: kalau kelas/kamar dihapus dari Master Data, isian santri jadi kosong (tidak error)
+        if (! Schema::hasColumn('pendaftaran_siswas', 'kelas_id')) {
+            Schema::table('pendaftaran_siswas', fn (Blueprint $table) => $table->foreignId('kelas_id')->nullable()->constrained('kelas')->nullOnDelete());
+        }
+        if (! Schema::hasColumn('pendaftaran_siswas', 'kamar_id')) {
+            Schema::table('pendaftaran_siswas', fn (Blueprint $table) => $table->foreignId('kamar_id')->nullable()->constrained('kamar')->nullOnDelete());
+        }
     }
 
     public function down(): void
