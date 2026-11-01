@@ -29,7 +29,49 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
     </div> --}}
 
     {{-- ================= HEADER: DATA SANTRI ================= --}}
-    
+    <div
+        class="bg-linear-to-r from-[#07662ed0] to-[#1ef963cf] rounded-2xl px-6 py-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mx-4 md:mx-10 lg:mx-20 mt-8">
+        <div>
+            <h1 class="text-white text-xl font-bold">Data Santri</h1>
+            <p class="text-teal-100 text-sm mt-0.5">Total @{{ totalSantri }} Santri</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            {{-- Kelola Massal: munculkan centang + panel pindah kelas/kamar --}}
+            <button type="button" @click="toggleMassal"
+                class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
+                :class="kelolaMassal ? 'ring-2 ring-white ring-offset-2 ring-offset-purple-600' : ''">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
+                </svg>
+                <span v-text="kelolaMassal ? 'Selesai Kelola' : 'Kelola Massal'"></span>
+            </button>
+
+            {{-- Mode Detail: formulir PSB lengkap di tab baru, lalu diterima lewat Data Masuk Peserta --}}
+            <a href="{{ route('psb.daftar') }}" target="_blank" rel="noopener"
+                title="Buka formulir pendaftaran lengkap (tab baru). Setelah dikirim, terima lewat menu Data Masuk Peserta."
+                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Tambah Santri (Mode Detail)
+            </a>
+
+            {{-- Tambah Cepat: form singkat, langsung jadi santri --}}
+            <a href="#" @click.prevent="bukaTambahCepat"
+                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                Tambah Cepat
+            </a>
+        </div>
+    </div>
 
     {{-- ================= GRID: STATISTIK PER KELAS ================= --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6 mx-4 md:mx-10 lg:mx-20 mt-8">
