@@ -148,10 +148,12 @@
                                     <i :data-lucide="item.icon" class="w-4 h-4"></i>
                                 </span>
                                 <span class="sb-teks flex-1 text-left" v-text="item.label"></span>
-                                <span class="sb-teks shrink-0">
-                                    <i data-lucide="chevron-down"
-                                        class="w-4 h-4 shrink-0 text-white/50 transition-transform duration-200"
-                                        :class="{ 'rotate-180': openMenus.includes(item.label) }"></i>
+                                {{-- Panah: ke kanan saat tertutup, berputar ke bawah saat dibuka.
+                                     Putarannya dipasang di <span> pembungkus, karena Lucide mengganti <i> dengan <svg>
+                                     (binding :class di <i> ikut hilang). --}}
+                                <span class="sb-teks shrink-0 inline-flex text-white/50 transition-transform duration-200"
+                                    :class="{ 'rotate-90 text-white/80': openMenus.includes(item.label) }">
+                                    <i data-lucide="chevron-right" class="w-4 h-4 shrink-0"></i>
                                 </span>
                             </button>
 
