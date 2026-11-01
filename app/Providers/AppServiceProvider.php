@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Support\NotifikasiAdmin;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -88,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
                         ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => 'Kelola Akun', 'icon' => 'user-cog'],
                         ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => 'Role & Permission', 'icon' => 'shield-check'],
                         ['route' => 'admin.master-data.index', 'active' => 'admin.master-data.*', 'label' => 'Master Data', 'icon' => 'database'],
+                        ['route' => 'admin.pengaturan.index', 'active' => 'admin.pengaturan.*', 'label' => 'Pengaturan', 'icon' => 'sliders-horizontal'],
                     ],
                 ],
             ];
@@ -141,7 +143,10 @@ class AppServiceProvider extends ServiceProvider
             // Langkah terakhir = halaman yang sedang dibuka, tidak perlu jadi link
             $breadcrumbs[array_key_last($breadcrumbs)]['url'] = null;
 
-            $view->with(compact('menuItemsForVue', 'initiallyOpenMenus', 'breadcrumbs'));
+            // ===== Notifikasi (ikon lonceng di kanan atas) — jenisnya diatur di Sistem > Pengaturan =====
+            ['items' => $notifItems, 'total' => $jumlahNotif] = NotifikasiAdmin::kumpulkan();
+
+            $view->with(compact('menuItemsForVue', 'initiallyOpenMenus', 'breadcrumbs', 'jumlahNotif', 'notifItems'));
         });
     }
 }

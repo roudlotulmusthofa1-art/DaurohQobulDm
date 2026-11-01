@@ -28,6 +28,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::resource('santri', AdminSantriController::class);
     Route::resource('asatid', AdminDataAsatidController::class);
     Route::resource('kelas', AdminDataKelasController::class);
+
+    // Landing Page > Hero & Statistik (angka di bagian atas beranda)
+    Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
+    Route::put('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'update'])->name('landing-hero.update');
+
+    // Sistem > Pengaturan (termasuk pengaturan notifikasi)
+    Route::get('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'index'])->name('pengaturan.index');
+    Route::put('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'update'])->name('pengaturan.update');
     // Route::resource('wali', AdminWaliController::class);
 });
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\PendaftaranSiswa;
+use App\Models\Pengaturan;
 use Illuminate\View\View;
 
 class LandingController extends Controller
@@ -110,6 +112,12 @@ class LandingController extends Controller
             'jam' => 'Fast Response - Hubungi Kami Kapan Saja',
         ];
 
-        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak'));
+        // Angka statistik di bagian atas beranda
+        // - peserta: pendaftar yang sudah diterima (otomatis dari database)
+        // - assatid: diisi admin di menu Landing Page > Hero & Statistik
+        $jumlahPeserta = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count();
+        $jumlahAssatid = (int) Pengaturan::ambil('jumlah_assatid', 15);
+
+        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid'));
     }
 }

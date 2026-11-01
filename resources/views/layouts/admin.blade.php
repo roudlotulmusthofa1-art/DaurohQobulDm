@@ -258,18 +258,96 @@
                             class="bg-white rounded-xl text-[13px] pl-10 pr-4 py-2.5 w-64 border border-transparent focus:outline-none focus:border-[#0b332c]/20 focus:ring-2 focus:ring-[#22c55e]/20" />
                     </div>
 
-                    <button
-                        class="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-white/70 transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
-                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                            <path stroke-linecap="round" stroke-linejoin="round"
-                                d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                        </svg>
-                        <span class="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-[#22c55e]"></span>
-                    </button>
+                    {{-- ===== Notifikasi (lonceng): pendaftar yang menunggu verifikasi ===== --}}
+                    <div class="relative" data-dropdown>
+                        <button type="button" data-dropdown-tombol aria-haspopup="true" aria-expanded="false"
+                            title="Notifikasi"
+                            class="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-white/70 transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                                <path stroke-linecap="round" stroke-linejoin="round"
+                                    d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
+                            </svg>
+                            @if ($jumlahNotif > 0)
+                                <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-[18px] text-center ring-2 ring-white">{{ $jumlahNotif > 9 ? '9+' : $jumlahNotif }}</span>
+                            @endif
+                        </button>
 
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0b332c&color=fff"
-                        class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
+                        <div data-dropdown-isi hidden
+                            class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
+                            <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
+                                <p class="text-sm font-bold text-slate-800">Notifikasi</p>
+                                @if ($jumlahNotif > 0)
+                                    <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-2 py-0.5">{{ $jumlahNotif }} perlu dicek</span>
+                                @endif
+                            </div>
+
+                            <div class="max-h-[60vh] overflow-y-auto">
+                            @forelse ($notifItems as $n)
+                                <a href="{{ $n['url'] ?? '#' }}"
+                                    class="flex items-start gap-3 px-4 py-3 hover:bg-[#f5f9f7] transition-colors border-b border-slate-50 last:border-0">
+                                    <span class="w-9 h-9 shrink-0 rounded-xl ring-1 flex items-center justify-center {{ $n['warna'] }}">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $n['ikon'] }}"/></svg>
+                                    </span>
+                                    <span class="min-w-0">
+                                        {{-- teks sudah di-escape di App\Support\NotifikasiAdmin --}}
+                                        <span class="block text-[13px] text-slate-700 leading-snug [&_b]:font-semibold [&_b]:text-slate-900">{!! $n['teks'] !!}</span>
+                                        <span class="block text-[11px] text-slate-400 mt-0.5">{{ collect([$n['keterangan'], $n['waktu']])->filter()->implode(' · ') }}</span>
+                                    </span>
+                                </a>
+                            @empty
+                                <div class="px-4 py-8 text-center">
+                                    <span class="mx-auto w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                    </span>
+                                    <p class="mt-2 text-sm text-slate-500">Tidak ada notifikasi baru</p>
+                                </div>
+                            @endforelse
+                            </div>
+
+                            <a href="{{ route('admin.pengaturan.index') }}"
+                                class="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-emerald-700 bg-[#f5f9f7] hover:bg-emerald-50 transition-colors">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                                Atur notifikasi
+                            </a>
+                        </div>
+                    </div>
+
+                    {{-- ===== Profil: foto + nama + peran, klik untuk Keluar ===== --}}
+                    <div class="relative" data-dropdown>
+                        <button type="button" data-dropdown-tombol aria-haspopup="true" aria-expanded="false"
+                            class="flex items-center gap-2.5 rounded-xl pl-1 pr-2.5 py-1 hover:bg-white/60 transition-colors">
+                            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0b332c&color=fff"
+                                class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
+                            <span class="hidden sm:flex flex-col items-start leading-tight text-left">
+                                <span class="text-[13px] font-semibold text-[#0f1f1a] max-w-[10rem] truncate">{{ auth()->user()->name ?? 'Admin' }}</span>
+                                <span class="text-[11px] text-gray-600">Super Admin</span>
+                            </span>
+                            <svg class="hidden sm:block w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                        </button>
+
+                        <div data-dropdown-isi hidden
+                            class="absolute right-0 mt-2 w-60 bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
+                            <div class="px-4 py-3 border-b border-slate-100">
+                                <p class="text-sm font-bold text-slate-800 truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                <p class="text-xs text-slate-400 truncate">{{ auth()->user()->email ?? '' }}</p>
+                            </div>
+                            <a href="/" target="_blank" rel="noopener"
+                                class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-[#f5f9f7] transition-colors">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
+                                Lihat Website
+                            </a>
+                            <form method="POST" action="{{ route('admin.logout') }}"
+                                onsubmit="return confirm('Keluar dari akun admin?')" class="border-t border-slate-100">
+                                @csrf
+                                <button type="submit"
+                                    class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                                    Keluar
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
             </header>
 
@@ -325,6 +403,33 @@
             </main>
         </div>
     </div>
+
+    {{-- Menu kecil di kanan atas (notifikasi & profil): klik untuk buka, klik di luar / Esc untuk tutup --}}
+    <script>
+        (function () {
+            const semua = () => document.querySelectorAll('[data-dropdown]');
+            const tutup = (kecuali) => semua().forEach((d) => {
+                if (d === kecuali) return;
+                d.querySelector('[data-dropdown-isi]').hidden = true;
+                d.querySelector('[data-dropdown-tombol]').setAttribute('aria-expanded', 'false');
+            });
+
+            semua().forEach((d) => {
+                const tombol = d.querySelector('[data-dropdown-tombol]');
+                const isi = d.querySelector('[data-dropdown-isi]');
+                tombol.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    tutup(d);
+                    isi.hidden = !isi.hidden;
+                    tombol.setAttribute('aria-expanded', isi.hidden ? 'false' : 'true');
+                });
+                isi.addEventListener('click', (e) => e.stopPropagation());
+            });
+
+            document.addEventListener('click', () => tutup());
+            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tutup(); });
+        })();
+    </script>
 
     @stack('scripts')
 
