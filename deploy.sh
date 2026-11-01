@@ -10,6 +10,22 @@ fi
 
 echo "🚀 Starting Deployment to $DEPLOY_HOST..."
 
+# ===== Kirim commit terbaru ke GitHub (branch main) dulu =====
+# Server hanya mengambil branch "main", jadi commit lokal harus sudah ada di main.
+if [ -n "$(git status --porcelain --untracked-files=no)" ]; then
+    echo "⚠️  Ada perubahan yang BELUM di-commit. Perubahan itu TIDAK ikut ke server:"
+    git status --short --untracked-files=no
+    read -r -p "Lanjut deploy tanpa perubahan itu? (y/n) " jawab
+    [ "$jawab" = "y" ] || { echo "Deploy dibatalkan. Commit dulu, lalu jalankan deploy lagi."; exit 1; }
+fi
+
+echo "📤 Mengirim commit ke GitHub (main)..."
+if ! git push origin HEAD:main; then
+    echo "❌ Gagal push ke main. Biasanya karena ada commit baru di GitHub yang belum Anda ambil."
+    echo "   Jalankan: git pull origin main   lalu deploy lagi."
+    exit 1
+fi
+
 # Check for sshpass (Windows fallback)
 if command -v sshpass &> /dev/null; then
     SSH_CMD="sshpass -p $DEPLOY_SUDO_PASS ssh -o StrictHostKeyChecking=no"
