@@ -78,10 +78,10 @@ class UpdatePendaftaranRequest extends FormRequest
             'rencana'          => 'required|string|max:2000',
 
             // Berkas: boleh kosong (berarti tidak diganti)
-            'berkas_foto'          => 'nullable|image|max:2048',
-            'berkas_rekomendasi'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:3072',
-            'berkas_raport_ijazah' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:3072',
-            'berkas_izin_belajar'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:3072',
+            'berkas_foto'          => 'nullable|image|max:5120',
+            'berkas_rekomendasi'   => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'berkas_raport_ijazah' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
+            'berkas_izin_belajar'  => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
         ];
     }
 

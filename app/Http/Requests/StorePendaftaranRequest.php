@@ -288,28 +288,35 @@ class StorePendaftaranRequest extends FormRequest
             'berkas_foto' => [
                 'required',
                 'image',
-                'max:2048',
+                'max:5120',
             ],
 
             'berkas_rekomendasi' => [
                 'required',
                 'file',
                 'mimes:jpg,jpeg,png,pdf',
-                'max:3072',
+                'max:5120',
             ],
 
             'berkas_raport_ijazah' => [
                 'required',
                 'file',
                 'mimes:jpg,jpeg,png,pdf',
-                'max:3072',
+                'max:5120',
             ],
 
             'berkas_izin_belajar' => [
                 'required',
                 'file',
                 'mimes:jpg,jpeg,png,pdf',
-                'max:3072',
+                'max:5120',
+            ],
+
+            // Catatan peserta untuk admin (boleh kosong)
+            'catatan_peserta' => [
+                'nullable',
+                'string',
+                'max:2000',
             ],
 
             'setuju' => [
@@ -343,6 +350,8 @@ class StorePendaftaranRequest extends FormRequest
             'image'            => ':attribute harus berupa gambar.',
             'max'              => ':attribute terlalu besar atau terlalu panjang.',
             'accepted'         => 'Anda harus menyetujui pernyataan kebenaran data.',
+            'berkas_*.max'      => ':attribute maksimal 5 MB.',
+            'berkas_*.uploaded' => ':attribute gagal diunggah. Pastikan ukurannya maksimal 5 MB lalu coba lagi.',
             'no_hp_wali.regex' => 'Format nomor WhatsApp tidak valid (contoh: 081234567890).',
             'no_hp.regex' => 'Format nomor WhatsApp tidak valid (contoh: +6281234567890).',
 
@@ -405,6 +414,7 @@ class StorePendaftaranRequest extends FormRequest
             'berkas_rekomendasi' => 'Berkas surat rekomendasi',
             'berkas_raport_ijazah' => 'Berkas raport/ijazah terakhir',
             'berkas_izin_belajar' => 'Berkas surat izin belajar dari orang tua/wali',
+            'catatan_peserta' => 'Catatan untuk admin',
             'setuju' => 'Pernyataan kebenaran data',
         ];
     }

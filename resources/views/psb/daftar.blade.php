@@ -6,58 +6,127 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
         <title>Pendaftaran Masuk Dauroh Qobul Darul Musthofa Tarim</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+            rel="stylesheet">
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     </head>
 
-    <body class="bg-slate-50 min-h-screen text-slate-800">
+    <body class="min-h-screen text-slate-800 bg-[#eef4f1] antialiased">
 
-        <div class="max-w-5xl mx-auto px-4 py-8">
-            <div class="text-center mb-6">
-                <h1 class="text-2xl sm:text-4xl font-bold text-teal-700 uppercase mb-1.5">Pendaftaran Peserta Baru</h1>
-                <p class="text-[15px] sm:text-[18px] text-slate-500">Dauroh Qobul Darul Musthofa Tarim — isi 6 langkah
-                    berikut dengan data
-                    yang benar</p>
+        {{-- ================= HEADER (hijau tua) ================= --}}
+        <header class="relative overflow-hidden bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white pt-10 pb-28 sm:pt-14 sm:pb-32">
+            <div class="pointer-events-none absolute inset-0 opacity-60"
+                style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
+            <div class="pointer-events-none absolute -top-32 -right-24 w-96 h-96 rounded-full bg-emerald-400/25 blur-3xl"></div>
+            <div class="pointer-events-none absolute -bottom-40 -left-20 w-96 h-96 rounded-full bg-amber-300/10 blur-3xl"></div>
+
+            <div class="relative max-w-5xl mx-auto px-4 text-center">
+                <div class="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#eff5f0] ring-4 ring-white/10 shadow-xl shadow-black/30 flex items-center justify-center overflow-hidden">
+                    <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo Dauroh Qobul" class="w-full h-full object-contain">
+                </div>
+                <p class="mt-5 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-amber-200/90">Dauroh Qobul · Darul Musthofa Tarim</p>
+                <h1 class="mt-2 text-3xl sm:text-5xl font-extrabold tracking-tight">Pendaftaran Peserta Baru</h1>
+                <p class="mt-3 text-sm sm:text-lg text-emerald-50/75 max-w-2xl mx-auto">Isi 6 langkah berikut dengan data yang benar</p>
+
+                <div class="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs sm:text-sm">
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 px-3.5 py-1.5">
+                        <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+                        6 langkah
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 px-3.5 py-1.5">
+                        <svg class="w-4 h-4 text-amber-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg>
+                        Siapkan paspor &amp; berkas
+                    </span>
+                    <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 px-3.5 py-1.5">
+                        <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802"/></svg>
+                        Banyak isian ditulis huruf Arab
+                    </span>
+                </div>
             </div>
+        </header>
 
+        <main class="relative -mt-20 sm:-mt-24 max-w-5xl mx-auto px-4 pb-14">
             @verbatim
                 <div id="app">
                     <!-- Indikator step -->
-                    <ol class="flex items-center justify-between mb-6">
-                        <li v-for="(judulLangkah, index) in steps" :key="index"
-                            class="flex-1 flex flex-col items-center relative">
-                            <div v-if="index > 0" class="absolute top-4 sm:top-6 right-1/2 w-full h-0.5 sm:h-1"
-                                :class="step >= index ?
-                                    'bg-teal-600' :
-                                    'bg-slate-200'">
+                    <div class="bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_20px_48px_-24px_rgba(7,31,26,0.35)] p-4 sm:p-6 mb-6">
+                        <!-- Ringkasan untuk layar kecil -->
+                        <div class="sm:hidden flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-[11px] font-semibold uppercase tracking-wider text-emerald-600">Langkah {{ step + 1 }} dari {{ steps.length }}</p>
+                                <p class="font-bold text-slate-800">{{ steps[step] }}</p>
                             </div>
-                            <div class="relative z-10 w-10 h-10 sm:w-13 sm:h-13 rounded-full flex items-center justify-center text-sm sm:text-lg font-semibold border-2"
-                                :class="step > index ?
-                                    'bg-teal-600 border-teal-600 text-white' :
-                                    step === index ?
-                                    'bg-white border-3 border-teal-600 text-teal-700' :
-                                    'bg-white border-slate-300 text-slate-400'">
-                                {{ step > index ? '✓' : index + 1 }}
+                            <span class="text-xs font-bold text-[#0b332c] bg-emerald-50 ring-1 ring-emerald-100 rounded-full px-3 py-1">{{ Math.round((step + 1) / steps.length * 100) }}%</span>
+                        </div>
+
+                        <ol class="flex items-start justify-between">
+                            <li v-for="(judulLangkah, index) in steps" :key="index"
+                                class="flex-1 flex flex-col items-center relative">
+                                <div v-if="index > 0" class="absolute top-[18px] sm:top-[22px] right-1/2 w-full h-1 rounded-full bg-slate-100 overflow-hidden">
+                                    <div class="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+                                        :class="step >= index ? 'w-full' : 'w-0'"></div>
+                                </div>
+                                <div class="relative z-10 w-9 h-9 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                    :class="step > index ?
+                                        'bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/30' :
+                                        step === index ?
+                                        'bg-[#0b332c] text-white ring-4 ring-emerald-200 shadow-lg shadow-emerald-900/20 scale-110' :
+                                        'bg-white ring-2 ring-slate-200 text-slate-400'">
+                                    <svg v-if="step > index" class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                                    <span v-else>{{ index + 1 }}</span>
+                                </div>
+                                <span class="mt-2.5 text-[12px] leading-tight text-center px-1 hidden sm:block"
+                                    :class="step === index ?
+                                        'text-[#0b332c] font-bold' :
+                                        step > index ? 'text-emerald-700 font-medium' : 'text-slate-400'">{{ judulLangkah }}</span>
+                            </li>
+                        </ol>
+                    </div>
+
+                    <div class="bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_16px_40px_-20px_rgba(11,51,44,0.25)] overflow-hidden">
+                        <!-- Judul langkah -->
+                        <div class="relative px-5 sm:px-8 py-5 sm:py-6 bg-gradient-to-r from-emerald-50 via-white to-amber-50/50 border-b border-slate-100 flex items-center gap-4">
+                            <span class="w-12 h-12 sm:w-14 sm:h-14 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/25">
+                                <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" :d="[
+                                        'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
+                                        'M15 10.5a3 3 0 11-6 0 3 3 0 016 0zM19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z',
+                                        'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
+                                        'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25',
+                                        'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z',
+                                        'M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5'
+                                    ][step]" />
+                                </svg>
+                            </span>
+                            <div class="min-w-0">
+                                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600">Langkah {{ step + 1 }} dari {{ steps.length }}</p>
+                                <h2 class="text-lg sm:text-2xl font-extrabold text-slate-800 leading-tight">{{ steps[step] }}</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">{{ [
+                                    'Isi identitas diri sesuai paspor.',
+                                    'Tempat tinggal Anda saat ini.',
+                                    'Kontak wali, muarrif, dan orang yang bisa dihubungi.',
+                                    'Pondok, sekolah, dan kitab yang pernah dipelajari.',
+                                    'Rencana belajar dan akun login Anda.',
+                                    'Unggah berkas, lalu kirim pendaftaran.'
+                                ][step] }}</p>
                             </div>
-                            <span class="mt-1 text-[13px] text-center hidden sm:block"
-                                :class="step === index ?
-                                    'text-teal-700 font-semibold' :
-                                    'text-slate-400'">{{ judulLangkah }}</span>
-                        </li>
-                    </ol>
+                        </div>
 
-                    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-                        <h2 class="text-lg font-semibold mb-4">Langkah {{ step + 1 }}: {{ steps[step] }}</h2>
-
-                        <div v-if="serverError" class="mb-4 p-3 rounded-lg bg-red-50 text-red-700 text-sm">
-                            {{ serverError }}
+                        <div class="p-5 sm:p-8">
+                        <div v-if="serverError" class="mb-5 flex items-start gap-3 p-4 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">
+                            <span class="w-7 h-7 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008z"/></svg>
+                            </span>
+                            <span class="pt-1">{{ serverError }}</span>
                         </div>
 
                         <!-- STEP 1 -->
-                        <div v-show="step === 0" class="grid sm:grid-cols-2 gap-4 ">
+                        <div v-show="step === 0" class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
                             <div class="sm:col-span-2">
                                 <label class="lbl">Nama Lengkap Bahasa Indonesia (sesuai paspor)
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input v-model="f.nama_lengkap" class="inp"
                                     placeholder="Sesuai nama yang tertera di paspor">
@@ -66,7 +135,7 @@
                             <div class="sm:col-span-2">
                                 <label class="lbl">
                                     Nama Lengkap Bahasa Arab (sesuai paspor)
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
 
                                 <input v-model="f.nama_lengkap_arab" class="inp"
@@ -80,7 +149,7 @@
 
                             <div>
                                 <label class="lbl">Tempat Lahir
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input v-model="f.tempat_lahir" @input="validasiHurufArab(f.tempat_lahir, 'tempat_lahir')"
                                     class="inp" placeholder="اكتب مكان الميلاد باللغة العربية" dir="auto">
@@ -88,14 +157,14 @@
                             </div>
                             <div>
                                 <label class="lbl">Tanggal Lahir
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input type="date" v-model="f.tanggal_lahir" class="inp">
                                 <p class="err" v-if="e.tanggal_lahir">{{ e . tanggal_lahir }}</p>
                             </div>
                             <div>
                                 <label class="lbl">Status Pernikahan
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <select v-model="f.status_pernikahan" class="inp">
                                     <option value="">Pilih...</option>
@@ -106,7 +175,7 @@
                             </div>
                             <div>
                                 <label class="lbl">Nomer WhatsApp
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input v-model="f.no_hp" type="tel" inputmode="tel" placeholder="+6281234567890"
                                     class="inp">
@@ -115,11 +184,11 @@
                         </div>
 
                         <!-- STEP 2 -->
-                        <div v-show="step === 1" class="grid sm:grid-cols-2 gap-4">
+                        <div v-show="step === 1" class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
 
                             <div>
                                 <label class="lbl">Provinsi
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input v-model="f.provinsi" @input="validasiHurufArab(f.provinsi, 'provinsi')"
                                     class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
@@ -127,7 +196,7 @@
                             </div>
                             <div>
                                 <label class="lbl">Kota/Kabupaten
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input v-model="f.kota" @input="validasiHurufArab(f.kota, 'kota')" class="inp"
                                     placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
@@ -135,7 +204,7 @@
                             </div>
                             <div>
                                 <label class="lbl">Kecamatan
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
                                 <input v-model="f.kecamatan" @input="validasiHurufArab(f.kecamatan, 'kecamatan')"
                                     class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
@@ -149,106 +218,132 @@
                             </div>
                             <div class="sm:col-span-2">
                                 <label class="lbl">Alamat Lengkap
-                                    <span class="text-red-500">*</span>
+                                    <span class="text-rose-500">*</span>
                                 </label>
-                                <textarea v-model="f.alamat" @input="validasiHurufArab(f.alamat, 'alamat')" class="inp h-24"
+                                <textarea v-model="f.alamat" @input="validasiHurufArab(f.alamat, 'alamat')" class="inp h-28"
                                     placeholder="tulis dalam bahasa Arab atau Latin" dir="auto"></textarea>
                                 <p class="err" v-if="e.alamat">{{ e . alamat }}</p>
                             </div>
                         </div>
 
                         <!-- STEP 3 -->
-                        <div v-show="step === 2" class="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="lbl">Nama Wali
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.nama_wali" @input="validasiHurufArab(f.nama_wali, 'nama_wali')"
-                                    class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.nama_wali">{{ e . nama_wali }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Pekerjaan Wali</label>
-                                <input v-model="f.pekerjaan_wali"
-                                    @input="validasiHurufArab(f.pekerjaan_wali, 'pekerjaan_wali')" class="inp"
-                                    placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.pekerjaan_wali">{{ e . pekerjaan_wali }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Hubungan Dengan Wali</label>
-                                <input v-model="f.hubungan_wali"
-                                    @input="validasiHurufArab(f.hubungan_wali, 'hubungan_wali')"
-                                    placeholder="tulis dalam bahasa Arab atau Latin" class="inp">
-                                <p class="err" v-if="e.hubungan_wali">{{ e . hubungan_wali }}</p>
+                        <div v-show="step === 2" class="space-y-6">
+                            <!-- Wali -->
+                            <div class="rounded-2xl ring-1 ring-amber-100 bg-gradient-to-br from-amber-50/70 to-white p-4 sm:p-5">
+                                <p class="sub-judul"><span class="sub-ikon bg-amber-400">W</span> Data Wali</p>
+                                <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
+                                    <div>
+                                        <label class="lbl">Nama Wali
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input v-model="f.nama_wali" @input="validasiHurufArab(f.nama_wali, 'nama_wali')"
+                                            class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                        <p class="err" v-if="e.nama_wali">{{ e . nama_wali }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="lbl">Pekerjaan Wali</label>
+                                        <input v-model="f.pekerjaan_wali"
+                                            @input="validasiHurufArab(f.pekerjaan_wali, 'pekerjaan_wali')" class="inp"
+                                            placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                        <p class="err" v-if="e.pekerjaan_wali">{{ e . pekerjaan_wali }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="lbl">Hubungan Dengan Wali</label>
+                                        <input v-model="f.hubungan_wali"
+                                            @input="validasiHurufArab(f.hubungan_wali, 'hubungan_wali')"
+                                            placeholder="tulis dalam bahasa Arab atau Latin" class="inp">
+                                        <p class="err" v-if="e.hubungan_wali">{{ e . hubungan_wali }}</p>
+                                    </div>
+
+                                    <div>
+                                        <label class="lbl">No. WhatsApp Wali
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input v-model="f.no_hp_wali" inputmode="tel" placeholder="081234567890" class="inp">
+                                        <p class="hint">Info penerimaan akan dikirim ke nomor ini.</p>
+                                        <p class="err" v-if="e.no_hp_wali">{{ e . no_hp_wali }}</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="lbl">No. WhatsApp Wali
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.no_hp_wali" inputmode="tel" placeholder="081234567890" class="inp">
-                                <p class="text-xs text-slate-400 mt-1">Info penerimaan akan dikirim ke nomor ini.</p>
-                                <p class="err" v-if="e.no_hp_wali">{{ e . no_hp_wali }}</p>
+                            <!-- Muarrif -->
+                            <div class="rounded-2xl ring-1 ring-emerald-100 bg-gradient-to-br from-emerald-50/70 to-white p-4 sm:p-5">
+                                <p class="sub-judul"><span class="sub-ikon bg-emerald-500">M</span> Muarrif (Pemberi Rekomendasi)</p>
+                                <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
+                                    <div>
+                                        <label class="lbl">Nama Muarrif
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input v-model="f.nama_muarrif" @input="validasiHurufArab(f.nama_muarrif, 'nama_muarrif')"
+                                            class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                        <p class="err" v-if="e.nama_muarrif">{{ e . nama_muarrif }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="lbl">No. WhatsApp Muarrif
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input v-model="f.no_hp_muarrif" inputmode="tel" placeholder="081234567890"
+                                            class="inp">
+                                        <p class="err" v-if="e.no_hp_muarrif">{{ e . no_hp_muarrif }}</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div>
-                                <label class="lbl">Nama Muarrif
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.nama_muarrif" @input="validasiHurufArab(f.nama_muarrif, 'nama_muarrif')"
-                                    class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.nama_muarrif">{{ e . nama_muarrif }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">No. WhatsApp Muarrif
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.no_hp_muarrif" inputmode="tel" placeholder="081234567890"
-                                    class="inp">
-                                <p class="err" v-if="e.no_hp_muarrif">{{ e . no_hp_muarrif }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Nama Yang Bisa Di Hubungi Jika Diperlukan
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.nama_butuh" @input="validasiHurufArab(f.nama_butuh, 'nama_butuh')"
-                                    class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.nama_butuh">{{ e . nama_butuh }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">No. WhatsApp Nya
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.no_hp_nya" inputmode="tel" placeholder="081234567890" class="inp">
-                                <p class="err" v-if="e.no_hp_nya">{{ e . no_hp_nya }}</p>
+                            <!-- Kontak darurat -->
+                            <div class="rounded-2xl ring-1 ring-cyan-100 bg-gradient-to-br from-cyan-50/70 to-white p-4 sm:p-5">
+                                <p class="sub-judul"><span class="sub-ikon bg-cyan-500">K</span> Kontak yang Bisa Dihubungi</p>
+                                <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
+                                    <div>
+                                        <label class="lbl">Nama Yang Bisa Di Hubungi Jika Diperlukan
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input v-model="f.nama_butuh" @input="validasiHurufArab(f.nama_butuh, 'nama_butuh')"
+                                            class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                        <p class="err" v-if="e.nama_butuh">{{ e . nama_butuh }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="lbl">No. WhatsApp Nya
+                                            <span class="text-rose-500">*</span>
+                                        </label>
+                                        <input v-model="f.no_hp_nya" inputmode="tel" placeholder="081234567890" class="inp">
+                                        <p class="err" v-if="e.no_hp_nya">{{ e . no_hp_nya }}</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <!-- STEP 4 -->
-                        <div v-show="step === 3" class="grid sm:grid-cols-1 gap-4">
+                        <div v-show="step === 3" class="space-y-8">
 
-                            <div class="space-y-5  col-span-2 " >
-                                <p class="text-sm font-semibold col-span-2 ">A. Riwayat Pendidikan Pondok Pesantren </p>
+                            <!-- A. Pondok -->
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="sub-judul !mb-0"><span class="sub-ikon bg-amber-400">A</span> Riwayat Pendidikan Pondok Pesantren</p>
+                                    <span class="text-xs font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-3 py-1 shrink-0">{{ pondoks.length }}/5</span>
+                                </div>
                                 <div v-for="(pondok, index) in pondoks" :key="index"
-                                    class="rounded-xl border border-gray-200 p-4 space-y-4 ">
+                                    class="relative rounded-2xl ring-1 ring-amber-100 bg-gradient-to-br from-amber-50/70 via-white to-white p-4 sm:p-5 pl-5 sm:pl-6 space-y-4 overflow-hidden">
+                                    <span class="absolute left-0 top-5 bottom-5 w-1 rounded-r-full bg-gradient-to-b from-amber-400 to-orange-400"></span>
                                     <div class="flex items-center justify-between">
-                                        <h3 class="font-semibold text-gray-800">
-                                            Pondok Pesantren @{{ index + 1 }}
+                                        <h3 class="flex items-center gap-2 font-bold text-slate-800">
+                                            <span class="w-7 h-7 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center">{{ index + 1 }}</span>
+                                            Pondok Pesantren {{ index + 1 }}
                                         </h3>
 
                                         <button v-if="pondoks.length > 1" type="button" @click="hapusPondok(index)"
-                                            class="text-red-600 hover:text-red-800">
+                                            class="btn-hapus">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                             Hapus
                                         </button>
                                     </div>
-                                    <div class="grid sm:grid-cols-2 gap-4">
+                                    <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
                                         <!-- Asal Pondok -->
                                         <div>
                                             <label class="lbl">
                                                 Asal Pondok Pesantren
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
-                                            <input v-model="pondok.asal_pondok" class="inp"
+                                            <input v-model="pondok.asal_pondok" class="inp inp-putih"
                                                 placeholder="Tulis dalam bahasa Arab atau Latin" dir="auto"
                                                 @input="validasiPondokField(index, 'asal_pondok'), validasiHurufArab(pondok.asal_pondok, `pondok_${index}_asal_pondok`)">
 
@@ -261,10 +356,10 @@
                                         <div>
                                             <label class="lbl">
                                                 Nama Pengasuh Pondok Pesantren
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
-                                            <input v-model="pondok.nama_pengasuh" class="inp"
+                                            <input v-model="pondok.nama_pengasuh" class="inp inp-putih"
                                                 placeholder="Tulis dalam bahasa Arab atau Latin" dir="auto"
                                                 @input="validasiPondokField(index, 'nama_pengasuh'), validasiHurufArab(pondok.nama_pengasuh, `pondok_${index}_nama_pengasuh`)">
                                             <p class="err" v-if="e[`pondok_${index}_nama_pengasuh`]">
@@ -276,10 +371,10 @@
                                         <div>
                                             <label class="lbl">
                                                 Nama Daerah/Kota Pondok Pesantren
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
-                                            <input v-model="pondok.nama_daerah" class="inp"
+                                            <input v-model="pondok.nama_daerah" class="inp inp-putih"
                                                 placeholder="Tulis dalam bahasa Arab atau Latin" dir="auto"
                                                 @input="validasiPondokField(index, 'nama_daerah'), validasiHurufArab(pondok.nama_daerah, `pondok_${index}_nama_daerah`)">
 
@@ -292,11 +387,11 @@
                                         <div>
                                             <label class="lbl">
                                                 Lama Belajar (tahun)
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
                                             <input v-model="pondok.tahun_belajar" type="number" min="1"
-                                                class="inp" placeholder="Contoh: 3"
+                                                class="inp inp-putih" placeholder="Contoh: 3"
                                                 @input="validasiPondokField(index, 'tahun_belajar')">
                                             <p class="err" v-if="e[`pondok_${index}_tahun_belajar`]">
                                                 {{ e[`pondok_${index}_tahun_belajar`] }}
@@ -306,28 +401,26 @@
                                 </div>
 
                                 <button type="button" @click="tambahPondok" :disabled="pondoks.length >= 5"
-                                    class="flex items-center gap-2 rounded-lg
-                                           border border-emerald-600 px-4 py-2
-                                           text-emerald-700 hover:bg-emerald-50
-                                           disabled:opacity-50">
-                                    <span class="text-xl">+</span>
+                                    class="btn-tambah border-amber-200 text-amber-700 hover:bg-amber-50 hover:border-amber-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
                                     Tambah Pondok Pesantren
                                 </button>
 
                             </div>
 
-                            <div class="space-y-5  col-span-2">
-                                <p class="text-sm font-semibold mt-5 col-span-2">B. Riwayat Pendidikan Formal </p>
+                            <!-- B. Pendidikan formal -->
+                            <div class="space-y-4">
+                                <p class="sub-judul !mb-0"><span class="sub-ikon bg-sky-500">B</span> Riwayat Pendidikan Formal</p>
                                 <div v-for="(pondok, index) in pondoks" :key="index"
-                                    class="rounded-xl border border-gray-200 p-4 space-y-4 ">
+                                    class="rounded-2xl ring-1 ring-sky-100 bg-gradient-to-br from-sky-50/70 to-white p-4 sm:p-5 space-y-4">
 
-                                    <div class="grid sm:grid-cols-2 gap-4">
+                                    <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
                                         <!-- pendidikan terakhir -->
                                         <div>
                                             <label class="lbl">Pendidikan Terakhir
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
-                                            <select v-model="f.pendidikan_terakhir" class="inp">
+                                            <select v-model="f.pendidikan_terakhir" class="inp inp-putih">
                                                 <option value="">Pilih...</option>
                                                 <option value="K">إبتدائية</option>
                                                 <option value="L">ثانوية</option>
@@ -339,18 +432,18 @@
                                         </div>
                                         <div>
                                             <label class="lbl">Nama Sekolah/Lembaga Pendidikan
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
-                                            <input v-model="f.nama_sekolah" class="inp"
+                                            <input v-model="f.nama_sekolah" class="inp inp-putih"
                                                 placeholder="tulis dalam bahasa Arab atau Latin" dir="rtl"
                                                 @input="validasiHurufArab(f.nama_sekolah, 'nama_sekolah')">
                                             <p class="err" v-if="e.nama_sekolah">{{ e . nama_sekolah }}</p>
                                         </div>
                                         <div>
                                             <label class="lbl">Nama Daerah Lembaga Pendidikan
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
-                                            <input v-model="f.nama_daerah" class="inp"
+                                            <input v-model="f.nama_daerah" class="inp inp-putih"
                                                 placeholder="tulis dalam bahasa Arab atau Latin" dir="rtl"
                                                 @input="validasiHurufArab(f.nama_daerah, 'nama_daerah')">
                                             <p class="err" v-if="e.nama_daerah">{{ e . nama_daerah }}</p>
@@ -358,34 +451,38 @@
                                     </div>
                                 </div>
                             </div>
+
                             <!-- C. Kitab-kitab yang pernah dipelajari -->
-
-
-                            <div class="space-y-5 col-span-2">
-                                <p class="text-sm font-semibold col-span-2">C. Kitab-kitab yang pernah dipelajari </p>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between gap-3">
+                                    <p class="sub-judul !mb-0"><span class="sub-ikon bg-cyan-500">C</span> Kitab-kitab yang Pernah Dipelajari</p>
+                                    <span class="text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-100 rounded-full px-3 py-1 shrink-0">{{ riwayatKitab.length }}/20</span>
+                                </div>
                                 <div v-for="(kitab, index) in riwayatKitab" :key="kitab.id"
-                                    class="rounded-xl border border-gray-200 p-4 space-y-4">
+                                    class="rounded-2xl ring-1 ring-cyan-100 bg-gradient-to-br from-cyan-50/60 to-white p-4 sm:p-5 space-y-4">
                                     <div class="flex items-center justify-between">
-                                        <h3 class="font-semibold text-gray-800">
-                                            Kitab @{{ index + 1 }}
+                                        <h3 class="flex items-center gap-2 font-bold text-slate-800">
+                                            <span class="w-7 h-7 rounded-lg bg-cyan-500 text-white text-xs font-bold flex items-center justify-center">{{ index + 1 }}</span>
+                                            Kitab {{ index + 1 }}
                                         </h3>
 
                                         <button v-if="riwayatKitab.length > 1" type="button" @click="hapusKitab(index)"
-                                            class="text-red-600 hover:text-red-800">
+                                            class="btn-hapus">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                                             Hapus
                                         </button>
                                     </div>
 
-                                    <div class="grid sm:grid-cols-2 gap-4">
+                                    <div class="grid sm:grid-cols-3 gap-x-5 gap-y-5">
 
                                         <!-- Nama Kitab -->
                                         <div>
                                             <label class="lbl">
                                                 Nama Kitab
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
-                                            <input v-model="kitab.nama_kitab" class="inp"
+                                            <input v-model="kitab.nama_kitab" class="inp inp-putih"
                                                 placeholder="Contoh: فتح القريب" dir="auto"
                                                 @input="validasiKitabField(index, 'nama_kitab') , validasiHurufArab(kitab.nama_kitab, `kitab_${index}_nama_kitab`)">
 
@@ -398,10 +495,10 @@
                                         <div>
                                             <label class="lbl">
                                                 Fan Kitab
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
-                                            <select v-model="kitab.fan_kitab" class="inp"
+                                            <select v-model="kitab.fan_kitab" class="inp inp-putih"
                                                 @change="validasiKitabField(index, 'fan_kitab')">
                                                 <option value="">-- Pilih Fan Kitab --</option>
 
@@ -417,13 +514,13 @@
                                         </div>
 
                                         <!-- Status Ujian -->
-                                        <div class="sm:col-span-2">
+                                        <div>
                                             <label class="lbl">
                                                 Sudah Diujikan?
-                                                <span class="text-red-500">*</span>
+                                                <span class="text-rose-500">*</span>
                                             </label>
 
-                                            <select v-model="kitab.sudah_diujikan" class="inp"
+                                            <select v-model="kitab.sudah_diujikan" class="inp inp-putih"
                                                 @change="validasiKitabField(index, 'sudah_diujikan')">
                                                 <option value="">-- Pilih Status --</option>
                                                 <option value="sudah">أختبر</option>
@@ -439,192 +536,340 @@
                                 </div>
 
                                 <!-- Tombol tambah kitab -->
-                                <div class="flex items-center gap-3 flex-wrap">
-                                    <button type="button" @click="tambahKitab" :disabled="riwayatKitab.length >= 20"
-                                        class="flex items-center gap-2 rounded-lg
-                                       border border-emerald-600 px-4 py-2
-                                       text-emerald-700 hover:bg-emerald-50
-                                       disabled:opacity-50">
-                                        <span class="text-xl">+</span>
-                                        Tambah Kitab
-                                    </button>
-
-                                    <span class="text-sm text-gray-500">
-                                        @{{ riwayatKitab.length }}/20 kitab
-                                    </span>
-                                </div>
+                                <button type="button" @click="tambahKitab" :disabled="riwayatKitab.length >= 20"
+                                    class="btn-tambah border-cyan-200 text-cyan-700 hover:bg-cyan-50 hover:border-cyan-300">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                                    Tambah Kitab
+                                </button>
 
                             </div>
                         </div>
 
                         <!-- STEP 5 -->
-                        <div v-show="step === 4" class="grid sm:grid-cols-2 gap-4">
-                            <div>
-                                <label class="lbl">Marhalah Yang Diinginkan DI darul Musthofa
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.marhalah" @input="validasiHurufArab(f.marhalah, 'marhalah')"
-                                    class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.marhalah">{{ e . marhalah }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Berapa tahun anda ingin belajar di Darul Musthofa ?
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.lama_belajar" @input="validasiHurufArab(f.lama_belajar, 'lama_belajar')"
-                                    class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.lama_belajar">{{ e . lama_belajar }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Kesehatan
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.kesehatan" @input="validasiHurufArab(f.kesehatan, 'kesehatan')"
-                                    class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.kesehatan">{{ e . kesehatan }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Status Ekonomi
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.status_ekonomi"
-                                    @input="validasiHurufArab(f.status_ekonomi, 'status_ekonomi')" class="inp"
-                                    placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.status_ekonomi">{{ e . status_ekonomi }}</p>
-                            </div>
-                            <div>
-                                <label class="lbl">Banyaknya Orang Muslim Didaerah Anda
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="flex items-center gap-2">
-                                    <input v-model="f.persentasimuslim" type="number" min="0" max="100"
-                                        class="inp" placeholder="Persentase banyaknya orang muslim" dir="auto">
-                                    <span class="text-sm text-gray-500">%</span>
+                        <div v-show="step === 4" class="space-y-6">
+                            <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
+                                <div>
+                                    <label class="lbl">Marhalah Yang Diinginkan DI darul Musthofa
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input v-model="f.marhalah" @input="validasiHurufArab(f.marhalah, 'marhalah')"
+                                        class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                    <p class="err" v-if="e.marhalah">{{ e . marhalah }}</p>
                                 </div>
-                                <p class="err" v-if="e.persentasimuslim">{{ e . persentasimuslim }}</p>
+                                <div>
+                                    <label class="lbl">Berapa tahun anda ingin belajar di Darul Musthofa ?
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input v-model="f.lama_belajar" @input="validasiHurufArab(f.lama_belajar, 'lama_belajar')"
+                                        class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                    <p class="err" v-if="e.lama_belajar">{{ e . lama_belajar }}</p>
+                                </div>
+                                <div>
+                                    <label class="lbl">Kesehatan
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input v-model="f.kesehatan" @input="validasiHurufArab(f.kesehatan, 'kesehatan')"
+                                        class="inp" placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                    <p class="err" v-if="e.kesehatan">{{ e . kesehatan }}</p>
+                                </div>
+                                <div>
+                                    <label class="lbl">Status Ekonomi
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input v-model="f.status_ekonomi"
+                                        @input="validasiHurufArab(f.status_ekonomi, 'status_ekonomi')" class="inp"
+                                        placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                    <p class="err" v-if="e.status_ekonomi">{{ e . status_ekonomi }}</p>
+                                </div>
+                                <div>
+                                    <label class="lbl">Banyaknya Orang Muslim Didaerah Anda
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <input v-model="f.persentasimuslim" type="number" min="0" max="100"
+                                            class="inp !pr-10" placeholder="Persentase banyaknya orang muslim" dir="auto">
+                                        <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-emerald-600">%</span>
+                                    </div>
+                                    <p class="err" v-if="e.persentasimuslim">{{ e . persentasimuslim }}</p>
+                                </div>
+                                <div>
+                                    <label class="lbl">Banyaknya Alumni Darul Musthofa Didaerah Anda
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input v-model="f.alumni" class="inp"
+                                        placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
+                                    <p class="err" v-if="e.alumni">{{ e . alumni }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="lbl">Tujuan Anda Belajar Di Darul Musthofa
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <textarea v-model="f.tujuan" @input="validasiHurufArab(f.tujuan, 'tujuan')" class="inp h-28"
+                                        placeholder="tulis dalam bahasa Arab atau Latin" dir="auto"></textarea>
+                                    <p class="err" v-if="e.tujuan">{{ e . tujuan }}</p>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <label class="lbl">Rencana Setelah Lulus Dari Darul Musthofa
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <textarea v-model="f.rencana" @input="validasiHurufArab(f.rencana, 'rencana')" class="inp h-28"
+                                        placeholder="tulis dalam bahasa Arab atau Latin" dir="auto"></textarea>
+                                    <p class="err" v-if="e.rencana">{{ e . rencana }}</p>
+                                </div>
                             </div>
-                            <div>
-                                <label class="lbl">Banyaknya Alumni Darul Musthofa Didaerah Anda
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input v-model="f.alumni" class="inp"
-                                    placeholder="tulis dalam bahasa Arab atau Latin" dir="auto">
-                                <p class="err" v-if="e.alumni">{{ e . alumni }}</p>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="lbl">Tujuan Anda Belajar Di Darul Musthofa
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <textarea v-model="f.tujuan" @input="validasiHurufArab(f.tujuan, 'tujuan')" class="inp h-24"
-                                    placeholder="tulis dalam bahasa Arab atau Latin" dir="auto"></textarea>
-                                <p class="err" v-if="e.tujuan">{{ e . tujuan }}</p>
-                            </div>
-                            <div class="sm:col-span-2">
-                                <label class="lbl">Rencana Setelah Lulus Dari Darul Musthofa
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <textarea v-model="f.rencana" @input="validasiHurufArab(f.rencana, 'rencana')" class="inp h-24"
-                                    placeholder="tulis dalam bahasa Arab atau Latin" dir="auto"></textarea>
-                                <p class="err" v-if="e.rencana">{{ e . rencana }}</p>
-                            </div>
-                            <!-- Email Login -->
-                            <div>
-                                <label class="lbl">
-                                    Email Login
-                                    <span class="text-red-500">*</span>
-                                </label>
 
-                                <input v-model.trim="f.email_login" @input="validasiEmail" type="email" class="inp"
-                                    placeholder="contoh@email.com" autocomplete="email" dir="ltr">
+                            <!-- Akun login -->
+                            <div class="rounded-2xl bg-gradient-to-br from-[#0b332c] to-[#135347] p-4 sm:p-5 text-white">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <span class="w-10 h-10 rounded-xl bg-white/10 ring-1 ring-white/15 flex items-center justify-center text-emerald-300">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                                    </span>
+                                    <div>
+                                        <p class="font-bold">Akun Login</p>
+                                        <p class="text-xs text-white/60">Dipakai untuk masuk ke akun siswa setelah diterima.</p>
+                                    </div>
+                                </div>
+                                <div class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
+                                    <!-- Email Login -->
+                                    <div>
+                                        <label class="lbl !text-white/80">
+                                            Email Login
+                                            <span class="text-rose-300">*</span>
+                                        </label>
 
-                                <p class="err" v-if="e.email_login">
-                                    {{ e . email_login }}
-                                </p>
-                            </div>
+                                        <input v-model.trim="f.email_login" @input="validasiEmail" type="email" class="inp inp-putih"
+                                            placeholder="contoh@email.com" autocomplete="email" dir="ltr">
 
-                            <!-- Password Login -->
-                            <div>
-                                <label class="lbl">
-                                    Password Login
-                                    <span class="text-red-500">*</span>
-                                </label>
+                                        <p class="err !text-rose-200" v-if="e.email_login">
+                                            {{ e . email_login }}
+                                        </p>
+                                    </div>
 
-                                <input v-model="f.password_login" @input="validasiPassword" type="password"
-                                    class="inp" placeholder="Minimal 8 karakter" autocomplete="new-password"
-                                    dir="ltr">
+                                    <!-- Password Login -->
+                                    <div>
+                                        <label class="lbl !text-white/80">
+                                            Password Login
+                                            <span class="text-rose-300">*</span>
+                                        </label>
 
-                                <p class="err" v-if="e.password_login">
-                                    {{ e . password_login }}
-                                </p>
+                                        <input v-model="f.password_login" @input="validasiPassword" type="password"
+                                            class="inp inp-putih" placeholder="Minimal 8 karakter" autocomplete="new-password"
+                                            dir="ltr">
+
+                                        <p class="err !text-rose-200" v-if="e.password_login">
+                                            {{ e . password_login }}
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
                         <!-- STEP 6 -->
-                        <div v-show="step === 5" class="space-y-4">
-                            <div v-for="b in berkas" :key="b.key">
-                                <label class="lbl">{{ b . label }}
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <input type="file" :accept="b.accept" @change="pilihFile($event, b.key)"
-                                    class="block w-full text-sm file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100">
-                                <p class="text-xs text-slate-400 mt-1">{{ b . hint }}</p>
-                                <p class="err" v-if="e[b.key]">{{ e[b . key] }}</p>
+                        <div v-show="step === 5" class="space-y-5">
+                            <div class="grid sm:grid-cols-2 gap-4">
+                                <div v-for="b in berkas" :key="b.key"
+                                    class="rounded-2xl border-2 border-dashed p-4 transition-colors"
+                                    :class="e[b.key] ? 'border-rose-300 bg-rose-50/50' : 'border-emerald-200 bg-emerald-50/30 hover:border-emerald-400 hover:bg-emerald-50/60'">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <span class="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white flex items-center justify-center shadow-sm">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m6.75 12l-3-3m0 0l-3 3m3-3v6m-1.5-15H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                                        </span>
+                                        <div class="min-w-0">
+                                            <label class="lbl !mb-0 !text-slate-800 !font-bold">{{ b . label }}
+                                                <span class="text-rose-500">*</span>
+                                            </label>
+                                            <p class="text-xs text-slate-400">{{ b . hint }}</p>
+                                        </div>
+                                    </div>
+                                    <input type="file" :accept="b.accept" @change="pilihFile($event, b.key)"
+                                        class="block w-full text-xs text-slate-500 cursor-pointer file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:bg-[#0b332c] file:text-white file:font-semibold hover:file:bg-[#135347] file:cursor-pointer">
+                                    <p class="err" v-if="e[b.key]">{{ e[b . key] }}</p>
+                                </div>
                             </div>
 
-                            <label class="flex items-start gap-2 text-sm pt-2">
-                                <input type="checkbox" v-model="f.setuju" class="mt-1 rounded">
-                                <span>Saya menyatakan bahwa seluruh data yang diisi adalah benar dan dapat
+                            <!-- Catatan peserta untuk admin (opsional) -->
+                            <div class="rounded-2xl ring-1 ring-sky-100 bg-gradient-to-br from-sky-50/70 to-white p-4 sm:p-5">
+                                <p class="sub-judul">
+                                    <span class="sub-ikon bg-sky-500">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+                                    </span>
+                                    Catatan untuk Admin
+                                    <span class="text-xs font-medium text-slate-400">(opsional)</span>
+                                </p>
+                                <textarea v-model="f.catatan_peserta" class="inp inp-putih h-28" maxlength="2000" dir="auto"
+                                    placeholder="Contoh: saya baru bisa berangkat bulan depan, mohon info jadwalnya."></textarea>
+                                <p class="hint">{{ (f.catatan_peserta || '').length }}/2000 karakter · Catatan ini akan dibaca oleh admin.</p>
+                                <p class="err" v-if="e.catatan_peserta">{{ e . catatan_peserta }}</p>
+                            </div>
+
+                            <label class="flex items-start gap-3 text-sm rounded-2xl bg-amber-50 ring-1 ring-amber-200/70 p-4 cursor-pointer hover:bg-amber-100/60 transition-colors">
+                                <input type="checkbox" v-model="f.setuju" class="mt-0.5 w-5 h-5 shrink-0 rounded accent-emerald-600 cursor-pointer">
+                                <span class="text-slate-700">Saya menyatakan bahwa seluruh data yang diisi adalah benar dan dapat
                                     dipertanggungjawabkan.</span>
                             </label>
                             <p class="err" v-if="e.setuju">{{ e . setuju }}</p>
                         </div>
+                        </div>
 
                         <!-- Navigasi -->
-                        <div class="flex justify-between mt-6 pt-4 border-t border-slate-100">
+                        <div class="flex items-center justify-between gap-3 px-5 sm:px-8 py-4 sm:py-5 bg-[#f5f9f7] border-t border-slate-100">
                             <button type="button" @click="mundur" :disabled="step === 0 || loading"
-                                class="px-5 py-2 rounded-lg border border-slate-300 text-sm disabled:opacity-40">Kembali</button>
+                                class="inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-slate-600 text-sm font-semibold hover:ring-slate-300 hover:text-slate-800 transition disabled:opacity-40 disabled:cursor-not-allowed">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                                Kembali</button>
+
+                            <span class="hidden sm:inline text-xs text-slate-400">Langkah {{ step + 1 }} / {{ steps.length }}</span>
 
                             <button v-if="step < steps.length - 1" type="button" @click="maju"
-                                class="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm hover:bg-teal-700">Lanjut</button>
+                                class="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-semibold hover:bg-[#135347] shadow-lg shadow-[#0b332c]/20 transition-colors">
+                                Lanjut
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+                            </button>
 
                             <button v-else type="button" @click="kirim" :disabled="loading"
-                                class="px-5 py-2 rounded-lg bg-teal-600 text-white text-sm hover:bg-teal-700 disabled:opacity-60">
+                                class="inline-flex items-center gap-2 px-5 sm:px-6 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white text-sm font-bold hover:from-emerald-600 hover:to-teal-700 shadow-lg shadow-emerald-500/30 transition disabled:opacity-60">
+                                <svg v-if="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"/></svg>
+                                <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
                                 {{ loading ? 'Mengirim...' : 'Kirim Pendaftaran' }}
                             </button>
                         </div>
                     </div>
+
+                    <p class="mt-6 text-center text-xs text-slate-400">Bertanda <span class="text-rose-500 font-bold">*</span> wajib diisi · Data Anda hanya dipakai untuk keperluan pendaftaran.</p>
                 </div>
             @endverbatim
-        </div>
+        </main>
 
         <style>
+            body {
+                font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+            }
+
             .lbl {
                 display: block;
                 font-size: .8rem;
-                font-weight: 500;
-                margin-bottom: .25rem;
+                font-weight: 600;
+                margin-bottom: .4rem;
                 color: #475569;
             }
 
             .inp {
                 width: 100%;
-                border: 1px solid #cbd5e1;
-                border-radius: .5rem;
-                padding: .55rem .75rem;
-                font-size: .9rem;
-                background: #fff;
+                border: 1px solid #e2e8f0;
+                border-radius: .85rem;
+                padding: .7rem .95rem;
+                font-size: .92rem;
+                color: #1e293b;
+                background: #f5f9f7;
+                transition: border-color .15s, box-shadow .15s, background-color .15s;
+            }
+
+            .inp::placeholder {
+                color: #94a3b8;
+            }
+
+            .inp:hover {
+                border-color: #cbd5e1;
             }
 
             .inp:focus {
-                outline: 2px solid #14b8a6;
-                outline-offset: -1px;
-                border-color: #14b8a6;
+                outline: none;
+                background: #fff;
+                border-color: #34d399;
+                box-shadow: 0 0 0 4px rgba(16, 185, 129, .15);
+            }
+
+            .inp-putih {
+                background: #fff;
+            }
+
+            .hint {
+                font-size: .75rem;
+                color: #94a3b8;
+                margin-top: .35rem;
             }
 
             .err {
-                color: #dc2626;
+                display: flex;
+                align-items: center;
+                gap: .35rem;
+                color: #e11d48;
                 font-size: .75rem;
-                margin-top: .25rem;
+                font-weight: 500;
+                margin-top: .4rem;
+            }
+
+            .err::before {
+                content: '!';
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                width: 1rem;
+                height: 1rem;
+                border-radius: 9999px;
+                background: #ffe4e6;
+                color: #e11d48;
+                font-size: .65rem;
+                font-weight: 800;
+            }
+
+            .sub-judul {
+                display: flex;
+                align-items: center;
+                gap: .6rem;
+                font-weight: 700;
+                color: #1e293b;
+                margin-bottom: 1rem;
+            }
+
+            .sub-ikon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 1.9rem;
+                height: 1.9rem;
+                border-radius: .7rem;
+                color: #fff;
+                font-size: .8rem;
+                font-weight: 800;
+                flex-shrink: 0;
+            }
+
+            .btn-hapus {
+                display: inline-flex;
+                align-items: center;
+                gap: .35rem;
+                font-size: .78rem;
+                font-weight: 600;
+                color: #e11d48;
+                padding: .4rem .7rem;
+                border-radius: .75rem;
+                transition: background-color .15s;
+            }
+
+            .btn-hapus:hover {
+                background: #fff1f2;
+            }
+
+            .btn-tambah {
+                width: 100%;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: .5rem;
+                padding: .7rem 1rem;
+                border-radius: 1rem;
+                border-width: 2px;
+                border-style: dashed;
+                font-size: .875rem;
+                font-weight: 600;
+                transition: background-color .15s, border-color .15s;
+            }
+
+            .btn-tambah:disabled {
+                opacity: .5;
+                cursor: not-allowed;
             }
         </style>
 
@@ -646,25 +891,25 @@
                                 key: 'berkas_foto',
                                 label: 'Pas Foto',
                                 accept: 'image/*',
-                                hint: 'JPG/PNG, maks. 2 MB'
+                                hint: 'JPG/PNG, maks. 5 MB'
                             },
                             {
                                 key: 'berkas_rekomendasi',
                                 label: 'Surat Rekomendasi',
                                 accept: '.jpg,.jpeg,.png,.pdf',
-                                hint: 'JPG/PNG/PDF, maks. 3 MB'
+                                hint: 'JPG/PNG/PDF, maks. 5 MB'
                             },
                             {
                                 key: 'berkas_raport_ijazah',
                                 label: 'Raport Akhir / Ijazah Terakhir',
                                 accept: '.jpg,.jpeg,.png,.pdf',
-                                hint: 'JPG/PNG/PDF, maks. 3 MB'
+                                hint: 'JPG/PNG/PDF, maks. 5 MB'
                             },
                             {
                                 key: 'berkas_izin_belajar',
                                 label: 'Surat Izin Belajar dari Orang Tua / Wali',
                                 accept: '.jpg,.jpeg,.png,.pdf',
-                                hint: 'JPG/PNG/PDF, maks. 3 MB'
+                                hint: 'JPG/PNG/PDF, maks. 5 MB'
                             },
                         ];
 
@@ -731,6 +976,7 @@
                             rencana: '',
                             email_login: '',
                             password_login: '',
+                            catatan_peserta: '',
                             setuju: false,
                         });
 
@@ -1069,7 +1315,18 @@
                             }
                         };
                         const pilihFile = (ev, key) => {
-                            files[key] = ev.target.files[0] || null;
+                            const berkasDipilih = ev.target.files[0] || null;
+
+                            // Tolak berkas di atas 5 MB sebelum dikirim, supaya tidak gagal di server
+                            if (berkasDipilih && berkasDipilih.size > 5 * 1024 * 1024) {
+                                files[key] = null;
+                                ev.target.value = '';
+                                e[key] = 'Ukuran berkas terlalu besar (maksimal 5 MB).';
+                                return;
+                            }
+
+                            files[key] = berkasDipilih;
+                            delete e[key];
                         };
 
                         const kirim = async () => {

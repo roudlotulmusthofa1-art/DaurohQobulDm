@@ -84,7 +84,7 @@
                     </svg>
 
                     <span data-target="200" class="stat-number">0</span>+
-                    Santri Aktif
+                    Peserta
                 </span>
 
                 <span class="flex items-center gap-2">
@@ -95,7 +95,7 @@
                     </svg>
 
                     <span data-target="15" class="stat-number">0</span>
-                    Tahun Berpengalaman
+                    Assatid
                 </span>
 
                 <span class="flex items-center gap-2">

@@ -334,11 +334,11 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="pointer-events-none absolute -right-6 -bottom-8 text-white/10">{!! $svg('cap', 'w-32 h-32') !!}</div>
             <div class="relative flex items-start justify-between gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">{!! $svg('cap') !!}</span>
-                <span class="text-xs font-bold bg-white/20 rounded-full px-3 py-1">{{ $p->kelasMaster?->kode ?: '-' }}</span>
+                
             </div>
             <p class="relative mt-4 text-xs font-medium text-white/70">Kelas Ditempatkan</p>
             <p class="relative text-lg font-bold">{{ $p->kelasMaster?->nama ?? 'Belum dipilih' }}</p>
-            <p class="relative mt-1 text-[11px] text-white/60">Update: {{ $diperbarui }}</p>
+
         </div>
 
         {{-- Kamar (nama dari Master Data > Kamar) --}}
@@ -346,13 +346,30 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="pointer-events-none absolute -right-6 -bottom-8 text-white/15">{!! $svg('home', 'w-32 h-32') !!}</div>
             <div class="relative flex items-start justify-between gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">{!! $svg('home') !!}</span>
-                <span class="text-xs font-bold bg-white/20 rounded-full px-3 py-1">{{ $p->kamarMaster?->kode ?: '-' }}</span>
+
             </div>
             <p class="relative mt-4 text-xs font-medium text-white/75">Kamar Ditempatkan</p>
             <p class="relative text-lg font-bold" dir="auto">{{ $p->kamarMaster?->nama ?? 'Belum dipilih' }}</p>
-            <p class="relative mt-1 text-[11px] text-white/70">Update: {{ $diperbarui }}</p>
+            <p class="relative mt-1 text-[11px] text-white/70">Kasur: {{ $p->nomor_kasur ? 'No. ' . $p->nomor_kasur : 'Belum dipilih' }}</p>
         </div>
     </div>
+
+    {{-- ================= CATATAN DARI PESERTA ================= --}}
+    @if ($p->catatan_peserta)
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-50 via-white to-white ring-1 ring-sky-200/70 p-5 sm:p-6 shadow-[0_12px_32px_-16px_rgba(2,132,199,0.25)]" v-pre>
+        <span class="absolute left-0 top-5 bottom-5 w-1 rounded-r-full bg-gradient-to-b from-sky-400 to-cyan-500"></span>
+        <div class="flex items-center gap-3 mb-3">
+            <span class="w-10 h-10 shrink-0 rounded-2xl bg-sky-500 text-white flex items-center justify-center shadow-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
+            </span>
+            <div>
+                <h2 class="text-[15px] font-bold text-slate-800 leading-tight">Catatan dari Peserta</h2>
+                <p class="text-xs text-slate-400 mt-0.5">Ditulis peserta saat mendaftar</p>
+            </div>
+        </div>
+        <p dir="auto" class="whitespace-pre-line text-[15px] leading-relaxed text-slate-700 bg-white rounded-2xl ring-1 ring-sky-100 px-4 py-3">{{ $p->catatan_peserta }}</p>
+    </div>
+    @endif
 
     {{-- ================= BAGIAN-BAGIAN DATA ================= --}}
     <div class="grid xl:grid-cols-2 gap-6 items-start" v-pre>
