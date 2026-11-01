@@ -26,6 +26,7 @@ $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     if [ -f .env.production ]; then cp .env.production .env; fi && \
     mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs storage/app/public && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker compose up -d --build --renew-anon-volumes && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker compose restart web && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S chmod -R 777 storage bootstrap/cache && \
     echo '⏳ Waiting for system to stabilize...' && \
     sleep 8 && \
