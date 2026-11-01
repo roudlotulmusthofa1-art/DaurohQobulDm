@@ -186,14 +186,12 @@ class MasterDataController extends Controller
             'kelas' => [
                 'nama' => ['required', 'string', 'max:100'],
                 'kode' => ['nullable', 'string', 'max:30', Rule::unique($table, 'kode')->ignore($id)],
-                'tingkat' => ['nullable', 'integer', 'min:1', 'max:255'],
+               
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
             'kamar' => [
                 'nama' => ['required', 'string', 'max:100'],
                 'kode' => ['nullable', 'string', 'max:30', Rule::unique($table, 'kode')->ignore($id)],
-                'gedung' => ['nullable', 'string', 'max:100'],
-                'jenis' => ['required', Rule::in(['putra', 'putri'])],
                 'kapasitas' => ['required', 'integer', 'min:0', 'max:1000'],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
@@ -257,14 +255,12 @@ class MasterDataController extends Controller
                 'singular' => 'Kelas',
                 'columns' => [
                     ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'kode'],
-                    ['key' => 'tingkat', 'label' => 'Tingkat', 'type' => 'text'],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
                     ['key' => 'items_count', 'label' => 'Santri', 'type' => 'count'],
                 ],
                 'fields' => [
                     ['key' => 'nama', 'label' => 'Nama Kelas', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Ula 1'],
-                    ['key' => 'kode', 'label' => 'Kode', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. U1'],
-                    ['key' => 'tingkat', 'label' => 'Tingkat', 'type' => 'number', 'half' => true, 'min' => 1],
+                    ['key' => 'kode', 'label' => 'Kode', 'type' => 'text', 'placeholder' => 'cth. U1'],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
                 ],
             ],
@@ -277,20 +273,12 @@ class MasterDataController extends Controller
                 'singular' => 'Kamar',
                 'columns' => [
                     ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'kode'],
-                    ['key' => 'gedung', 'label' => 'Gedung', 'type' => 'text'],
-                    ['key' => 'jenis', 'label' => 'Jenis', 'type' => 'badge', 'badges' => [
-                        'putra' => 'bg-sky-50 text-sky-700 ring-sky-200',
-                        'putri' => 'bg-pink-50 text-pink-700 ring-pink-200',
-                    ]],
                     ['key' => 'kapasitas', 'label' => 'Kapasitas', 'type' => 'suffix', 'suffix' => 'santri'],
                     ['key' => 'items_count', 'label' => 'Terisi', 'type' => 'count'],
                 ],
                 'fields' => [
                     ['key' => 'nama', 'label' => 'Nama Kamar', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Kamar Abu Bakar'],
                     ['key' => 'kode', 'label' => 'Kode', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. A-01'],
-                    ['key' => 'gedung', 'label' => 'Gedung', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. Gedung A'],
-                    ['key' => 'jenis', 'label' => 'Jenis', 'type' => 'select', 'half' => true, 'required' => true, 'default' => 'putra',
-                        'options' => ['putra' => 'Putra', 'putri' => 'Putri']],
                     ['key' => 'kapasitas', 'label' => 'Kapasitas', 'type' => 'number', 'half' => true, 'required' => true, 'default' => 0, 'min' => 0],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
                 ],

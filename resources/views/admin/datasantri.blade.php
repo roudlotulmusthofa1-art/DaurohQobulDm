@@ -157,23 +157,60 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input type="text" v-model="pencarian" placeholder="Cari santri (nama, no. pendaftaran, kelas, kamar, wali)..."
+            <input type="text" v-model="pencarian" placeholder="Cari santri (nama latin/Arab, no. pendaftaran, kelas, kamar, wali)..."
                 class="w-full border border-ribath-green-light rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green focus:border-transparent">
         </div>
         <button type="button" @click="filterTerbuka = !filterTerbuka"
-            class="inline-flex items-center justify-center gap-2 border border-ribath-green-light rounded-lg px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50 transition">
+                    class="inline-flex items-center justify-center gap-2 border rounded-lg px-4 py-2.5 text-sm font-medium transition"
+                    :class="jumlahFilterAktif ? 'border-ribath-green bg-ribath-green text-white' : 'border-ribath-green-light text-gray-600 hover:bg-gray-50'">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
             </svg>
             Filter
+                        <span v-if="jumlahFilterAktif" class="rounded-full bg-white px-1.5 text-[11px] font-bold text-ribath-green"
+                            v-text="jumlahFilterAktif"></span>
             <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <polyline points="6 9 12 15 18 9" />
             </svg>
         </button>
     </div>
-
+{{-- ================= PANEL FILTER ================= --}}
+    <div v-if="filterTerbuka"
+        class="mb-4 mx-4 md:mx-10 lg:mx-20 rounded-xl border border-ribath-green-light bg-white px-4 py-3 shadow-sm">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <label class="text-xs font-medium text-gray-500">Kelas
+                <select v-model="filter.kelas"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-ribath-green-light">
+                    <option value="">Semua kelas</option>
+                    <option value="kosong">Belum ada kelas</option>
+                    <option v-for="k in kelasOptions" :key="k.id" :value="k.id" v-text="k.nama"></option>
+                </select>
+            </label>
+            <label class="text-xs font-medium text-gray-500">Kamar
+                <select v-model="filter.kamar"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-ribath-green-light">
+                    <option value="">Semua kamar</option>
+                    <option value="kosong">Belum ada kamar</option>
+                    <option v-for="k in kamarOptions" :key="k.id" :value="k.id" v-text="k.label"></option>
+                </select>
+            </label>
+            <label class="text-xs font-medium text-gray-500">Status
+                <select v-model="filter.status"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-ribath-green-light">
+                    <option value="">Semua status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="belum punya akun">Belum punya akun</option>
+                </select>
+            </label>
+        </div>
+        <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
+            <span>Menampilkan <b v-text="santriTersaring.length"></b> dari <b v-text="santriList.length"></b> santri</span>
+            <button type="button" @click="filter = { kelas: '', kamar: '', status: '' }"
+                class="font-medium text-red-600 hover:underline">Reset filter</button>
+        </div>
+    </div>
     {{-- ================= PANEL KELOLA MASSAL ================= --}}
     <div v-if="kelolaMassal"
         class="mb-4 mx-4 md:mx-10 lg:mx-20 xl:mx-50 rounded-xl border border-purple-200 bg-purple-50 px-4 py-3">
@@ -256,16 +293,19 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <td class="px-4 py-3 text-gray-800">@{{ index + 1 }}</td>
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2.5">
-                                <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-400"
-                                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="8" r="4" />
-                                        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-                                    </svg>
-                                </div>
+                                {{-- Pas foto santri. Kalau belum ada / gagal dimuat -> ikon orang --}}
+                                                                <img v-if="santri.foto" :src="santri.foto" :alt="'Foto ' + santri.nama" v-on:error="santri.foto = null" loading="lazy"
+                                                                    class="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-ribath-green-light/60">
+                                                                <div v-else class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none"
+                                                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                                        <circle cx="12" cy="8" r="4" />
+                                                                        <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                                                                    </svg>
+                                                                </div>
                                 <div>
                                     <span class="block text-gray-700">@{{ santri.nama }}</span>
+                                    <span v-if="santri.nama_arab" class="block text-sm text-gray-500" dir="rtl" lang="ar">@{{ santri.nama_arab }}</span>
                                     <span class="block text-xs text-gray-400">@{{ santri.nomor }}</span>
                                 </div>
                             </div>
@@ -400,6 +440,16 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
     // Warna kotak & badge kelas, dipakai bergiliran sesuai urutan kelas di Master Data
     // Warna aksen kartu kelas: terang, supaya kontras dengan latar hijau gelap sidebar
     const WARNA_AKSEN = ['#60a5fa', '#4ade80', '#facc15', '#c084fc', '#f87171', '#2dd4bf', '#fb923c', '#38bdf8', '#f472b6', '#a3e635'];
+    function rapikan(teks) {
+    return (teks || '')
+    .toString()
+    .toLowerCase()
+    .replace(/[\u064B-\u0652\u0670\u0640]/g, '') // harakat & tatwil
+    .replace(/[أإآٱ]/g, 'ا')
+    .replace(/ة/g, 'ه')
+    .replace(/ى/g, 'ي')
+    .trim();
+    }
     const WARNA_BADGE = ['bg-blue-50 text-blue-600', 'bg-green-50 text-green-600', 'bg-amber-50 text-amber-600', 'bg-purple-50 text-purple-600', 'bg-red-50 text-red-600', 'bg-emerald-50 text-emerald-700', 'bg-orange-50 text-orange-600', 'bg-sky-50 text-sky-600', 'bg-pink-50 text-pink-600', 'bg-teal-50 text-teal-700'];
 
     // Kirim data ke server (JSON). Melempar error berisi status & pesan bila gagal.
@@ -433,6 +483,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 kamarOptions: @json($kamarOptions),
                 pencarian: '',
                 filterTerbuka: false,
+                filter: { kelas: '', kamar: '', status: '' },
                 kelolaMassal: false,
                 pilihSemua: false,
                 terpilih: [],
@@ -463,14 +514,31 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 return this.santriList.length;
             },
             santriTersaring() {
-                const kata = this.pencarian.toLowerCase().trim();
-                if (!kata) return this.santriList;
+                        const kata = rapikan(this.pencarian);
+                        const f = this.filter;
 
-                return this.santriList.filter(santri =>
-                    [santri.nama, santri.nomor, santri.kelas, santri.kamar, santri.wali]
-                        .some(nilai => (nilai || '').toLowerCase().includes(kata))
-                );
-            },
+                        return this.santriList.filter(santri => {
+                        // 1) Filter kelas
+                        if (f.kelas === 'kosong' && santri.kelas_id) return false;
+                        if (f.kelas && f.kelas !== 'kosong' && santri.kelas_id !== f.kelas) return false;
+
+                        // 2) Filter kamar
+                        if (f.kamar === 'kosong' && santri.kamar_id) return false;
+                        if (f.kamar && f.kamar !== 'kosong' && santri.kamar_id !== f.kamar) return false;
+
+                        // 3) Filter status
+                        if (f.status && santri.status !== f.status) return false;
+
+                        // 4) Kotak pencarian
+                        if (!kata) return true;
+                        return [santri.nama, santri.nama_arab, santri.nomor, santri.kelas, santri.kamar, santri.wali]
+                                                .some(nilai => rapikan(nilai).includes(kata));
+                        });
+                        },
+                        // Berapa filter yang sedang dipakai (untuk angka di tombol Filter)
+                        jumlahFilterAktif() {
+                        return Object.values(this.filter).filter(nilai => nilai !== '').length;
+                        },
         },
         methods: {
             notif(text, error = false) {

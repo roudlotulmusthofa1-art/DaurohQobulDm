@@ -43,10 +43,10 @@ class MasterDataSeeder extends Seeder
         ]);
 
         $this->seed(Kamar::class, 'kode', [
-            ['nama' => 'Kamar Abu Bakar', 'kode' => 'A-01', 'gedung' => 'Gedung A', 'jenis' => 'putra', 'kapasitas' => 12],
-            ['nama' => 'Kamar Umar',      'kode' => 'A-02', 'gedung' => 'Gedung A', 'jenis' => 'putra', 'kapasitas' => 12],
-            ['nama' => 'Kamar Utsman',    'kode' => 'A-03', 'gedung' => 'Gedung A', 'jenis' => 'putra', 'kapasitas' => 10],
-            ['nama' => 'Kamar Ali',       'kode' => 'A-04', 'gedung' => 'Gedung A', 'jenis' => 'putra', 'kapasitas' => 10],
+            ['nama' => 'Kamar Abu Bakar', 'kode' => 'A-01', 'kapasitas' => 12],
+            ['nama' => 'Kamar Umar',      'kode' => 'A-02', 'kapasitas' => 12],
+            ['nama' => 'Kamar Utsman',    'kode' => 'A-03', 'kapasitas' => 10],
+            ['nama' => 'Kamar Ali',       'kode' => 'A-04', 'kapasitas' => 10],
         ]);
 
         $this->seed(KategoriBerita::class, 'slug', [

@@ -13,12 +13,12 @@ class Kelas extends Model
 
     protected $table = 'kelas';
 
-    protected $fillable = ['nama', 'kode', 'tingkat', 'deskripsi', 'urutan', 'is_active'];
+    protected $fillable = ['nama', 'kode', 'deskripsi', 'urutan', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',
         'urutan' => 'integer',
-        'tingkat' => 'integer',
+
     ];
 
     /** Santri yang ditempatkan di kelas ini (kolom pendaftaran_siswas.kelas_id). */

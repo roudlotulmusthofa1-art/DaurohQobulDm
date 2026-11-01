@@ -13,7 +13,7 @@ class Kamar extends Model
 
     protected $table = 'kamar';
 
-    protected $fillable = ['nama', 'kode', 'gedung', 'jenis', 'kapasitas', 'deskripsi', 'urutan', 'is_active'];
+    protected $fillable = ['nama', 'kode', 'kapasitas', 'deskripsi', 'urutan', 'is_active'];
 
     protected $casts = [
         'is_active' => 'boolean',

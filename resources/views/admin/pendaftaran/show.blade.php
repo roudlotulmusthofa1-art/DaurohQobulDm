@@ -264,7 +264,7 @@ $warnaSeksi = ['bg-teal-400', 'bg-sky-400', 'bg-violet-400', 'bg-lime-400', 'bg-
                     <p class="text-[11px] text-slate-600">Update:<br>{{ $diperbarui }}</p>
                     <span
                         class="w-11 h-11 rounded-full bg-white/60 flex items-center justify-center text-xs font-semibold text-slate-800">
-                        {{ $p->kelasMaster?->kode ?: ($p->kelasMaster?->tingkat ?: '-') }}
+                        {{ $p->kelasMaster?->kode ?: '-' }}
                     </span>
                 </div>
             </div>
