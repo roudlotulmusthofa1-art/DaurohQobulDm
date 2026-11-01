@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Profil Siswa | Ribath</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-slate-50 min-h-screen">
 @php
@@ -55,6 +55,17 @@
             </span>
             @if ($siswa->diproses_at)
                 <p class="text-xs text-slate-400 mt-2">Diterima pada {{ $siswa->diproses_at->translatedFormat('d F Y') }}</p>
+            @endif
+            {{-- Penempatan dari Master Data (Kelas & Kamar) --}}
+            @if ($siswa->kelasMaster || $siswa->kamarMaster)
+                <div class="mt-2 flex flex-wrap justify-center sm:justify-start gap-2 text-xs">
+                    @if ($siswa->kelasMaster)
+                        <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-700">Kelas: <strong>{{ $siswa->kelasMaster->nama }}</strong></span>
+                    @endif
+                    @if ($siswa->kamarMaster)
+                        <span class="px-3 py-1 rounded-full bg-rose-50 text-rose-700">Kamar: <strong>{{ $siswa->kamarMaster->nama }}</strong></span>
+                    @endif
+                </div>
             @endif
             @if ($siswa->catatan_admin)
                 <p class="text-sm text-slate-600 mt-2">Catatan: {{ $siswa->catatan_admin }}</p>

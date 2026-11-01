@@ -18,13 +18,9 @@ Route::prefix('psb')->name('psb.')->group(function () {
 // ===== ADMIN =====
 Route::prefix('admin')->middleware(['auth', 'peran:admin'])->group(function () {
 
-    // Dua menu di sidebar (sesuai AppServiceProvider)
+    // Menu sidebar PSB > Data Masuk Peserta (sesuai AppServiceProvider)
     Route::get('data-masuk', [AdminPendaftaranController::class, 'index'])
         ->name('admin.data-masuk.index');
-
-    Route::get('data-diterima', [AdminPendaftaranController::class, 'index'])
-        ->defaults('status', 'diterima')
-        ->name('admin.data-diterima.index');
 
     // Detail dan aksi, dipakai oleh tombol di view
     Route::prefix('pendaftaran')->name('admin.pendaftaran.')->group(function () {
@@ -33,6 +29,9 @@ Route::prefix('admin')->middleware(['auth', 'peran:admin'])->group(function () {
         Route::post('/{pendaftaran}/terima', [AdminPendaftaranController::class, 'terima'])->name('terima');
         Route::post('/{pendaftaran}/tolak', [AdminPendaftaranController::class, 'tolak'])->name('tolak');
         Route::delete('/{pendaftaran}', [AdminPendaftaranController::class, 'destroy'])->name('destroy');
+        Route::get('/{pendaftaran}/edit', [AdminPendaftaranController::class, 'edit'])->name('edit');
+        Route::put('/{pendaftaran}', [AdminPendaftaranController::class, 'update'])->name('update');
+        Route::post('/{pendaftaran}/syarat', [AdminPendaftaranController::class, 'simpanSyarat'])->name('syarat');
     });
 });
 

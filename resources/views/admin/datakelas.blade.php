@@ -4,7 +4,7 @@
 
 @section('content')
 
-<div class="flex min-h-[60vh] flex-col items-center justify-center gap-6">
+<div class="flex min-h-[60vh] flex-col items-center justify-center gap-6 ">
 
     <div class="text-4xl text-amber-900">
         Halaman Data Kelas

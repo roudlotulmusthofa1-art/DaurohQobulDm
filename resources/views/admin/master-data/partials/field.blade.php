@@ -1,4 +1,6 @@
 {{-- Satu isian form. Variabel: $field (dari config), $colors (dari controller). --}}
+
+{{-- ini juga yang mengatur modal ketika di klik --}}
 @php
     $id = 'f-'.$field['key'];
     $model = 'modal.form.'.$field['key'];

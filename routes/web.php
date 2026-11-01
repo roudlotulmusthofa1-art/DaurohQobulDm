@@ -24,6 +24,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
     // Manajemen Data
+    Route::post('santri/massal', [AdminSantriController::class, 'massal'])->name('santri.massal'); // tombol Kelola Massal
     Route::resource('santri', AdminSantriController::class);
     Route::resource('asatid', AdminDataAsatidController::class);
     Route::resource('kelas', AdminDataKelasController::class);

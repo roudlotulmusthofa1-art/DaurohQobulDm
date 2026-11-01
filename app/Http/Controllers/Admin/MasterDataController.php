@@ -259,6 +259,7 @@ class MasterDataController extends Controller
                     ['key' => 'nama', 'label' => 'Nama', 'type' => 'name', 'sub' => 'kode'],
                     ['key' => 'tingkat', 'label' => 'Tingkat', 'type' => 'text'],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                    ['key' => 'items_count', 'label' => 'Santri', 'type' => 'count'],
                 ],
                 'fields' => [
                     ['key' => 'nama', 'label' => 'Nama Kelas', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Ula 1'],
@@ -282,6 +283,7 @@ class MasterDataController extends Controller
                         'putri' => 'bg-pink-50 text-pink-700 ring-pink-200',
                     ]],
                     ['key' => 'kapasitas', 'label' => 'Kapasitas', 'type' => 'suffix', 'suffix' => 'santri'],
+                    ['key' => 'items_count', 'label' => 'Terisi', 'type' => 'count'],
                 ],
                 'fields' => [
                     ['key' => 'nama', 'label' => 'Nama Kamar', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Kamar Abu Bakar'],

@@ -24,6 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*', 'admin/master-data/api/*'),
+            // Balas JSON untuk API dan untuk permintaan fetch/AJAX yang meminta JSON (Accept: application/json)
+            fn (Request $request) => $request->is('api/*', 'admin/master-data/api/*') || $request->expectsJson(),
         );
     })->create();

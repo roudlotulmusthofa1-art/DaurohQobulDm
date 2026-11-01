@@ -1,14 +1,14 @@
 import "../css/app.css";
+import { createApp, reactive, ref } from "vue";
 
-// Vue dimuat lewat file lokal public/js/vue.global.prod.js (lihat layouts/app.blade.php),
-// diakses via window.Vue — bukan "import { createApp } from 'vue'" (tidak butuh npm install vue).
-if (!window.Vue) {
-    console.error(
-        '[Ribath] window.Vue tidak ditemukan. Pastikan <script src=".../js/vue.global.prod.js"> ' +
-            "ada di <head> SEBELUM @vite(...), dan file public/js/vue.global.prod.js benar-benar ada.",
-    );
-}
-const { createApp } = window.Vue || {};
+// Sediakan Vue untuk skrip yang masih berada di file Blade.
+window.Vue = {
+    createApp,
+    reactive,
+    ref,
+};
+
+// Navbar dan animasi statistik tetap di bawah sini.
 
 /**
  * Navbar: dropdown desktop (Profil/Informasi/Bantuan) + drawer menu mobile.

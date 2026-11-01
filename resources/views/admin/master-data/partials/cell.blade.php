@@ -12,11 +12,12 @@
             @isset($col['sub'])
                 <div class="text-xs text-gray-500" v-text="'#' + row.id + (row.{{ $col['sub'] }} ? ' • ' + row.{{ $col['sub'] }} : '')"></div>
             @else
+            {{-- bagian nomer --}}
                 <div class="text-xs text-gray-500" v-text="'#' + row.id"></div>
             @endisset
         </td>
         @break
-
+{{-- bagian warna --}}
     @case('color')
         <td class="px-3 py-4">
             <div class="flex items-center gap-2">
