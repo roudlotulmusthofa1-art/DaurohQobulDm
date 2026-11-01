@@ -18,7 +18,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
-        $middleware->redirectUsersTo('/admin/beranda');
+        // Sudah login lalu membuka /login -> diarahkan ke halaman sesuai role (admin / asatid / siswa)
+        $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->halamanAwal() ?? '/admin/beranda');
         $middleware->alias([
             'peran' => \App\Http\Middleware\PeranMiddleware::class,
         ]);

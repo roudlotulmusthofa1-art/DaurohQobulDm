@@ -42,6 +42,9 @@
 </header>
 
 <main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
+    @if (session('error'))
+    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm">{{ session('error') }}</div>
+    @endif
     <!-- Kartu identitas -->
     <section class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row gap-5 items-center sm:items-start">
         @if ($siswa->foto_url)

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Kamar;
+use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
 use App\Models\Pengaturan;
 use Illuminate\Support\Facades\Route;
@@ -26,6 +27,12 @@ class NotifikasiAdmin
             'keterangan' => 'Ada pendaftar yang masih menunggu verifikasi.',
             'ikon' => 'user-plus',
             'warna' => 'amber',
+        ],
+        'asatid_baru' => [
+            'judul' => 'Pendaftar asatid baru',
+            'keterangan' => 'Ada calon asatid yang menunggu verifikasi.',
+            'ikon' => 'cap',
+            'warna' => 'emerald',
         ],
         'catatan_peserta' => [
             'judul' => 'Catatan dari peserta',
@@ -107,6 +114,19 @@ class NotifikasiAdmin
                     $p->nomor_pendaftaran,
                     route('admin.pendaftaran.show', $p->id),
                     $p->created_at);
+            }
+        }
+
+        // 1b. Pendaftar asatid baru: satu baris per pendaftar (5 terbaru)
+        if (static::aktif('asatid_baru')) {
+            $q = PendaftaranAsatid::where('status', PendaftaranAsatid::MENUNGGU);
+            $total += (clone $q)->count();
+            foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
+                $items[] = static::item('asatid_baru',
+                    'Pendaftar asatid baru: <b>' . e($a->nama_lengkap) . '</b>',
+                    $a->nomor_pendaftaran,
+                    route('admin.asatid.show', $a->id),
+                    $a->created_at);
             }
         }
 

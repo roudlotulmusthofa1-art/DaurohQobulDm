@@ -3,63 +3,118 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PendaftaranAsatid;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
+/**
+ * Admin > Manajemen Data > Data Asatid
+ * Daftar asatid yang mendaftar lewat link khusus, lalu diterima/ditolak admin.
+ */
 class AdminDataAsatidController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(Request $request)
     {
-        return view('admin.dataasatid');
+        $status = $request->status;
+
+        $asatid = PendaftaranAsatid::query()
+            ->cari($request->q)
+            ->when($status, fn ($q, $s) => $q->where('status', $s))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
+        $stat = [
+            'total'    => PendaftaranAsatid::count(),
+            'menunggu' => PendaftaranAsatid::where('status', PendaftaranAsatid::MENUNGGU)->count(),
+            'diterima' => PendaftaranAsatid::where('status', PendaftaranAsatid::DITERIMA)->count(),
+            'ditolak'  => PendaftaranAsatid::where('status', PendaftaranAsatid::DITOLAK)->count(),
+        ];
+
+        // Link pendaftaran yang dibagikan admin ke calon asatid
+        $linkDaftar = route('asatid.daftar', PendaftaranAsatid::kodeLink());
+
+        return view('admin.asatid.index', compact('asatid', 'stat', 'status', 'linkDaftar'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function show(PendaftaranAsatid $asatid)
     {
-        //
+        return view('admin.asatid.show', ['a' => $asatid]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function terima(Request $request, PendaftaranAsatid $asatid, WhatsAppService $wa)
     {
-        //
+        if ($asatid->status === PendaftaranAsatid::DITERIMA) {
+            return back()->with('error', 'Asatid ini sudah diterima sebelumnya.');
+        }
+
+        $request->validate(['catatan_admin' => 'nullable|string|max:1000']);
+
+        // Terima + buat akun di tabel users dengan role asatid
+        $asatid->terima($request->input('catatan_admin'));
+
+        $pesan = "Assalamu'alaikum *{$asatid->nama_lengkap}*, alhamdulillah pendaftaran Anda sebagai *ASATID* dinyatakan *DITERIMA*.\n\n"
+            . ($asatid->catatan_admin ? "*Catatan admin:*\n{$asatid->catatan_admin}\n\n" : '')
+            . "Silakan masuk ke akun asatid:\n" . url('/login') . "\n"
+            . "Email: *{$asatid->email}*\n"
+            . "Password: sesuai yang Anda isi saat mendaftar.";
+
+        $terkirim = $wa->kirim($asatid->no_hp, $pesan);
+
+        return redirect()->route('admin.asatid.show', $asatid)->with(
+            $terkirim ? 'success' : 'error',
+            $terkirim
+                ? 'Asatid diterima dan chat WhatsApp terkirim.'
+                : 'Asatid diterima, tetapi chat WhatsApp GAGAL terkirim. Hubungi lewat ikon WhatsApp di halaman ini.'
+        );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function tolak(Request $request, PendaftaranAsatid $asatid, WhatsAppService $wa)
     {
-        //
+        $request->validate(['catatan_admin' => 'required|string|max:500'], [
+            'catatan_admin.required' => 'Alasan penolakan wajib diisi.',
+        ]);
+
+        $asatid->tolak($request->catatan_admin);
+
+        $wa->kirim(
+            $asatid->no_hp,
+            "Assalamu'alaikum *{$asatid->nama_lengkap}*, mohon maaf pendaftaran Anda sebagai asatid *DITOLAK*.\n\n"
+                . "Alasan:\n" . $request->catatan_admin
+        );
+
+        return redirect()->route('admin.asatid.index')->with('success', 'Pendaftar asatid ditolak.');
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+    /** Buat link pendaftaran baru; link lama langsung tidak berlaku. */
+    public function linkBaru()
     {
-        //
+        PendaftaranAsatid::buatKodeLinkBaru();
+
+        return back()->with('success', 'Link pendaftaran baru sudah dibuat. Link lama tidak bisa dipakai lagi.');
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    /** Hapus data asatid beserta pas foto dan akun login-nya (hanya akun ber-role asatid). */
+    public function destroy(PendaftaranAsatid $asatid)
     {
-        //
-    }
+        $nama = $asatid->nama_lengkap;
+        $foto = $asatid->berkas_foto;
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        DB::transaction(function () use ($asatid) {
+            $user = $asatid->user;
+            $asatid->delete();
+
+            if ($user && $user->role === PendaftaranAsatid::ROLE) {
+                $user->delete();
+            }
+        });
+
+        if ($foto) {
+            Storage::disk('public')->delete($foto);
+        }
+
+        return redirect()->route('admin.asatid.index')->with('success', "Data {$nama} berhasil dihapus.");
     }
 }

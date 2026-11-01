@@ -8,8 +8,8 @@ use Illuminate\Database\Eloquent\Model;
  * Pengaturan sederhana (kunci => nilai) yang bisa diubah admin.
  *
  * Contoh:
- *   Pengaturan::ambil('jumlah_assatid', 15);
- *   Pengaturan::simpan('jumlah_assatid', 20);
+ *   Pengaturan::ambil('notif_pendaftar_baru', '1');
+ *   Pengaturan::simpan('notif_pendaftar_baru', '0');
  */
 class Pengaturan extends Model
 {

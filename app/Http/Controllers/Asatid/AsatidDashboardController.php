@@ -1,0 +1,140 @@
+<?php
+
+namespace App\Http\Controllers\Asatid;
+
+use App\Http\Controllers\Controller;
+use App\Models\Kelas;
+use App\Models\PendaftaranAsatid;
+use App\Models\PendaftaranSiswa;
+use App\Models\Semester;
+use App\Models\WaktuPelajaran;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+/**
+ * Halaman-halaman akun asatid (role "asatid").
+ * Beranda berisi kartu menu; tiap kartu membuka halamannya sendiri.
+ * Semua halaman memakai layout resources/views/layouts/asatid.blade.php.
+ */
+class AsatidDashboardController extends Controller
+{
+    /** Beranda: kartu menu */
+    public function index()
+    {
+        return $this->tampil('asatid.dashboard', [
+            'jumlahPeserta' => PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count(),
+            'jumlahJam'     => WaktuPelajaran::where('is_active', true)->count(),
+        ]);
+    }
+
+    public function profil()
+    {
+        return $this->tampil('asatid.profil');
+    }
+
+    /** Daftar peserta (santri yang sudah diterima), bisa dicari & disaring per kelas */
+    public function peserta(Request $request)
+    {
+        $peserta = PendaftaranSiswa::query()
+            ->with(['kelasMaster', 'kamarMaster'])
+            ->where('status', PendaftaranSiswa::DITERIMA)
+            ->when($request->q, fn ($q, $kata) => $q->where(fn ($w) => $w
+                ->where('nama_lengkap', 'like', "%{$kata}%")
+                ->orWhere('nama_lengkap_arab', 'like', "%{$kata}%")
+                ->orWhere('nomor_pendaftaran', 'like', "%{$kata}%")))
+            ->when($request->kelas, fn ($q, $k) => $q->where('kelas_id', $k))
+            ->orderBy('nama_lengkap')
+            ->paginate(12)
+            ->withQueryString();
+
+        $kelasList = Kelas::where('is_active', true)->ordered()->get(['id', 'nama']);
+
+        return $this->tampil('asatid.peserta', compact('peserta', 'kelasList'));
+    }
+
+    public function jadwal()
+    {
+        return $this->tampil('asatid.jadwal', [
+            'semester'  => Semester::where('is_active', true)->ordered()->first(),
+            'jamList'   => WaktuPelajaran::where('is_active', true)->ordered()->get(),
+        ]);
+    }
+
+    public function absensi()
+    {
+        return $this->tampil('asatid.absensi');
+    }
+
+    public function penilaian()
+    {
+        return $this->tampil('asatid.penilaian', [
+            'semester' => Semester::where('is_active', true)->ordered()->first(),
+        ]);
+    }
+
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('login');
+    }
+
+    /** Data yang dipakai semua halaman asatid (profil singkat + notifikasi) */
+    private function tampil(string $view, array $data = [])
+    {
+        $user = Auth::user();
+        $asatid = PendaftaranAsatid::where('user_id', $user->id)->first();
+
+        return view($view, $data + [
+            'user'    => $user,
+            'asatid'  => $asatid,
+            'notif'   => $this->notifikasi($asatid),
+        ]);
+    }
+
+    /**
+     * Notifikasi untuk asatid (lonceng di kanan atas).
+     * Dihitung dari data yang ada, jadi hilang sendiri kalau sudah tidak relevan.
+     */
+    private function notifikasi(?PendaftaranAsatid $asatid): array
+    {
+        $items = [];
+
+        // Peserta baru yang diterima 7 hari terakhir
+        $baru = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)
+            ->where('diproses_at', '>=', now()->subDays(7))->count();
+        if ($baru > 0) {
+            $items[] = [
+                'teks'  => "<b>{$baru}</b> peserta baru diterima minggu ini",
+                'ket'   => 'Lihat di Daftar Peserta',
+                'url'   => route('asatid.peserta'),
+                'warna' => 'bg-emerald-50 text-emerald-600 ring-emerald-100',
+                'ikon'  => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
+            ];
+        }
+
+        // Catatan dari admin saat menerima pendaftaran
+        if ($asatid?->catatan_admin) {
+            $items[] = [
+                'teks'  => 'Catatan dari admin: <b>' . e(\Illuminate\Support\Str::limit($asatid->catatan_admin, 80)) . '</b>',
+                'ket'   => optional($asatid->diproses_at)->locale('id')->diffForHumans(),
+                'url'   => route('asatid.profil'),
+                'warna' => 'bg-amber-50 text-amber-600 ring-amber-100',
+                'ikon'  => 'M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z',
+            ];
+        }
+
+        // Jadwal mengajar belum diatur (fitur jadwal per asatid belum tersedia)
+        $items[] = [
+            'teks'  => 'Jadwal mengajar Anda <b>belum diatur</b> oleh admin',
+            'ket'   => 'Lihat Jadwal Pelajaran',
+            'url'   => route('asatid.jadwal'),
+            'warna' => 'bg-sky-50 text-sky-600 ring-sky-100',
+            'ikon'  => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
+        ];
+
+        return $items;
+    }
+}

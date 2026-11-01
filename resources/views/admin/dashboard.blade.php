@@ -4,6 +4,14 @@
 
 @section('content')
 
+{{-- Pesan saat diarahkan ke sini (mis. membuka halaman yang bukan untuk akun ini) --}}
+@if (session('error'))
+<div class="mb-5 flex items-start gap-3 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-amber-900 text-sm">
+    <span class="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold">!</span>
+    <span class="pt-0.5">{{ session('error') }}</span>
+</div>
+@endif
+
 <div id="dashboard-app" v-cloak>
 
     {{-- ===== Stat cards ===== --}}

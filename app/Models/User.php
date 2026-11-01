@@ -33,4 +33,20 @@ class User extends Authenticatable
     {
         return $this->hasOne(\App\Models\PendaftaranSiswa::class);
     }
+
+    /** Data pendaftaran asatid milik akun ini (kalau role-nya asatid) */
+    public function pendaftaranAsatid()
+    {
+        return $this->hasOne(\App\Models\PendaftaranAsatid::class);
+    }
+
+    /** Halaman pertama setelah login, sesuai role */
+    public function halamanAwal(): string
+    {
+        return match ($this->role) {
+            'asatid' => route('asatid.dashboard'),
+            'siswa'  => route('siswa.profil'),
+            default  => route('admin.dashboard'),
+        };
+    }
 }

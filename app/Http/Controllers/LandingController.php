@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PendaftaranSiswa;
-use App\Models\Pengaturan;
+use App\Models\PendaftaranAsatid;
 use Illuminate\View\View;
 
 class LandingController extends Controller
@@ -114,9 +114,9 @@ class LandingController extends Controller
 
         // Angka statistik di bagian atas beranda
         // - peserta: pendaftar yang sudah diterima (otomatis dari database)
-        // - assatid: diisi admin di menu Landing Page > Hero & Statistik
+        // - assatid: pendaftar asatid yang sudah diterima (otomatis dari database)
         $jumlahPeserta = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count();
-        $jumlahAssatid = (int) Pengaturan::ambil('jumlah_assatid', 15);
+        $jumlahAssatid = PendaftaranAsatid::where('status', PendaftaranAsatid::DITERIMA)->count();
 
         return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid'));
     }

@@ -26,13 +26,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Manajemen Data
     Route::post('santri/massal', [AdminSantriController::class, 'massal'])->name('santri.massal'); // tombol Kelola Massal
     Route::resource('santri', AdminSantriController::class);
-    Route::resource('asatid', AdminDataAsatidController::class);
+    // Data Asatid: daftar, detail, terima/tolak, hapus, dan link pendaftaran khusus
+    Route::post('asatid/link-baru', [AdminDataAsatidController::class, 'linkBaru'])->name('asatid.link-baru');
+    Route::post('asatid/{asatid}/terima', [AdminDataAsatidController::class, 'terima'])->name('asatid.terima');
+    Route::post('asatid/{asatid}/tolak', [AdminDataAsatidController::class, 'tolak'])->name('asatid.tolak');
+    Route::resource('asatid', AdminDataAsatidController::class)->only(['index', 'show', 'destroy']);
     Route::resource('kelas', AdminDataKelasController::class);
 
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
-    Route::put('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'update'])->name('landing-hero.update');
-
     // Sistem > Pengaturan (termasuk pengaturan notifikasi)
     Route::get('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'update'])->name('pengaturan.update');
@@ -42,3 +44,4 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
 
 
 require __DIR__ . '/psb.php';
+require __DIR__ . '/asatid.php';
