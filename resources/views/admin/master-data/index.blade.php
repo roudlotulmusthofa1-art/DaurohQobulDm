@@ -5,29 +5,70 @@
 @section('content')
     <div id="master-data-app" v-cloak>
         <div class="mx-4 md:mx-10 lg:mx-20 mt-8">
-            <p class="mb-1 font-bold text-xl text-[#222722f0]">Master Data</p>
-            <p class="mb-5 text-sm text-gray-500">Kelola data referensi dan kategori sistem</p>
+            {{-- ================= Header =================
+                 Latar gradasi hijau gelap, sama seperti sidebar --}}
+            <div class="relative mb-5 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)] px-6 py-5 text-white shadow-lg shadow-[#0b332c]/20">
+                {{-- hiasan lingkaran cahaya --}}
+                <span class="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-[#4ade80]/20 blur-3xl"></span>
+                <span class="pointer-events-none absolute -bottom-16 right-32 h-36 w-36 rounded-full bg-[#22d3ee]/10 blur-3xl"></span>
 
-            {{-- ================= Tab ================= --}}
-            <div class="mb-6 overflow-x-auto">
-                <div class="inline-flex gap-1 rounded-xl bg-white p-1 shadow-sm" role="tablist">
+                <div class="relative flex items-center gap-4">
+                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
+                        <x-master-data.icon name="database" size="24" class="text-[#4ade80]" />
+                    </span>
+                    <div class="min-w-0">
+                        <h1 class="text-xl font-bold">Master Data</h1>
+                        <p class="text-sm text-white/60">Kelola data referensi dan kategori sistem</p>
+                    </div>
+                    {{-- jumlah semua data di semua menu --}}
+                    <div class="ml-auto hidden text-right sm:block">
+                        <p class="text-2xl font-bold" v-text="totalData()"></p>
+                        <p class="text-xs text-white/50">total data</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- ================= Menu (tab) =================
+                 Setiap menu punya warna sendiri lewat --aksen (diisi dari 'accent' di controller).
+                 Menu aktif: latar hijau gelap + ikon berwarna penuh. --}}
+            <div class="mb-6 -mx-1 overflow-x-auto px-1 pb-2">
+                <div class="inline-flex gap-1.5 rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-black/5" role="tablist">
                     @foreach ($tabs as $key => $t)
-                        <a href="?tab={{ $key }}" role="tab"
-                            class="whitespace-nowrap rounded-lg px-6 py-2 text-center text-sm font-medium transition sm:min-w-36"
-                            :class="activeKey === '{{ $key }}' ? 'bg-[#0b332c] text-white shadow-sm' :
-                                'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
-                            @click.prevent="selectTab('{{ $key }}')">{{ $t['label'] }}</a>
+                        <a href="?tab={{ $key }}" role="tab" style="--aksen: {{ $t['accent'] }}"
+                            :aria-selected="activeKey === '{{ $key }}'"
+                            class="group flex items-center gap-2.5 whitespace-nowrap rounded-xl py-1.5 pl-1.5 pr-3 text-sm font-medium transition-all duration-200"
+                            :class="activeKey === '{{ $key }}'
+                                ? 'bg-[linear-gradient(135deg,#0f4238,#0b332c)] text-white shadow-md shadow-[#0b332c]/25'
+                                : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
+                            @click.prevent="selectTab('{{ $key }}')">
+                            <span class="flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110"
+                                :class="activeKey === '{{ $key }}'
+                                    ? 'bg-[var(--aksen)] text-white shadow-[0_4px_12px_-2px_var(--aksen)]'
+                                    : 'bg-[color-mix(in_srgb,var(--aksen)_14%,white)] text-[var(--aksen)]'">
+                                <x-master-data.icon :name="$t['icon']" size="16" />
+                            </span>
+                            {{ $t['label'] }}
+                            {{-- jumlah data di menu ini --}}
+                            <span class="min-w-5 rounded-full px-1.5 text-center text-[11px] font-semibold"
+                                :class="activeKey === '{{ $key }}' ? 'bg-white/15 text-white' : 'bg-gray-100 text-gray-500'"
+                                v-text="rows['{{ $key }}'].length"></span>
+                        </a>
                     @endforeach
                 </div>
             </div>
 
             {{-- ================= Isi tiap tab ================= --}}
             @foreach ($tabs as $key => $t)
-                <section v-if="activeKey === '{{ $key }}'">
+                <section v-if="activeKey === '{{ $key }}'" style="--aksen: {{ $t['accent'] }}">
                     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                        <div>
-                            <h2 class="text-lg font-semibold text-[#0f1f1a]">{{ $t['title'] }}</h2>
-                            <p class="text-sm text-gray-500">{{ $t['description'] }}</p>
+                        <div class="flex items-start gap-3">
+                            <span class="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--aksen)_14%,white)] text-[var(--aksen)]">
+                                <x-master-data.icon :name="$t['icon']" size="20" />
+                            </span>
+                            <div>
+                                <h2 class="text-lg font-semibold text-[#0f1f1a]">{{ $t['title'] }}</h2>
+                                <p class="text-sm text-gray-500">{{ $t['description'] }}</p>
+                            </div>
                         </div>
                         <button type="button"
                             class="inline-flex shrink-0 items-center gap-2 self-start rounded-xl bg-[#0b332c] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0f4a3f]"
@@ -37,7 +78,9 @@
                         </button>
                     </div>
 
-                    <div class="overflow-hidden rounded-2xl bg-white shadow-sm">
+                    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+                        {{-- garis tipis berwarna sesuai menu --}}
+                        <div class="h-1 bg-[var(--aksen)]"></div>
                         <div class="overflow-x-auto">
                             <table class="min-w-full text-sm">
                                 <thead>
@@ -257,6 +300,26 @@
                 const colorHex = (v) => COLORS[v] ?? '#f1f5f9';
                 const timeRange = (r) => (r.jam_mulai || r.jam_selesai ?
                     `${r.jam_mulai ?? '--:--'} – ${r.jam_selesai ?? '--:--'}` : '-');
+                // ---------- Kalender (Semester) ----------
+                // Intl = fitur bawaan browser untuk format tanggal.
+                // 'islamic-umalqura' = kalender Hijriyah Umm al-Qura.
+                const FORMAT_MASEHI = new Intl.DateTimeFormat('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const FORMAT_HIJRIYAH = new Intl.DateTimeFormat('id-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+                const FORMAT_TAHUN_HIJRIYAH = new Intl.DateTimeFormat('id-u-ca-islamic-umalqura', { year: 'numeric' });
+                const keTanggal = (iso) => (iso ? new Date(iso.slice(0, 10) + 'T00:00:00') : null); // "2026-07-13" -> Date
+
+                const masehi = (iso) => (iso ? FORMAT_MASEHI.format(keTanggal(iso)) : '?');      // "13 Jul 2026"
+                const hijriyahDari = (iso) => (iso ? FORMAT_HIJRIYAH.format(keTanggal(iso)) : ''); // "28 Muharam 1448 H"
+                const tahunHijriyah = (iso) => (iso ? FORMAT_TAHUN_HIJRIYAH.formatToParts(keTanggal(iso))
+                    .find((p) => p.type === 'year')?.value : null);                                // "1448"
+
+                const periodeMasehi = (r) => (r.tanggal_mulai || r.tanggal_selesai ?
+                    `${masehi(r.tanggal_mulai)} – ${masehi(r.tanggal_selesai)}` : '-');
+                const periodeHijriyah = (r) => (r.tanggal_mulai_hijriyah || r.tanggal_selesai_hijriyah ?
+                    `${r.tanggal_mulai_hijriyah || '?'} – ${r.tanggal_selesai_hijriyah || '?'}` : '-');
+                // Jumlah semua data (angka di header)
+                // (fungsi biasa, karena window.Vue di app.js tidak menyediakan computed)
+                const totalData = () => Object.values(rows).reduce((n, list) => n + list.length, 0);
 
                 function selectTab(key) {
                     activeKey.value = key;
@@ -301,6 +364,7 @@
                         is_active: item?.is_active ?? true
                     };
                     for (const f of TABS[activeKey.value].fields) {
+                        if (f.type === 'section') continue; // judul bagian, bukan isian
                         form[f.key] = item?.[f.key] ?? f.default ?? '';
                     }
                     Object.assign(modal, {
@@ -313,6 +377,22 @@
                     setTimeout(() => document.querySelector(
                             '#master-data-form input:not([type=checkbox]), #master-data-form textarea')
                     ?.focus());
+                }
+
+                /**
+                 * Dipanggil saat tanggal Masehi dipilih (lihat 'hijri' di controller).
+                 * Mengisi tanggal Hijriyah-nya, dan tahun ajaran (Masehi & Hijriyah) bila masih kosong.
+                 */
+                function isiHijriyah(dari, ke) {
+                    const f = modal.form;
+                    f[ke] = hijriyahDari(f[dari]);
+
+                    if (f.tanggal_mulai && f.tanggal_selesai) {
+                        const m1 = f.tanggal_mulai.slice(0, 4), m2 = f.tanggal_selesai.slice(0, 4);
+                        const h1 = tahunHijriyah(f.tanggal_mulai), h2 = tahunHijriyah(f.tanggal_selesai);
+                        if (!f.tahun_ajaran) f.tahun_ajaran = m1 === m2 ? m1 : `${m1}/${m2}`;
+                        if (!f.tahun_ajaran_hijriyah) f.tahun_ajaran_hijriyah = h1 === h2 ? `${h1} H` : `${h1}/${h2} H`;
+                    }
                 }
 
                 async function save() {
@@ -442,6 +522,10 @@
                     show,
                     colorHex,
                     timeRange,
+                    periodeMasehi,
+                    periodeHijriyah,
+                    isiHijriyah,
+                    totalData,
                     selectTab,
                     openModal,
                     save,

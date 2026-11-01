@@ -8,6 +8,22 @@
     $input = 'block w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm shadow-sm outline-none focus:border-[#0b332c]/40 focus:ring-2 focus:ring-[#22c55e]/20';
 @endphp
 
+@if ($field['type'] === 'section')
+    {{-- Judul kecil pemisah di dalam form, mis. "Kalender Masehi" --}}
+    @php $warna = $field['color'] ?? 'gray'; @endphp
+    <div class="col-span-2 -mb-1 mt-1 flex items-center gap-2">
+        <span @class([
+            'rounded-md px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide',
+            'bg-sky-50 text-sky-700' => $warna === 'sky',
+            'bg-emerald-50 text-emerald-700' => $warna === 'emerald',
+            'bg-gray-100 text-gray-600' => ! in_array($warna, ['sky', 'emerald']),
+        ])>{{ $field['label'] }}</span>
+        <span class="h-px flex-1 bg-gray-200"></span>
+    </div>
+    @isset($field['hint'])
+        <p class="col-span-2 -mt-2 text-xs text-gray-500">{{ $field['hint'] }}</p>
+    @endisset
+@else
 <div class="{{ ! empty($field['half']) ? 'col-span-2 sm:col-span-1' : 'col-span-2' }}">
     <label for="{{ $id }}" class="mb-1 block text-sm font-medium text-gray-700">
         {{ $field['label'] }}
@@ -52,6 +68,8 @@
                 class="{{ $input }}"
                 placeholder="{{ $field['placeholder'] ?? '' }}"
                 @isset($field['min']) min="{{ $field['min'] }}" @endisset
+                {{-- tanggal Masehi -> isi otomatis tanggal Hijriyah-nya --}}
+                @isset($field['hijri']) v-on:change="isiHijriyah('{{ $field['key'] }}', '{{ $field['hijri'] }}')" @endisset
                 {{ $required ? 'required' : '' }}
             >
     @endswitch
@@ -61,3 +79,4 @@
         <p v-else class="mt-1 text-xs text-gray-500">{{ $field['hint'] }}</p>
     @endisset
 </div>
+@endif

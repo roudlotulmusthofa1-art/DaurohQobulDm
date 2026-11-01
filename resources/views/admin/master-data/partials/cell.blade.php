@@ -47,6 +47,34 @@
         <td class="px-3 py-4 text-gray-600" v-text="timeRange(row)"></td>
         @break
 
+    {{-- Semester: tahun ajaran Masehi (M) & Hijriyah (H) --}}
+    @case('tahun-ganda')
+        <td class="px-3 py-4 text-xs">
+            <div class="flex items-center gap-1.5">
+                <span class="w-4 rounded bg-sky-50 text-center font-semibold text-sky-700">M</span>
+                <span class="text-gray-700" v-text="show(row.tahun_ajaran)"></span>
+            </div>
+            <div class="mt-1 flex items-center gap-1.5">
+                <span class="w-4 rounded bg-emerald-50 text-center font-semibold text-emerald-700">H</span>
+                <span class="text-gray-700" v-text="show(row.tahun_ajaran_hijriyah)"></span>
+            </div>
+        </td>
+        @break
+
+    {{-- Semester: tanggal mulai – selesai, Masehi (M) & Hijriyah (H) --}}
+    @case('periode-ganda')
+        <td class="px-3 py-4 text-xs">
+            <div class="flex items-center gap-1.5">
+                <span class="w-4 rounded bg-sky-50 text-center font-semibold text-sky-700">M</span>
+                <span class="text-gray-700" v-text="periodeMasehi(row)"></span>
+            </div>
+            <div class="mt-1 flex items-center gap-1.5">
+                <span class="w-4 rounded bg-emerald-50 text-center font-semibold text-emerald-700">H</span>
+                <span class="text-gray-700" v-text="periodeHijriyah(row)"></span>
+            </div>
+        </td>
+        @break
+
     @case('suffix')
         <td class="px-3 py-4 text-gray-600" v-text="({{ $value }} ?? 0) + ' {{ $col['suffix'] }}'"></td>
         @break

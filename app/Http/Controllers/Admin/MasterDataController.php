@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BidangIlmu;
+use App\Models\JenisKegiatan;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
+use App\Models\Semester;
 use App\Models\WaktuPelajaran;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -17,19 +19,24 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Kategori Berita.
+ * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan, Semester, Kategori Berita.
  *
- * Satu controller untuk 5 model.
- * Definisi tab (kolom tabel & isian form) ada di method tabs() di bawah.
+ * Satu controller untuk 7 model.
+ * Definisi tab (kolom tabel, isian form, ikon & warna menu) ada di method tabs() di bawah.
+ *
+ * Cara menambah menu baru: buat tabel (migration) + model (pakai trait IsMasterData),
+ * lalu tambahkan di TYPES, rules(), dan tabs(). Route & tampilan otomatis ikut.
  */
 class MasterDataController extends Controller
 {
-    /** Kunci tab (dipakai di URL) => Model. Urutan ini = urutan tab di halaman. */
+    /** Kunci tab (dipakai di URL) => Model. */
     public const TYPES = [
         'bidang-ilmu' => BidangIlmu::class,
         'waktu-pelajaran' => WaktuPelajaran::class,
         'kelas' => Kelas::class,
         'kamar' => Kamar::class,
+        'jenis-kegiatan' => JenisKegiatan::class,
+        'semester' => Semester::class,
         'kategori-berita' => KategoriBerita::class,
     ];
 
@@ -92,7 +99,7 @@ class MasterDataController extends Controller
     public function store(Request $request, string $type): JsonResponse
     {
         $model = $this->model($type);
-        $item = $model::create($request->validate($this->rules($type)));
+        $item = $model::create($request->validate($this->rules($type), $this->messages()));
 
         return response()->json([
             'message' => 'Data berhasil ditambahkan.',
@@ -104,7 +111,7 @@ class MasterDataController extends Controller
     public function update(Request $request, string $type, int $id): JsonResponse
     {
         $item = $this->model($type)::findOrFail($id);
-        $item->update($request->validate($this->rules($type, $item->id)));
+        $item->update($request->validate($this->rules($type, $item->id), $this->messages()));
 
         return response()->json([
             'message' => 'Data berhasil diperbarui.',
@@ -195,20 +202,56 @@ class MasterDataController extends Controller
                 'kapasitas' => ['required', 'integer', 'min:0', 'max:1000'],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
+            'jenis-kegiatan' => [
+                'nama' => ['required', 'string', 'max:100'],
+                'warna' => ['nullable', 'string', Rule::in(array_keys(self::COLORS))],
+                'deskripsi' => ['nullable', 'string', 'max:1000'],
+            ],
+            'semester' => [
+                'nama' => ['required', 'string', 'max:100'],
+                // Masehi
+                'tahun_ajaran' => ['nullable', 'string', 'max:20', 'regex:/^\d{4}\/\d{4}$/'],
+                'tanggal_mulai' => ['nullable', 'date'],
+                'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
+                // Hijriyah
+                'tahun_ajaran_hijriyah' => ['nullable', 'string', 'max:30'],
+                'tanggal_mulai_hijriyah' => ['nullable', 'string', 'max:50'],
+                'tanggal_selesai_hijriyah' => ['nullable', 'string', 'max:50'],
+                'keterangan' => ['nullable', 'string', 'max:255'],
+            ],
         };
+    }
+
+    /** Pesan error khusus (selain pesan bawaan Laravel). */
+    private function messages(): array
+    {
+        return [
+            'tahun_ajaran.regex' => 'Format tahun ajaran harus seperti 2026/2027.',
+            'tanggal_selesai.after_or_equal' => 'Tanggal selesai tidak boleh sebelum tanggal mulai.',
+        ];
     }
 
     /* =====================================================================
      |  Definisi tab untuk view
-     |  Tipe kolom : name, color, text, count, badge, time-range, suffix
-     |  Tipe isian : text, number, time, textarea, select, color
+     |  Tipe kolom : name, color, text, count, badge, time-range, suffix,
+     |               tahun-ganda, periode-ganda (Masehi + Hijriyah, untuk Semester)
+     |  Tipe isian : text, number, time, date, textarea, select, color,
+     |               section (judul kecil pemisah di dalam form)
+     |  Isian date bisa diberi 'hijri' => 'nama_kolom' : saat tanggal Masehi dipilih,
+     |  kolom itu otomatis diisi tanggal Hijriyah-nya.
      |  Kolom Urutan, Status, dan Aksi ditambahkan otomatis di view.
+     |
+     |  URUTAN di array ini = urutan menu (tab) di halaman.
+     |  icon  : nama ikon di resources/views/components/master-data/icon.blade.php
+     |  accent: warna khas menu (kode hex), dipakai untuk ikon & garis bawah menu
      * ===================================================================== */
 
     private function tabs(): array
     {
         return [
             'bidang-ilmu' => [
+                'icon' => 'book',
+                'accent' => '#3b82f6',
                 'label' => 'Bidang Ilmu',
                 'title' => 'Kategori Bidang Ilmu',
                 'description' => 'Kelola kategori bidang ilmu (fann) untuk kurikulum kitab. Seret baris untuk mengubah urutan.',
@@ -229,6 +272,8 @@ class MasterDataController extends Controller
             ],
 
             'waktu-pelajaran' => [
+                'icon' => 'clock',
+                'accent' => '#f59e0b',
                 'label' => 'Waktu Pelajaran',
                 'title' => 'Waktu Pelajaran',
                 'description' => 'Kelola sesi/waktu pelajaran harian. Seret baris untuk mengubah urutan.',
@@ -248,6 +293,8 @@ class MasterDataController extends Controller
             ],
 
             'kelas' => [
+                'icon' => 'graduation',
+                'accent' => '#22c55e',
                 'label' => 'Kelas',
                 'title' => 'Daftar Kelas',
                 'description' => 'Kelola kelas/marhalah santri. Seret baris untuk mengubah urutan.',
@@ -266,6 +313,8 @@ class MasterDataController extends Controller
             ],
 
             'kamar' => [
+                'icon' => 'bed',
+                'accent' => '#a855f7',
                 'label' => 'Kamar',
                 'title' => 'Daftar Kamar',
                 'description' => 'Kelola kamar asrama santri beserta kapasitasnya. Seret baris untuk mengubah urutan.',
@@ -284,7 +333,64 @@ class MasterDataController extends Controller
                 ],
             ],
 
+            // ===== BARU =====
+            'jenis-kegiatan' => [
+                'icon' => 'activity',
+                'accent' => '#14b8a6',
+                'label' => 'Jenis Kegiatan',
+                'title' => 'Jenis Kegiatan',
+                'description' => 'Kelola jenis/nama kegiatan pondok (mis. Muhadharah, Ro\'an, Ziarah). Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Kegiatan',
+                'singular' => 'Jenis Kegiatan',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama Kegiatan', 'type' => 'name'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Kegiatan', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Muhadharah'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-teal-100'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+
+            'semester' => [
+                'icon' => 'calendar',
+                'accent' => '#f43f5e',
+                'label' => 'Semester',
+                'title' => 'Semester',
+                'description' => 'Kelola semester per tahun ajaran, dengan kalender Masehi dan Hijriyah. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Semester',
+                'singular' => 'Semester',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name'],
+                    ['key' => 'tahun', 'label' => 'Tahun Ajaran', 'type' => 'tahun-ganda'],
+                    ['key' => 'periode', 'label' => 'Periode', 'type' => 'periode-ganda'],
+                    ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Semester', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Semester Ganjil'],
+
+                    ['key' => 'judul_masehi', 'label' => 'Kalender Masehi', 'type' => 'section', 'color' => 'sky'],
+                    ['key' => 'tahun_ajaran', 'label' => 'Tahun Ajaran', 'type' => 'text', 'placeholder' => 'cth. 2026/2027'],
+                    // 'hijri' => saat tanggal ini dipilih, isian Hijriyah-nya terisi otomatis
+                    ['key' => 'tanggal_mulai', 'label' => 'Tanggal Mulai', 'type' => 'date', 'half' => true, 'hijri' => 'tanggal_mulai_hijriyah'],
+                    ['key' => 'tanggal_selesai', 'label' => 'Tanggal Selesai', 'type' => 'date', 'half' => true, 'hijri' => 'tanggal_selesai_hijriyah'],
+
+                    ['key' => 'judul_hijriyah', 'label' => 'Kalender Hijriyah', 'type' => 'section', 'color' => 'emerald',
+                        'hint' => 'Terisi otomatis dari tanggal Masehi. Boleh diubah bila berbeda menurut rukyat.'],
+                    ['key' => 'tahun_ajaran_hijriyah', 'label' => 'Tahun Ajaran Hijriyah', 'type' => 'text', 'placeholder' => 'cth. 1447/1448 H'],
+                    ['key' => 'tanggal_mulai_hijriyah', 'label' => 'Tanggal Mulai', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. 1 Muharam 1448 H'],
+                    ['key' => 'tanggal_selesai_hijriyah', 'label' => 'Tanggal Selesai', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. 29 Jumadil Akhir 1448 H'],
+
+                    ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
+                ],
+            ],
+
+            // Kategori Berita sengaja diletakkan paling belakang
             'kategori-berita' => [
+                'icon' => 'newspaper',
+                'accent' => '#ec4899',
                 'label' => 'Kategori Berita',
                 'title' => 'Kategori Berita',
                 'description' => 'Kelola kategori untuk berita di landing page. Seret baris untuk mengubah urutan.',
