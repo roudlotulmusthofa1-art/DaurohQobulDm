@@ -81,5 +81,5 @@ require __DIR__ . '/keuangan.php'; // Keuangan > Buku Kas
 
 // Formulir pendaftaran admin (publik, hanya bisa dibuka lewat link khusus dari halaman Data Admin)
 Route::get('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'create'])->name('pendaftaran-admin.daftar');
-Route::post('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'store'])->middleware('throttle:20,1')->name('pendaftaran-admin.store');
+Route::post('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'store'])->middleware('throttle:200,1')->name('pendaftaran-admin.store');
 Route::get('daftar-admin-sukses/{nomor}', [\App\Http\Controllers\PendaftaranAdminController::class, 'sukses'])->name('pendaftaran-admin.sukses');
