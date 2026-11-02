@@ -51,7 +51,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
             </span>
             <div class="flex-1 min-w-0">
                 <p class="text-sm text-slate-500">Saldo Saat Ini</p>
-                <p class="mt-0.5 text-3xl font-extrabold tracking-tight" :class="saldo < 0 ? 'text-rose-600' : 'text-slate-800'" v-text="rupiah(saldo)">{{ 'Rp ' . number_format($saldo, 0, ',', '.') }}</p>
+                <p class="mt-0.5 text-3xl font-extrabold tracking-tight" :class="saldo < 0 ? 'text-rose-600' : 'text-slate-800'" v-text="rupiah(saldo)"></p>
 
                 <div class="mt-4 pt-4 border-t border-slate-100 grid sm:grid-cols-3 gap-4">
                     <div>

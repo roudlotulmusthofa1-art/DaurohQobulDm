@@ -100,7 +100,7 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
             <label class="flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" name="salin_pengaturan" value="1" checked class="rounded text-emerald-600"> Pengaturan (profil pesantren, notifikasi)</label>
         </div>
         <label class="flex items-center gap-2 text-sm font-semibold text-slate-700"><input type="checkbox" name="aktifkan" value="1" class="rounded text-emerald-600"> Langsung jadikan sesi aktif</label>
-        <div class="flex justify-end gap-2"><button type="button" @click="tutupDialog" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200">Batal</button><button class="{{ $tombol }}" :disabled="sedangProses" v-text="sedangProses ? 'Memproses… (bisa ±1 menit)' : 'Buat Sesi'">Buat Sesi</button></div>
+        <div class="flex justify-end gap-2"><button type="button" @click="tutupDialog" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200">Batal</button><button class="{{ $tombol }}" :disabled="sedangProses" v-text="sedangProses ? 'Memproses… (bisa ±1 menit)' : 'Buat Sesi'"></button></div>
     </form>
 </dialog>
 

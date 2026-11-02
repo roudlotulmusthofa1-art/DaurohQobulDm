@@ -73,11 +73,11 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
             <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 px-3 py-2.5">
                     <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-600">Masehi</span>
-                    <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksMasehi">-</span>
+                    <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksMasehi"></span>
                 </div>
                 <div class="rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 px-3 py-2.5">
                     <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">Hijriyah</span>
-                    <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksHijriyah">-</span>
+                    <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksHijriyah"></span>
                 </div>
             </div>
         </section>

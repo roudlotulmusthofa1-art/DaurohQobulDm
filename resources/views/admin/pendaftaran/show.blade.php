@@ -636,7 +636,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <option v-for="k in pilihanKasur" :key="k.nomor" :value="String(k.nomor)" :disabled="!!k.penghuni"
                                 v-text="k.penghuni ? 'Kasur ' + k.nomor + ' — ' + k.penghuni : 'Kasur ' + k.nomor"></option>
                         </select>
-                        <p class="text-xs text-slate-400 mt-1" v-text="keteranganKasur">Pilih kamar dulu.</p>
+                        <p class="text-xs text-slate-400 mt-1" v-text="keteranganKasur"></p>
                         @error('nomor_kasur')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                         @enderror
