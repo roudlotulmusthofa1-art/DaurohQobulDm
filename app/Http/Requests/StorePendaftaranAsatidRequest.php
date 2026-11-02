@@ -34,6 +34,7 @@ class StorePendaftaranAsatidRequest extends FormRequest
             'email_login'       => [
                 'required', 'email', 'max:255',
                 'unique:pendaftaran_asatid,email',
+                'unique:pendaftaran_admin,email',
                 'unique:pendaftaran_siswas,email',
                 'unique:users,email',
             ],

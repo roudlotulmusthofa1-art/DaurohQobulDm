@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use App\Models\Kamar;
+use App\Models\PendaftaranAdmin;
 use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
 use App\Models\Pengaturan;
@@ -33,6 +34,12 @@ class NotifikasiAdmin
             'keterangan' => 'Ada calon asatid yang menunggu verifikasi.',
             'ikon' => 'cap',
             'warna' => 'emerald',
+        ],
+        'admin_baru' => [
+            'judul' => 'Pendaftar admin baru',
+            'keterangan' => 'Ada calon admin yang menunggu verifikasi.',
+            'ikon' => 'user-plus',
+            'warna' => 'sky',
         ],
         'catatan_peserta' => [
             'judul' => 'Catatan dari peserta',
@@ -126,6 +133,19 @@ class NotifikasiAdmin
                     'Pendaftar asatid baru: <b>' . e($a->nama_lengkap) . '</b>',
                     $a->nomor_pendaftaran,
                     route('admin.asatid.show', $a->id),
+                    $a->created_at);
+            }
+        }
+
+        // 1c. Pendaftar admin baru: satu baris per pendaftar (5 terbaru)
+        if (static::aktif('admin_baru')) {
+            $q = PendaftaranAdmin::where('status', PendaftaranAdmin::MENUNGGU);
+            $total += (clone $q)->count();
+            foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
+                $items[] = static::item('admin_baru',
+                    'Pendaftar admin baru: <b>' . e($a->nama_lengkap) . '</b>',
+                    $a->nomor_pendaftaran,
+                    route('admin.data-admin.show', $a->id),
                     $a->created_at);
             }
         }

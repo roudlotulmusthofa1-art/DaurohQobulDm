@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDataAsatidController;
-use App\Http\Controllers\Admin\AdminDataKelasController;
+use App\Http\Controllers\Admin\AdminDataAdminController;
 use App\Http\Controllers\Admin\AdminSantriController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Auth\LoginController;
@@ -31,7 +31,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::post('asatid/{asatid}/terima', [AdminDataAsatidController::class, 'terima'])->name('asatid.terima');
     Route::post('asatid/{asatid}/tolak', [AdminDataAsatidController::class, 'tolak'])->name('asatid.tolak');
     Route::resource('asatid', AdminDataAsatidController::class)->only(['index', 'show', 'destroy']);
-    Route::resource('kelas', AdminDataKelasController::class);
+    // Data Admin: sama seperti Data Asatid, akun yang diterima ber-role admin
+    Route::post('data-admin/link-baru', [AdminDataAdminController::class, 'linkBaru'])->name('data-admin.link-baru');
+    Route::post('data-admin/{dataAdmin}/terima', [AdminDataAdminController::class, 'terima'])->name('data-admin.terima');
+    Route::post('data-admin/{dataAdmin}/tolak', [AdminDataAdminController::class, 'tolak'])->name('data-admin.tolak');
+    Route::resource('data-admin', AdminDataAdminController::class)->only(['index', 'show', 'destroy'])
+        ->parameters(['data-admin' => 'dataAdmin']);
 
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
@@ -50,3 +55,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
 
 require __DIR__ . '/psb.php';
 require __DIR__ . '/asatid.php';
+
+// Formulir pendaftaran admin (publik, hanya bisa dibuka lewat link khusus dari halaman Data Admin)
+Route::get('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'create'])->name('pendaftaran-admin.daftar');
+Route::post('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'store'])->middleware('throttle:20,1')->name('pendaftaran-admin.store');
+Route::get('daftar-admin-sukses/{nomor}', [\App\Http\Controllers\PendaftaranAdminController::class, 'sukses'])->name('pendaftaran-admin.sukses');

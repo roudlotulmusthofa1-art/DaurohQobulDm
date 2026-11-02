@@ -32,7 +32,7 @@ class AppServiceProvider extends ServiceProvider
                     'submenu' => [
                         ['route' => 'admin.santri.index', 'active' => 'admin.santri.*', 'label' => 'Data Santri', 'icon' => 'user-round'],
                         ['route' => 'admin.asatid.index',   'active' => 'admin.asatid.*',   'label' => 'Data Asatid', 'icon' => 'user-check'],
-                        ['route' => 'admin.kelas.index',  'active' => 'admin.kelas.*',  'label' => 'Data Kelas', 'icon' => 'school'],
+                        ['route' => 'admin.data-admin.index', 'active' => 'admin.data-admin.*', 'label' => 'Data Admin', 'icon' => 'user-cog'],
                     ],
                 ],
 
