@@ -260,7 +260,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @if ($p->status === 'menunggu')
                 <div class="mt-5 flex flex-wrap gap-2.5">
                     <button type="submit" form="form-syarat" formaction="{{ route('admin.pendaftaran.terima', $p) }}"
-                        onclick="return confirm('Terima pendaftar ini? Persyaratan dan catatan di bawah ikut terkirim ke wali lewat WhatsApp.')"
+                        @click="konfirmasi" data-konfirmasi="Terima pendaftar ini? Persyaratan dan catatan di bawah ikut terkirim ke wali lewat WhatsApp."
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-400 text-[#0b332c] text-sm font-bold hover:bg-emerald-300 shadow-lg shadow-emerald-500/20 transition-colors">
                         {!! $svg('check', 'w-4 h-4') !!} Terima &amp; Kirim Chat
                     </button>
@@ -371,8 +371,10 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     </div>
     @endif
 
-    {{-- ================= BAGIAN-BAGIAN DATA ================= --}}
-    <div class="grid xl:grid-cols-2 gap-6 items-start" v-pre>
+    {{-- ================= BAGIAN-BAGIAN DATA =================
+         Tidak memakai v-pre: form Persyaratan di bawah memakai Vue (kamar & nomor kasur).
+         Teks data aman karena {{ }} Blade sudah dilindungi App\Support\TeksAman. --}}
+    <div class="grid xl:grid-cols-2 gap-6 items-start">
         @foreach ($seksi as $judul => $baris)
         @php [$namaIkon, $warna, $ket] = $gayaSeksi[$judul]; $penuh = in_array($judul, $seksiPenuh); @endphp
 
@@ -606,7 +608,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     {{-- Kamar: pilihan dari Master Data > Kamar, dengan jumlah isi / kapasitas --}}
                     <div class="rounded-2xl bg-[#f5f9f7] ring-1 ring-slate-100 p-3.5 text-right" dir="rtl">
                         <label for="kamar_id" class="block text-sm font-semibold text-slate-700">Kamar</label>
-                        <select id="kamar_id" name="kamar_id"
+                        <select id="kamar_id" name="kamar_id" v-model="kamarId"
                             class="mt-2 w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20">
                             <option value="">Pilih kamar...</option>
                             @foreach ($kamarList as $kamar)
@@ -624,14 +626,17 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         @enderror
                     </div>
 
-                    {{-- Nomor kasur: pilihan mengikuti kamar yang dipilih (lihat skrip "pilihan nomor kasur" di bawah) --}}
+                    {{-- Nomor kasur: pilihan mengikuti kamar yang dipilih (Vue: computed "pilihanKasur") --}}
                     <div class="rounded-2xl bg-[#f5f9f7] ring-1 ring-slate-100 p-3.5">
                         <label for="nomor_kasur" class="block text-sm font-semibold text-slate-700">Nomor Kasur</label>
-                        <select id="nomor_kasur" name="nomor_kasur" data-awal="{{ old('nomor_kasur', $p->nomor_kasur) }}"
+                        <select id="nomor_kasur" name="nomor_kasur" v-model="nomorKasur" :disabled="!kamarTerpilih || kamarTerpilih.kapasitas < 1"
                             class="mt-2 w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400">
                             <option value="">Belum ditentukan</option>
+                            {{-- Kasur yang sudah ditempati santri lain tampil dengan namanya dan tidak bisa dipilih --}}
+                            <option v-for="k in pilihanKasur" :key="k.nomor" :value="String(k.nomor)" :disabled="!!k.penghuni"
+                                v-text="k.penghuni ? 'Kasur ' + k.nomor + ' — ' + k.penghuni : 'Kasur ' + k.nomor"></option>
                         </select>
-                        <p id="ket-kasur" class="text-xs text-slate-400 mt-1">Pilih kamar dulu.</p>
+                        <p class="text-xs text-slate-400 mt-1" v-text="keteranganKasur">Pilih kamar dulu.</p>
                         @error('nomor_kasur')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                         @enderror
@@ -658,7 +663,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 </div>
             </form>
         </section>
-    </div>{{-- /v-pre --}}
+    </div>
 
     {{-- Modal tolak (Vue) --}}
     <div v-if="tolakBuka" v-cloak
@@ -689,58 +694,51 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
 <script>
-    Vue.createApp({
-        data: () => ({ tolakBuka: false, alasan: '' }),
-    }).mount('#psb-detail');
-</script>
-<script>
-    // Pilihan nomor kasur: 1..kapasitas kamar yang dipilih.
-    // Kasur yang sudah ditempati santri lain ditampilkan dengan namanya dan tidak bisa dipilih.
-    // (Dijalankan setelah Vue di atas, karena Vue membuat ulang elemen halaman.)
-    (function () {
-        const KASUR = @json($kasurPerKamar);
-        const kamar = document.getElementById('kamar_id');
-        const kasur = document.getElementById('nomor_kasur');
-        const ket = document.getElementById('ket-kasur');
-        if (!kamar || !kasur) return;
+    // Aplikasi Vue halaman detail pendaftar (Vue dari resources/js/app.js).
+    // Data pendaftar di halaman ini ditampilkan Blade dan sebagian diberi v-pre.
+    document.addEventListener('DOMContentLoaded', function () {
+        const KASUR = @json($kasurPerKamar); // { idKamar: { kapasitas, terisi: { nomor: 'nama penghuni' } } }
 
-        let pilihan = kasur.dataset.awal || '';
-
-        function isi() {
-            const data = KASUR[kamar.value];
-            kasur.innerHTML = '';
-            kasur.add(new Option('Belum ditentukan', ''));
-
-            if (!data) {
-                kasur.disabled = true;
-                ket.textContent = 'Pilih kamar dulu.';
-                return;
-            }
-            if (data.kapasitas < 1) {
-                kasur.disabled = true;
-                ket.textContent = 'Kapasitas kamar ini belum diatur di Master Data › Kamar.';
-                return;
-            }
-
-            kasur.disabled = false;
-            let kosong = 0;
-            for (let n = 1; n <= data.kapasitas; n++) {
-                const penghuni = data.terisi[n];
-                const opsi = new Option(penghuni ? `Kasur ${n} — ${penghuni}` : `Kasur ${n}`, n);
-                opsi.disabled = !!penghuni;
-                if (!penghuni) kosong++;
-                kasur.add(opsi);
-            }
-            const ada = [...kasur.options].some((o) => o.value === String(pilihan) && !o.disabled);
-            kasur.value = ada ? String(pilihan) : '';
-            ket.textContent = `${kosong} dari ${data.kapasitas} kasur masih kosong.`;
-        }
-
-        kamar.addEventListener('change', () => { pilihan = ''; isi(); });
-        kasur.addEventListener('change', () => { pilihan = kasur.value; });
-        isi();
-    })();
+        Vue.createApp({
+            data() {
+                return {
+                    tolakBuka: false, // pop-up alasan penolakan
+                    alasan: '',
+                    kamarId: @json((string) old('kamar_id', $p->kamar_id ?? '')),
+                    nomorKasur: @json((string) old('nomor_kasur', $p->nomor_kasur ?? '')),
+                };
+            },
+            computed: {
+                kamarTerpilih() {
+                    return KASUR[this.kamarId] ?? null;
+                },
+                // Kasur 1..kapasitas kamar yang dipilih, beserta penghuninya (bila ada)
+                pilihanKasur() {
+                    const k = this.kamarTerpilih;
+                    if (!k || k.kapasitas < 1) return [];
+                    return Array.from({ length: k.kapasitas }, (_, i) => ({ nomor: i + 1, penghuni: k.terisi[i + 1] ?? null }));
+                },
+                keteranganKasur() {
+                    if (!this.kamarTerpilih) return 'Pilih kamar dulu.';
+                    if (this.kamarTerpilih.kapasitas < 1) return 'Kapasitas kamar ini belum diatur di Master Data › Kamar.';
+                    const kosong = this.pilihanKasur.filter((k) => !k.penghuni).length;
+                    return kosong + ' dari ' + this.kamarTerpilih.kapasitas + ' kasur masih kosong.';
+                },
+            },
+            watch: {
+                // Ganti kamar -> nomor kasur dipilih ulang
+                kamarId() {
+                    this.nomorKasur = '';
+                },
+            },
+            created() {
+                // Nomor kasur lama tidak berlaku bila kasurnya sudah ditempati santri lain
+                const k = this.pilihanKasur.find((x) => String(x.nomor) === this.nomorKasur);
+                if (!k || k.penghuni) this.nomorKasur = '';
+            },
+            methods: { ...metodeHalaman }, // konfirmasi tombol Terima
+        }).mount('#psb-detail');
+    });
 </script>
 @endpush

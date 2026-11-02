@@ -43,6 +43,12 @@ class CadanganDatabase
             'keterangan' => 'Tahun & bulan ajaran, kurikulum & kitab, jadwal mengajar.',
             'tabel' => ['jadwal_mengajar', 'kitab', 'bulan_ajaran', 'tahun_ajaran'],
         ],
+        'keuangan' => [
+            'label' => 'Buku Kas',
+            'keterangan' => 'Semua transaksi kas masuk & keluar beserta file buktinya. Kategori tetap disimpan.',
+            'tabel' => ['kas_transaksi'],
+            'folder' => ['buku-kas'],
+        ],
         'master' => [
             'label' => 'Master Data',
             'keterangan' => 'Bidang ilmu, waktu pelajaran, kelas, kamar, jenis kegiatan/pelanggaran/khidmah, kategori berita.',

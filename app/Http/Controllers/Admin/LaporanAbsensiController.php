@@ -232,14 +232,14 @@ class LaporanAbsensiController extends Controller
         if ($perKelas->count() > 1) {
             $rendah = $perKelas->first();
             $tinggi = $perKelas->last();
-            $k[] = ['Kelas dengan kehadiran tertinggi <b>' . e($tinggi['nama']) . '</b> (' . $tinggi['persen'] . '%), terendah <b>' . e($rendah['nama']) . '</b> (' . $rendah['persen'] . '%).', 'sky'];
+            $k[] = ['Kelas dengan kehadiran tertinggi <b>' . \App\Support\TeksAman::e($tinggi['nama']) . '</b> (' . $tinggi['persen'] . '%), terendah <b>' . \App\Support\TeksAman::e($rendah['nama']) . '</b> (' . $rendah['persen'] . '%).', 'sky'];
         } elseif ($perKelas->count() === 1) {
-            $k[] = ['Kehadiran kelas <b>' . e($perKelas->first()['nama']) . '</b>: ' . $perKelas->first()['persen'] . '%.', 'sky'];
+            $k[] = ['Kehadiran kelas <b>' . \App\Support\TeksAman::e($perKelas->first()['nama']) . '</b>: ' . $perKelas->first()['persen'] . '%.', 'sky'];
         }
 
         if ($perKegiatan->isNotEmpty()) {
             $rendah = $perKegiatan->first();
-            $k[] = ['Kegiatan dengan kehadiran terendah <b>' . e($rendah['nama']) . '</b> (' . $rendah['persen'] . '%).', 'teal'];
+            $k[] = ['Kegiatan dengan kehadiran terendah <b>' . \App\Support\TeksAman::e($rendah['nama']) . '</b> (' . $rendah['persen'] . '%).', 'teal'];
         }
 
         $jumlahPerhatian = $perPeserta->filter(fn ($p) => $p['persen'] < 75 || $p['alfa'] >= 3)->count();

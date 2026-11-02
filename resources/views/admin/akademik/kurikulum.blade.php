@@ -2,7 +2,7 @@
     Admin > Akademik > Kurikulum & Kitab
     Kitab dikelompokkan per bidang ilmu (Master Data > Bidang Ilmu), untuk satu tahun ajaran.
     Pilihan "bulan ke" mengikuti jumlah bulan di tahun ajaran itu. Kelas dipilih di Jadwal Mengajar.
-    Form tambah/ubah memakai <dialog> (lihat _form-kitab).
+    Form tambah/ubah memakai <dialog> (lihat _form-kitab). Interaksinya diatur aplikasi Vue #halaman-kurikulum.
 --}}
 @extends('layouts.admin')
 
@@ -22,6 +22,7 @@ $ikonStat = [
 $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald-600 ring-emerald-100', 'bg-violet-50 text-violet-600 ring-violet-100'];
 @endphp
 
+<div id="halaman-kurikulum">
 <div class="space-y-6 mx-4 md:mx-10 lg:mx-20">
     @include('admin.akademik._flash')
 
@@ -35,7 +36,7 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                 <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">Manajemen Kurikulum &amp; Kitab</h1>
                 <p class="mt-1.5 text-sm text-white/75">Total {{ $semua->count() }} kitab · {{ $semua->pluck('bidang_ilmu_id')->filter()->unique()->count() }} bidang ilmu</p>
             </div>
-            <button type="button" data-buka="dialog-kitab-baru"
+            <button type="button" @click="bukaDialog('dialog-kitab-baru')"
                 class="inline-flex items-center gap-2 self-start sm:self-auto rounded-2xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-amber-300 shadow-lg shadow-amber-500/30 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                 Tambah Kitab
@@ -87,7 +88,7 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
             <input type="search" name="q" value="{{ $filter['q'] }}" placeholder="Cari kitab (nama, nama Arab, deskripsi)…" class="flex-1 bg-transparent border-0 py-2.5 text-sm outline-none focus:ring-0">
         </label>
-        <select name="tahun" onchange="this.form.submit()" class="rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm text-slate-700">
+        <select name="tahun" @change="kirimForm" class="rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm text-slate-700">
             <option value="">Semua tahun ajaran</option>
             @foreach ($tahunList as $t)<option value="{{ $t->id }}" @selected((string) $filter['tahun'] === (string) $t->id)>TA {{ $t->nama }}{{ $t->is_active ? ' (aktif)' : '' }}</option>@endforeach
         </select>
@@ -155,10 +156,10 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                     </p>
                 </div>
                 <div class="flex items-center justify-between border-t border-slate-100 px-4 py-2.5">
-                    <button type="button" data-buka="dialog-kitab-{{ $k->id }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-600 hover:text-sky-700">
+                    <button type="button" @click="bukaDialog('dialog-kitab-{{ $k->id }}')" class="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-600 hover:text-sky-700">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>Edit
                     </button>
-                    <form method="POST" action="{{ route('admin.kurikulum.destroy', $k) }}" onsubmit="return confirm('Hapus kitab {{ addslashes($k->nama) }}?')">
+                    <form method="POST" action="{{ route('admin.kurikulum.destroy', $k) }}" @submit="konfirmasi" data-konfirmasi="Hapus kitab {{ $k->nama }}?">
                         @csrf @method('DELETE')
                         <button class="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-600 hover:text-rose-700">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>Hapus
@@ -167,7 +168,7 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                 </div>
             </article>
 
-            <dialog id="dialog-kitab-{{ $k->id }}" class="dialog-akademik">
+            <dialog id="dialog-kitab-{{ $k->id }}" ref="dialog-kitab-{{ $k->id }}" class="dialog-akademik" @click.self="tutupDialog">
                 @include('admin.akademik._form-kitab', ['aksi' => route('admin.kurikulum.update', $k), 'metode' => 'PUT', 'judul' => 'Ubah Kitab', 'k' => $k])
             </dialog>
             @endforeach
@@ -181,9 +182,10 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
     @endforelse
 </div>
 
-<dialog id="dialog-kitab-baru" class="dialog-akademik">
+<dialog id="dialog-kitab-baru" ref="dialog-kitab-baru" class="dialog-akademik" @click.self="tutupDialog">
     @include('admin.akademik._form-kitab', ['aksi' => route('admin.kurikulum.store'), 'metode' => 'POST', 'judul' => 'Tambah Kitab', 'k' => null])
 </dialog>
+</div>
 @endsection
 
 @push('styles')
@@ -191,17 +193,23 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
 @endpush
 
 @push('scripts')
-@include('admin.akademik._dialog-script')
 <script>
-    // Pilihan "bulan ke" mengikuti tahun ajaran yang dipilih (bulan tahun lain disembunyikan dan tidak ikut terkirim)
-    document.addEventListener('change', (e) => {
-        const pilih = e.target.closest('[data-pilih-tahun]');
-        if (!pilih) return;
-        pilih.closest('[data-form-kitab]').querySelectorAll('[data-bulan-tahun]').forEach((grup) => {
-            const tampil = grup.dataset.bulanTahun === pilih.value;
-            grup.classList.toggle('hidden', !tampil);
-            grup.querySelectorAll('input').forEach((i) => { i.disabled = !tampil; if (!tampil) i.checked = false; });
-        });
+    document.addEventListener('DOMContentLoaded', function () {
+        Vue.createApp({
+            data() {
+                return {
+                    tahunForm: {}, // tahun ajaran yang dipilih di tiap form kitab: { 'k5': '3', 'baru': '2' }
+                };
+            },
+            methods: {
+                ...metodeHalaman, // bukaDialog, tutupDialog, konfirmasi, kirimForm (partials/vue-metode.blade.php)
+                // Tahun yang sedang dipilih di form (bila belum diganti: tahun awal dari server).
+                // Kotak "bulan ke" tahun lain disembunyikan dan dinonaktifkan agar tidak ikut terkirim.
+                tahunTerpilih(kunciForm, awal) {
+                    return this.tahunForm[kunciForm] ?? awal;
+                },
+            },
+        }).mount('#halaman-kurikulum');
     });
 </script>
 @endpush

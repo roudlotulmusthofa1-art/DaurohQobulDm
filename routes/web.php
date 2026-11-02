@@ -76,6 +76,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
 require __DIR__ . '/psb.php';
 require __DIR__ . '/asatid.php';
 require __DIR__ . '/pengaturan.php';
+require __DIR__ . '/sistem.php'; // Sistem > Role & Permission, Daftar User
+require __DIR__ . '/keuangan.php'; // Keuangan > Buku Kas
 
 // Formulir pendaftaran admin (publik, hanya bisa dibuka lewat link khusus dari halaman Data Admin)
 Route::get('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'create'])->name('pendaftaran-admin.daftar');

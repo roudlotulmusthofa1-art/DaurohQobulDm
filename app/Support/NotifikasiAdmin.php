@@ -47,6 +47,12 @@ class NotifikasiAdmin
             'ikon' => 'chat',
             'warna' => 'sky',
         ],
+        'pesan_peserta' => [
+            'judul' => 'Pesan dari peserta',
+            'keterangan' => 'Peserta mengirim pesan lewat dasbor siswa yang belum dibaca admin.',
+            'ikon' => 'chat',
+            'warna' => 'emerald',
+        ],
         'syarat_belum_lengkap' => [
             'judul' => 'Persyaratan belum lengkap',
             'keterangan' => 'Santri sudah diterima, tapi ada persyaratan yang belum dicentang.',
@@ -117,7 +123,7 @@ class NotifikasiAdmin
             $total += (clone $q)->count();
             foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $p) {
                 $items[] = static::item('pendaftar_baru',
-                    'Pendaftar baru: <b>' . e($p->nama_lengkap) . '</b>',
+                    'Pendaftar baru: <b>' . \App\Support\TeksAman::e($p->nama_lengkap) . '</b>',
                     $p->nomor_pendaftaran,
                     route('admin.pendaftaran.show', $p->id),
                     $p->created_at);
@@ -130,7 +136,7 @@ class NotifikasiAdmin
             $total += (clone $q)->count();
             foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
                 $items[] = static::item('asatid_baru',
-                    'Pendaftar asatid baru: <b>' . e($a->nama_lengkap) . '</b>',
+                    'Pendaftar asatid baru: <b>' . \App\Support\TeksAman::e($a->nama_lengkap) . '</b>',
                     $a->nomor_pendaftaran,
                     route('admin.asatid.show', $a->id),
                     $a->created_at);
@@ -143,7 +149,7 @@ class NotifikasiAdmin
             $total += (clone $q)->count();
             foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
                 $items[] = static::item('admin_baru',
-                    'Pendaftar admin baru: <b>' . e($a->nama_lengkap) . '</b>',
+                    'Pendaftar admin baru: <b>' . \App\Support\TeksAman::e($a->nama_lengkap) . '</b>',
                     $a->nomor_pendaftaran,
                     route('admin.data-admin.show', $a->id),
                     $a->created_at);
@@ -157,9 +163,22 @@ class NotifikasiAdmin
             $total += (clone $q)->count();
             foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'created_at']) as $p) {
                 $items[] = static::item('catatan_peserta',
-                    '<b>' . e($p->nama_lengkap) . '</b> menulis catatan untuk admin',
+                    '<b>' . \App\Support\TeksAman::e($p->nama_lengkap) . '</b> menulis catatan untuk admin',
                     'Baca di detail siswa',
                     route('admin.pendaftaran.show', $p->id),
+                    $p->created_at);
+            }
+        }
+
+        // Pesan dari peserta (dasbor siswa) yang belum dibaca admin
+        if (static::aktif('pesan_peserta') && \Illuminate\Support\Facades\Schema::hasTable('pesan_peserta')) {
+            $q = \App\Models\PesanPeserta::dariPeserta()->belumDibaca();
+            $total += (clone $q)->count();
+            foreach ($q->with('peserta:id,nama_lengkap')->latest()->take(5)->get() as $p) {
+                $items[] = static::item('pesan_peserta',
+                    '<b>' . \App\Support\TeksAman::e($p->peserta?->nama_lengkap ?? 'Peserta') . '</b> mengirim pesan: ' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($p->judul ?: $p->isi, 40)),
+                    'Buka Pesan Peserta',
+                    route('admin.pesan-peserta.show', $p->pendaftaran_siswa_id),
                     $p->created_at);
             }
         }
@@ -203,7 +222,7 @@ class NotifikasiAdmin
             $total += $kamarPenuh->count();
             foreach ($kamarPenuh->take(5) as $k) {
                 $items[] = static::item('kamar_penuh',
-                    'Kamar <b>' . e($k->nama) . '</b> sudah penuh',
+                    'Kamar <b>' . \App\Support\TeksAman::e($k->nama) . '</b> sudah penuh',
                     "{$k->santri_count}/{$k->kapasitas} santri",
                     $urlKamar);
             }

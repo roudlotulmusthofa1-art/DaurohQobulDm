@@ -372,9 +372,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @endsection
 
 @push('scripts')
-<script src="https://unpkg.com/vue@3.4.38/dist/vue.global.prod.js"></script>
 <script>
-    // Data awal dikirim dari PHP ke JavaScript dalam format JSON
+    // Vue dari resources/js/app.js (Vite). Data awal dikirim dari PHP ke JavaScript dalam format JSON
     const awalPondok = @json($pondokAwal);
     const awalKitab  = @json($kitabAwal);
     const daftarFan  = @json($p::FAN_KITAB);
@@ -383,7 +382,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     let kunci = 0;
     const beriKunci = (baris) => baris.map((b) => ({ key: ++kunci, ...b }));
 
-    Vue.createApp({
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({
         data: () => ({
             pondok: beriKunci(awalPondok),
             kitab: beriKunci(awalKitab),
@@ -407,6 +406,6 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 if (this.kitab.length > 1) this.kitab.splice(i, 1);
             },
         },
-    }).mount('#riwayat-app');
+    }).mount('#riwayat-app'));
 </script>
 @endpush

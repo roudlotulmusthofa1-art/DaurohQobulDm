@@ -26,6 +26,14 @@ class LoginController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        // Pendaftar santri lama yang belum punya akun: buatkan dari email & password formulir pendaftaran
+        if (! \App\Models\User::where('email', $credentials['email'])->exists()) {
+            $pendaftar = \App\Models\PendaftaranSiswa::where('email', $credentials['email'])->first();
+            if ($pendaftar?->password && \Illuminate\Support\Facades\Hash::check($credentials['password'], $pendaftar->password)) {
+                $pendaftar->buatAkun();
+            }
+        }
+
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 

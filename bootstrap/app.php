@@ -18,10 +18,13 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        // Cookie posisi sidebar admin ditulis oleh Vue (JavaScript), jadi tidak dienkripsi
+        $middleware->encryptCookies(except: ['sidebar_tertutup']);
         // Sudah login lalu membuka /login -> diarahkan ke halaman sesuai role (admin / asatid / siswa)
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->halamanAwal() ?? '/admin/beranda');
         // Peserta dikeluarkan bila sesi aktif berganti; admin & asatid tetap login
-        $middleware->web(append: [\App\Http\Middleware\CekSesiLogin::class]);
+        // CekIzinAdmin: akun admin ber-role pengurus hanya membuka menu yang diizinkan (Sistem > Role & Permission)
+        $middleware->web(append: [\App\Http\Middleware\CekSesiLogin::class, \App\Http\Middleware\CekIzinAdmin::class]);
         $middleware->alias([
             'peran' => \App\Http\Middleware\PeranMiddleware::class,
         ]);

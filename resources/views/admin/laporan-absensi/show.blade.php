@@ -32,6 +32,7 @@ $info = $kegiatan
     ];
 @endphp
 
+<div id="halaman-detail-absensi">
 <div class="space-y-6">
     <a href="{{ route('admin.laporan-absensi.index') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-emerald-700">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
@@ -82,7 +83,7 @@ $info = $kegiatan
                     @endforeach
                 </div>
             </section>
-            <form method="POST" action="{{ route('admin.laporan-absensi.destroy', $absensi) }}" onsubmit="return confirm('Hapus absensi ini beserta seluruh data kehadirannya?')">
+            <form method="POST" action="{{ route('admin.laporan-absensi.destroy', $absensi) }}" @submit="konfirmasi" data-konfirmasi="Hapus absensi ini beserta seluruh data kehadirannya?">
                 @csrf @method('DELETE')
                 <button class="w-full py-3 rounded-2xl bg-white ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">Hapus absensi ini</button>
             </form>
@@ -120,4 +121,12 @@ $info = $kegiatan
         </section>
     </div>
 </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Aplikasi Vue halaman ini: konfirmasi hapus (metode dari partials/vue-metode.blade.php)
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-detail-absensi'));
+</script>
+@endpush

@@ -11,7 +11,6 @@
         rel="stylesheet">
 
     {{-- Vue 3 (global build) --}}
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -232,19 +231,12 @@
     </div>
 
     <script>
-        const { createApp,ref } = Vue;
-        createApp({
-            setup() {
-            const showPassword = ref(false);
-
-            return {
-            showPassword
-            };
-            },
+        // Vue dari resources/js/app.js (Vite), dipasang setelah halaman siap
+        document.addEventListener('DOMContentLoaded', () => Vue.createApp({
             data() {
                 return {
                     form: {
-                        email: '{{ old('email') }}',
+                        email: @json(old('email', '')),
                         password: '',
                     },
                     showPassword: false,
@@ -269,10 +261,11 @@
                     // cukup tampilkan status loading pada tombol.
                     this.loading = true;
                 }
-            }
-        }).mount('#loginApp');
-
-        lucide.createIcons();
+            },
+            mounted() {
+                lucide.createIcons();
+            },
+        }).mount('#loginApp'));
     </script>
 </body>
 

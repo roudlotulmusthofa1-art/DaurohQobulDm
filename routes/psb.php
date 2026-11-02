@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminPendaftaranController;
 use App\Http\Controllers\Psb\PendaftaranController;
-use App\Http\Controllers\Siswa\SiswaProfilController;
+use App\Http\Controllers\Siswa\SiswaDashboardController;
 use Illuminate\Support\Facades\Route;
 
 /* Tambahkan di routes/web.php:  require __DIR__ . '/psb.php'; */
@@ -35,10 +35,26 @@ Route::prefix('admin')->middleware(['auth', 'peran:admin'])->group(function () {
     });
 });
 
+// ===== ADMIN: Pesan Peserta (pesan dua arah dengan dasbor siswa) =====
+Route::prefix('admin/pesan-peserta')->name('admin.pesan-peserta.')->middleware(['auth', 'peran:admin'])
+    ->controller(\App\Http\Controllers\Admin\PesanPesertaController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'kirim')->name('kirim');                         // pesan baru (satu / banyak peserta)
+        Route::get('/{peserta}', 'show')->name('show');                   // percakapan dengan satu peserta
+        Route::post('/{peserta}/balas', 'balas')->name('balas');
+        Route::delete('/pesan/{pesan}', 'hapus')->name('hapus');
+    });
+
 // ===== SISWA: akun siswa (login lewat halaman login yang sama dengan admin) =====
 Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'peran:siswa'])->group(function () {
-    Route::get('/profil', [SiswaProfilController::class, 'index'])->name('profil');
-    Route::post('/keluar', [SiswaProfilController::class, 'logout'])->name('logout');
+    // Dasbor siswa: kartu menu Profil, Pengumuman Kelulusan, Pesan dari Admin, Pesan untuk Admin
+    Route::get('/beranda', [SiswaDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/profil', [SiswaDashboardController::class, 'profil'])->name('profil');
+    Route::get('/kelulusan', [SiswaDashboardController::class, 'kelulusan'])->name('kelulusan');
+    Route::get('/pesan-admin', [SiswaDashboardController::class, 'pesanAdmin'])->name('pesan-admin');
+    Route::get('/pesan-saya', [SiswaDashboardController::class, 'pesanSaya'])->name('pesan-saya');
+    Route::post('/pesan-saya', [SiswaDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');
+    Route::post('/keluar', [SiswaDashboardController::class, 'logout'])->name('logout');
 });
 
 

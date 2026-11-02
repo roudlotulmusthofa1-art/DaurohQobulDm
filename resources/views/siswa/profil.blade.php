@@ -1,106 +1,70 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Profil Siswa | Ribath</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-slate-50 min-h-screen">
+{{-- Akun Siswa > Profil: data diri dari formulir pendaftaran (hanya dilihat) --}}
+@extends('layouts.siswa')
+
+@section('judul', 'Profil Saya')
+
+@section('content')
 @php
-    $seksi = [
-        'Data Pribadi' => [
-            'Nama Lengkap' => $siswa->nama_lengkap, 'NIK' => $siswa->nik, 'NISN' => $siswa->nisn,
-            'Jenis Kelamin' => $siswa->jenis_kelamin === 'L' ? 'Laki-laki' : ($siswa->jenis_kelamin === 'P' ? 'Perempuan' : null),
-            'Tempat, Tanggal Lahir' => $siswa->tempat_lahir . ', ' . optional($siswa->tanggal_lahir)->translatedFormat('d F Y'),
-            'Anak ke / Jumlah Saudara' => ($siswa->anak_ke ?? '-') . ' / ' . ($siswa->jumlah_saudara ?? '-'),
-        ],
-        'Alamat' => [
-            'Alamat' => $siswa->alamat, 'Kelurahan/Desa' => $siswa->kelurahan, 'Kecamatan' => $siswa->kecamatan,
-            'Kota/Kabupaten' => $siswa->kota, 'Provinsi' => $siswa->provinsi, 'Kode Pos' => $siswa->kode_pos,
-        ],
-        'Orang Tua / Wali' => [
-            'Nama Ayah' => $siswa->nama_ayah, 'Pekerjaan Ayah' => $siswa->pekerjaan_ayah,
-            'Nama Ibu' => $siswa->nama_ibu, 'Pekerjaan Ibu' => $siswa->pekerjaan_ibu,
-            'Nama Wali' => $siswa->nama_wali, 'No. WhatsApp Wali' => $siswa->no_hp_wali,
-        ],
-        'Pendidikan & Program' => [
-            'Asal Sekolah' => $siswa->asal_sekolah, 'Tahun Lulus' => $siswa->tahun_lulus,
-            'Program Pilihan' => $siswa->program_pilihan, 'Hafalan' => ($siswa->hafalan_juz ?? 0) . ' juz',
-        ],
-    ];
+$s = $siswa;
+$kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
 @endphp
 
-<header class="bg-teal-700 text-white">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <span class="font-semibold">Ribath — Akun Siswa</span>
-        <form method="POST" action="{{ route('siswa.logout') }}">
-            @csrf
-            <button class="text-sm bg-white/15 hover:bg-white/25 rounded-lg px-3 py-1.5">Keluar</button>
-        </form>
-    </div>
-</header>
-
-<main class="max-w-4xl mx-auto px-4 py-6 space-y-5">
-    @if (session('error'))
-    <div class="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-sm">{{ session('error') }}</div>
-    @endif
-    <!-- Kartu identitas -->
-    <section class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-col sm:flex-row gap-5 items-center sm:items-start">
-        @if ($siswa->foto_url)
-            <img src="{{ $siswa->foto_url }}" alt="Foto" class="w-28 h-36 object-cover rounded-xl border border-slate-200">
-        @endif
-        <div class="text-center sm:text-left">
-            <h1 class="text-xl font-bold text-slate-800">{{ $siswa->nama_lengkap }}</h1>
-            <p class="text-sm text-slate-500">No. Pendaftaran: <strong>{{ $siswa->nomor_pendaftaran }}</strong></p>
-            <span class="inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-700">
-                {{ $siswa->label_status }}
-            </span>
-            @if ($siswa->diproses_at)
-                <p class="text-xs text-slate-400 mt-2">Diterima pada {{ $siswa->diproses_at->translatedFormat('d F Y') }}</p>
+<div class="space-y-5">
+    {{-- ===== Kartu identitas ===== --}}
+    <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-8">
+        <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
+        <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
+        <div class="relative flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
+            @if ($s->foto_url)
+                <img src="{{ $s->foto_url }}" alt="Foto {{ $s->nama_lengkap }}" class="w-28 h-36 rounded-3xl object-cover ring-4 ring-white/15 shadow-2xl">
+            @else
+                <span class="w-28 h-36 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 ring-4 ring-white/15 text-4xl font-extrabold flex items-center justify-center">{{ mb_strtoupper(mb_substr($s->nama_lengkap, 0, 1)) }}</span>
             @endif
-            {{-- Penempatan dari Master Data (Kelas & Kamar) --}}
-            @if ($siswa->kelasMaster || $siswa->kamarMaster)
-                <div class="mt-2 flex flex-wrap justify-center sm:justify-start gap-2 text-xs">
-                    @if ($siswa->kelasMaster)
-                        <span class="px-3 py-1 rounded-full bg-sky-50 text-sky-700">Kelas: <strong>{{ $siswa->kelasMaster->nama }}</strong></span>
-                    @endif
-                    @if ($siswa->kamarMaster)
-                        <span class="px-3 py-1 rounded-full bg-rose-50 text-rose-700">Kamar: <strong>{{ $siswa->kamarMaster->nama }}</strong></span>
-                    @endif
+            <div class="flex-1 min-w-0">
+                <span class="inline-flex rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1 text-[11px] font-semibold text-white/80">No. Pendaftaran {{ $s->nomor_pendaftaran }}</span>
+                <h2 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ $s->nama_lengkap }}</h2>
+                @if ($s->nama_lengkap_arab)
+                    <p class="mt-0.5 text-xl text-white/80" dir="rtl">{{ $s->nama_lengkap_arab }}</p>
+                @endif
+                <div class="mt-3 flex flex-wrap justify-center sm:justify-start gap-2 text-xs font-semibold">
+                    <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ $s->label_status }}</span>
+                    @if ($s->kelasMaster)<span class="rounded-full bg-emerald-300/15 ring-1 ring-emerald-200/25 px-3 py-1.5 text-emerald-100">Kelas: {{ $s->kelasMaster->nama }}</span>@endif
+                    @if ($s->kamarMaster)<span class="rounded-full bg-amber-300/15 ring-1 ring-amber-200/25 px-3 py-1.5 text-amber-100">Kamar: {{ $s->kamarMaster->nama }}{{ $s->nomor_kasur ? ' · Kasur ' . $s->nomor_kasur : '' }}</span>@endif
                 </div>
-            @endif
-            @if ($siswa->catatan_admin)
-                <p class="text-sm text-slate-600 mt-2">Catatan: {{ $siswa->catatan_admin }}</p>
+                <p class="mt-3 text-xs text-white/60">Email login: {{ $s->email }}</p>
+            </div>
+            @if ($s->qr_svg)
+            <div class="shrink-0 rounded-2xl bg-white p-2.5 text-center">
+                <div class="w-24 h-24 [&_svg]:w-full [&_svg]:h-full">{!! $s->qr_svg !!}</div>
+                <p class="mt-1 text-[10px] font-semibold text-slate-500">Kode absensi</p>
+            </div>
             @endif
         </div>
     </section>
 
-    @foreach ($seksi as $judul => $baris)
-        <section class="bg-white rounded-2xl border border-slate-200 p-5">
-            <h2 class="font-semibold text-teal-700 mb-3">{{ $judul }}</h2>
-            <dl class="grid sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
-                @foreach ($baris as $label => $nilai)
-                    <div>
-                        <dt class="text-slate-400 text-xs">{{ $label }}</dt>
-                        <dd class="text-slate-800">{{ $nilai ?: '-' }}</dd>
-                    </div>
-                @endforeach
-            </dl>
-        </section>
-    @endforeach
+    <p class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 px-4 py-3 text-sm text-sky-900">
+        Data ini sesuai formulir pendaftaran. Bila ada yang salah, kirim pesan lewat menu
+        <a href="{{ route('siswa.pesan-saya') }}" class="font-semibold underline">Pesan untuk Admin</a>.
+    </p>
 
-    <section class="bg-white rounded-2xl border border-slate-200 p-5">
-        <h2 class="font-semibold text-teal-700 mb-3">Berkas</h2>
-        <div class="flex flex-wrap gap-3 text-sm">
-            @foreach (['berkas_foto' => 'Pas Foto', 'berkas_kk' => 'Kartu Keluarga', 'berkas_akta' => 'Akta Kelahiran'] as $kolom => $nama)
-                @if ($siswa->$kolom)
-                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siswa->$kolom) }}" target="_blank"
-                       class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">{{ $nama }}</a>
+    @include('partials.rincian-peserta', ['s' => $s, 'kartu' => $kartu])
+
+    {{-- ===== Berkas ===== --}}
+    <section class="{{ $kartu }} p-5 sm:p-6">
+        <h3 class="flex items-center gap-2.5 font-bold text-slate-800">
+            <span class="w-2 h-6 rounded-full bg-gradient-to-b from-slate-400 to-slate-600"></span>Berkas yang Diunggah
+        </h3>
+        <div class="mt-4 flex flex-wrap gap-2">
+            @foreach ($s::BERKAS as $kolom => $label)
+                @if ($s->$kolom)
+                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($s->$kolom) }}" target="_blank" rel="noopener"
+                    class="inline-flex items-center gap-2 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200 px-3.5 py-2 text-sm font-semibold text-slate-700 hover:bg-emerald-50 hover:ring-emerald-200">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    {{ is_array($label) ? ($label[0] ?? $kolom) : $label }}
+                </a>
                 @endif
             @endforeach
         </div>
     </section>
-</main>
-</body>
-</html>
+</div>
+@endsection

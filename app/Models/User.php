@@ -54,7 +54,7 @@ class User extends Authenticatable
     {
         return match ($this->role) {
             'asatid' => route('asatid.dashboard'),
-            'siswa'  => route('siswa.profil'),
+            'siswa'  => route('siswa.dashboard'),
             default  => route('admin.dashboard'),
         };
     }

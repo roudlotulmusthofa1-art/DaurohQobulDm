@@ -33,6 +33,7 @@ $nada = [
 $lebar = ['Alamat Lengkap'];
 @endphp
 
+<div id="halaman-detail-admin">
 <div class="space-y-6 pb-4">
     <a href="{{ route('admin.data-admin.index') }}"
         class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors">
@@ -145,7 +146,7 @@ $lebar = ['Alamat Lengkap'];
     @if ($a->status === 'menunggu')
     <div class="grid md:grid-cols-2 gap-6">
         <form method="POST" action="{{ route('admin.data-admin.terima', $a) }}" class="{{ $kartu }} p-5 sm:p-6 flex flex-col"
-            onsubmit="return confirm('Terima {{ addslashes($a->nama_lengkap) }} sebagai admin? Akun admin dibuat (bisa membuka seluruh panel admin) dan chat WhatsApp dikirim.')">
+            @submit="konfirmasi" data-konfirmasi="Terima {{ $a->nama_lengkap }} sebagai admin? Akun admin dibuat (bisa membuka seluruh panel admin) dan chat WhatsApp dikirim.">
             @csrf
             <h2 class="text-[15px] font-bold text-emerald-700">Terima sebagai Admin</h2>
             <p class="text-xs text-slate-400 mt-0.5">Akun login (role admin) dibuat, lalu info dikirim lewat WhatsApp.</p>
@@ -174,7 +175,7 @@ $lebar = ['Alamat Lengkap'];
     {{-- Hapus --}}
     <div class="flex justify-end">
         <form method="POST" action="{{ route('admin.data-admin.destroy', $a) }}"
-            onsubmit="return confirm('Hapus data admin ini? Pas foto dan akun login-nya ikut terhapus.')">
+            @submit="konfirmasi" data-konfirmasi="Hapus data admin ini? Pas foto dan akun login-nya ikut terhapus.">
             @csrf
             @method('DELETE')
             <button class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
@@ -184,4 +185,12 @@ $lebar = ['Alamat Lengkap'];
         </form>
     </div>
 </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Aplikasi Vue halaman ini: konfirmasi hapus (metode dari partials/vue-metode.blade.php)
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-detail-admin'));
+</script>
+@endpush

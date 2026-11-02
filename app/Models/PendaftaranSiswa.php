@@ -60,16 +60,33 @@ class PendaftaranSiswa extends Model
     }
 
 
+    /**
+     * Buat / perbarui akun login peserta (role siswa) dari email & password formulir.
+     * Dipanggil saat mendaftar (agar bisa langsung masuk dasbor siswa) dan saat diterima.
+     */
+    public function buatAkun(): User
+    {
+        $user = $this->user_id ? User::find($this->user_id) : null;
+        $user ??= User::firstOrNew(['email' => $this->email]);
+
+        $user->forceFill([
+            'name'     => $this->nama_lengkap,
+            'email'    => $this->email,
+            'password' => $this->password, // sudah ter-hash saat mendaftar, JANGAN di-Hash::make lagi
+            'role'     => 'siswa',         // ditulis eksplisit, tidak bergantung nilai bawaan
+        ])->save();
+
+        if ($this->user_id !== $user->id) {
+            $this->forceFill(['user_id' => $user->id])->saveQuietly();
+        }
+
+        return $user;
+    }
+
     public function terima(?string $catatan = null): void
     {
         DB::transaction(function () use ($catatan) {
-            $user = User::firstOrNew(['email' => $this->email]);
-
-            $user->forceFill([
-                'name'     => $this->nama_lengkap,
-                'password' => $this->password, // sudah ter-hash saat mendaftar, JANGAN di-Hash::make lagi
-                'role'     => 'siswa',         // ditulis eksplisit, tidak bergantung nilai bawaan
-            ])->save();
+            $user = $this->buatAkun();
 
             $this->update([
                 'status'        => self::DITERIMA,
@@ -217,6 +234,12 @@ class PendaftaranSiswa extends Model
     }
 
     /** Kelas penempatan dari Master Data (kolom kelas_id). Pakai: $p->kelasMaster?->nama */
+    /** Pesan antara admin dan peserta ini (dasbor siswa) */
+    public function pesan()
+    {
+        return $this->hasMany(PesanPeserta::class);
+    }
+
     public function kelasMaster()
     {
         return $this->belongsTo(Kelas::class, 'kelas_id');

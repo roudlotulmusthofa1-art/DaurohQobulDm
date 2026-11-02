@@ -1,7 +1,7 @@
 {{--
     Admin > Akademik > Tahun & Bulan Ajaran
     Tahun ajaran dibagi menjadi bulan ajaran (pengganti semester).
-    Form tambah/ubah memakai <dialog> bawaan browser (lihat skrip di bawah).
+    Form tambah/ubah memakai <dialog> bawaan browser. Interaksinya diatur aplikasi Vue #halaman-tahun-ajaran (skrip di bawah).
 --}}
 @extends('layouts.admin')
 
@@ -18,6 +18,7 @@ $tgl = fn ($t) => $t?->locale('id')->translatedFormat('d M Y');
 $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ring-1 transition-colors';
 @endphp
 
+<div id="halaman-tahun-ajaran">
 <div class="space-y-6 mx-4 md:mx-10 lg:mx-20">
     @include('admin.akademik._flash')
 
@@ -37,7 +38,7 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
                 </p>
                 @endif
             </div>
-            <button type="button" data-buka="dialog-tahun-baru"
+            <button type="button" @click="bukaDialog('dialog-tahun-baru')"
                 class="inline-flex items-center gap-2 self-start sm:self-auto rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-emerald-100 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                 Tambah Tahun Ajaran
@@ -68,7 +69,7 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
                     @endif
                 </div>
             </div>
-            <div class="flex flex-wrap items-center gap-2" onclick="event.stopPropagation()">
+            <div class="flex flex-wrap items-center gap-2" @click.stop>
                 @if ($t->is_active)
                     <span class="{{ $tombol }} bg-emerald-600 text-white ring-emerald-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Aktif
@@ -80,16 +81,16 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
                         </button>
                     </form>
                 @endif
-                <button type="button" class="{{ $tombol }} bg-white text-slate-600 ring-slate-200 hover:bg-slate-50" onclick="this.closest('details').toggleAttribute('open')">
+                <button type="button" class="{{ $tombol }} bg-white text-slate-600 ring-slate-200 hover:bg-slate-50" @click="bukaTutupDetail">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
                     Bulan
                     <svg class="w-3.5 h-3.5 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                 </button>
-                <button type="button" data-buka="dialog-tahun-{{ $t->id }}" title="Ubah" class="{{ $tombol }} bg-white text-slate-600 ring-slate-200 hover:bg-slate-50">
+                <button type="button" @click="bukaDialog('dialog-tahun-{{ $t->id }}')" title="Ubah" class="{{ $tombol }} bg-white text-slate-600 ring-slate-200 hover:bg-slate-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
                 </button>
                 <form method="POST" action="{{ route('admin.tahun-ajaran.destroy', $t) }}"
-                    onsubmit="return confirm('Hapus tahun ajaran {{ addslashes($t->nama) }}? Semua bulan dan jadwal di dalamnya ikut terhapus.')">
+                    @submit="konfirmasi" data-konfirmasi="Hapus tahun ajaran {{ $t->nama }}? Semua bulan dan jadwal di dalamnya ikut terhapus.">
                     @csrf @method('DELETE')
                     <button title="Hapus" class="{{ $tombol }} bg-rose-500 text-white ring-rose-500 hover:bg-rose-600">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
@@ -111,7 +112,7 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
                         </button>
                     </form>
                     @endif
-                    <button type="button" data-buka="dialog-bulan-baru-{{ $t->id }}" class="{{ $tombol }} bg-[#0b332c] text-white ring-[#0b332c] hover:bg-[#135347]">
+                    <button type="button" @click="bukaDialog('dialog-bulan-baru-{{ $t->id }}')" class="{{ $tombol }} bg-[#0b332c] text-white ring-[#0b332c] hover:bg-[#135347]">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                         Tambah Bulan
                     </button>
@@ -143,11 +144,11 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
                             <button class="rounded-lg px-2 py-1 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-50">Aktifkan</button>
                         </form>
                         @endunless
-                        <button type="button" data-buka="dialog-bulan-{{ $b->id }}" title="Ubah" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+                        <button type="button" @click="bukaDialog('dialog-bulan-{{ $b->id }}')" title="Ubah" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
                         </button>
                         <form method="POST" action="{{ route('admin.bulan-ajaran.destroy', $b) }}"
-                            onsubmit="return confirm('Hapus bulan {{ addslashes($b->nama) }}?{{ $b->jadwal_count ? ' ' . $b->jadwal_count . ' jadwal di bulan ini ikut terhapus.' : '' }}')">
+                            @submit="konfirmasi" data-konfirmasi="Hapus bulan {{ $b->nama }}?{{ $b->jadwal_count ? ' ' . $b->jadwal_count . ' jadwal di bulan ini ikut terhapus.' : '' }}">
                             @csrf @method('DELETE')
                             <button title="Hapus" class="rounded-lg p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -157,7 +158,7 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
                 </div>
 
                 {{-- Dialog ubah bulan --}}
-                <dialog id="dialog-bulan-{{ $b->id }}" class="dialog-akademik">
+                <dialog id="dialog-bulan-{{ $b->id }}" ref="dialog-bulan-{{ $b->id }}" class="dialog-akademik" @click.self="tutupDialog">
                     @include('admin.akademik._form-bulan', ['aksi' => route('admin.bulan-ajaran.update', $b), 'metode' => 'PUT', 'judul' => 'Ubah Bulan', 'b' => $b])
                 </dialog>
                 @endforeach
@@ -170,10 +171,10 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
         </div>
 
         {{-- Dialog ubah tahun & tambah bulan --}}
-        <dialog id="dialog-tahun-{{ $t->id }}" class="dialog-akademik">
+        <dialog id="dialog-tahun-{{ $t->id }}" ref="dialog-tahun-{{ $t->id }}" class="dialog-akademik" @click.self="tutupDialog">
             @include('admin.akademik._form-tahun', ['aksi' => route('admin.tahun-ajaran.update', $t), 'metode' => 'PUT', 'judul' => 'Ubah Tahun Ajaran', 't' => $t])
         </dialog>
-        <dialog id="dialog-bulan-baru-{{ $t->id }}" class="dialog-akademik">
+        <dialog id="dialog-bulan-baru-{{ $t->id }}" ref="dialog-bulan-baru-{{ $t->id }}" class="dialog-akademik" @click.self="tutupDialog">
             @include('admin.akademik._form-bulan', ['aksi' => route('admin.bulan-ajaran.store', $t), 'metode' => 'POST', 'judul' => 'Tambah Bulan · ' . $t->nama, 'b' => null, 'urutanBaru' => $t->bulan->max('urutan') + 1])
         </dialog>
     </details>
@@ -186,13 +187,14 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
 </div>
 
 {{-- Dialog tambah tahun ajaran --}}
-<dialog id="dialog-tahun-baru" class="dialog-akademik">
+<dialog id="dialog-tahun-baru" ref="dialog-tahun-baru" class="dialog-akademik" @click.self="tutupDialog">
     @include('admin.akademik._form-tahun', ['aksi' => route('admin.tahun-ajaran.store'), 'metode' => 'POST', 'judul' => 'Tambah Tahun Ajaran', 't' => null])
 </dialog>
 
 <datalist id="nama-bulan-hijriyah">
     @foreach ($namaHijriyah as $n)<option value="{{ $n }}">@endforeach
 </datalist>
+</div>
 @endsection
 
 @push('styles')
@@ -200,17 +202,28 @@ $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-se
 @endpush
 
 @push('scripts')
-@include('admin.akademik._dialog-script')
 <script>
-    // Tanggal Hijriyah di bawah isian tanggal (form tahun & bulan)
-    (function () {
-        const FMT = new Intl.DateTimeFormat('id-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
-        document.querySelectorAll('input[type=date][data-hijri]').forEach((el) => {
-            const ket = document.getElementById(el.dataset.hijri);
-            const isi = () => { ket.textContent = el.value ? FMT.format(new Date(el.value + 'T12:00:00')) : ''; };
-            el.addEventListener('input', isi);
-            isi();
-        });
-    })();
+    document.addEventListener('DOMContentLoaded', function () {
+        const FMT_HIJRIYAH = new Intl.DateTimeFormat('id-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
+
+        Vue.createApp({
+            data() {
+                return {
+                    tanggal: {}, // isian tanggal yang sedang diubah, per kotak isian
+                };
+            },
+            methods: {
+                ...metodeHalaman, // bukaDialog, tutupDialog, konfirmasi (partials/vue-metode.blade.php)
+                // "2026-11-02" -> "22 Jumadil Awal 1448 H"
+                hijriyah(tgl) {
+                    return tgl ? FMT_HIJRIYAH.format(new Date(tgl + 'T12:00:00')) : '';
+                },
+                // Tombol "Bulan": buka/tutup daftar bulan di dalam <details>
+                bukaTutupDetail(e) {
+                    e.currentTarget.closest('details').toggleAttribute('open');
+                },
+            },
+        }).mount('#halaman-tahun-ajaran');
+    });
 </script>
 @endpush

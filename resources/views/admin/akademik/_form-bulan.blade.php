@@ -9,7 +9,7 @@ $kunci = $b ? 'b' . $b->id : 'baru' . ($urutanBaru ?? '') . uniqid();
     @if ($metode !== 'POST') @method($metode) @endif
     <div class="flex items-center justify-between">
         <h2 class="text-lg font-extrabold text-slate-800">{{ $judul }}</h2>
-        <button type="button" data-tutup class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">✕</button>
+        <button type="button" @click="tutupDialog" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">✕</button>
     </div>
     <div class="grid grid-cols-3 gap-3">
         <label class="col-span-2"><span class="{{ $label }}">Nama bulan *</span>
@@ -17,14 +17,18 @@ $kunci = $b ? 'b' . $b->id : 'baru' . ($urutanBaru ?? '') . uniqid();
         <label><span class="{{ $label }}">Bulan ke-</span>
             <input type="number" name="urutan" min="1" max="24" value="{{ $b?->urutan ?? ($urutanBaru ?? 1) }}" class="{{ $input }}"></label>
         <label class="col-span-3 sm:col-span-1"><span class="{{ $label }}">Tanggal mulai</span>
-            <input type="date" name="tanggal_mulai" value="{{ $b?->tanggal_mulai?->toDateString() }}" data-hijri="hijri-bm-{{ $kunci }}" class="{{ $input }}">
-            <span id="hijri-bm-{{ $kunci }}" class="mt-1 block text-[11px] text-emerald-700"></span></label>
+            <input type="date" name="tanggal_mulai" value="{{ $b?->tanggal_mulai?->toDateString() }}" class="{{ $input }}"
+                @input="tanggal['hijri-bm-{{ $kunci }}'] = $event.target.value">
+            {{-- Tanggal Hijriyah dihitung Vue (method hijriyah) dari isian di atas --}}
+            <span class="mt-1 block text-[11px] text-emerald-700" v-text="hijriyah(tanggal['hijri-bm-{{ $kunci }}'] ?? '{{ $b?->tanggal_mulai?->toDateString() }}')"></span></label>
         <label class="col-span-3 sm:col-span-2"><span class="{{ $label }}">Tanggal selesai</span>
-            <input type="date" name="tanggal_selesai" value="{{ $b?->tanggal_selesai?->toDateString() }}" data-hijri="hijri-bs-{{ $kunci }}" class="{{ $input }}">
-            <span id="hijri-bs-{{ $kunci }}" class="mt-1 block text-[11px] text-emerald-700"></span></label>
+            <input type="date" name="tanggal_selesai" value="{{ $b?->tanggal_selesai?->toDateString() }}" class="{{ $input }}"
+                @input="tanggal['hijri-bs-{{ $kunci }}'] = $event.target.value">
+            {{-- Tanggal Hijriyah dihitung Vue (method hijriyah) dari isian di atas --}}
+            <span class="mt-1 block text-[11px] text-emerald-700" v-text="hijriyah(tanggal['hijri-bs-{{ $kunci }}'] ?? '{{ $b?->tanggal_selesai?->toDateString() }}')"></span></label>
     </div>
     <div class="flex justify-end gap-2 pt-2">
-        <button type="button" data-tutup class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Batal</button>
+        <button type="button" @click="tutupDialog" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Batal</button>
         <button class="rounded-xl bg-[#0b332c] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#135347]">Simpan</button>
     </div>
 </form>

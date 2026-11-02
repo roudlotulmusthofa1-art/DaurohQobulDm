@@ -69,15 +69,15 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
         {{-- 2. Tanggal --}}
         <section class="{{ $kartu }} p-5 sm:p-6">
             <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span> Tanggal</h3>
-            <input type="date" name="tanggal" id="tanggal" value="{{ old('tanggal') }}" required class="mt-4 {{ $input }}">
+            <input type="date" name="tanggal" id="tanggal" v-model="tanggal" required class="mt-4 {{ $input }}">
             <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 px-3 py-2.5">
                     <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-600">Masehi</span>
-                    <span class="mt-0.5 block font-semibold text-slate-700" id="teks-masehi">-</span>
+                    <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksMasehi">-</span>
                 </div>
                 <div class="rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 px-3 py-2.5">
                     <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">Hijriyah</span>
-                    <span class="mt-0.5 block font-semibold text-slate-700" id="teks-hijriyah">-</span>
+                    <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksHijriyah">-</span>
                 </div>
             </div>
         </section>
@@ -114,7 +114,7 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
             ] as $nama => [$label, $titik, $ket])
             <label class="block rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 p-4">
                 <span class="flex items-center gap-2 text-xs font-bold text-slate-600"><span class="w-2.5 h-2.5 rounded-full {{ $titik }}"></span>{{ $label }}</span>
-                <input type="time" name="{{ $nama }}" id="{{ $nama }}" value="{{ old($nama) }}" required
+                <input type="time" name="{{ $nama }}" id="{{ $nama }}" v-model="jam.{{ $nama }}" required
                     class="mt-2 w-full bg-transparent border-0 p-0 text-2xl font-extrabold text-slate-800 outline-none">
                 <span class="mt-1 block text-[11px] text-slate-400">{{ $ket }}</span>
             </label>
@@ -129,9 +129,9 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
                 <div class="flex-1 bg-gradient-to-r from-rose-400 to-rose-500"></div>
             </div>
             <div class="mt-2 grid grid-cols-5 text-[11px] font-semibold">
-                <span class="col-span-2 text-emerald-700">Hadir <span class="text-slate-400 font-normal" id="ket-hadir"></span></span>
-                <span class="col-span-2 text-amber-700">Terlambat <span class="text-slate-400 font-normal" id="ket-terlambat"></span></span>
-                <span class="text-rose-700">Alfa <span class="text-slate-400 font-normal" id="ket-alfa"></span></span>
+                <span class="col-span-2 text-emerald-700">Hadir <span class="text-slate-400 font-normal" v-text="jam.batas_terlambat ? '(sebelum ' + jam.batas_terlambat + ')' : ''"></span></span>
+                <span class="col-span-2 text-amber-700">Terlambat <span class="text-slate-400 font-normal" v-text="jam.batas_terlambat && jam.batas_alfa ? '(' + jam.batas_terlambat + '–' + jam.batas_alfa + ')' : ''"></span></span>
+                <span class="text-rose-700">Alfa <span class="text-slate-400 font-normal" v-text="jam.batas_alfa ? '(mulai ' + jam.batas_alfa + ')' : ''"></span></span>
             </div>
         </div>
     </section>
@@ -148,38 +148,41 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
 
 @push('scripts')
 <script>
-(function () {
-    const $ = (id) => document.getElementById(id);
-    const dua = (n) => String(n).padStart(2, '0');
-    const sekarang = new Date();
+    document.addEventListener('DOMContentLoaded', function () {
+        const dua = (n) => String(n).padStart(2, '0');
+        const sekarang = new Date();
+        // Jam sekarang + menit, dibulatkan ke 5 menit (jam HP/komputer guru)
+        const tambahMenit = (menit) => {
+            const d = new Date(sekarang.getTime() + menit * 60000);
+            return dua(d.getHours()) + ':' + dua(Math.floor(d.getMinutes() / 5) * 5);
+        };
+        const FMT_MASEHI = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        const FMT_HIJRIYAH = new Intl.DateTimeFormat('id-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
 
-    // Isian kosong diisi otomatis memakai tanggal & jam di HP ini
-    if (!$('tanggal').value) {
-        $('tanggal').value = `${sekarang.getFullYear()}-${dua(sekarang.getMonth() + 1)}-${dua(sekarang.getDate())}`;
-    }
-    const tambahMenit = (menit) => {
-        const d = new Date(sekarang.getTime() + menit * 60000);
-        return `${dua(d.getHours())}:${dua(Math.floor(d.getMinutes() / 5) * 5)}`;
-    };
-    if (!$('jam_mulai').value) $('jam_mulai').value = tambahMenit(0);
-    if (!$('batas_terlambat').value) $('batas_terlambat').value = tambahMenit(15);
-    if (!$('batas_alfa').value) $('batas_alfa').value = tambahMenit(60);
-
-    const FMT_M = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    const FMT_H = new Intl.DateTimeFormat('id-u-ca-islamic-umalqura', { day: 'numeric', month: 'long', year: 'numeric' });
-
-    function perbarui() {
-        const t = $('tanggal').value;
-        const d = t ? new Date(t + 'T12:00:00') : null;
-        $('teks-masehi').textContent = d ? FMT_M.format(d) : '-';
-        $('teks-hijriyah').textContent = d ? FMT_H.format(d) : '-';
-        const m = $('jam_mulai').value, tl = $('batas_terlambat').value, a = $('batas_alfa').value;
-        $('ket-hadir').textContent = tl ? `(sebelum ${tl})` : '';
-        $('ket-terlambat').textContent = tl && a ? `(${tl}–${a})` : '';
-        $('ket-alfa').textContent = a ? `(mulai ${a})` : '';
-    }
-    ['tanggal', 'jam_mulai', 'batas_terlambat', 'batas_alfa'].forEach((id) => $(id).addEventListener('input', perbarui));
-    perbarui();
-})();
+        Vue.createApp({
+            data() {
+                // Isian kosong diisi otomatis memakai tanggal & jam di HP ini (isian lama dipakai bila gagal validasi)
+                return {
+                    tanggal: @json(old('tanggal')) || `${sekarang.getFullYear()}-${dua(sekarang.getMonth() + 1)}-${dua(sekarang.getDate())}`,
+                    jam: {
+                        jam_mulai: @json(old('jam_mulai')) || tambahMenit(0),
+                        batas_terlambat: @json(old('batas_terlambat')) || tambahMenit(15),
+                        batas_alfa: @json(old('batas_alfa')) || tambahMenit(60),
+                    },
+                };
+            },
+            computed: {
+                tanggalDate() {
+                    return this.tanggal ? new Date(this.tanggal + 'T12:00:00') : null;
+                },
+                teksMasehi() {
+                    return this.tanggalDate ? FMT_MASEHI.format(this.tanggalDate) : '-';
+                },
+                teksHijriyah() {
+                    return this.tanggalDate ? FMT_HIJRIYAH.format(this.tanggalDate) : '-';
+                },
+            },
+        }).mount('#form-kegiatan');
+    });
 </script>
 @endpush

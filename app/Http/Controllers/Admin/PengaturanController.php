@@ -72,7 +72,7 @@ class PengaturanController extends Controller
             $data['ringkasSesi'] = $data['sesiList']->mapWithKeys(fn (Sesi $s) => [$s->id => $this->ringkasSesi($s)]);
         }
 
-        return view('admin.pengaturan', $data);
+        return view('admin.pengaturan.index', $data);
     }
 
     /* ---------------- Umum: profil pesantren ---------------- */

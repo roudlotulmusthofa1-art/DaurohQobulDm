@@ -19,6 +19,7 @@ $total = max($detail->count(), 1);
 $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100);
 @endphp
 
+<div id="halaman-rekap-absensi">
 <div class="space-y-5">
     @if (session('sukses'))
     <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm">
@@ -108,10 +109,18 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
         <a href="{{ route('asatid.absensi.kelas', ['kelas_id' => $absensi->kelas_id, 'bidang_ilmu_id' => $absensi->bidang_ilmu_id, 'waktu_pelajaran_id' => $absensi->waktu_pelajaran_id, 'tanggal' => $absensi->tanggal->toDateString()]) }}"
             class="flex-1 text-center py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ubah Absensi</a>
         @endunless
-        <form method="POST" action="{{ route('asatid.absensi.destroy', $absensi) }}" onsubmit="return confirm('Hapus absensi ini? Data kehadirannya ikut terhapus.')" class="sm:w-auto">
+        <form method="POST" action="{{ route('asatid.absensi.destroy', $absensi) }}" @submit="konfirmasi" data-konfirmasi="Hapus absensi ini? Data kehadirannya ikut terhapus." class="sm:w-auto">
             @csrf @method('DELETE')
             <button class="w-full px-5 py-3 rounded-2xl bg-white ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">Hapus</button>
         </form>
     </div>
 </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Aplikasi Vue halaman ini: konfirmasi hapus (metode dari partials/vue-metode.blade.php)
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-rekap-absensi'));
+</script>
+@endpush

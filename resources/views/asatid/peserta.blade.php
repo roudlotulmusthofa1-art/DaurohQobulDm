@@ -8,6 +8,7 @@
 $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
 @endphp
 
+<div id="halaman-daftar-peserta">
 {{-- Ringkasan + pencarian --}}
 <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-rose-500 via-pink-600 to-fuchsia-700 text-white p-5 sm:p-7">
     <div class="pointer-events-none absolute inset-0 opacity-50"
@@ -28,7 +29,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <input type="search" name="q" value="{{ request('q') }}" placeholder="Cari nama atau nomor..."
                 class="w-full bg-white rounded-2xl py-3 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-white/30">
         </div>
-        <select name="kelas" onchange="this.form.submit()"
+        <select name="kelas" @change="kirimForm"
             class="sm:w-48 bg-white rounded-2xl py-3 px-4 text-sm text-slate-800 focus:outline-none focus:ring-4 focus:ring-white/30">
             <option value="">Semua kelas</option>
             @foreach ($kelasList as $k)
@@ -79,4 +80,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     <p class="mt-1 text-sm text-slate-400">Coba kata kunci atau kelas lain.</p>
 </div>
 @endif
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Aplikasi Vue halaman ini: kirim form saat kelas diganti (metode dari partials/vue-metode.blade.php)
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-daftar-peserta'));
+</script>
+@endpush

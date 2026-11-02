@@ -35,7 +35,7 @@ class AkunBersama
         }
 
         $pusat = DB::connection('pusat')->table('users');
-        $data = collect($user->getAttributes())->only(['name', 'email', 'password', 'role'])->all()
+        $data = collect($user->getAttributes())->only(['name', 'email', 'password', 'role', 'role_id'])->all()
             + ['created_at' => now(), 'updated_at' => now()];
 
         $user->id = $pusat->where('email', $user->email)->value('id')

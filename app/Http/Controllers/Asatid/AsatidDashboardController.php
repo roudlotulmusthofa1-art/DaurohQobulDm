@@ -141,7 +141,7 @@ class AsatidDashboardController extends Controller
         // Catatan dari admin saat menerima pendaftaran
         if ($asatid?->catatan_admin) {
             $items[] = [
-                'teks'  => 'Catatan dari admin: <b>' . e(\Illuminate\Support\Str::limit($asatid->catatan_admin, 80)) . '</b>',
+                'teks'  => 'Catatan dari admin: <b>' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($asatid->catatan_admin, 80)) . '</b>',
                 'ket'   => optional($asatid->diproses_at)->locale('id')->diffForHumans(),
                 'url'   => route('asatid.profil'),
                 'warna' => 'bg-amber-50 text-amber-600 ring-amber-100',

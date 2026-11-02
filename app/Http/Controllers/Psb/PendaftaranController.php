@@ -37,11 +37,11 @@ class PendaftaranController extends Controller
             $nomor = PendaftaranSiswa::buatNomor();
             $dir   = "psb/{$nomor}";
 
-            return PendaftaranSiswa::create($data + [
+            $p = PendaftaranSiswa::create($data + [
                 'nomor_pendaftaran'    => $nomor,
 
-                // Email & password HANYA disimpan di tabel pendaftaran (password di-hash).
-                // Tabel users TIDAK disentuh di sini.
+                // Email & password disimpan di tabel pendaftaran (password di-hash),
+                // lalu akun login (role siswa) dibuat agar peserta bisa langsung masuk dasbor siswa.
                 'email'                => $request->input('email_login'),
                 'password'             => Hash::make($request->input('password_login')),
 
@@ -51,6 +51,9 @@ class PendaftaranController extends Controller
                 'berkas_izin_belajar'  => $request->file('berkas_izin_belajar')->store($dir, 'public'),
                 'status'               => PendaftaranSiswa::MENUNGGU,
             ]);
+            $p->buatAkun();
+
+            return $p;
         });
 
         // Isi pesan diatur di Pengaturan > Pesan

@@ -2,6 +2,7 @@
 @extends('layouts.admin')
 
 @section('content')
+<div id="halaman-data-masuk">
     <div class="space-y-5 mx-4 md:mx-10 lg:mx-20 mt-8">
         <div class="rounded-2xl bg-teal-700 text-white p-5">
             <h1 class="text-xl font-bold">
@@ -88,7 +89,7 @@
 
                                     {{-- Ikon tempat sampah: hapus (minta konfirmasi dulu) --}}
                                     <form method="POST" action="{{ route('admin.pendaftaran.destroy', $p) }}"
-                                        onsubmit="return confirm({{ Js::from('Hapus data ' . $p->nama_lengkap . "?\nBerkas unggahan dan akun login siswanya juga ikut terhapus.") }})">
+                                        @submit="konfirmasi" data-konfirmasi="{{ 'Hapus data ' . $p->nama_lengkap . "?\nBerkas unggahan dan akun login siswanya juga ikut terhapus." }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
@@ -119,4 +120,12 @@
 
         {{ $pendaftar->links() }}
     </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    // Aplikasi Vue halaman ini: konfirmasi hapus pendaftar (metode dari partials/vue-metode.blade.php)
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-data-masuk'));
+</script>
+@endpush

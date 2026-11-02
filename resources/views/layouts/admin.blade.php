@@ -77,15 +77,15 @@
            .sb-teks  = bagian yang disembunyikan saat ditutup (tulisan, judul, submenu)
            .sb-item  = tombol menu yang ikonnya dibuat ke tengah saat ditutup */
         #sidebar[data-ready] { transition: width .2s ease, padding .2s ease; }
-        #sidebar[data-collapsed="true"] { width: 5rem; padding-left: .75rem; padding-right: .75rem; }
-        #sidebar[data-collapsed="true"] .sb-teks { display: none; }
-        #sidebar[data-collapsed="true"] .sb-logo { flex-direction: column; gap: .75rem; }
-        #sidebar[data-collapsed="true"] .sb-item { justify-content: center; padding-left: 0; padding-right: 0; }
-        #sidebar[data-collapsed="true"] .sb-user { justify-content: center; }
-        #sidebar[data-collapsed="true"] #sidebar-toggle svg { transform: rotate(180deg); }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) { width: 5rem; padding-left: .75rem; padding-right: .75rem; }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) .sb-teks { display: none; }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) .sb-logo { flex-direction: column; gap: .75rem; }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) .sb-item { justify-content: center; padding-left: 0; padding-right: 0; }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) .sb-user { justify-content: center; }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) #sidebar-toggle svg { transform: rotate(180deg); }
         /* .sb-ikon = daftar ikon submenu, hanya tampil saat sidebar ditutup */
         .sb-ikon { display: none; }
-        #sidebar[data-collapsed="true"] .sb-ikon { display: flex; }
+        :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) .sb-ikon { display: flex; }
     </style>
     @stack('styles')
 </head>
@@ -96,8 +96,14 @@
     <div
         class="flex h-screen min-h-0 overflow-hidden p-3 bg-[linear-gradient(180deg,#0f4238_0%,#0b332c_55%,#0a2b25_100%)]">
 
-        {{-- ============================= SIDEBAR ============================= --}}
-        <aside id="sidebar" data-collapsed="false"
+        {{-- ============================= SIDEBAR =============================
+             Aplikasi Vue #sidebar-app (skrip di bawah halaman): buka/tutup sidebar + menu.
+             Posisi buka/tutup disimpan di cookie "sidebar_tertutup" supaya server langsung
+             menampilkan posisi yang benar (tidak berkedip saat pindah halaman). --}}
+        @php $sidebarTertutup = request()->cookie('sidebar_tertutup') === '1'; @endphp
+        {{-- data-tertutup-awal: posisi dari server, dipakai CSS hanya sebelum Vue terpasang (lihat <style> di atas) --}}
+        <div id="sidebar-app" class="contents" data-tertutup-awal="{{ $sidebarTertutup ? '1' : '0' }}">
+        <aside id="sidebar" :data-collapsed="tertutup ? 'true' : 'false'" :data-ready="siap ? '1' : null"
             class="w-65 h-full min-h-0 shrink-0 text-gray-100 flex flex-col pl-4 pr-5 pt-5 pb-4">
 
             {{-- Logo --}}
@@ -108,11 +114,11 @@
                         @php $profilPesantren = \App\Models\Pengaturan::profilPesantren(); @endphp
                         <img src="{{ $profilPesantren['logo_url'] }}" alt="Logo" class="w-full h-full object-contain">
                     </div>
-                    <span class="sb-teks text-white font-semibold text-[19px] tracking-tight group-hover:text-white/80 line-clamp-2 leading-tight">{{ $profilPesantren['nama'] }}</span>
+                    <span class="sb-teks text-white font-semibold text-[19px] tracking-tight group-hover:text-white/80 line-clamp-2 leading-tight" v-pre>{{ $profilPesantren['nama'] }}</span>
                 </a>
-                {{-- Tombol buka/tutup sidebar (diatur script di bawah </aside>) --}}
-                <button type="button" id="sidebar-toggle" aria-controls="sidebar" aria-expanded="true"
-                    title="Tutup sidebar"
+                {{-- Tombol buka/tutup sidebar --}}
+                <button type="button" id="sidebar-toggle" aria-controls="sidebar" @click="aturSidebar(!tertutup)"
+                    :aria-expanded="tertutup ? 'false' : 'true'" :title="tertutup ? 'Buka sidebar' : 'Tutup sidebar'"
                     class="shrink-0 rounded-md p-1 text-white/40 hover:text-white/80 hover:bg-white/5 transition-colors">
                     <svg class="w-5 h-5 transition-transform duration-200"
                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
@@ -203,7 +209,7 @@
                 <div class="sb-user flex items-center gap-3 px-1">
                     <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=4ade80&color=0b332c"
                         class="w-10 h-10 rounded-full object-cover ring-2 ring-[#4ade80]/60" alt="Avatar admin" />
-                    <div class="sb-teks flex flex-col items-start justify-center min-w-0">
+                    <div class="sb-teks flex flex-col items-start justify-center min-w-0" v-pre>
                         <p class="text-white text-[15px] font-medium truncate">@yield('page-heading', '' .
                             (auth()->user()->name ?? 'Admin'))</p>
                         <p class="text-white/45 text-xs">Super Admin</p>
@@ -211,41 +217,18 @@
                 </div>
             </div>
         </aside>
-
-        {{-- Buka/tutup sidebar. Dijalankan langsung (bukan menunggu halaman selesai) supaya tidak berkedip. --}}
-        <script>
-            (function () {
-                const sidebar = document.getElementById('sidebar');
-                const tombol = document.getElementById('sidebar-toggle');
-
-                // tutup = true -> sidebar ditutup (ikon saja); disimpan agar tetap sama saat pindah halaman
-                window.aturSidebar = function (tutup) {
-                    sidebar.dataset.collapsed = tutup ? 'true' : 'false';
-                    tombol.setAttribute('aria-expanded', tutup ? 'false' : 'true');
-                    tombol.title = tutup ? 'Buka sidebar' : 'Tutup sidebar';
-                    try { localStorage.setItem('sidebarTertutup', tutup ? '1' : '0'); } catch (e) {}
-                };
-                window.sidebarTertutup = () => sidebar.dataset.collapsed === 'true';
-
-                let tertutup = false;
-                try { tertutup = localStorage.getItem('sidebarTertutup') === '1'; } catch (e) {}
-                window.aturSidebar(tertutup);
-
-                tombol.addEventListener('click', () => window.aturSidebar(!window.sidebarTertutup()));
-
-                // Animasi baru dinyalakan setelah tampilan pertama, jadi tidak "bergeser" saat halaman dibuka
-                requestAnimationFrame(() => requestAnimationFrame(() => (sidebar.dataset.ready = '1')));
-            })();
-        </script>
+        </div>
 
         {{-- ============================= KONTEN ============================= --}}
         <div
             class="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden rounded-[26px] bg-[#eef4f1]">
 
             {{-- Topbar: tetap di atas, di luar area scroll, jadi sudut kanan atas tertutup rapi --}}
-            <header class="shrink-0 z-30 flex items-center justify-between px-6 pt-6 pb-5 bg-[#0b312a4e] border-b border-[#0b312a99] backdrop-blur-md">
+            {{-- Aplikasi Vue #header-akun: menu lonceng & profil (skrip di bawah halaman).
+                 Teks dari database di sini diberi v-pre agar tidak dibaca Vue sebagai template. --}}
+            <header id="header-akun" class="shrink-0 z-30 flex items-center justify-between px-6 pt-6 pb-5 bg-[#0b312a4e] border-b border-[#0b312a99] backdrop-blur-md">
                 <div>
-                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]">@yield('page-heading', 'Selamat
+                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]" v-pre>@yield('page-heading', 'Selamat
                         Datang, ' . (auth()->user()->name ?? 'Admin') . ' 👋')</h1>
                 </div>
 
@@ -256,7 +239,7 @@
                     <a href="{{ route('admin.pengaturan.index', ['tab' => 'sesi']) }}" title="Sesi aktif. Klik untuk mengganti."
                         class="hidden lg:inline-flex items-center gap-2 max-w-[14rem] rounded-xl bg-white/80 px-3 py-2.5 text-[12px] font-semibold text-[#0b332c] ring-1 ring-emerald-200 hover:bg-white">
                         <span class="w-2 h-2 shrink-0 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
-                        <span class="truncate">{{ $sesiAktifHeader->nama }}</span>
+                        <span class="truncate" v-pre>{{ $sesiAktifHeader->nama }}</span>
                     </a>
                     @endif
                     <div class="relative hidden md:block">
@@ -271,9 +254,9 @@
                     </div>
 
                     {{-- ===== Notifikasi (lonceng): pendaftar yang menunggu verifikasi ===== --}}
-                    <div class="relative" data-dropdown>
-                        <button type="button" data-dropdown-tombol aria-haspopup="true" aria-expanded="false"
-                            title="Notifikasi"
+                    <div class="relative">
+                        <button type="button" @click.stop="bukaTutup('notif')" aria-haspopup="true"
+                            :aria-expanded="menuBuka === 'notif' ? 'true' : 'false'" title="Notifikasi"
                             class="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-white/70 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -285,7 +268,7 @@
                             @endif
                         </button>
 
-                        <div data-dropdown-isi hidden
+                        <div v-show="menuBuka === 'notif'" @click.stop style="display: none"
                             class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                                 <p class="text-sm font-bold text-slate-800">Notifikasi</p>
@@ -294,7 +277,7 @@
                                 @endif
                             </div>
 
-                            <div class="max-h-[60vh] overflow-y-auto">
+                            <div class="max-h-[60vh] overflow-y-auto" v-pre>
                             @forelse ($notifItems as $n)
                                 <a href="{{ $n['url'] ?? '#' }}"
                                     class="flex items-start gap-3 px-4 py-3 hover:bg-[#f5f9f7] transition-colors border-b border-slate-50 last:border-0">
@@ -326,21 +309,22 @@
                     </div>
 
                     {{-- ===== Profil: foto + nama + peran, klik untuk Keluar ===== --}}
-                    <div class="relative" data-dropdown>
-                        <button type="button" data-dropdown-tombol aria-haspopup="true" aria-expanded="false"
+                    <div class="relative">
+                        <button type="button" @click.stop="bukaTutup('profil')" aria-haspopup="true"
+                            :aria-expanded="menuBuka === 'profil' ? 'true' : 'false'"
                             class="flex items-center gap-2.5 rounded-xl pl-1 pr-2.5 py-1 hover:bg-white/60 transition-colors">
                             <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0b332c&color=fff"
                                 class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
-                            <span class="hidden sm:flex flex-col items-start leading-tight text-left">
+                            <span class="hidden sm:flex flex-col items-start leading-tight text-left" v-pre>
                                 <span class="text-[13px] font-semibold text-[#0f1f1a] max-w-[10rem] truncate">{{ auth()->user()->name ?? 'Admin' }}</span>
                                 <span class="text-[11px] text-gray-600">Super Admin</span>
                             </span>
                             <svg class="hidden sm:block w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </button>
 
-                        <div data-dropdown-isi hidden
+                        <div v-show="menuBuka === 'profil'" @click.stop style="display: none"
                             class="absolute right-0 mt-2 w-60 bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
-                            <div class="px-4 py-3 border-b border-slate-100">
+                            <div class="px-4 py-3 border-b border-slate-100" v-pre>
                                 <p class="text-sm font-bold text-slate-800 truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
                                 <p class="text-xs text-slate-400 truncate">{{ auth()->user()->email ?? '' }}</p>
                             </div>
@@ -350,7 +334,7 @@
                                 Lihat Website
                             </a>
                             <form method="POST" action="{{ route('admin.logout') }}"
-                                onsubmit="return confirm('Keluar dari akun admin?')" class="border-t border-slate-100">
+                                @submit="konfirmasi($event, 'Keluar dari akun admin?')" class="border-t border-slate-100">
                                 @csrf
                                 <button type="submit"
                                     class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
@@ -416,76 +400,89 @@
         </div>
     </div>
 
-    {{-- Menu kecil di kanan atas (notifikasi & profil): klik untuk buka, klik di luar / Esc untuk tutup --}}
+    {{-- ===== Aplikasi Vue layout admin (window.Vue dari resources/js/app.js) ===== --}}
     <script>
-        (function () {
-            const semua = () => document.querySelectorAll('[data-dropdown]');
-            const tutup = (kecuali) => semua().forEach((d) => {
-                if (d === kecuali) return;
-                d.querySelector('[data-dropdown-isi]').hidden = true;
-                d.querySelector('[data-dropdown-tombol]').setAttribute('aria-expanded', 'false');
-            });
+        document.addEventListener('DOMContentLoaded', function () {
+            const { createApp } = window.Vue;
 
-            semua().forEach((d) => {
-                const tombol = d.querySelector('[data-dropdown-tombol]');
-                const isi = d.querySelector('[data-dropdown-isi]');
-                tombol.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    tutup(d);
-                    isi.hidden = !isi.hidden;
-                    tombol.setAttribute('aria-expanded', isi.hidden ? 'false' : 'true');
-                });
-                isi.addEventListener('click', (e) => e.stopPropagation());
-            });
+            // 1) Menu lonceng & profil di header
+            createApp({
+                data() {
+                    return { menuBuka: null }; // null | 'notif' | 'profil'
+                },
+                methods: {
+                    bukaTutup(nama) {
+                        this.menuBuka = this.menuBuka === nama ? null : nama;
+                    },
+                    tutupSemua() {
+                        this.menuBuka = null;
+                    },
+                    tutupDenganEsc(e) {
+                        if (e.key === 'Escape') this.tutupSemua();
+                    },
+                    // Tanya dulu sebelum form dikirim (dipakai tombol Keluar)
+                    konfirmasi(e, pesan) {
+                        if (!confirm(pesan)) e.preventDefault();
+                    },
+                },
+                // Klik di luar menu / tekan Esc -> menu tertutup
+                mounted() {
+                    document.addEventListener('click', this.tutupSemua);
+                    document.addEventListener('keydown', this.tutupDenganEsc);
+                },
+                unmounted() {
+                    document.removeEventListener('click', this.tutupSemua);
+                    document.removeEventListener('keydown', this.tutupDenganEsc);
+                },
+            }).mount('#header-akun');
 
-            document.addEventListener('click', () => tutup());
-            document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tutup(); });
-        })();
+            // 2) Sidebar: buka/tutup + menu bertingkat
+            createApp({
+                data() {
+                    return {
+                        tertutup: @json($sidebarTertutup), // true = sidebar ditutup (ikon saja)
+                        siap: false,                        // animasi dinyalakan setelah tampilan pertama
+                        menuItems: @json($menuItemsForVue),
+                        openMenus: @json($initiallyOpenMenus),
+                    };
+                },
+                methods: {
+                    // Simpan posisi di cookie agar server menampilkan posisi yang sama di halaman berikutnya
+                    aturSidebar(tutup) {
+                        this.tertutup = tutup;
+                        document.cookie = 'sidebar_tertutup=' + (tutup ? 1 : 0) + '; path=/; max-age=31536000; SameSite=Lax';
+                    },
+                    toggle(label) {
+                        // Sidebar sedang ditutup: buka dulu, lalu tampilkan submenu yang diklik
+                        if (this.tertutup) {
+                            this.aturSidebar(false);
+                            if (!this.openMenus.includes(label)) this.openMenus.push(label);
+                            return;
+                        }
+                        const idx = this.openMenus.indexOf(label);
+                        idx === -1 ? this.openMenus.push(label) : this.openMenus.splice(idx, 1);
+                    },
+                    isActive(item) {
+                        if (item.active) return true;
+                        if (item.submenu) return item.submenu.some(sub => sub.active);
+                        return false;
+                    },
+                },
+                mounted() {
+                    lucide.createIcons();
+                    // Animasi buka/tutup baru aktif setelah tampilan pertama (tidak "bergeser" saat halaman dibuka)
+                    requestAnimationFrame(() => requestAnimationFrame(() => (this.siap = true)));
+                },
+                updated() {
+                    lucide.createIcons();
+                },
+            }).mount('#sidebar-app');
+        });
     </script>
 
+    {{-- Metode Vue bersama untuk skrip halaman (window.metodeHalaman), lalu skrip tiap halaman --}}
+    @include('partials.vue-metode')
     @stack('scripts')
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-                const {
-                    createApp
-                } = window.Vue;
-                createApp({
-                    data() {
-                        return {
-                            menuItems: @json($menuItemsForVue),
-                            openMenus: @json($initiallyOpenMenus),
-                        };
-                    },
-                    methods: {
-                        toggle(label) {
-                            // Sidebar sedang ditutup: buka dulu, lalu tampilkan submenu yang diklik
-                            if (window.sidebarTertutup && window.sidebarTertutup()) {
-                                window.aturSidebar(false);
-                                if (!this.openMenus.includes(label)) this.openMenus.push(label);
-                                this.$nextTick(() => lucide.createIcons());
-                                return;
-                            }
-
-                            const idx = this.openMenus.indexOf(label);
-                            idx === -1 ? this.openMenus.push(label) : this.openMenus.splice(idx, 1);
-                            this.$nextTick(() => lucide.createIcons());
-                        },
-                        isActive(item) {
-                            if (item.active) return true;
-                            if (item.submenu) return item.submenu.some(sub => sub.active);
-                            return false;
-                        },
-                    },
-                    mounted() {
-                        lucide.createIcons();
-                    },
-                    updated() {
-                        lucide.createIcons();
-                    },
-                }).mount('#sidebar-nav');
-            });
-    </script>
 
 </body>
 

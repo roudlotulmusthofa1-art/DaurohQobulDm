@@ -4,14 +4,16 @@ $input = 'mt-1 w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-
 $label = 'block text-xs font-semibold text-slate-600';
 $bulanDipilih = $k?->bulan_ke ?? [];
 $tahunDipilih = $k?->tahun_ajaran_id ?? $tahunAktif?->id ?? $tahunList->first()?->id;
+// Kunci form untuk data Vue "tahunForm" di halaman kurikulum (satu nilai per form)
+$kunciForm = $k ? 'k' . $k->id : 'baru';
 $pilih = 'cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold ring-1 ring-slate-200 bg-white text-slate-600 has-[:checked]:bg-emerald-600 has-[:checked]:text-white has-[:checked]:ring-emerald-600 transition-colors';
 @endphp
-<form method="POST" action="{{ $aksi }}" data-form-kitab class="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+<form method="POST" action="{{ $aksi }}" class="p-6 space-y-4 max-h-[85vh] overflow-y-auto">
     @csrf
     @if ($metode !== 'POST') @method($metode) @endif
     <div class="flex items-center justify-between">
         <h2 class="text-lg font-extrabold text-slate-800">{{ $judul }}</h2>
-        <button type="button" data-tutup class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">✕</button>
+        <button type="button" @click="tutupDialog" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">✕</button>
     </div>
 
     <div class="grid grid-cols-2 gap-3">
@@ -27,7 +29,7 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold ring-1 ring-
         <label class="col-span-2 sm:col-span-1"><span class="{{ $label }}">Frekuensi (x/minggu) *</span>
             <input type="number" name="frekuensi" min="1" max="30" required value="{{ $k?->frekuensi ?? 2 }}" class="{{ $input }}"></label>
         <label class="col-span-2"><span class="{{ $label }}">Tahun ajaran *</span>
-            <select name="tahun_ajaran_id" required data-pilih-tahun class="{{ $input }}">
+            <select name="tahun_ajaran_id" required class="{{ $input }}" @change="tahunForm['{{ $kunciForm }}'] = $event.target.value">
                 @forelse ($tahunList as $t)
                 <option value="{{ $t->id }}" @selected($tahunDipilih === $t->id)>{{ $t->nama }}{{ $t->nama_masehi ? ' (' . $t->nama_masehi . ')' : '' }} · {{ $t->bulan->count() }} bulan{{ $t->is_active ? ' · aktif' : '' }}</option>
                 @empty
@@ -38,10 +40,13 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold ring-1 ring-
 
     <div><span class="{{ $label }}">Diajarkan di bulan ke <span class="font-normal text-slate-400">(kosongkan = semua bulan)</span></span>
         @forelse ($tahunList as $t)
-        <div data-bulan-tahun="{{ $t->id }}" @class(['mt-1.5 grid grid-cols-2 sm:grid-cols-3 gap-1.5', 'hidden' => $tahunDipilih !== $t->id])>
+        {{-- Hanya bulan milik tahun ajaran yang dipilih yang tampil & ikut terkirim (Vue: tahunTerpilih) --}}
+        <div class="mt-1.5 grid grid-cols-2 sm:grid-cols-3 gap-1.5"
+            :class="{ hidden: tahunTerpilih('{{ $kunciForm }}', '{{ $tahunDipilih }}') != '{{ $t->id }}' }">
             @forelse ($t->bulan as $b)
             <label class="{{ $pilih }}">
-                <input type="checkbox" name="bulan_ke[]" value="{{ $b->urutan }}" class="sr-only" @disabled($tahunDipilih !== $t->id) @checked($k?->tahun_ajaran_id === $t->id && in_array($b->urutan, $bulanDipilih))>
+                <input type="checkbox" name="bulan_ke[]" value="{{ $b->urutan }}" class="sr-only"
+                    :disabled="tahunTerpilih('{{ $kunciForm }}', '{{ $tahunDipilih }}') != '{{ $t->id }}'" @checked($k?->tahun_ajaran_id === $t->id && in_array($b->urutan, $bulanDipilih))>
                 <span class="block">Bulan ke-{{ $b->urutan }}</span>
                 <span class="block text-[10px] font-normal opacity-75 truncate">{{ $b->nama }}</span>
             </label>
@@ -58,7 +63,7 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold ring-1 ring-
         <textarea name="deskripsi" rows="2" maxlength="1000" class="{{ $input }}">{{ $k?->deskripsi }}</textarea></label>
 
     <div class="flex justify-end gap-2 pt-2">
-        <button type="button" data-tutup class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Batal</button>
+        <button type="button" @click="tutupDialog" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">Batal</button>
         <button @disabled($tahunList->isEmpty()) class="rounded-xl bg-[#0b332c] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#135347] disabled:opacity-50">Simpan</button>
     </div>
 </form>
