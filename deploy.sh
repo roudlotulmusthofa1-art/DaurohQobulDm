@@ -37,7 +37,10 @@ fi
 echo "📥 Menarik (Pull) kode terbaru dari GitHub ke Server..."
 
 # Execute docker command on server
-$SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
+# package-lock.json di server bisa berubah sendiri karena "npm install" (langkah di bawah),
+# jadi dikembalikan dulu ke versi GitHub supaya "git pull" tidak gagal.
+if ! $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S git checkout -- package-lock.json && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S git pull origin main && \
     if [ -f .env.production ]; then cp .env.production .env; fi && \
     mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs storage/app/public && \
@@ -53,6 +56,9 @@ $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     (echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan storage:link || true) && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan config:clear && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan cache:clear && \
-    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan view:clear"
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan view:clear"; then
+    echo "❌ Deploy GAGAL di server. Baca pesan error di atas (kode di server belum diperbarui sepenuhnya)."
+    exit 1
+fi
 
 echo "✅ Deployment Finished & System Refreshed! Aplikasi dapat diakses di https://daurohqobul.com (atau http://$DEPLOY_HOST:8080)"
