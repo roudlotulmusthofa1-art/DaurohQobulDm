@@ -46,7 +46,7 @@ $jumlahNotif = count($notif ?? []);
                     <h1 class="mt-1 text-base sm:text-lg font-extrabold text-slate-800 truncate leading-tight">@yield('judul')</h1>
                 </div>
             @else
-                <a href="{{ route('asatid.dashboard') }}" class="flex items-center gap-2.5 min-w-0 flex-1">
+                <a href="/" class="flex items-center gap-2.5 min-w-0 flex-1">
                     <span class="w-10 h-10 shrink-0 rounded-full bg-[#eff5f0] ring-1 ring-[#0b332c]/10 overflow-hidden flex items-center justify-center">
                         <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo" class="w-full h-full object-contain">
                     </span>

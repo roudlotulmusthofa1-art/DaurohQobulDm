@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\BidangIlmu;
 use App\Models\JenisKegiatan;
+use App\Models\JenisKhidmah;
+use App\Models\JenisPelanggaran;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
@@ -19,9 +21,10 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan, Semester, Kategori Berita.
+ * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan, Semester,
+ * Jenis Pelanggaran, Jenis Khidmah, Kategori Berita.
  *
- * Satu controller untuk 7 model.
+ * Satu controller untuk 9 model.
  * Definisi tab (kolom tabel, isian form, ikon & warna menu) ada di method tabs() di bawah.
  *
  * Cara menambah menu baru: buat tabel (migration) + model (pakai trait IsMasterData),
@@ -37,6 +40,8 @@ class MasterDataController extends Controller
         'kamar' => Kamar::class,
         'jenis-kegiatan' => JenisKegiatan::class,
         'semester' => Semester::class,
+        'jenis-pelanggaran' => JenisPelanggaran::class,
+        'jenis-khidmah' => JenisKhidmah::class,
         'kategori-berita' => KategoriBerita::class,
     ];
 
@@ -203,7 +208,7 @@ class MasterDataController extends Controller
                 'kasur_per_baris' => ['nullable', 'integer', 'min:1', 'max:12'],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
-            'jenis-kegiatan' => [
+            'jenis-kegiatan', 'jenis-pelanggaran', 'jenis-khidmah' => [
                 'nama' => ['required', 'string', 'max:100'],
                 'warna' => ['nullable', 'string', Rule::in(array_keys(self::COLORS))],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
@@ -387,6 +392,46 @@ class MasterDataController extends Controller
                     ['key' => 'tanggal_selesai_hijriyah', 'label' => 'Tanggal Selesai', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. 29 Jumadil Akhir 1448 H'],
 
                     ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
+                ],
+            ],
+
+            'jenis-pelanggaran' => [
+                'icon' => 'shield-alert',
+                'accent' => '#ef4444',
+                'label' => 'Jenis Pelanggaran',
+                'title' => 'Jenis Pelanggaran',
+                'description' => 'Kelola daftar jenis pelanggaran santri. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Pelanggaran',
+                'singular' => 'Jenis Pelanggaran',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama Pelanggaran', 'type' => 'name'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Pelanggaran', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Terlambat sholat berjamaah'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-red-100'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+
+            'jenis-khidmah' => [
+                'icon' => 'hand-heart',
+                'accent' => '#0ea5e9',
+                'label' => 'Jenis Khidmah',
+                'title' => 'Jenis Khidmah',
+                'description' => 'Kelola jenis tugas khidmah/pengabdian santri (mis. Kebersihan, Dapur, Keamanan). Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Khidmah',
+                'singular' => 'Jenis Khidmah',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama Khidmah', 'type' => 'name'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Khidmah', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Kebersihan Masjid'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-sky-100'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
                 ],
             ],
 

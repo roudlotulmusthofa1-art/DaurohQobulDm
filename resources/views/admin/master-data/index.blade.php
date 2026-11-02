@@ -32,7 +32,7 @@
                  Setiap menu punya warna sendiri lewat --aksen (diisi dari 'accent' di controller).
                  Menu aktif: latar hijau gelap + ikon berwarna penuh. --}}
             <div class="mb-6 -mx-1 overflow-x-auto px-1 pb-2">
-                <div class="inline-flex gap-1.5 rounded-2xl bg-white p-1.5 shadow-sm ring-1 ring-black/5" role="tablist">
+                <div class="inline-flex gap-1.5 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-black/5" role="tablist">
                     @foreach ($tabs as $key => $t)
                         <a href="?tab={{ $key }}" role="tab" style="--aksen: {{ $t['accent'] }}"
                             :aria-selected="activeKey === '{{ $key }}'"
@@ -43,8 +43,8 @@
                             @click.prevent="selectTab('{{ $key }}')">
                             <span class="flex h-8 w-8 items-center justify-center rounded-lg transition-transform duration-200 group-hover:scale-110"
                                 :class="activeKey === '{{ $key }}'
-                                    ? 'bg-[var(--aksen)] text-white shadow-[0_4px_12px_-2px_var(--aksen)]'
-                                    : 'bg-[color-mix(in_srgb,var(--aksen)_14%,white)] text-[var(--aksen)]'">
+                                    ? 'bg-(--aksen) text-white shadow-[0_4px_12px_-2px_var(--aksen)]'
+                                    : 'bg-[color-mix(in_srgb,var(--aksen)_14%,white)] text-(--aksen)'">
                                 <x-master-data.icon :name="$t['icon']" size="16" />
                             </span>
                             {{ $t['label'] }}

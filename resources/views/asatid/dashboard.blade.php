@@ -71,7 +71,7 @@ $kartuMenu = [
     <div class="relative">
         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/90">{{ $hariIni }}</p>
         <h2 class="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-            {{ $salam }},<br><span class="text-emerald-300">{{ $nama }}</span>
+            Ahlan Wasahlan ,<br><span class="text-emerald-300">Ustad {{ $nama }}</span>
         </h2>
         @if ($asatid?->nama_lengkap_arab)
         <p class="mt-1 text-xl sm:text-2xl text-emerald-100/80" dir="rtl">{{ $asatid->nama_lengkap_arab }}</p>
