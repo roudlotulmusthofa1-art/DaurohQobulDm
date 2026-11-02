@@ -623,6 +623,19 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                         @enderror
                     </div>
+
+                    {{-- Nomor kasur: pilihan mengikuti kamar yang dipilih (lihat skrip "pilihan nomor kasur" di bawah) --}}
+                    <div class="rounded-2xl bg-[#f5f9f7] ring-1 ring-slate-100 p-3.5">
+                        <label for="nomor_kasur" class="block text-sm font-semibold text-slate-700">Nomor Kasur</label>
+                        <select id="nomor_kasur" name="nomor_kasur" data-awal="{{ old('nomor_kasur', $p->nomor_kasur) }}"
+                            class="mt-2 w-full bg-white border border-slate-200 rounded-xl py-2 px-3 text-sm focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 disabled:text-slate-400">
+                            <option value="">Belum ditentukan</option>
+                        </select>
+                        <p id="ket-kasur" class="text-xs text-slate-400 mt-1">Pilih kamar dulu.</p>
+                        @error('nomor_kasur')
+                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="mt-5">
@@ -681,5 +694,53 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     Vue.createApp({
         data: () => ({ tolakBuka: false, alasan: '' }),
     }).mount('#psb-detail');
+</script>
+<script>
+    // Pilihan nomor kasur: 1..kapasitas kamar yang dipilih.
+    // Kasur yang sudah ditempati santri lain ditampilkan dengan namanya dan tidak bisa dipilih.
+    // (Dijalankan setelah Vue di atas, karena Vue membuat ulang elemen halaman.)
+    (function () {
+        const KASUR = @json($kasurPerKamar);
+        const kamar = document.getElementById('kamar_id');
+        const kasur = document.getElementById('nomor_kasur');
+        const ket = document.getElementById('ket-kasur');
+        if (!kamar || !kasur) return;
+
+        let pilihan = kasur.dataset.awal || '';
+
+        function isi() {
+            const data = KASUR[kamar.value];
+            kasur.innerHTML = '';
+            kasur.add(new Option('Belum ditentukan', ''));
+
+            if (!data) {
+                kasur.disabled = true;
+                ket.textContent = 'Pilih kamar dulu.';
+                return;
+            }
+            if (data.kapasitas < 1) {
+                kasur.disabled = true;
+                ket.textContent = 'Kapasitas kamar ini belum diatur di Master Data › Kamar.';
+                return;
+            }
+
+            kasur.disabled = false;
+            let kosong = 0;
+            for (let n = 1; n <= data.kapasitas; n++) {
+                const penghuni = data.terisi[n];
+                const opsi = new Option(penghuni ? `Kasur ${n} — ${penghuni}` : `Kasur ${n}`, n);
+                opsi.disabled = !!penghuni;
+                if (!penghuni) kosong++;
+                kasur.add(opsi);
+            }
+            const ada = [...kasur.options].some((o) => o.value === String(pilihan) && !o.disabled);
+            kasur.value = ada ? String(pilihan) : '';
+            ket.textContent = `${kosong} dari ${data.kapasitas} kasur masih kosong.`;
+        }
+
+        kamar.addEventListener('change', () => { pilihan = ''; isi(); });
+        kasur.addEventListener('change', () => { pilihan = kasur.value; });
+        isi();
+    })();
 </script>
 @endpush

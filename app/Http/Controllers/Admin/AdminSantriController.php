@@ -129,6 +129,7 @@ class AdminSantriController extends Controller
             'kamar_id'      => $s->kamar_id,
             'kelas'         => $s->kelasMaster?->nama,
             'kamar'         => $s->kamarMaster?->nama,
+            'nomor_kasur'   => $s->nomor_kasur,
             'tanggal_masuk' => ($s->diproses_at ?? $s->created_at)?->translatedFormat('d M Y'),
             'wali'          => $s->nama_wali,
             'status'        => $s->user_id ? 'aktif' : 'belum punya akun',
@@ -141,7 +142,11 @@ class AdminSantriController extends Controller
     private function kamarOptions()
     {
         return Kamar::ordered()->where('is_active', true)->withCount('santri')->get()
-            ->map(fn (Kamar $k) => ['id' => $k->id, 'nama' => $k->nama, 'label' => $k->label_isi]);
+            ->map(fn (Kamar $k) => [
+                'id' => $k->id, 'nama' => $k->nama, 'label' => $k->label_isi,
+                // untuk kartu kamar & denah di halaman Data Santri
+                'kapasitas' => (int) $k->kapasitas, 'kasur_per_baris' => $k->kasur_per_baris ?: 4,
+            ]);
     }
 
     /** Tolak kalau kamar tidak cukup untuk $tambahan santri baru (kapasitas 0 = tanpa batas) */

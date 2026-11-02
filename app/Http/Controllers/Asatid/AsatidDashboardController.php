@@ -52,6 +52,21 @@ class AsatidDashboardController extends Controller
         return $this->tampil('asatid.peserta', compact('peserta', 'kelasList'));
     }
 
+    /** Detail lengkap satu peserta, hanya untuk dilihat (tidak bisa diubah) */
+    public function pesertaShow(PendaftaranSiswa $siswa)
+    {
+        abort_unless($siswa->status === PendaftaranSiswa::DITERIMA, 404);
+
+        $siswa->load(['kelasMaster', 'kamarMaster']);
+
+        // Rekap absensi peserta ini: ['hadir' => 3, 'terlambat' => 1, ...]
+        $jumlah = \App\Models\AbsensiDetail::where('pendaftaran_siswa_id', $siswa->id)
+            ->selectRaw('status, count(*) as n')->groupBy('status')->pluck('n', 'status');
+        $absensi = collect(\App\Models\Absensi::STATUS)->map(fn ($s, $k) => (int) ($jumlah[$k] ?? 0))->all();
+
+        return $this->tampil('asatid.peserta-detail', compact('siswa', 'absensi'));
+    }
+
     public function jadwal()
     {
         return $this->tampil('asatid.jadwal', [

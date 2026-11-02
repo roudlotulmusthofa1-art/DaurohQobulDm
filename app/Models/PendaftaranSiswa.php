@@ -228,6 +228,27 @@ class PendaftaranSiswa extends Model
         return $this->belongsTo(Kamar::class, 'kamar_id');
     }
 
+    /** Alamat dalam satu baris: alamat، kecamatan، kota، provinsi */
+    public function getAlamatSingkatAttribute(): ?string
+    {
+        $bagian = collect([$this->alamat, $this->kecamatan, $this->kota, $this->provinsi])
+            ->map(fn ($v) => trim((string) $v))->filter()->unique();
+
+        return $bagian->isNotEmpty() ? $bagian->implode('، ') : null;
+    }
+
+    /** Riwayat mondok terakhir (baris terakhir riwayat_pondok), mis. "معهد دار السلام، باندونغ" */
+    public function getPondokTerakhirAttribute(): ?string
+    {
+        $akhir = collect($this->riwayat_pondok ?? [])->filter(fn ($r) => filled($r['asal_pondok'] ?? null))->last();
+        if (! $akhir) {
+            return null;
+        }
+
+        return collect([$akhir['asal_pondok'] ?? null, $akhir['nama_daerah'] ?? null])
+            ->map(fn ($v) => trim((string) $v))->filter()->implode('، ');
+    }
+
     public function getFotoUrlAttribute(): ?string
     {
         return $this->berkas_foto ? asset('storage/' . $this->berkas_foto) : null;

@@ -156,15 +156,41 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <div :key="sekarang.id" :class="kartu" class="overflow-hidden">
                     <div class="relative h-24 bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700">
                         <div class="absolute inset-0 opacity-50" style="background-image: radial-gradient(rgba(255,255,255,0.1) 1px, transparent 1px); background-size: 16px 16px;"></div>
-                        <span v-if="sekarang.status" class="absolute top-3 right-3 text-[11px] font-bold rounded-full px-2.5 py-1 bg-white/90"
+                        <span v-if="sekarang.status" class="absolute top-3 left-3 text-[11px] font-bold rounded-full px-2.5 py-1 bg-white/90"
                             :class="gaya(sekarang.status).teks" v-text="label(sekarang.status)"></span>
+                        <!-- Detail lengkap peserta (hanya lihat), dibuka di tab baru supaya absensi tidak hilang -->
+                        <a :href="sekarang.detail" target="_blank" rel="noopener" title="Lihat detail lengkap peserta"
+                            class="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 hover:bg-white/25 ring-1 ring-white/30 backdrop-blur px-3 py-1.5 text-[11px] font-bold text-white transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Detail
+                        </a>
                     </div>
                     <div class="relative px-5 pb-5 -mt-12 text-center">
                         <img v-if="sekarang.foto" :src="sekarang.foto" alt="" class="mx-auto w-24 h-24 rounded-3xl object-cover ring-4 ring-white shadow-lg bg-white">
                         <span v-else class="mx-auto w-24 h-24 rounded-3xl ring-4 ring-white shadow-lg bg-gradient-to-br from-emerald-400 to-teal-600 text-white text-3xl font-extrabold flex items-center justify-center" v-text="inisial(sekarang.nama)"></span>
                         <h3 class="mt-3 text-xl font-extrabold text-slate-800" v-text="sekarang.nama"></h3>
                         <p v-if="sekarang.arab" dir="rtl" class="mt-0.5 text-lg text-slate-600" v-text="sekarang.arab"></p>
-                        <p class="mt-1 text-xs font-semibold text-slate-400" v-text="sekarang.nomor"></p>
+
+                        <div class="mt-4 grid sm:grid-cols-2 gap-2 text-left">
+                            <div class="flex items-start gap-2.5 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100 px-3 py-2.5">
+                                <span class="w-7 h-7 shrink-0 rounded-lg bg-rose-50 text-rose-500 ring-1 ring-rose-100 flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
+                                </span>
+                                <span class="min-w-0">
+                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Alamat</span>
+                                    <span class="block text-[13px] font-medium text-slate-700 leading-snug break-words" dir="auto" v-text="sekarang.alamat || '-'"></span>
+                                </span>
+                            </div>
+                            <div class="flex items-start gap-2.5 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100 px-3 py-2.5">
+                                <span class="w-7 h-7 shrink-0 rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100 flex items-center justify-center">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
+                                </span>
+                                <span class="min-w-0">
+                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Pondok terakhir</span>
+                                    <span class="block text-[13px] font-medium text-slate-700 leading-snug break-words" dir="auto" v-text="sekarang.pondok || '-'"></span>
+                                </span>
+                            </div>
+                        </div>
 
                         <label class="mt-5 block text-left">
                             <span class="text-xs font-semibold text-slate-500">Catatan mudarris <span class="font-normal text-slate-400">(opsional, isi sebelum memilih keterangan)</span></span>

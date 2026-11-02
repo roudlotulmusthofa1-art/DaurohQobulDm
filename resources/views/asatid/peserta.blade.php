@@ -43,7 +43,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @if ($peserta->count())
 <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
     @foreach ($peserta as $p)
-    <div class="{{ $kartu }} p-4 flex items-center gap-4">
+    <a href="{{ route('asatid.peserta.show', $p) }}" class="{{ $kartu }} p-4 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-20px_rgba(11,51,44,0.35)] transition-all">
         @if ($p->foto_url)
         <img src="{{ $p->foto_url }}" alt="" class="w-16 h-20 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
         @else
@@ -62,7 +62,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @endif
             </div>
         </div>
-    </div>
+        <svg class="w-5 h-5 shrink-0 text-slate-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </a>
     @endforeach
 </div>
 

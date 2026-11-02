@@ -3,6 +3,8 @@
     Halaman mengisi:
       @section('judul', 'Nama Halaman')   -> judul di header (kosongkan untuk beranda)
       @section('content')                  -> isi halaman
+      @section('kembali', url(...))         -> (opsional) panah kiri atas kembali ke HALAMAN SEBELUMNYA,
+                                              url ini dipakai kalau tidak ada halaman sebelumnya
 --}}
 <!DOCTYPE html>
 <html lang="id">
@@ -37,7 +39,11 @@ $jumlahNotif = count($notif ?? []);
         <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
 
             @hasSection('judul')
+                @hasSection('kembali')
+                <a href="@yield('kembali')" title="Kembali ke halaman sebelumnya" data-kembali-sebelumnya
+                @else
                 <a href="{{ route('asatid.dashboard') }}" title="Kembali ke beranda"
+                @endif
                     class="w-10 h-10 shrink-0 rounded-2xl bg-[#f5f9f7] ring-1 ring-slate-200/70 flex items-center justify-center text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
                 </a>
@@ -171,6 +177,25 @@ $jumlahNotif = count($notif ?? []);
             document.addEventListener('click', () => tutup());
             document.addEventListener('keydown', (e) => { if (e.key === 'Escape') tutup(); });
         })();
+    </script>
+    {{--
+        Tombol [data-kembali-sebelumnya]: kembali ke halaman sebelumnya.
+        Kalau halaman ini dibuka di tab baru (mis. Detail dari absensi), tab ditutup
+        sehingga kembali ke tab absensi. Kalau tidak bisa, pindah ke alamat di href.
+    --}}
+    <script>
+        document.querySelectorAll('[data-kembali-sebelumnya]').forEach((el) => {
+            el.addEventListener('click', (e) => {
+                e.preventDefault();
+                const dariSitusIni = document.referrer && new URL(document.referrer).origin === location.origin;
+                if (history.length > 1 && dariSitusIni) {
+                    history.back();
+                    return;
+                }
+                window.close();
+                setTimeout(() => { location.href = el.getAttribute('href'); }, 250);
+            });
+        });
     </script>
     @stack('scripts')
 </body>

@@ -332,6 +332,9 @@ class AbsensiController extends Controller
             'nomor' => $s->nomor_pendaftaran,
             'foto' => $s->foto_url,
             'kelas' => $s->relationLoaded('kelasMaster') ? $s->kelasMaster?->nama : null,
+            'alamat' => $s->alamat_singkat,
+            'pondok' => $s->pondok_terakhir,
+            'detail' => route('asatid.peserta.show', $s),
         ];
     }
 

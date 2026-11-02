@@ -52,10 +52,23 @@ class AdminPendaftaranController extends Controller
             ->where(fn ($q) => $q->where('is_active', true)->orWhere('id', $pendaftaran->kamar_id))
             ->get();
 
+        // Kasur per kamar untuk pilihan "Nomor Kasur": kapasitas + kasur yang sudah ditempati santri lain
+        $terisi = PendaftaranSiswa::whereIn('kamar_id', $kamarList->pluck('id'))
+            ->whereNotNull('nomor_kasur')
+            ->whereKeyNot($pendaftaran->id)
+            ->get(['kamar_id', 'nomor_kasur', 'nama_lengkap'])
+            ->groupBy('kamar_id');
+
+        $kasurPerKamar = $kamarList->mapWithKeys(fn ($k) => [$k->id => [
+            'kapasitas' => (int) $k->kapasitas,
+            'terisi' => ($terisi[$k->id] ?? collect())->mapWithKeys(fn ($s) => [$s->nomor_kasur => $s->nama_lengkap]),
+        ]]);
+
         return view('admin.pendaftaran.show', [
             'p' => $pendaftaran,
             'kelasList' => $kelasList,
             'kamarList' => $kamarList,
+            'kasurPerKamar' => $kasurPerKamar,
         ]);
     }
 
@@ -106,7 +119,7 @@ class AdminPendaftaranController extends Controller
 
         // 1) Simpan ceklis, paspor, kelas, kamar, dan catatan lebih dulu
         $data = $this->dataSyarat($request, $pendaftaran);
-        $pendaftaran->update($data);
+        $this->simpanData($pendaftaran, $data);
         $pendaftaran->load(['kelasMaster', 'kamarMaster']); // nama kelas/kamar terbaru untuk chat WA
 
         // 2) Terima + buat akun siswa di tabel users
@@ -151,6 +164,26 @@ class AdminPendaftaranController extends Controller
                     }
                 },
             ],
+            // Nomor kasur di kamar yang dipilih: 1..kapasitas dan belum ditempati santri lain
+            'nomor_kasur' => [
+                'nullable', 'integer', 'min:1',
+                function ($attribute, $value, $fail) use ($request, $pendaftaran) {
+                    $kamar = Kamar::find($request->input('kamar_id'));
+                    if (! $kamar) {
+                        $fail('Pilih kamar dulu sebelum menentukan nomor kasur.');
+                        return;
+                    }
+                    if ($kamar->kapasitas > 0 && $value > $kamar->kapasitas) {
+                        $fail("Nomor kasur melebihi kapasitas {$kamar->nama} ({$kamar->kapasitas} kasur).");
+                        return;
+                    }
+                    $penghuni = PendaftaranSiswa::where('kamar_id', $kamar->id)->where('nomor_kasur', $value)
+                        ->whereKeyNot($pendaftaran->id)->value('nama_lengkap');
+                    if ($penghuni) {
+                        $fail("Kasur {$value} di {$kamar->nama} sudah ditempati {$penghuni}.");
+                    }
+                },
+            ],
         ], [
             'kelas_id.exists' => 'Kelas yang dipilih tidak ada di Master Data.',
             'kamar_id.exists' => 'Kamar yang dipilih tidak ada di Master Data.',
@@ -161,6 +194,7 @@ class AdminPendaftaranController extends Controller
             'syarat_no_paspor' => $request->input('syarat_no_paspor'),
             'kelas_id'         => $request->input('kelas_id') ?: null,
             'kamar_id'         => $request->input('kamar_id') ?: null,
+            'nomor_kasur'      => $request->input('kamar_id') ? ($request->input('nomor_kasur') ?: null) : null,
         ];
 
         foreach (array_keys(PendaftaranSiswa::SYARAT) as $kolom) {
@@ -169,10 +203,23 @@ class AdminPendaftaranController extends Controller
 
         return $data;
     }
+    /**
+     * Simpan isian Persyaratan. Model mengosongkan nomor kasur saat kamar berganti,
+     * jadi nomor kasur pilihan admin dipasang lagi sesudahnya.
+     */
+    private function simpanData(PendaftaranSiswa $pendaftaran, array $data): void
+    {
+        $pendaftaran->update($data);
+
+        if ($pendaftaran->nomor_kasur != $data['nomor_kasur']) {
+            $pendaftaran->forceFill(['nomor_kasur' => $data['nomor_kasur']])->saveQuietly();
+        }
+    }
+
     /** Tombol "Simpan Persyaratan & Catatan" (tanpa menerima) */
     public function simpanSyarat(Request $request, PendaftaranSiswa $pendaftaran)
     {
-        $pendaftaran->update($this->dataSyarat($request, $pendaftaran));
+        $this->simpanData($pendaftaran, $this->dataSyarat($request, $pendaftaran));
 
         return back()->with('success', 'Persyaratan dan catatan berhasil disimpan.');
     }

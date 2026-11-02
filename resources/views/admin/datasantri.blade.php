@@ -73,79 +73,179 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
         </div>
     </div>
 
-    {{-- ================= GRID: STATISTIK PER KELAS ================= --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mb-6 mx-4 md:mx-10 lg:mx-20 mt-8">
-        {{-- Kartu modern: latar gradasi hijau gelap (sama seperti sidebar) + warna aksen per kelas.
-             --aksen = warna aksen kartu itu (dari WARNA_AKSEN di script bawah). --}}
-        <div v-for="kelas in kelasStats" :key="kelas.nama" :style="{ '--aksen': kelas.aksen }"
-            class="group relative overflow-hidden rounded-2xl p-4 text-white
-                   bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)]
-                   ring-1 ring-white/10 shadow-[0_8px_24px_-12px_rgba(11,51,44,.6)]
-                   transition duration-300 hover:-translate-y-1 hover:ring-(--aksen)
-                   hover:shadow-[0_18px_40px_-16px_var(--aksen)]">
-            {{-- Cahaya warna aksen di pojok kanan atas (makin terang saat disorot) --}}
-            <span class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-(--aksen) opacity-20 blur-2xl transition-opacity duration-300 group-hover:opacity-45"></span>
-            {{-- Kilau yang menyapu kartu saat disorot --}}
-            <span class="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></span>
-            {{-- Ikon besar samar sebagai hiasan --}}
-            <svg class="pointer-events-none absolute -bottom-4 -right-4 h-20 w-20 text-white/5 transition-transform duration-500 group-hover:-rotate-12 group-hover:scale-110"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" />
-                <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
-            </svg>
+    {{-- ================= KARTU KELAS & KAMAR =================
+         Kartu kecil yang bisa diklik. Klik kartu -> panel di bawahnya menampilkan anggotanya
+         (kamar: lengkap dengan denah kasur). Klik lagi kartu yang sama untuk menutup. --}}
+    <div class="mb-6 mx-4 md:mx-10 lg:mx-20 mt-8 space-y-4">
+        {{-- ----- Kelas ----- --}}
+        <div>
+            <p class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                <svg class="w-4 h-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" /><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" /></svg>
+                Kelas <span class="font-normal normal-case tracking-normal text-gray-400">· klik untuk melihat anggota</span>
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                <button v-for="kelas in kelasStats" :key="'kelas-' + kelas.id" type="button" @click="bukaGrup('kelas', kelas.id)"
+                    :style="{ '--aksen': kelas.aksen }"
+                    class="group relative overflow-hidden rounded-xl p-3 text-left text-white
+                           bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)]
+                           ring-1 shadow-[0_6px_18px_-12px_rgba(11,51,44,.7)] transition duration-300 hover:-translate-y-0.5"
+                    :class="aktif('kelas', kelas.id) ? 'ring-2 ring-(--aksen) -translate-y-0.5 shadow-[0_14px_30px_-14px_var(--aksen)]' : 'ring-white/10 hover:ring-(--aksen)'">
+                    <span class="pointer-events-none absolute -right-6 -top-6 h-16 w-16 rounded-full bg-(--aksen) opacity-25 blur-xl"></span>
+                    <span class="relative flex items-center justify-between gap-2">
+                        <span class="min-w-0 truncate text-xs font-semibold text-white/75" :title="kelas.nama" v-text="kelas.nama"></span>
+                        <span class="h-2 w-2 shrink-0 rounded-full bg-(--aksen)"></span>
+                    </span>
+                    <span class="relative mt-1 block text-xl font-bold leading-none">
+                        <span v-text="kelas.jumlah"></span> <span class="text-[10px] font-normal text-white/45">santri</span>
+                    </span>
+                    <span class="relative mt-2 block h-1 rounded-full bg-white/10 overflow-hidden">
+                        <span class="block h-full rounded-full bg-(--aksen)" :style="{ width: kelas.persen + '%' }"></span>
+                    </span>
+                </button>
 
-            <div class="relative">
-                <div class="flex items-start justify-between">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-(--aksen) text-[#0b332c] shadow-[0_6px_16px_-6px_var(--aksen)] transition-transform duration-300 group-hover:scale-110">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                            stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" />
-                            <path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" />
-                        </svg>
+                {{-- Santri tanpa kelas --}}
+                <button v-if="tanpaKelas > 0" type="button" @click="bukaGrup('kelas', 'kosong')"
+                    class="relative overflow-hidden rounded-xl p-3 text-left text-white bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)] border border-dashed transition duration-300 hover:-translate-y-0.5"
+                    :class="aktif('kelas', 'kosong') ? 'border-amber-300 ring-2 ring-amber-300' : 'border-amber-300/60'">
+                    <span class="block truncate text-xs font-semibold text-amber-200">Belum ada kelas</span>
+                    <span class="mt-1 block text-xl font-bold leading-none"><span v-text="tanpaKelas"></span> <span class="text-[10px] font-normal text-white/45">santri</span></span>
+                    <span class="mt-2 block text-[10px] text-amber-300/80 truncate">Atur lewat Kelola Massal</span>
+                </button>
+
+                <a v-if="kelasStats.length === 0" href="{{ route('admin.master-data.index', ['tab' => 'kelas']) }}"
+                    class="col-span-2 sm:col-span-4 lg:col-span-6 flex items-center rounded-xl border-2 border-dashed border-gray-300 p-3 text-sm text-gray-500 hover:bg-white/60">
+                    Belum ada kelas di Master Data. Klik di sini untuk menambahkan kelas.
+                </a>
+            </div>
+        </div>
+
+        {{-- ----- Kamar ----- --}}
+        <div>
+            <p class="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-gray-500">
+                <svg class="w-4 h-4 text-amber-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16" /><path d="M2 8h18a2 2 0 0 1 2 2v10" /><path d="M2 17h20" /><path d="M6 8v9" /></svg>
+                Kamar <span class="font-normal normal-case tracking-normal text-gray-400">· klik untuk melihat anggota &amp; denah</span>
+            </p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5">
+                <button v-for="kamar in kamarStats" :key="'kamar-' + kamar.id" type="button" @click="bukaGrup('kamar', kamar.id)"
+                    class="group relative overflow-hidden rounded-xl bg-white p-3 text-left ring-1 shadow-[0_6px_18px_-14px_rgba(11,51,44,.5)] transition duration-300 hover:-translate-y-0.5"
+                    :class="aktif('kamar', kamar.id) ? 'ring-2 ring-amber-400 -translate-y-0.5 shadow-[0_14px_30px_-16px_rgba(245,158,11,.7)]' : 'ring-gray-200 hover:ring-amber-300'">
+                    <span class="flex items-center justify-between gap-2">
+                        <span class="min-w-0 truncate text-xs font-semibold text-gray-600" :title="kamar.nama" v-text="kamar.nama"></span>
+                        <span v-if="kamar.penuh" class="shrink-0 rounded-full bg-rose-50 px-1.5 py-0.5 text-[9px] font-bold text-rose-600">Penuh</span>
+                    </span>
+                    <span class="mt-1 block text-xl font-bold leading-none text-gray-800">
+                        <span v-text="kamar.jumlah"></span><span class="text-xs font-semibold text-gray-400" v-text="kamar.kapasitas ? ' / ' + kamar.kapasitas : ''"></span>
+                        <span class="text-[10px] font-normal text-gray-400">santri</span>
+                    </span>
+                    <span class="mt-2 block h-1 rounded-full bg-gray-100 overflow-hidden">
+                        <span class="block h-full rounded-full" :class="kamar.penuh ? 'bg-rose-400' : 'bg-amber-400'" :style="{ width: kamar.persen + '%' }"></span>
+                    </span>
+                </button>
+
+                <button v-if="tanpaKamar > 0" type="button" @click="bukaGrup('kamar', 'kosong')"
+                    class="rounded-xl bg-amber-50/60 p-3 text-left border border-dashed transition duration-300 hover:-translate-y-0.5"
+                    :class="aktif('kamar', 'kosong') ? 'border-amber-400 ring-2 ring-amber-300' : 'border-amber-300'">
+                    <span class="block truncate text-xs font-semibold text-amber-700">Belum ada kamar</span>
+                    <span class="mt-1 block text-xl font-bold leading-none text-amber-800"><span v-text="tanpaKamar"></span> <span class="text-[10px] font-normal text-amber-600/70">santri</span></span>
+                    <span class="mt-2 block text-[10px] text-amber-600/80 truncate">Atur lewat Kelola Massal</span>
+                </button>
+
+                <a v-if="kamarStats.length === 0" href="{{ route('admin.master-data.index', ['tab' => 'kamar']) }}"
+                    class="col-span-2 sm:col-span-4 lg:col-span-6 flex items-center rounded-xl border-2 border-dashed border-gray-300 p-3 text-sm text-gray-500 hover:bg-white/60">
+                    Belum ada kamar di Master Data. Klik di sini untuk menambahkan kamar.
+                </a>
+            </div>
+        </div>
+
+        {{-- ----- Panel anggota (muncul setelah kartu diklik) ----- --}}
+        <transition enter-active-class="transition duration-300 ease-out" enter-from-class="opacity-0 -translate-y-2"
+            leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-2">
+            <section v-if="grup" class="rounded-2xl bg-white ring-1 ring-gray-200 shadow-[0_18px_40px_-24px_rgba(11,51,44,.45)] overflow-hidden">
+                <div class="flex flex-wrap items-center gap-3 px-5 py-4 border-b border-gray-100"
+                    :class="grup.jenis === 'kelas' ? 'bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_100%)] text-white' : 'bg-amber-50'">
+                    <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                        :class="grup.jenis === 'kelas' ? 'bg-white/10 text-emerald-300' : 'bg-amber-400 text-white'">
+                        <svg v-if="grup.jenis === 'kelas'" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5-10-5Z" /><path d="M6 12v5c0 1.66 2.69 3 6 3s6-1.34 6-3v-5" /></svg>
+                        <svg v-else class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16" /><path d="M2 8h18a2 2 0 0 1 2 2v10" /><path d="M2 17h20" /><path d="M6 8v9" /></svg>
+                    </span>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-[11px] font-semibold uppercase tracking-wider" :class="grup.jenis === 'kelas' ? 'text-white/60' : 'text-amber-700'"
+                            v-text="grup.jenis === 'kelas' ? 'Anggota kelas' : 'Anggota kamar'"></p>
+                        <h3 class="truncate text-lg font-bold" :class="grup.jenis === 'kelas' ? '' : 'text-gray-800'" v-text="grup.nama"></h3>
                     </div>
-                    <span class="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-medium text-white/70">@{{ kelas.persen }}%</span>
+                    <span class="rounded-full px-3 py-1 text-xs font-semibold"
+                        :class="grup.jenis === 'kelas' ? 'bg-white/10 text-white' : 'bg-white text-amber-700 ring-1 ring-amber-200'"
+                        v-text="grup.anggota.length + ' santri' + (grup.kapasitas ? ' / ' + grup.kapasitas + ' kasur' : '')"></span>
+                    <button type="button" @click="tampilkanDiTabel"
+                        class="rounded-lg px-3 py-1.5 text-xs font-semibold transition"
+                        :class="grup.jenis === 'kelas' ? 'bg-white/10 hover:bg-white/20' : 'bg-white text-gray-600 ring-1 ring-gray-200 hover:bg-gray-50'">Tampilkan di tabel</button>
+                    <button type="button" @click="grupAktif = null" title="Tutup"
+                        class="flex h-8 w-8 items-center justify-center rounded-lg transition"
+                        :class="grup.jenis === 'kelas' ? 'hover:bg-white/10' : 'text-gray-500 hover:bg-white'">
+                        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                    </button>
                 </div>
 
-                <p class="mt-3 text-sm text-white/60 truncate" :title="kelas.nama">@{{ kelas.nama }}</p>
-                <p class="mt-0.5 text-2xl font-bold">@{{ kelas.jumlah }} <span class="text-xs font-normal text-white/45">santri</span></p>
+                <div class="p-5" :class="grup.denah ? 'grid gap-6 lg:grid-cols-5' : ''">
+                    {{-- Denah kasur (khusus kamar) --}}
+                    <div v-if="grup.denah" class="lg:col-span-3">
+                        <div class="mb-3 flex items-center justify-between gap-2">
+                            <p class="text-sm font-semibold text-gray-800">Denah kamar</p>
+                            <a href="{{ route('admin.master-data.index', ['tab' => 'kamar']) }}" class="text-xs font-medium text-emerald-700 hover:underline">Atur denah di Master Data &rsaquo;</a>
+                        </div>
+                        <div class="rounded-2xl bg-amber-50/50 p-3 ring-1 ring-amber-100">
+                            <div class="grid gap-2" :style="{ gridTemplateColumns: 'repeat(' + grup.kolom + ', minmax(0, 1fr))' }">
+                                <component v-for="kasur in grup.denah" :key="kasur.nomor" :is="kasur.santri ? 'a' : 'div'"
+                                    :href="kasur.santri ? kasur.santri.detail_url : undefined"
+                                    :title="kasur.santri ? 'Kasur ' + kasur.nomor + ': ' + kasur.santri.nama : 'Kasur ' + kasur.nomor + ': kosong'"
+                                    class="relative flex flex-col items-center rounded-xl border-2 px-1.5 pb-2 pt-1.5 text-center transition"
+                                    :class="kasur.santri ? 'border-amber-200 bg-white shadow-sm hover:-translate-y-0.5 hover:border-amber-400' : 'border-dashed border-gray-300 bg-white/60'">
+                                    <span class="absolute left-1.5 top-1 text-[10px] font-semibold text-gray-400" v-text="kasur.nomor"></span>
+                                    <span class="mb-1.5 h-1.5 w-1/2 rounded-full" :class="kasur.santri ? 'bg-amber-200' : 'bg-gray-200'"></span>
+                                    <img v-if="kasur.santri && kasur.santri.foto" :src="kasur.santri.foto" alt="" class="h-9 w-9 rounded-full object-cover">
+                                    <span v-else-if="kasur.santri" class="flex h-9 w-9 items-center justify-center rounded-full bg-amber-100 text-xs font-bold text-amber-700" v-text="inisial(kasur.santri.nama)"></span>
+                                    <span v-else class="flex h-9 w-9 items-center justify-center text-[10px] text-gray-300">kosong</span>
+                                    <span class="mt-1 w-full truncate text-[11px] font-medium" :class="kasur.santri ? 'text-gray-800' : 'text-gray-400'"
+                                        v-text="kasur.santri ? kasur.santri.nama : 'Kosong'"></span>
+                                </component>
+                            </div>
+                            <div class="mt-2 flex justify-center">
+                                <span class="rounded-b-lg border-x-2 border-b-2 border-amber-300 bg-amber-50 px-6 py-0.5 text-[10px] font-medium text-amber-700">Pintu</span>
+                            </div>
+                        </div>
+                        <p v-if="grup.tanpaKasur" class="mt-2 text-xs text-amber-700"
+                            v-text="grup.tanpaKasur + ' santri di kamar ini belum mendapat nomor kasur. Atur di detail santri (Persyaratan & Ketentuan) atau di denah Master Data.'"></p>
+                    </div>
+                    <p v-else-if="grup.jenis === 'kamar' && grup.id !== 'kosong'" class="mb-4 rounded-xl bg-gray-50 p-3 text-sm text-gray-500">
+                        Kapasitas kamar ini belum diatur, jadi denah belum bisa ditampilkan.
+                        <a href="{{ route('admin.master-data.index', ['tab' => 'kamar']) }}" class="font-medium text-emerald-700 hover:underline">Atur di Master Data</a>.
+                    </p>
 
-                {{-- Bar: porsi santri kelas ini dari seluruh santri --}}
-                <div class="mt-3 h-1.5 rounded-full bg-white/10 overflow-hidden">
-                    <div class="h-full rounded-full bg-(--aksen) transition-[width] duration-700" :style="{ width: kelas.persen + '%' }"></div>
+                    {{-- Daftar anggota --}}
+                    <div :class="grup.denah ? 'lg:col-span-2' : ''">
+                        <p v-if="grup.denah" class="mb-3 text-sm font-semibold text-gray-800">Daftar anggota</p>
+                        <div v-if="grup.anggota.length" class="grid gap-2" :class="grup.denah ? '' : 'sm:grid-cols-2 lg:grid-cols-3'">
+                            <a v-for="santri in grup.anggota" :key="santri.id" :href="santri.detail_url"
+                                class="flex items-center gap-3 rounded-xl p-2.5 ring-1 ring-gray-100 bg-gray-50/60 transition hover:bg-white hover:ring-emerald-200 hover:shadow-sm">
+                                <img v-if="santri.foto" :src="santri.foto" alt="" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                                <span v-else class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700" v-text="inisial(santri.nama)"></span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate text-sm font-semibold text-gray-800" v-text="santri.nama"></span>
+                                    <span class="block truncate text-[11px] text-gray-400" dir="auto" v-text="santri.nama_arab || santri.nomor"></span>
+                                </span>
+                                <span v-if="grup.jenis === 'kelas'" class="shrink-0 text-[11px] font-medium rounded-md px-2 py-0.5"
+                                    :class="santri.kamar ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"
+                                    v-text="santri.kamar ? santri.kamar + (santri.nomor_kasur ? ' · Kasur ' + santri.nomor_kasur : '') : 'Tanpa kamar'"></span>
+                                <span v-else class="shrink-0 text-[11px] font-bold rounded-md px-2 py-0.5"
+                                    :class="santri.nomor_kasur ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"
+                                    v-text="santri.nomor_kasur ? 'Kasur ' + santri.nomor_kasur : 'Belum ada kasur'"></span>
+                            </a>
+                        </div>
+                        <p v-else class="py-8 text-center text-sm text-gray-400">Belum ada santri.</p>
+                    </div>
                 </div>
-            </div>
-        </div>
-
-        {{-- Santri yang belum dipilihkan kelas (aksen kuning sebagai peringatan) --}}
-        <div v-if="tanpaKelas > 0" style="--aksen: #fbbf24"
-            class="group relative overflow-hidden rounded-2xl p-4 text-white
-                   bg-[linear-gradient(145deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)]
-                   border border-dashed border-(--aksen)/60 shadow-[0_8px_24px_-12px_rgba(11,51,44,.6)]
-                   transition duration-300 hover:-translate-y-1 hover:ring-(--aksen)
-                   hover:shadow-[0_18px_40px_-16px_var(--aksen)]">
-            <span class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[var(--aksen)] opacity-20 blur-2xl transition-opacity duration-300 group-hover:opacity-45"></span>
-            <span class="pointer-events-none absolute inset-0 -translate-x-full bg-linear-to-r from-transparent via-white/10 to-transparent transition-transform duration-700 group-hover:translate-x-full"></span>
-
-            <div class="relative">
-                <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-(--aksen) text-[#0b332c] shadow-[0_6px_16px_-6px_var(--aksen)] animate-pulse">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="12" />
-                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                    </svg>
-                </div>
-                <p class="mt-3 text-sm text-white/60">Belum ada kelas</p>
-                <p class="mt-0.5 text-2xl font-bold">@{{ tanpaKelas }} <span class="text-xs font-normal text-white/45">santri</span></p>
-                <p class="mt-3 text-[11px] text-amber-300/80">Pilih kelasnya lewat Kelola Massal</p>
-            </div>
-        </div>
-
-        {{-- Master Data masih kosong --}}
-        <a v-if="kelasStats.length === 0" href="{{ route('admin.master-data.index', ['tab' => 'kelas']) }}"
-            class="col-span-2 sm:col-span-3 lg:col-span-4 flex items-center rounded-xl border-2 border-dashed border-ribath-green-light/60 p-4 text-sm text-gray-500 hover:bg-white/60">
-            Belum ada kelas di Master Data. Klik di sini untuk menambahkan kelas.
-        </a>
+            </section>
+        </transition>
     </div>
 
     {{-- ================= SEARCH + FILTER ================= --}}
@@ -264,6 +364,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <th class="px-4 py-5 font-medium text-base">Nama Santri</th>
                         <th class="px-4 py-5 font-medium text-base">Kelas</th>
                         <th class="px-4 py-5 font-medium text-base">Kamar</th>
+                        <th class="px-4 py-5 font-medium text-base whitespace-nowrap">No. Kasur</th>
                         <th class="px-4 py-5 font-medium text-base">Tanggal Masuk</th>
                         <th class="px-4 py-5 font-medium text-base">Wali Santri</th>
                         <th class="px-4 py-5 font-medium text-base">Status</th>
@@ -321,6 +422,11 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                             <span v-if="santri.kamar">@{{ santri.kamar }}</span>
                             <span v-else class="text-xs text-amber-600">Belum dipilih</span>
                         </td>
+                        <td class="px-4 py-3">
+                            <span v-if="santri.nomor_kasur" class="inline-flex items-center justify-center min-w-8 h-7 px-2 rounded-lg bg-amber-50 text-amber-700 ring-1 ring-amber-200 text-xs font-bold">@{{ santri.nomor_kasur }}</span>
+                            <span v-else-if="santri.kamar" class="text-xs text-amber-600">Belum dipilih</span>
+                            <span v-else class="text-xs text-gray-300">-</span>
+                        </td>
                         <td class="px-4 py-3 text-gray-600">@{{ santri.tanggal_masuk }}</td>
                         <td class="px-4 py-3 text-gray-400">@{{ santri.wali || '-' }}</td>
                         <td class="px-4 py-3">
@@ -360,7 +466,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     </tr>
 
                     <tr v-if="santriTersaring.length === 0">
-                        <td :colspan="kelolaMassal ? 9 : 8" class="px-4 py-10 text-center text-gray-400 text-sm">
+                        <td :colspan="kelolaMassal ? 10 : 9" class="px-4 py-10 text-center text-gray-400 text-sm">
                             @{{ santriList.length === 0 ? 'Belum ada santri. Santri muncul di sini setelah pendaftarannya diterima.' : 'Tidak ada santri yang cocok dengan pencarian.' }}
                         </td>
                     </tr>
@@ -491,6 +597,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 tambah: { buka: false, form: formKosong(), errors: {}, loading: false },
                 toast: { show: false, text: '', error: false },
                 menghapus: null, // id santri yang sedang dihapus
+                grupAktif: null, // kartu kelas/kamar yang sedang dibuka: { jenis, id }
             };
         },
         computed: {
@@ -500,6 +607,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 return this.kelasOptions.map((kelas, i) => {
                     const jumlah = this.santriList.filter(santri => santri.kelas_id === kelas.id).length;
                     return {
+                        id: kelas.id,
                         nama: kelas.nama,
                         jumlah,
                         persen: total ? Math.round(jumlah / total * 100) : 0, // untuk bar & label %
@@ -509,6 +617,57 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
             },
             tanpaKelas() {
                 return this.santriList.filter(santri => !santri.kelas_id).length;
+            },
+            // Kartu kamar: jumlah penghuni / kapasitas (ikut berubah setelah pindah kamar)
+            kamarStats() {
+                return this.kamarOptions.map(kamar => {
+                    const jumlah = this.santriList.filter(santri => santri.kamar_id === kamar.id).length;
+                    return {
+                        id: kamar.id,
+                        nama: kamar.nama,
+                        kapasitas: kamar.kapasitas,
+                        jumlah,
+                        penuh: kamar.kapasitas > 0 && jumlah >= kamar.kapasitas,
+                        persen: kamar.kapasitas > 0 ? Math.min(100, Math.round(jumlah / kamar.kapasitas * 100)) : (jumlah ? 100 : 0),
+                    };
+                });
+            },
+            tanpaKamar() {
+                return this.santriList.filter(santri => !santri.kamar_id).length;
+            },
+            // Isi panel anggota untuk kartu yang sedang dibuka (kamar: lengkap dengan denah)
+            grup() {
+                const g = this.grupAktif;
+                if (!g) return null;
+                const kolom = g.jenis === 'kelas' ? 'kelas_id' : 'kamar_id';
+                const anggota = this.santriList
+                    .filter(santri => (g.id === 'kosong' ? !santri[kolom] : santri[kolom] === g.id))
+                    .sort((a, b) => a.nama.localeCompare(b.nama));
+
+                if (g.jenis === 'kelas') {
+                    const kelas = this.kelasOptions.find(k => k.id === g.id);
+                    return { ...g, nama: kelas ? kelas.nama : 'Belum ada kelas', anggota };
+                }
+
+                const kamar = this.kamarOptions.find(k => k.id === g.id);
+                if (!kamar) return { ...g, nama: 'Belum ada kamar', anggota };
+
+                // Urut menurut nomor kasur; yang belum punya kasur di belakang
+                anggota.sort((a, b) => (a.nomor_kasur || 999) - (b.nomor_kasur || 999));
+
+                // Denah: kasur 1..kapasitas (atau sampai nomor kasur terbesar yang terpakai)
+                const terbesar = Math.max(0, ...anggota.map(s => s.nomor_kasur || 0));
+                const jumlahKasur = Math.max(kamar.kapasitas, terbesar);
+                const denah = jumlahKasur ? Array.from({ length: jumlahKasur }, (_, i) => ({
+                    nomor: i + 1,
+                    santri: anggota.find(s => s.nomor_kasur === i + 1) || null,
+                })) : null;
+
+                return {
+                    ...g, nama: kamar.nama, kapasitas: kamar.kapasitas, anggota, denah,
+                    kolom: Math.min(kamar.kasur_per_baris || 4, Math.max(jumlahKasur, 1)),
+                    tanpaKasur: anggota.filter(s => !s.nomor_kasur).length,
+                };
             },
             totalSantri() {
                 return this.santriList.length;
@@ -541,6 +700,24 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         },
         },
         methods: {
+            // ----- Kartu kelas / kamar -----
+            bukaGrup(jenis, id) {
+                this.grupAktif = this.aktif(jenis, id) ? null : { jenis, id };
+            },
+            aktif(jenis, id) {
+                return !!this.grupAktif && this.grupAktif.jenis === jenis && this.grupAktif.id === id;
+            },
+            inisial(nama) {
+                return (nama || '?').trim().charAt(0).toUpperCase();
+            },
+            // Saring tabel di bawah sesuai kartu yang dibuka
+            tampilkanDiTabel() {
+                const g = this.grupAktif;
+                this.filter = { kelas: '', kamar: '', status: '', [g.jenis]: g.id };
+                this.pencarian = '';
+                this.$nextTick(() => document.querySelector('#data-santri-app table')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
+            },
+
             notif(text, error = false) {
                 this.toast = { show: true, text, error };
                 clearTimeout(this._toast);

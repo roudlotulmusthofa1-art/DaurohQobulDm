@@ -21,6 +21,7 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     Route::get('/jadwal', [AsatidDashboardController::class, 'jadwal'])->name('jadwal');
     Route::get('/penilaian', [AsatidDashboardController::class, 'penilaian'])->name('penilaian');
     Route::get('/peserta', [AsatidDashboardController::class, 'peserta'])->name('peserta');
+    Route::get('/peserta/{siswa}', [AsatidDashboardController::class, 'pesertaShow'])->whereNumber('siswa')->name('peserta.show');
 
     // Absensi peserta (kelas & kegiatan)
     Route::controller(AbsensiController::class)->prefix('absensi')->group(function () {
