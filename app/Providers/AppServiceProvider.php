@@ -38,12 +38,11 @@ class AppServiceProvider extends ServiceProvider
 
                 [
                     'label' => 'AKADEMIK',
-                    'icon'  => 'users',
+                    'icon'  => 'book-open-check',
                     'submenu' => [
-                        ['route' => 'admin.ustadz.index',       'active' => 'admin.ustadz.*',       'label' => 'Data Ustadz', 'icon' => 'presentation'],
+                        ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => 'Tahun & Bulan Ajaran', 'icon' => 'calendar-range'],
                         ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => 'Kurikulum & Kitab', 'icon' => 'book-open'],
-                        ['route' => 'admin.tahun-ajaran.index', 'active' => 'admin.tahun-ajaran.*', 'label' => 'Tahun Ajaran', 'icon' => 'calendar-range'],
-                        ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => 'Jadwal Pelajaran', 'icon' => 'calendar-clock'],
+                        ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => 'Jadwal Mengajar', 'icon' => 'calendar-clock'],
                     ],
                 ],
 

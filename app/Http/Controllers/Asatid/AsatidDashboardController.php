@@ -6,7 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
-use App\Models\Semester;
+use App\Models\BulanAjaran;
+use App\Models\JadwalMengajar;
 use App\Models\WaktuPelajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,7 +24,8 @@ class AsatidDashboardController extends Controller
     {
         return $this->tampil('asatid.dashboard', [
             'jumlahPeserta' => PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count(),
-            'jumlahJam'     => WaktuPelajaran::where('is_active', true)->count(),
+            // Jumlah jam mengajar per minggu (Akademik > Jadwal Mengajar, bulan aktif)
+            'jumlahJam'     => self::jadwalSaya()->count(),
         ]);
     }
 
@@ -70,7 +72,8 @@ class AsatidDashboardController extends Controller
     public function jadwal()
     {
         return $this->tampil('asatid.jadwal', [
-            'semester'  => Semester::where('is_active', true)->ordered()->first(),
+            'bulan'     => BulanAjaran::aktif(),
+            'jadwal'    => self::jadwalSaya()->load(['kelas', 'kitab.bidangIlmu', 'waktu']),
             'jamList'   => WaktuPelajaran::where('is_active', true)->ordered()->get(),
         ]);
     }
@@ -78,7 +81,7 @@ class AsatidDashboardController extends Controller
     public function penilaian()
     {
         return $this->tampil('asatid.penilaian', [
-            'semester' => Semester::where('is_active', true)->ordered()->first(),
+            'bulan' => BulanAjaran::aktif(),
         ]);
     }
 
@@ -108,6 +111,16 @@ class AsatidDashboardController extends Controller
      * Notifikasi untuk asatid (lonceng di kanan atas).
      * Dihitung dari data yang ada, jadi hilang sendiri kalau sudah tidak relevan.
      */
+    /** Jadwal mengajar milik asatid yang login, di bulan ajaran aktif */
+    public static function jadwalSaya()
+    {
+        $bulan = BulanAjaran::aktif();
+
+        return $bulan
+            ? JadwalMengajar::where('bulan_ajaran_id', $bulan->id)->where('user_id', Auth::id())->get()
+            : collect();
+    }
+
     public static function notifikasi(?PendaftaranAsatid $asatid): array
     {
         $items = [];
@@ -136,9 +149,13 @@ class AsatidDashboardController extends Controller
             ];
         }
 
-        // Jadwal mengajar belum diatur (fitur jadwal per asatid belum tersedia)
+        // Jadwal mengajar (Akademik > Jadwal Mengajar, bulan aktif)
+        $jadwal = self::jadwalSaya();
+        $hariIni = $jadwal->where('hari', now('Asia/Jakarta')->dayOfWeekIso)->count();
         $items[] = [
-            'teks'  => 'Jadwal mengajar Anda <b>belum diatur</b> oleh admin',
+            'teks'  => $jadwal->isEmpty()
+                ? 'Jadwal mengajar Anda <b>belum diatur</b> oleh admin'
+                : ($hariIni ? "Hari ini Anda mengajar <b>{$hariIni} jam</b>" : 'Hari ini <b>tidak ada</b> jadwal mengajar'),
             'ket'   => 'Lihat Jadwal Pelajaran',
             'url'   => route('asatid.jadwal'),
             'warna' => 'bg-sky-50 text-sky-600 ring-sky-100',

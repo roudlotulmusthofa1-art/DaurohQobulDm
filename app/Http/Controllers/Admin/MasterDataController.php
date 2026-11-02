@@ -10,7 +10,6 @@ use App\Models\JenisPelanggaran;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
-use App\Models\Semester;
 use App\Models\WaktuPelajaran;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -21,10 +20,11 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan, Semester,
+ * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan,
  * Jenis Pelanggaran, Jenis Khidmah, Kategori Berita.
+ * (Semester dipindah ke menu Akademik > Tahun & Bulan Ajaran.)
  *
- * Satu controller untuk 9 model.
+ * Satu controller untuk 8 model.
  * Definisi tab (kolom tabel, isian form, ikon & warna menu) ada di method tabs() di bawah.
  *
  * Cara menambah menu baru: buat tabel (migration) + model (pakai trait IsMasterData),
@@ -39,7 +39,6 @@ class MasterDataController extends Controller
         'kelas' => Kelas::class,
         'kamar' => Kamar::class,
         'jenis-kegiatan' => JenisKegiatan::class,
-        'semester' => Semester::class,
         'jenis-pelanggaran' => JenisPelanggaran::class,
         'jenis-khidmah' => JenisKhidmah::class,
         'kategori-berita' => KategoriBerita::class,
@@ -213,18 +212,6 @@ class MasterDataController extends Controller
                 'warna' => ['nullable', 'string', Rule::in(array_keys(self::COLORS))],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
-            'semester' => [
-                'nama' => ['required', 'string', 'max:100'],
-                // Masehi
-                'tahun_ajaran' => ['nullable', 'string', 'max:20', 'regex:/^\d{4}\/\d{4}$/'],
-                'tanggal_mulai' => ['nullable', 'date'],
-                'tanggal_selesai' => ['nullable', 'date', 'after_or_equal:tanggal_mulai'],
-                // Hijriyah
-                'tahun_ajaran_hijriyah' => ['nullable', 'string', 'max:30'],
-                'tanggal_mulai_hijriyah' => ['nullable', 'string', 'max:50'],
-                'tanggal_selesai_hijriyah' => ['nullable', 'string', 'max:50'],
-                'keterangan' => ['nullable', 'string', 'max:255'],
-            ],
         };
     }
 
@@ -359,39 +346,6 @@ class MasterDataController extends Controller
                     ['key' => 'nama', 'label' => 'Nama Kegiatan', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Muhadharah'],
                     ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-teal-100'],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
-                ],
-            ],
-
-            'semester' => [
-                'icon' => 'calendar',
-                'accent' => '#f43f5e',
-                'label' => 'Semester',
-                'title' => 'Semester',
-                'description' => 'Kelola semester per tahun ajaran, dengan kalender Masehi dan Hijriyah. Seret baris untuk mengubah urutan.',
-                'add_label' => 'Tambah Semester',
-                'singular' => 'Semester',
-                'columns' => [
-                    ['key' => 'nama', 'label' => 'Nama', 'type' => 'name'],
-                    ['key' => 'tahun', 'label' => 'Tahun Ajaran', 'type' => 'tahun-ganda'],
-                    ['key' => 'periode', 'label' => 'Periode', 'type' => 'periode-ganda'],
-                    ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
-                ],
-                'fields' => [
-                    ['key' => 'nama', 'label' => 'Nama Semester', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Semester Ganjil'],
-
-                    ['key' => 'judul_masehi', 'label' => 'Kalender Masehi', 'type' => 'section', 'color' => 'sky'],
-                    ['key' => 'tahun_ajaran', 'label' => 'Tahun Ajaran', 'type' => 'text', 'placeholder' => 'cth. 2026/2027'],
-                    // 'hijri' => saat tanggal ini dipilih, isian Hijriyah-nya terisi otomatis
-                    ['key' => 'tanggal_mulai', 'label' => 'Tanggal Mulai', 'type' => 'date', 'half' => true, 'hijri' => 'tanggal_mulai_hijriyah'],
-                    ['key' => 'tanggal_selesai', 'label' => 'Tanggal Selesai', 'type' => 'date', 'half' => true, 'hijri' => 'tanggal_selesai_hijriyah'],
-
-                    ['key' => 'judul_hijriyah', 'label' => 'Kalender Hijriyah', 'type' => 'section', 'color' => 'emerald',
-                        'hint' => 'Terisi otomatis dari tanggal Masehi. Boleh diubah bila berbeda menurut rukyat.'],
-                    ['key' => 'tahun_ajaran_hijriyah', 'label' => 'Tahun Ajaran Hijriyah', 'type' => 'text', 'placeholder' => 'cth. 1447/1448 H'],
-                    ['key' => 'tanggal_mulai_hijriyah', 'label' => 'Tanggal Mulai', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. 1 Muharam 1448 H'],
-                    ['key' => 'tanggal_selesai_hijriyah', 'label' => 'Tanggal Selesai', 'type' => 'text', 'half' => true, 'placeholder' => 'cth. 29 Jumadil Akhir 1448 H'],
-
-                    ['key' => 'keterangan', 'label' => 'Keterangan', 'type' => 'text'],
                 ],
             ],
 

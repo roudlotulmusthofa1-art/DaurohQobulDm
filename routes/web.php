@@ -38,6 +38,27 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::resource('data-admin', AdminDataAdminController::class)->only(['index', 'show', 'destroy'])
         ->parameters(['data-admin' => 'dataAdmin']);
 
+    // ===== Akademik =====
+    // Tahun & Bulan Ajaran
+    Route::controller(\App\Http\Controllers\Admin\TahunAjaranController::class)->group(function () {
+        Route::get('tahun-ajaran', 'index')->name('tahun-ajaran.index');
+        Route::post('tahun-ajaran', 'store')->name('tahun-ajaran.store');
+        Route::put('tahun-ajaran/{tahunAjaran}', 'update')->name('tahun-ajaran.update');
+        Route::delete('tahun-ajaran/{tahunAjaran}', 'destroy')->name('tahun-ajaran.destroy');
+        Route::post('tahun-ajaran/{tahunAjaran}/aktifkan', 'aktifkan')->name('tahun-ajaran.aktifkan');
+        Route::post('tahun-ajaran/{tahunAjaran}/isi-bulan', 'isiBulan')->name('tahun-ajaran.isi-bulan');
+        Route::post('tahun-ajaran/{tahunAjaran}/bulan', 'storeBulan')->name('bulan-ajaran.store');
+        Route::put('bulan-ajaran/{bulanAjaran}', 'updateBulan')->name('bulan-ajaran.update');
+        Route::delete('bulan-ajaran/{bulanAjaran}', 'destroyBulan')->name('bulan-ajaran.destroy');
+        Route::post('bulan-ajaran/{bulanAjaran}/aktifkan', 'aktifkanBulan')->name('bulan-ajaran.aktifkan');
+    });
+    // Kurikulum & Kitab
+    Route::resource('kurikulum', \App\Http\Controllers\Admin\KurikulumController::class)->only(['index', 'store', 'update', 'destroy']);
+    // Jadwal Mengajar
+    Route::post('jadwal/salin', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'salin'])->name('jadwal.salin');
+    Route::post('jadwal/ganti-ustadz', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'gantiUstadz'])->name('jadwal.ganti-ustadz');
+    Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalMengajarController::class)->only(['index', 'store', 'update', 'destroy']);
+
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
     // Laporan > Laporan Absensi (hasil absensi kelas & kegiatan dari asatid)
