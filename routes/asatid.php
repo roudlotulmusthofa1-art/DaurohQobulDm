@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Asatid\AbsensiController;
 use App\Http\Controllers\Asatid\AsatidDashboardController;
 use App\Http\Controllers\Asatid\PendaftaranAsatidController;
 use Illuminate\Support\Facades\Route;
@@ -17,9 +18,24 @@ Route::prefix('asatid')->name('asatid.')->group(function () {
 Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->group(function () {
     Route::get('/beranda', [AsatidDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [AsatidDashboardController::class, 'profil'])->name('profil');
-    Route::get('/absensi', [AsatidDashboardController::class, 'absensi'])->name('absensi');
     Route::get('/jadwal', [AsatidDashboardController::class, 'jadwal'])->name('jadwal');
     Route::get('/penilaian', [AsatidDashboardController::class, 'penilaian'])->name('penilaian');
     Route::get('/peserta', [AsatidDashboardController::class, 'peserta'])->name('peserta');
+
+    // Absensi peserta (kelas & kegiatan)
+    Route::controller(AbsensiController::class)->prefix('absensi')->group(function () {
+        Route::get('/', 'index')->name('absensi');
+        Route::get('/kelas', 'kelas')->name('absensi.kelas');
+        Route::get('/kelas/peserta', 'pesertaKelas')->name('absensi.kelas.peserta');
+        Route::post('/kelas', 'simpanKelas')->name('absensi.kelas.simpan');
+        Route::get('/kegiatan', 'kegiatan')->name('absensi.kegiatan');
+        Route::post('/kegiatan', 'mulaiKegiatan')->name('absensi.kegiatan.mulai');
+        Route::get('/kegiatan/{absensi}', 'catatKegiatan')->name('absensi.kegiatan.catat');
+        Route::post('/kegiatan/{absensi}/catat', 'simpanCatatan')->name('absensi.kegiatan.simpan');
+        Route::post('/kegiatan/{absensi}/selesai', 'selesaiKegiatan')->name('absensi.kegiatan.selesai');
+        Route::get('/{absensi}', 'show')->whereNumber('absensi')->name('absensi.show');
+        Route::delete('/{absensi}', 'destroy')->whereNumber('absensi')->name('absensi.destroy');
+    });
+
     Route::post('/keluar', [AsatidDashboardController::class, 'logout'])->name('logout');
 });

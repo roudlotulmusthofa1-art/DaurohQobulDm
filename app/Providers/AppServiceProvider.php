@@ -62,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
                     'submenu' => [
                         ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => 'Laporan Akademik', 'icon' => 'chart-column'],
                         ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => 'Laporan Keuangan', 'icon' => 'chart-pie'],
+                        ['route' => 'admin.laporan-absensi.index',   'active' => 'admin.laporan-absensi.*',   'label' => 'Laporan Absensi', 'icon' => 'clipboard-check'],
                     ],
                 ],
                 [

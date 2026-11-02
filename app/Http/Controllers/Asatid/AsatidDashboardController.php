@@ -60,11 +60,6 @@ class AsatidDashboardController extends Controller
         ]);
     }
 
-    public function absensi()
-    {
-        return $this->tampil('asatid.absensi');
-    }
-
     public function penilaian()
     {
         return $this->tampil('asatid.penilaian', [
@@ -90,7 +85,7 @@ class AsatidDashboardController extends Controller
         return view($view, $data + [
             'user'    => $user,
             'asatid'  => $asatid,
-            'notif'   => $this->notifikasi($asatid),
+            'notif'   => self::notifikasi($asatid),
         ]);
     }
 
@@ -98,7 +93,7 @@ class AsatidDashboardController extends Controller
      * Notifikasi untuk asatid (lonceng di kanan atas).
      * Dihitung dari data yang ada, jadi hilang sendiri kalau sudah tidak relevan.
      */
-    private function notifikasi(?PendaftaranAsatid $asatid): array
+    public static function notifikasi(?PendaftaranAsatid $asatid): array
     {
         $items = [];
 

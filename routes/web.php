@@ -35,6 +35,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
 
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
+    // Laporan > Laporan Absensi (hasil absensi kelas & kegiatan dari asatid)
+    Route::get('laporan-absensi', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'index'])->name('laporan-absensi.index');
+    Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
+    Route::delete('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'destroy'])->name('laporan-absensi.destroy');
+
     // Sistem > Pengaturan (termasuk pengaturan notifikasi)
     Route::get('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'index'])->name('pengaturan.index');
     Route::put('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'update'])->name('pengaturan.update');

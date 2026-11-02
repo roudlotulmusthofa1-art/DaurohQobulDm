@@ -8,6 +8,9 @@ window.Vue = {
     ref,
 };
 
+// Pemindai QR (absensi kegiatan). Dimuat hanya saat dibutuhkan supaya halaman lain tetap ringan.
+window.muatPemindaiQr = () => import("html5-qrcode");
+
 // Navbar dan animasi statistik tetap di bawah sini.
 
 /**
