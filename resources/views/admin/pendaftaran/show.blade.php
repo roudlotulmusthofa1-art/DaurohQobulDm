@@ -505,7 +505,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 text-sm">
                 @foreach ($p::BERKAS as $kolom => $nama)
                 @if ($p->$kolom)
-                <a href="{{ asset('storage/' . $p->$kolom) }}" target="_blank" rel="noopener"
+                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($p->$kolom) }}" target="_blank" rel="noopener"
                     class="group flex items-center gap-3 rounded-2xl bg-white ring-1 ring-teal-100 px-3.5 py-3 hover:ring-teal-300 hover:shadow-md hover:shadow-teal-900/5 hover:-translate-y-0.5 transition">
                     <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white flex items-center justify-center shadow-sm">{!! $svg('file', 'w-5 h-5') !!}</span>
                     <span class="min-w-0 flex-1">
@@ -562,7 +562,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
                         @if ($kolomBerkas && $p->$kolomBerkas)
                         <div class="ml-8 mt-1">
-                            <a href="{{ asset('storage/' . $p->$kolomBerkas) }}" target="_blank" rel="noopener"
+                            <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($p->$kolomBerkas) }}" target="_blank" rel="noopener"
                                 class="inline-flex items-center gap-1 text-xs font-medium text-emerald-700 hover:underline">{!! $svg('open', 'w-3 h-3') !!} Lihat berkas yang diunggah</a>
                         </div>
                         @elseif ($kolomBerkas)

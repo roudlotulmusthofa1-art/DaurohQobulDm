@@ -18,11 +18,11 @@ $tgl = fn ($t) => $t?->locale('id')->translatedFormat('d M Y');
 $tombol = 'inline-flex items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold ring-1 transition-colors';
 @endphp
 
-<div class="space-y-6">
+<div class="space-y-6 mx-4 md:mx-10 lg:mx-20">
     @include('admin.akademik._flash')
 
     {{-- ===== Judul ===== --}}
-    <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-8">
+    <section class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-8">
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
         <div class="relative flex flex-col sm:flex-row sm:items-end gap-4">

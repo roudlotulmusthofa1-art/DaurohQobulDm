@@ -123,7 +123,7 @@ class AdminSantriController extends Controller
             'id'            => $s->id,
             'nama'          => $s->nama_lengkap,
             'nama_arab'     => $s->nama_lengkap_arab,
-            'foto'          => $s->berkas_foto ? asset('storage/' . $s->berkas_foto) : null,
+            'foto'          => $s->berkas_foto ? \Illuminate\Support\Facades\Storage::disk('public')->url($s->berkas_foto) : null,
             'nomor'         => $s->nomor_pendaftaran,
             'kelas_id'      => $s->kelas_id,
             'kamar_id'      => $s->kamar_id,

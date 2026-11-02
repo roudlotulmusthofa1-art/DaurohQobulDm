@@ -56,6 +56,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::resource('kurikulum', \App\Http\Controllers\Admin\KurikulumController::class)->only(['index', 'store', 'update', 'destroy']);
     // Jadwal Mengajar
     Route::post('jadwal/salin', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'salin'])->name('jadwal.salin');
+    Route::post('jadwal/pindah', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'pindah'])->name('jadwal.pindah');
     Route::post('jadwal/ganti-ustadz', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'gantiUstadz'])->name('jadwal.ganti-ustadz');
     Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalMengajarController::class)->only(['index', 'store', 'update', 'destroy']);
 
@@ -66,9 +67,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
     Route::delete('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'destroy'])->name('laporan-absensi.destroy');
 
-    // Sistem > Pengaturan (termasuk pengaturan notifikasi)
-    Route::get('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'index'])->name('pengaturan.index');
-    Route::put('pengaturan', [\App\Http\Controllers\Admin\PengaturanController::class, 'update'])->name('pengaturan.update');
+    // Sistem > Pengaturan: route-nya ada di routes/pengaturan.php
     // Route::resource('wali', AdminWaliController::class);
 });
 
@@ -76,6 +75,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
 
 require __DIR__ . '/psb.php';
 require __DIR__ . '/asatid.php';
+require __DIR__ . '/pengaturan.php';
 
 // Formulir pendaftaran admin (publik, hanya bisa dibuka lewat link khusus dari halaman Data Admin)
 Route::get('daftar-admin/{kode}', [\App\Http\Controllers\PendaftaranAdminController::class, 'create'])->name('pendaftaran-admin.daftar');

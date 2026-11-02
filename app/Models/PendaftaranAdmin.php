@@ -13,6 +13,9 @@ use Illuminate\Support\Str;
  */
 class PendaftaranAdmin extends Model
 {
+    /** Dipakai bersama semua sesi -> selalu di database utama */
+    protected $connection = 'pusat';
+
     protected $table = 'pendaftaran_admin';
 
     protected $guarded = ['id'];
@@ -30,7 +33,7 @@ class PendaftaranAdmin extends Model
     /** Role akun di tabel users */
     public const ROLE = 'admin';
 
-    /** Nomor pendaftaran: ADM20260001 (urut per tahun). Panggil di dalam DB::transaction(). */
+    /** Nomor pendaftaran: ADM20260001 (urut per tahun). Panggil di dalam DB::connection('pusat')->transaction(). */
     public static function buatNomor(): string
     {
         $prefix = 'ADM' . now()->format('Y');
@@ -48,14 +51,14 @@ class PendaftaranAdmin extends Model
     /** Kode rahasia di link pendaftaran admin. Disimpan di tabel pengaturan. */
     public static function kodeLink(): string
     {
-        return Pengaturan::ambil('admin_daftar_kode') ?: static::buatKodeLinkBaru();
+        return Pengaturan::ambilPusat('admin_daftar_kode') ?: static::buatKodeLinkBaru();
     }
 
     /** Buat kode link baru (link lama otomatis tidak berlaku). */
     public static function buatKodeLinkBaru(): string
     {
         $kode = Str::lower(Str::random(32));
-        Pengaturan::simpan('admin_daftar_kode', $kode);
+        Pengaturan::simpanPusat('admin_daftar_kode', $kode);
 
         return $kode;
     }
@@ -63,7 +66,7 @@ class PendaftaranAdmin extends Model
     /** Terima: buat/ubah akun di tabel users dengan role admin. */
     public function terima(?string $catatan = null): void
     {
-        DB::transaction(function () use ($catatan) {
+        DB::connection('pusat')->transaction(function () use ($catatan) {
             $user = User::firstOrNew(['email' => $this->email]);
 
             $user->forceFill([

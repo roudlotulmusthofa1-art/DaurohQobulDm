@@ -14,7 +14,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Koneksi "pusat" = database utama (daftar sesi, login, akun bersama). Lihat App\Support\SesiAplikasi
+        \App\Support\SesiAplikasi::daftarkanKoneksiPusat();
     }
 
     /**
@@ -22,6 +23,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Permintaan web membaca database & folder file milik sesi aktif (perintah artisan tetap di database utama)
+        if (! $this->app->runningInConsole()) {
+            \App\Support\SesiAplikasi::terapkan();
+        }
+
         View::composer('layouts.admin', function ($view) {
             $menuItems = [
                 ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'DASHBOARD', 'icon' => 'home'],

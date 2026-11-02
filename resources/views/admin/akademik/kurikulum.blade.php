@@ -1,6 +1,7 @@
 {{--
     Admin > Akademik > Kurikulum & Kitab
-    Kitab dikelompokkan per bidang ilmu (Master Data > Bidang Ilmu).
+    Kitab dikelompokkan per bidang ilmu (Master Data > Bidang Ilmu), untuk satu tahun ajaran.
+    Pilihan "bulan ke" mengikuti jumlah bulan di tahun ajaran itu. Kelas dipilih di Jadwal Mengajar.
     Form tambah/ubah memakai <dialog> (lihat _form-kitab).
 --}}
 @extends('layouts.admin')
@@ -9,12 +10,7 @@
 
 @section('content')
 @php
-use App\Models\Kitab;
 $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
-// Warna chip kelas (urutan kelas di Master Data)
-$warnaKelas = ['bg-sky-500', 'bg-emerald-500', 'bg-violet-500', 'bg-amber-500', 'bg-rose-500', 'bg-teal-500', 'bg-indigo-500', 'bg-orange-500', 'bg-pink-500', 'bg-lime-600'];
-$indeksKelas = $kelasList->pluck('id')->flip();
-$chip = fn ($kelas) => $warnaKelas[($indeksKelas[$kelas->id] ?? 0) % count($warnaKelas)];
 $namaBidang = $bidangList->keyBy('id');
 $totalJam = $semua->sum('frekuensi');
 $tautan = fn (array $ubah) => route('admin.kurikulum.index', array_filter(array_merge($filter, $ubah), fn ($v) => $v !== null && $v !== ''));
@@ -26,7 +22,7 @@ $ikonStat = [
 $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald-600 ring-emerald-100', 'bg-violet-50 text-violet-600 ring-violet-100'];
 @endphp
 
-<div class="space-y-6">
+<div class="space-y-6 mx-4 md:mx-10 lg:mx-20">
     @include('admin.akademik._flash')
 
     {{-- ===== Judul ===== --}}
@@ -57,14 +53,21 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
             <p class="text-xs font-semibold text-slate-600">Total Kitab</p>
             <p class="text-[11px] text-slate-400">{{ $bidangList->count() }} bidang ilmu</p>
         </div>
-        @foreach ($kelasRingkas as $i => $k)
+        @php
+        $ringkas = [
+            [$tahunAktif ? $semua->where('tahun_ajaran_id', $tahunAktif->id)->count() : 0, 'Kitab tahun aktif', $tahunAktif ? 'TA ' . $tahunAktif->nama . ' · ' . $tahunAktif->bulan->count() . ' bulan' : 'Belum ada tahun aktif'],
+            [$jumlahBulanIni, 'Kitab bulan ini', $bulanAktif ? 'Bulan ke-' . $bulanAktif->urutan . ' · ' . $bulanAktif->nama : 'Belum ada bulan aktif'],
+            [$terjadwal->count(), 'Sudah dijadwalkan', 'di Jadwal Mengajar bulan ini'],
+        ];
+        @endphp
+        @foreach ($ringkas as $i => [$angka, $judulStat, $ket])
         <div class="{{ $kartu }} p-4">
             <span class="w-9 h-9 rounded-xl ring-1 flex items-center justify-center {{ $warnaStat[$i % 3] }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikonStat[1] }}"/></svg>
             </span>
-            <p class="mt-3 text-2xl font-extrabold text-slate-800">{{ $k['jumlah'] }}</p>
-            <p class="text-xs font-semibold text-slate-600 truncate">Kitab kelas {{ $k['nama'] }}</p>
-            <p class="text-[11px] text-slate-400">dari Master Data › Kelas</p>
+            <p class="mt-3 text-2xl font-extrabold text-slate-800">{{ $angka }}</p>
+            <p class="text-xs font-semibold text-slate-600 truncate">{{ $judulStat }}</p>
+            <p class="text-[11px] text-slate-400 truncate">{{ $ket }}</p>
         </div>
         @endforeach
         <div class="{{ $kartu }} p-4">
@@ -82,11 +85,11 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
         @if ($filter['bidang'])<input type="hidden" name="bidang" value="{{ $filter['bidang'] }}">@endif
         <label class="flex-1 flex items-center gap-2 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 px-3 focus-within:ring-2 focus-within:ring-emerald-500">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-            <input type="search" name="q" value="{{ $filter['q'] }}" placeholder="Cari kitab (nama, pengarang, deskripsi)…" class="flex-1 bg-transparent border-0 py-2.5 text-sm outline-none focus:ring-0">
+            <input type="search" name="q" value="{{ $filter['q'] }}" placeholder="Cari kitab (nama, nama Arab, deskripsi)…" class="flex-1 bg-transparent border-0 py-2.5 text-sm outline-none focus:ring-0">
         </label>
-        <select name="jenis" onchange="this.form.submit()" class="rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm text-slate-700">
-            <option value="">Semua jenis</option>
-            @foreach (Kitab::JENIS as $kode => $nama)<option value="{{ $kode }}" @selected($filter['jenis'] === $kode)>{{ $nama }}</option>@endforeach
+        <select name="tahun" onchange="this.form.submit()" class="rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm text-slate-700">
+            <option value="">Semua tahun ajaran</option>
+            @foreach ($tahunList as $t)<option value="{{ $t->id }}" @selected((string) $filter['tahun'] === (string) $t->id)>TA {{ $t->nama }}{{ $t->is_active ? ' (aktif)' : '' }}</option>@endforeach
         </select>
         <button class="rounded-xl bg-[#0b332c] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#135347]">Cari</button>
     </form>
@@ -129,20 +132,21 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                 <div class="flex-1 p-4">
                     <h3 class="font-bold text-slate-800">{{ $k->nama }}</h3>
                     @if ($k->nama_arab)<p class="text-sm text-slate-500" dir="rtl">{{ $k->nama_arab }}</p>@endif
-                    @if ($k->pengarang)<p class="text-[11px] text-slate-400">{{ $k->pengarang }}</p>@endif
-                    <span class="mt-2 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {{ $k->jenis === 'praktik' ? 'bg-amber-50 text-amber-700 ring-amber-200' : 'bg-teal-50 text-teal-700 ring-teal-200' }}">{{ Kitab::JENIS[$k->jenis] ?? $k->jenis }}</span>
+                    <span class="mt-2 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {{ $k->tahunAjaran?->is_active ? 'bg-teal-50 text-teal-700 ring-teal-200' : 'bg-slate-50 text-slate-500 ring-slate-200' }}">
+                        {{ $k->tahunAjaran ? 'TA ' . $k->tahunAjaran->nama : 'Tahun ajaran belum dipilih' }}
+                    </span>
 
-                    <p class="mt-3 text-[11px] font-semibold text-slate-400">Kelas:</p>
+                    <p class="mt-3 text-[11px] font-semibold text-slate-400">Bulan ke:</p>
                     <div class="mt-1 flex flex-wrap gap-1.5">
-                        @forelse ($k->kelas as $kelas)
-                            <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white {{ $chip($kelas) }}">{{ $kelas->nama }}</span>
+                        @forelse ($k->bulan_label as $b)
+                            @php $bulanIni = $bulanAktif && $k->tahun_ajaran_id === $bulanAktif->tahun_ajaran_id && (int) $b === (int) $bulanAktif->urutan; @endphp
+                            <span class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {{ $bulanIni ? 'bg-amber-400 text-[#0b332c] ring-amber-400' : 'bg-white text-slate-600 ring-slate-200' }}">{{ $b }}</span>
                         @empty
-                            <span class="text-[11px] text-slate-400">Belum dipilih</span>
+                            <span class="rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">Semua bulan{{ $k->tahunAjaran ? ' (' . $k->tahunAjaran->bulan->count() . ' bulan)' : '' }}</span>
                         @endforelse
                     </div>
 
                     <dl class="mt-3 space-y-1 text-xs">
-                        <div class="flex justify-between"><dt class="text-slate-500">Bulan ke:</dt><dd class="font-semibold text-slate-700">{{ $k->bulan_ke ? implode(', ', $k->bulan_ke) : 'Semua bulan' }}</dd></div>
                         <div class="flex justify-between"><dt class="text-slate-500">Frekuensi:</dt><dd class="font-semibold text-slate-700">{{ $k->frekuensi }}x/minggu</dd></div>
                     </dl>
 
@@ -188,4 +192,16 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
 
 @push('scripts')
 @include('admin.akademik._dialog-script')
+<script>
+    // Pilihan "bulan ke" mengikuti tahun ajaran yang dipilih (bulan tahun lain disembunyikan dan tidak ikut terkirim)
+    document.addEventListener('change', (e) => {
+        const pilih = e.target.closest('[data-pilih-tahun]');
+        if (!pilih) return;
+        pilih.closest('[data-form-kitab]').querySelectorAll('[data-bulan-tahun]').forEach((grup) => {
+            const tampil = grup.dataset.bulanTahun === pilih.value;
+            grup.classList.toggle('hidden', !tampil);
+            grup.querySelectorAll('input').forEach((i) => { i.disabled = !tampil; if (!tampil) i.checked = false; });
+        });
+    });
+</script>
 @endpush

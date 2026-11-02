@@ -17,6 +17,15 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /** Akun admin & asatid dipakai bersama semua sesi: disalin otomatis (lihat App\Support\AkunBersama) */
+    protected static function booted(): void
+    {
+        static::creating(fn (User $u) => \App\Support\AkunBersama::pesanId($u));
+        static::updating(fn (User $u) => \App\Support\AkunBersama::cegahUbahPeran($u));
+        static::saved(fn (User $u) => \App\Support\AkunBersama::sebarkan($u));
+        static::deleted(fn (User $u) => \App\Support\AkunBersama::hapus($u));
+    }
+
     /**
      * Get the attributes that should be cast.
      *

@@ -73,7 +73,7 @@ return [
     |
     */
 
-    'connection' => env('SESSION_CONNECTION'),
+    'connection' => env('SESSION_CONNECTION', 'pusat'), // login tetap di database utama walau sesi aktif berganti
 
     /*
     |--------------------------------------------------------------------------

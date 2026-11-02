@@ -104,10 +104,11 @@
             <div class="sb-logo w-full flex items-center justify-between">
                 <a href="/" class="flex items-center gap-2.5 px-1 group">
                     <div class="w-10 h-10 flex items-center justify-center bg-[#eff5f0d7] rounded-full">
-                        <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo" class="w-full h-full object-contain">
+                        {{-- Logo & nama dari Sistem > Pengaturan > Umum (bawaan: Logo dar4.png & "Dauroh Qobul") --}}
+                        @php $profilPesantren = \App\Models\Pengaturan::profilPesantren(); @endphp
+                        <img src="{{ $profilPesantren['logo_url'] }}" alt="Logo" class="w-full h-full object-contain">
                     </div>
-                    <span class="sb-teks text-white font-semibold text-[19px] tracking-tight group-hover:text-white/80">Dauroh
-                        Qobul</span>
+                    <span class="sb-teks text-white font-semibold text-[19px] tracking-tight group-hover:text-white/80 line-clamp-2 leading-tight">{{ $profilPesantren['nama'] }}</span>
                 </a>
                 {{-- Tombol buka/tutup sidebar (diatur script di bawah </aside>) --}}
                 <button type="button" id="sidebar-toggle" aria-controls="sidebar" aria-expanded="true"
@@ -249,6 +250,15 @@
                 </div>
 
                 <div class="flex items-center gap-3">
+                    {{-- Sesi aktif (Pengaturan > Sesi): semua data yang tampil milik sesi ini --}}
+                    @php $sesiAktifHeader = \App\Support\SesiAplikasi::aktif(); @endphp
+                    @if ($sesiAktifHeader)
+                    <a href="{{ route('admin.pengaturan.index', ['tab' => 'sesi']) }}" title="Sesi aktif. Klik untuk mengganti."
+                        class="hidden lg:inline-flex items-center gap-2 max-w-[14rem] rounded-xl bg-white/80 px-3 py-2.5 text-[12px] font-semibold text-[#0b332c] ring-1 ring-emerald-200 hover:bg-white">
+                        <span class="w-2 h-2 shrink-0 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
+                        <span class="truncate">{{ $sesiAktifHeader->nama }}</span>
+                    </a>
+                    @endif
                     <div class="relative hidden md:block">
                         <svg xmlns="http://www.w3.org/2000/svg"
                             class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none"

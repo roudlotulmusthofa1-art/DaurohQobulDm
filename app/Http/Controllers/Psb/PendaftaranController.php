@@ -53,12 +53,10 @@ class PendaftaranController extends Controller
             ]);
         });
 
-        $wa->kirim(
-            $pendaftar->no_hp_wali,
-            "Assalamu'alaikum, pendaftaran santri *{$pendaftar->nama_lengkap}* berhasil kami terima.\n"
-                . "Nomor pendaftaran: *{$pendaftar->nomor_pendaftaran}*\n"
-                . "Data sedang diverifikasi admin. Kami akan menghubungi kembali setelah ada keputusan."
-        );
+        // Isi pesan diatur di Pengaturan > Pesan
+        if ($pesan = \App\Support\PesanWa::buat('psb_daftar', ['nama' => $pendaftar->nama_lengkap, 'nomor' => $pendaftar->nomor_pendaftaran])) {
+            $wa->kirim($pendaftar->no_hp_wali, $pesan);
+        }
         session(['psb_sukses' => $pendaftar->nomor_pendaftaran]);
         return response()->json([
             'message'  => 'Pendaftaran berhasil.',

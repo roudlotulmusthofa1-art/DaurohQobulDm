@@ -13,6 +13,9 @@ use Illuminate\Support\Str;
  */
 class PendaftaranAsatid extends Model
 {
+    /** Dipakai bersama semua sesi -> selalu di database utama */
+    protected $connection = 'pusat';
+
     protected $table = 'pendaftaran_asatid';
 
     protected $guarded = ['id'];
@@ -31,7 +34,7 @@ class PendaftaranAsatid extends Model
     /** Role akun di tabel users */
     public const ROLE = 'asatid';
 
-    /** Nomor pendaftaran: AST20260001 (urut per tahun). Panggil di dalam DB::transaction(). */
+    /** Nomor pendaftaran: AST20260001 (urut per tahun). Panggil di dalam DB::connection('pusat')->transaction(). */
     public static function buatNomor(): string
     {
         $prefix = 'AST' . now()->format('Y');
@@ -49,7 +52,7 @@ class PendaftaranAsatid extends Model
     /** Kode rahasia di link pendaftaran asatid. Disimpan di tabel pengaturan. */
     public static function kodeLink(): string
     {
-        $kode = Pengaturan::ambil('asatid_daftar_kode');
+        $kode = Pengaturan::ambilPusat('asatid_daftar_kode');
 
         if (! $kode) {
             $kode = static::buatKodeLinkBaru();
@@ -62,7 +65,7 @@ class PendaftaranAsatid extends Model
     public static function buatKodeLinkBaru(): string
     {
         $kode = Str::lower(Str::random(24));
-        Pengaturan::simpan('asatid_daftar_kode', $kode);
+        Pengaturan::simpanPusat('asatid_daftar_kode', $kode);
 
         return $kode;
     }
@@ -70,7 +73,7 @@ class PendaftaranAsatid extends Model
     /** Terima: buat/ubah akun di tabel users dengan role asatid. */
     public function terima(?string $catatan = null): void
     {
-        DB::transaction(function () use ($catatan) {
+        DB::connection('pusat')->transaction(function () use ($catatan) {
             $user = User::firstOrNew(['email' => $this->email]);
 
             $user->forceFill([

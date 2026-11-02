@@ -38,7 +38,18 @@ return [
             'report' => false,
         ],
 
+        // File milik sesi aktif. Sesi selain "utama" diarahkan ke storage/app/public/sesi/{kode} (lihat App\Support\SesiAplikasi)
         'public' => [
+            'driver' => 'local',
+            'root' => storage_path('app/public'),
+            'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
+            'visibility' => 'public',
+            'throw' => false,
+            'report' => false,
+        ],
+
+        // File yang dipakai bersama semua sesi (foto pendaftar asatid & admin). Tidak ikut berpindah sesi.
+        'bersama' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',

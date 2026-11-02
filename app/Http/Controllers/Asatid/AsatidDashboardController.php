@@ -118,7 +118,7 @@ class AsatidDashboardController extends Controller
 
         return $bulan
             ? JadwalMengajar::where('bulan_ajaran_id', $bulan->id)->where('user_id', Auth::id())->get()
-            : collect();
+            : new \Illuminate\Database\Eloquent\Collection(); // tetap koleksi Eloquent agar ->load() tidak error
     }
 
     public static function notifikasi(?PendaftaranAsatid $asatid): array

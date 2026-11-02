@@ -27,11 +27,11 @@ $indeksKelas = $kelasList->pluck('id')->flip();
 $gayaKelas = fn ($id) => $warnaKelas[($indeksKelas[$id] ?? 0) % count($warnaKelas)];
 $tautan = fn (array $ubah) => route('admin.jadwal.index', array_filter(array_merge(['bulan' => $bulan?->id, 'kelas' => $kelasFilter, 'tampilan' => $tampilan], $ubah)));
 $inisial = fn ($nama) => collect(preg_split('/\s+/', trim(preg_replace('/^(Ustadz|Ust\.?|Syekh|KH\.?)\s+/i', '', (string) $nama))))->filter()->take(3)->map(fn ($k) => mb_strtoupper(mb_substr($k, 0, 1)))->implode('');
-// Data kitab untuk pilihan di form: kitab tanpa kelas = boleh di semua kelas
-$dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'kelas' => $k->kelas->pluck('id')]);
+// Data kitab untuk pilihan di form: yang tampil hanya kitab kurikulum bulan ini (tahun ajaran & bulan ke cocok)
+$dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'cocok' => $kitabBulanIni->contains($k->id)])->values();
 @endphp
 
-<div class="space-y-6">
+<div class="space-y-6 mx-4 md:mx-10 lg:mx-20">
     @include('admin.akademik._flash')
 
     @if (! $bulan)
@@ -136,11 +136,16 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'ke
 
     {{-- ===== Tampilan GRID ===== --}}
     @if ($tampilan === 'grid' && $waktuList->isNotEmpty())
-    <section class="{{ $kartu }} overflow-x-auto">
-        <table class="w-full min-w-[960px] border-collapse text-sm">
+    <p class="mb-5 flex items-center gap-2 px-1 text-xs text-slate-500">
+        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/></svg>
+        <span>Geser kartu ke hari/jam lain untuk memindahkan jadwal, lalu klik <b>Simpan</b>. Klik ikon pensil untuk mengubah isi jadwal.</span>
+    </p>
+    <section class="{{ $kartu }} overflow-x-auto " id="grid-jadwal">
+        {{-- table-fixed: semua kolom hari sama lebar, sel berbentuk agak kotak --}}
+        <table class="w-full min-w-[1040px] table-fixed border-collapse text-sm">
             <thead>
                 <tr class="bg-[#f8fbfa]">
-                    <th class="w-28 px-3 py-3 text-left font-bold text-slate-700">Waktu</th>
+                    <th class="w-32 px-3 py-3 text-left font-bold text-slate-700">Waktu</th>
                     @foreach ($hari as $h)<th class="px-2 py-3 font-bold text-slate-700">{{ $h }}</th>@endforeach
                 </tr>
             </thead>
@@ -153,11 +158,12 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'ke
                     </td>
                     @foreach ($hari as $nomorHari => $h)
                     @php $isi = ($slot[$w->id . '-' . $nomorHari] ?? collect())->sortBy(fn ($j) => $indeksKelas[$j->kelas_id] ?? 0); @endphp
-                    <td class="px-1.5 py-2 border-l border-slate-100">
-                        <div class="space-y-1.5">
+                    <td class="p-2 border-l border-slate-100 transition-colors" data-slot="{{ $nomorHari }}-{{ $w->id }}" data-hari="{{ $nomorHari }}" data-waktu="{{ $w->id }}">
+                        {{-- Tinggi minimum 112px; tombol "+" mengisi sisa ruang (sel kosong = kotak penuh) --}}
+                        <div class="flex min-h-28 flex-col gap-3 " data-isi-slot>
                             @foreach ($isi as $j){!! $kartuJadwal($j) !!}@endforeach
                             <button type="button" data-tambah data-hari="{{ $nomorHari }}" data-waktu="{{ $w->id }}" data-kelas="{{ $kelasFilter }}"
-                                class="w-full rounded-xl border border-dashed border-slate-200 py-2 text-[11px] text-slate-300 hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-600 transition-colors">
+                                class="w-full flex-1 min-h-7 rounded-xl border border-dashed border-slate-200 text-[11px] text-slate-300 hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-600 transition-colors">
                                 {{ $isi->isEmpty() ? 'Kosong' : '+' }}
                             </button>
                         </div>
@@ -168,6 +174,23 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'ke
             </tbody>
         </table>
     </section>
+
+    {{-- Bar simpan: muncul setelah ada kartu yang digeser --}}
+    <form method="POST" action="{{ route('admin.jadwal.pindah') }}" id="form-pindah"
+        class="hidden fixed bottom-5 left-1/2 z-40 -translate-x-1/2 w-[min(640px,calc(100vw-2rem))] items-center gap-3 rounded-2xl bg-[#0b332c] px-4 py-3 text-white shadow-2xl shadow-[#0b332c]/40 ring-1 ring-white/10">
+        @csrf
+        <input type="hidden" name="bulan_ajaran_id" value="{{ $bulan->id }}">
+        <div data-isian-pindah></div>
+        <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-400 text-[#0b332c] flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
+        </span>
+        <div class="min-w-0 flex-1">
+            <p class="text-sm font-bold" data-teks-pindah>0 jadwal dipindah</p>
+            <p class="text-[11px] text-white/70 truncate" data-teks-bentrok>Belum disimpan</p>
+        </div>
+        <button type="button" data-batal-pindah class="rounded-xl px-3 py-2 text-sm font-semibold text-white/80 ring-1 ring-white/20 hover:bg-white/10">Batal</button>
+        <button data-simpan-pindah class="rounded-xl bg-amber-400 px-4 py-2 text-sm font-bold text-[#0b332c] hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed">Simpan</button>
+    </form>
     @endif
 
     {{-- ===== Tampilan PER KELAS / PER USTADZ ===== --}}
@@ -221,7 +244,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'ke
                 <select name="waktu_pelajaran_id" required class="{{ $input }}">@foreach ($waktuList as $w)<option value="{{ $w->id }}">{{ $w->nama }}{{ $w->jam_mulai ? ' (' . $w->jam_mulai . ')' : '' }}</option>@endforeach</select></label>
             <label class="col-span-2"><span class="{{ $label }}">Kelas *</span>
                 <select name="kelas_id" required class="{{ $input }}"><option value="">Pilih kelas…</option>@foreach ($kelasList as $k)<option value="{{ $k->id }}">{{ $k->nama }}</option>@endforeach</select></label>
-            <label class="col-span-2"><span class="{{ $label }}">Kitab <span class="font-normal text-slate-400">(dari Kurikulum, sesuai kelas)</span></span>
+            <label class="col-span-2"><span class="{{ $label }}">Kitab <span class="font-normal text-slate-400">(dari Kurikulum bulan ini)</span></span>
                 <select name="kitab_id" class="{{ $input }}"></select></label>
             <label class="col-span-2"><span class="{{ $label }}">Ustadz <span class="font-normal text-slate-400">(akun asatid yang diterima)</span></span>
                 <select name="user_id" class="{{ $input }}">
@@ -310,20 +333,17 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'ke
         const dialog = document.getElementById('dialog-jadwal');
         const pilih = (n) => form.querySelector(`[name="${n}"]`);
 
-        // Pilihan kitab mengikuti kelas: kitab kelas itu + kitab tanpa kelas
+        // Pilihan kitab: kitab kurikulum bulan ini (tahun ajaran & bulan ke cocok)
         function isiKitab(terpilih) {
-            const kelas = Number(pilih('kelas_id').value);
             const el = pilih('kitab_id');
             el.innerHTML = '<option value="">— Tanpa kitab —</option>';
-            KITAB.filter((k) => !k.kelas.length || !kelas || k.kelas.includes(kelas))
-                .forEach((k) => el.add(new Option(k.nama, k.id)));
+            KITAB.filter((k) => k.cocok).forEach((k) => el.add(new Option(k.nama, k.id)));
             if (terpilih && ![...el.options].some((o) => o.value === String(terpilih))) {
                 const k = KITAB.find((x) => x.id === Number(terpilih));
-                if (k) el.add(new Option(k.nama + ' (bukan kurikulum kelas ini)', k.id));
+                if (k) el.add(new Option(k.nama + ' (bukan kurikulum bulan ini)', k.id));
             }
             el.value = terpilih || '';
         }
-        pilih('kelas_id').addEventListener('change', () => isiKitab(pilih('kitab_id').value));
 
         function buka(data, ubahId) {
             form.reset();
@@ -344,6 +364,120 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'ke
             const ubah = e.target.closest('[data-ubah-jadwal]');
             if (ubah) buka(JSON.parse(ubah.dataset.ubahJadwal), ubah.dataset.id);
         });
+
+        // ===== Geser kartu di tampilan Grid (drag & drop), simpan sekaligus lewat bar Simpan =====
+        const grid = document.getElementById('grid-jadwal');
+        const formPindah = document.getElementById('form-pindah');
+        if (grid && formPindah) {
+            let diseret = null;
+            const pindahan = new Map(); // id jadwal -> "hari-waktu" tujuan
+            const kartuSemua = () => grid.querySelectorAll('[data-jadwal]');
+            const tandaBentrok = ['ring-2', 'ring-rose-500', 'animate-pulse'];
+
+            kartuSemua().forEach((k) => {
+                k.draggable = true;
+                k.classList.add('cursor-grab', 'active:cursor-grabbing');
+            });
+
+            // Teks tombol "Kosong" / "+" di tiap slot
+            const rapikanSlot = (td) => {
+                const tombol = td.querySelector('[data-tambah]');
+                if (tombol) tombol.textContent = td.querySelector('[data-jadwal]') ? '+' : 'Kosong';
+            };
+
+            // Tandai bentrok: kelas yang sama / ustadz yang sama di satu slot
+            function cekBentrok() {
+                let bentrok = 0;
+                kartuSemua().forEach((k) => { k.classList.remove(...tandaBentrok); k.removeAttribute('title'); });
+                grid.querySelectorAll('[data-slot]').forEach((td) => {
+                    const isi = [...td.querySelectorAll('[data-jadwal]')];
+                    isi.forEach((k) => {
+                        const kelasSama = isi.filter((x) => x.dataset.kelas === k.dataset.kelas).length > 1;
+                        const ustadzSama = k.dataset.ustadz && isi.filter((x) => x.dataset.ustadz === k.dataset.ustadz).length > 1;
+                        if (kelasSama || ustadzSama) {
+                            k.classList.add(...tandaBentrok);
+                            k.title = kelasSama ? 'Bentrok: kelas ini sudah ada pelajaran di jam ini' : 'Bentrok: ustadz ini mengajar dua kelas di jam ini';
+                            bentrok++;
+                        }
+                    });
+                });
+                return bentrok;
+            }
+
+            function perbaruiBar() {
+                const bentrok = cekBentrok();
+                formPindah.classList.toggle('hidden', pindahan.size === 0);
+                formPindah.classList.toggle('flex', pindahan.size > 0);
+                formPindah.querySelector('[data-teks-pindah]').textContent = `${pindahan.size} jadwal dipindah`;
+                formPindah.querySelector('[data-teks-bentrok]').textContent = bentrok
+                    ? `${bentrok} kartu bentrok (bertanda merah). Geser lagi sampai tidak bentrok.`
+                    : 'Belum disimpan. Klik Simpan untuk menyimpan perubahan.';
+                formPindah.querySelector('[data-simpan-pindah]').disabled = bentrok > 0;
+                const wadah = formPindah.querySelector('[data-isian-pindah]');
+                wadah.innerHTML = '';
+                [...pindahan].forEach(([id, slot], i) => {
+                    const [hari, waktu] = slot.split('-');
+                    Object.entries({ id, hari, waktu_pelajaran_id: waktu }).forEach(([nama, nilai]) => {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = `pindah[${i}][${nama}]`;
+                        input.value = nilai;
+                        wadah.appendChild(input);
+                    });
+                });
+            }
+
+            grid.addEventListener('dragstart', (e) => {
+                diseret = e.target.closest?.('[data-jadwal]');
+                if (!diseret) return;
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', diseret.dataset.jadwal);
+                setTimeout(() => diseret?.classList.add('opacity-40'), 0);
+            });
+            grid.addEventListener('dragend', () => {
+                diseret?.classList.remove('opacity-40');
+                diseret = null;
+                grid.querySelectorAll('[data-slot]').forEach((td) => td.classList.remove('bg-emerald-50'));
+            });
+            grid.addEventListener('dragover', (e) => {
+                const td = e.target.closest('[data-slot]');
+                if (!diseret || !td) return;
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                grid.querySelectorAll('[data-slot]').forEach((x) => x.classList.toggle('bg-emerald-50', x === td));
+            });
+            grid.addEventListener('drop', (e) => {
+                const td = e.target.closest('[data-slot]');
+                if (!diseret || !td) return;
+                e.preventDefault();
+                const asalTd = diseret.closest('[data-slot]');
+                if (asalTd === td) return;
+                const wadah = td.querySelector('[data-isi-slot]');
+                wadah.insertBefore(diseret, wadah.querySelector('[data-tambah]'));
+                diseret.classList.add('outline', 'outline-2', 'outline-dashed', 'outline-amber-400');
+
+                // Kembali ke tempat asal = tidak jadi dipindah
+                if (td.dataset.slot === diseret.dataset.asal) {
+                    pindahan.delete(diseret.dataset.jadwal);
+                    diseret.classList.remove('outline', 'outline-2', 'outline-dashed', 'outline-amber-400');
+                } else {
+                    pindahan.set(diseret.dataset.jadwal, td.dataset.slot);
+                }
+                rapikanSlot(asalTd);
+                rapikanSlot(td);
+                perbaruiBar();
+            });
+
+            formPindah.querySelector('[data-batal-pindah]').addEventListener('click', () => {
+                pindahan.clear();
+                location.reload();
+            });
+            formPindah.addEventListener('submit', () => pindahan.clear());
+            // Ingatkan bila meninggalkan halaman sebelum disimpan
+            window.addEventListener('beforeunload', (e) => {
+                if (pindahan.size) { e.preventDefault(); e.returnValue = ''; }
+            });
+        }
 
         // Pencarian: sembunyikan kartu jadwal yang tidak cocok
         document.getElementById('cari-jadwal')?.addEventListener('input', (e) => {

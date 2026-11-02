@@ -34,7 +34,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
     @endif
 
     {{-- ===== Link pendaftaran asatid ===== --}}
-    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-5 sm:p-7">
+    <div class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-5 sm:p-7 mx-4 md:mx-10 lg:mx-20">
         <div class="pointer-events-none absolute inset-0 opacity-60"
             style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
@@ -77,7 +77,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
     </div>
 
     {{-- ===== Ringkasan status (bisa diklik untuk menyaring) ===== --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mx-4 md:mx-10 lg:mx-20">
         @foreach ($tile as $kunci => [$label, $angka, $warna, $warnaLabel])
         <a href="{{ route('admin.asatid.index', array_filter(['status' => $kunci, 'q' => request('q')])) }}"
             @class(['relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br transition hover:-translate-y-0.5', $warna,
@@ -89,7 +89,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
     </div>
 
     {{-- ===== Daftar ===== --}}
-    <div class="{{ $kartu }} overflow-hidden">
+    <div class="{{ $kartu }} overflow-hidden mx-4 md:mx-10 lg:mx-20">
         <form method="GET" class="flex flex-col sm:flex-row gap-3 p-4 sm:p-5 border-b border-slate-100">
             @if ($status)
             <input type="hidden" name="status" value="{{ $status }}">

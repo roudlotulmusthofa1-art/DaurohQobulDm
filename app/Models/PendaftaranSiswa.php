@@ -251,7 +251,7 @@ class PendaftaranSiswa extends Model
 
     public function getFotoUrlAttribute(): ?string
     {
-        return $this->berkas_foto ? asset('storage/' . $this->berkas_foto) : null;
+        return $this->berkas_foto ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->berkas_foto) : null;
     }
 
     public function getLabelStatusAttribute(): string

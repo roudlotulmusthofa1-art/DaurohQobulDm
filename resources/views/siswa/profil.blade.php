@@ -95,7 +95,7 @@
         <div class="flex flex-wrap gap-3 text-sm">
             @foreach (['berkas_foto' => 'Pas Foto', 'berkas_kk' => 'Kartu Keluarga', 'berkas_akta' => 'Akta Kelahiran'] as $kolom => $nama)
                 @if ($siswa->$kolom)
-                    <a href="{{ asset('storage/' . $siswa->$kolom) }}" target="_blank"
+                    <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($siswa->$kolom) }}" target="_blank"
                        class="px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">{{ $nama }}</a>
                 @endif
             @endforeach

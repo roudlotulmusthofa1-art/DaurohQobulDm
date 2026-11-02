@@ -20,7 +20,7 @@ $tile = [
 $pesanWa = "Assalamu'alaikum, berikut link pendaftaran admin Dauroh Qobul Darul Musthofa:\n" . $linkDaftar;
 @endphp
 
-<div class="space-y-6">
+<div class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-6 mb-10">
     @if (session('success'))
     <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm">
         <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">

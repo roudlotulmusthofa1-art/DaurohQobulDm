@@ -49,6 +49,7 @@ $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app npm install --ignore-scripts && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app npm run build && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan migrate --force --seed && \
+    echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan sesi:migrate && \
     (echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan storage:link || true) && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan config:clear && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker exec daurohqobuldm-app php artisan cache:clear && \

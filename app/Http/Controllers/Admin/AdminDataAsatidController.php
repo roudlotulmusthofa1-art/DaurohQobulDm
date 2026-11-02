@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PendaftaranAsatid;
 use App\Services\WhatsAppService;
+use App\Support\PesanWa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -55,11 +56,11 @@ class AdminDataAsatidController extends Controller
         // Terima + buat akun di tabel users dengan role asatid
         $asatid->terima($request->input('catatan_admin'));
 
-        $pesan = "Assalamu'alaikum *{$asatid->nama_lengkap}*, alhamdulillah pendaftaran Anda sebagai *ASATID* dinyatakan *DITERIMA*.\n\n"
-            . ($asatid->catatan_admin ? "*Catatan admin:*\n{$asatid->catatan_admin}\n\n" : '')
-            . "Silakan masuk ke akun asatid:\n" . url('/login') . "\n"
-            . "Email: *{$asatid->email}*\n"
-            . "Password: sesuai yang Anda isi saat mendaftar.";
+        // Isi pesan diatur di Pengaturan > Pesan
+        $pesan = PesanWa::buat('asatid_terima', ['nama' => $asatid->nama_lengkap, 'catatan' => $asatid->catatan_admin, 'email' => $asatid->email]);
+        if (! $pesan) {
+            return redirect()->route('admin.asatid.show', $asatid)->with('success', 'Asatid diterima. (Pesan WhatsApp dimatikan di Pengaturan › Pesan.)');
+        }
 
         $terkirim = $wa->kirim($asatid->no_hp, $pesan);
 
@@ -79,11 +80,9 @@ class AdminDataAsatidController extends Controller
 
         $asatid->tolak($request->catatan_admin);
 
-        $wa->kirim(
-            $asatid->no_hp,
-            "Assalamu'alaikum *{$asatid->nama_lengkap}*, mohon maaf pendaftaran Anda sebagai asatid *DITOLAK*.\n\n"
-                . "Alasan:\n" . $request->catatan_admin
-        );
+        if ($pesan = PesanWa::buat('asatid_tolak', ['nama' => $asatid->nama_lengkap, 'alasan' => $request->catatan_admin])) {
+            $wa->kirim($asatid->no_hp, $pesan);
+        }
 
         return redirect()->route('admin.asatid.index')->with('success', 'Pendaftar asatid ditolak.');
     }
@@ -102,7 +101,7 @@ class AdminDataAsatidController extends Controller
         $nama = $asatid->nama_lengkap;
         $foto = $asatid->berkas_foto;
 
-        DB::transaction(function () use ($asatid) {
+        DB::connection('pusat')->transaction(function () use ($asatid) {
             $user = $asatid->user;
             $asatid->delete();
 
@@ -112,7 +111,7 @@ class AdminDataAsatidController extends Controller
         });
 
         if ($foto) {
-            Storage::disk('public')->delete($foto);
+            Storage::disk('bersama')->delete($foto);
         }
 
         return redirect()->route('admin.asatid.index')->with('success', "Data {$nama} berhasil dihapus.");

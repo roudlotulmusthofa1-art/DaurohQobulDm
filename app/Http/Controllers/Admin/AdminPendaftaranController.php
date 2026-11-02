@@ -7,6 +7,7 @@ use App\Models\Kamar;
 use App\Models\Kelas;
 use App\Models\PendaftaranSiswa;
 use App\Services\WhatsAppService;
+use App\Support\PesanWa;
 use Illuminate\Http\Request;
 use App\Http\Requests\UpdatePendaftaranRequest;
 use Illuminate\Support\Facades\DB;
@@ -126,15 +127,17 @@ class AdminPendaftaranController extends Controller
         $pendaftaran->terima($data['catatan_admin']);
 
         // 3) Kirim chat WhatsApp
-        $penempatan = $pendaftaran->ringkasanPenempatan();
-
-        $pesan = "Assalamu'alaikum, alhamdulillah santri *{$pendaftaran->nama_lengkap}* dinyatakan *DITERIMA*.\n\n"
-            . ($penempatan ? "*Penempatan:*\n{$penempatan}\n\n" : '')
-            . "*Status persyaratan:*\n" . $pendaftaran->ringkasanSyarat() . "\n\n"
-            . ($pendaftaran->catatan_admin ? "*Catatan admin:*\n{$pendaftaran->catatan_admin}\n\n" : '')
-            . "Silakan masuk ke akun siswa:\n" . url('/login') . "\n"
-            . "Email: *{$pendaftaran->email}*\n"
-            . "Password: sesuai yang Anda isi saat mendaftar.";
+        // Isi pesan diatur di Pengaturan > Pesan
+        $pesan = PesanWa::buat('psb_terima', [
+            'nama' => $pendaftaran->nama_lengkap,
+            'penempatan' => $pendaftaran->ringkasanPenempatan(),
+            'syarat' => $pendaftaran->ringkasanSyarat(),
+            'catatan' => $pendaftaran->catatan_admin,
+            'email' => $pendaftaran->email,
+        ]);
+        if (! $pesan) {
+            return redirect()->route('admin.pendaftaran.show', $pendaftaran)->with('success', 'Pendaftar diterima. (Pesan WhatsApp dimatikan di Pengaturan › Pesan.)');
+        }
 
         $terkirim = $wa->kirim($pendaftaran->no_hp_wali, $pesan);
 
@@ -230,10 +233,10 @@ class AdminPendaftaranController extends Controller
 
         $pendaftaran->tolak($request->catatan_admin);
 
-        $pesan = "Assalamu'alaikum, mohon maaf pendaftaran santri *{$pendaftaran->nama_lengkap}* *DITOLAK*.\n\n"
-            . "Alasan:\n" . $request->catatan_admin;
-        $terkirim = $wa->kirim($pendaftaran->no_hp_wali, $pesan);
-        $wa->kirim($pendaftaran->no_hp, $pesan);
+        if ($pesan = PesanWa::buat('psb_tolak', ['nama' => $pendaftaran->nama_lengkap, 'alasan' => $request->catatan_admin])) {
+            $wa->kirim($pendaftaran->no_hp_wali, $pesan);
+            $wa->kirim($pendaftaran->no_hp, $pesan);
+        }
 
         return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftar ditolak.');
     }

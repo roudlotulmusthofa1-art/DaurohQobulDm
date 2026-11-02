@@ -52,7 +52,9 @@ class JadwalMengajarController extends Controller
             'slot' => $jadwal->groupBy(fn ($j) => $j->waktu_pelajaran_id . '-' . $j->hari),
             'waktuList' => WaktuPelajaran::ordered()->where('is_active', true)->get(),
             'kelasList' => Kelas::ordered()->get(),
-            'kitabList' => Kitab::with('kelas:id')->where('is_active', true)->orderBy('nama')->get(),
+            'kitabList' => Kitab::where('is_active', true)->orderBy('nama')->get(),
+            // Kitab kurikulum bulan ini (tahun ajaran & bulan ke cocok) -> ditampilkan di pilihan form
+            'kitabBulanIni' => $bulan ? Kitab::untukBulan($bulan)->pluck('id') : collect(),
             'ustadzList' => $ustadzList,
             'namaUstadz' => $namaUstadz,
             'kelasFilter' => $kelasFilter,
@@ -115,6 +117,59 @@ class JadwalMengajarController extends Controller
         });
 
         return back()->with('success', "{$disalin} jadwal disalin." . ($dilewati ? " {$dilewati} dilewati karena slotnya sudah terisi." : ''));
+    }
+
+    /**
+     * Simpan hasil geser kartu di tampilan Grid: beberapa jadwal pindah hari/jam sekaligus.
+     * Bentrok diperiksa pada susunan akhir (jadi dua kartu boleh saling bertukar tempat).
+     */
+    public function pindah(Request $request)
+    {
+        $data = $request->validate([
+            'bulan_ajaran_id' => ['required', 'integer', Rule::exists('bulan_ajaran', 'id')],
+            'pindah' => ['required', 'array', 'max:200'],
+            'pindah.*.id' => ['required', 'integer', 'distinct'],
+            'pindah.*.hari' => ['required', 'integer', Rule::in(array_keys(JadwalMengajar::HARI))],
+            'pindah.*.waktu_pelajaran_id' => ['required', 'integer', Rule::exists('waktu_pelajaran', 'id')],
+        ], ['pindah.required' => 'Belum ada jadwal yang dipindah.']);
+
+        $semua = JadwalMengajar::with(['kelas', 'waktu'])->where('bulan_ajaran_id', $data['bulan_ajaran_id'])->get()->keyBy('id');
+        $pindah = collect($data['pindah'])->keyBy('id');
+
+        if ($pindah->keys()->diff($semua->keys())->isNotEmpty()) {
+            throw ValidationException::withMessages(['jadwal' => 'Ada jadwal yang tidak ditemukan di bulan ini. Muat ulang halaman lalu coba lagi.']);
+        }
+
+        // Susunan akhir setelah dipindah, lalu cek bentrok per slot (hari + jam)
+        $akhir = $semua->map(fn ($j) => [
+            'hari' => (int) ($pindah[$j->id]['hari'] ?? $j->hari),
+            'waktu' => (int) ($pindah[$j->id]['waktu_pelajaran_id'] ?? $j->waktu_pelajaran_id),
+            'kelas' => $j->kelas_id,
+            'ustadz' => $j->user_id,
+        ]);
+        foreach ($akhir->groupBy(fn ($a) => $a['hari'] . '-' . $a['waktu']) as $isi) {
+            $slot = JadwalMengajar::HARI[$isi->first()['hari']] . ', ' . (\App\Models\WaktuPelajaran::find($isi->first()['waktu'])?->nama ?? '-');
+            if ($isi->pluck('kelas')->duplicates()->isNotEmpty()) {
+                $kelas = $semua->firstWhere('kelas_id', $isi->pluck('kelas')->duplicates()->first())?->kelas?->nama;
+                throw ValidationException::withMessages(['jadwal' => "Bentrok di {$slot}: kelas {$kelas} punya dua pelajaran."]);
+            }
+            if ($isi->pluck('ustadz')->filter()->duplicates()->isNotEmpty()) {
+                throw ValidationException::withMessages(['jadwal' => "Bentrok di {$slot}: satu ustadz mengajar dua kelas sekaligus."]);
+            }
+        }
+
+        DB::transaction(function () use ($pindah) {
+            // Pindahkan dulu ke hari sementara (8, 9, ...) agar tidak menabrak aturan unik saat dua kartu bertukar tempat
+            $sementara = 8;
+            foreach ($pindah as $id => $p) {
+                JadwalMengajar::whereKey($id)->update(['hari' => $sementara++]);
+            }
+            foreach ($pindah as $id => $p) {
+                JadwalMengajar::whereKey($id)->update(['hari' => $p['hari'], 'waktu_pelajaran_id' => $p['waktu_pelajaran_id']]);
+            }
+        });
+
+        return back()->with('success', $pindah->count() . ' jadwal berhasil dipindah.');
     }
 
     /** Ganti ustadz di seluruh jadwal bulan ini (mis. ustadz berhalangan). */

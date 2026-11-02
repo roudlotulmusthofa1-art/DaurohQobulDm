@@ -28,24 +28,22 @@ class PendaftaranAsatidController extends Controller
 
         $data = $request->safe()->except(['berkas_foto', 'email_login', 'password_login']);
 
-        $asatid = DB::transaction(function () use ($request, $data) {
+        $asatid = DB::connection('pusat')->transaction(function () use ($request, $data) {
             $nomor = PendaftaranAsatid::buatNomor();
 
             return PendaftaranAsatid::create($data + [
                 'nomor_pendaftaran' => $nomor,
                 'email'             => $request->input('email_login'),
                 'password'          => Hash::make($request->input('password_login')),
-                'berkas_foto'       => $request->file('berkas_foto')->store("asatid/{$nomor}", 'public'),
+                'berkas_foto'       => $request->file('berkas_foto')->store("asatid/{$nomor}", 'bersama'),
                 'status'            => PendaftaranAsatid::MENUNGGU,
             ]);
         });
 
-        $wa->kirim(
-            $asatid->no_hp,
-            "Assalamu'alaikum *{$asatid->nama_lengkap}*, pendaftaran Anda sebagai asatid berhasil kami terima.\n"
-                . "Nomor pendaftaran: *{$asatid->nomor_pendaftaran}*\n"
-                . "Data sedang diverifikasi admin. Kami akan menghubungi kembali setelah ada keputusan."
-        );
+        // Isi pesan diatur di Pengaturan > Pesan
+        if ($pesan = \App\Support\PesanWa::buat('asatid_daftar', ['nama' => $asatid->nama_lengkap, 'nomor' => $asatid->nomor_pendaftaran])) {
+            $wa->kirim($asatid->no_hp, $pesan);
+        }
 
         session(['asatid_sukses' => $asatid->nomor_pendaftaran]);
 

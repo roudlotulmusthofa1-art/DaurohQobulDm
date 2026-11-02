@@ -54,6 +54,7 @@ class AkademikPercobaanSeeder extends Seeder
             ];
 
             $bulanAktif = null;
+            $tahunAktif = null;
             foreach ($tahunData as [$nama, $masehi, $aktif, $bulanList]) {
                 $tahun = TahunAjaran::firstOrCreate(['nama' => $nama], [
                     'nama_masehi' => $masehi,
@@ -61,6 +62,9 @@ class AkademikPercobaanSeeder extends Seeder
                     'tanggal_selesai' => end($bulanList)[2],
                     'keterangan' => 'Data percobaan',
                 ]);
+                if ($aktif) {
+                    $tahunAktif = $tahun;
+                }
                 foreach ($bulanList as $i => [$namaBulan, $mulai, $selesai]) {
                     $bulan = BulanAjaran::firstOrCreate(
                         ['tahun_ajaran_id' => $tahun->id, 'nama' => $namaBulan],
@@ -74,26 +78,18 @@ class AkademikPercobaanSeeder extends Seeder
             }
             $bulanAktif?->aktifkan();
 
-            // ----- 3 kitab -----
+            // ----- 3 kitab di tahun ajaran aktif (bulan ke mengikuti bulan tahun itu; kosong = semua bulan) -----
             $bidang = fn (string $nama) => BidangIlmu::where('nama', 'like', $nama . '%')->value('id');
             $kelas = Kelas::ordered()->pluck('id');
 
             $kitab = collect([
-                ['Al-Ajurrumiyyah', 'الآجرومية', 'Ibnu Ajurrum', 'Nahwu', 'teori', [1, 2], 3],
-                ['Safinatun Naja', 'سفينة النجا', 'Syekh Salim bin Sumair', 'Fiq', 'teori', [1, 2, 3], 2],
-                ["Tuhfatul Athfal", 'تحفة الأطفال', 'Syekh Sulaiman al-Jamzuri', 'Tajwid', 'praktik', [], 2],
-            ])->map(function ($k, $i) use ($bidang, $kelas) {
-                [$nama, $arab, $pengarang, $namaBidang, $jenis, $bulanKe, $frekuensi] = $k;
-                $kitab = Kitab::firstOrCreate(['nama' => $nama], [
-                    'nama_arab' => $arab, 'pengarang' => $pengarang, 'bidang_ilmu_id' => $bidang($namaBidang),
-                    'jenis' => $jenis, 'bulan_ke' => $bulanKe, 'frekuensi' => $frekuensi,
-                    'deskripsi' => 'Data percobaan',
-                ]);
-                // Kitab ke-1 di 2 kelas pertama, lainnya di 1 kelas
-                $kitab->kelas()->syncWithoutDetaching($kelas->slice($i === 0 ? 0 : $i - 1, $i === 0 ? 2 : 1)->values());
-
-                return $kitab;
-            });
+                ['Al-Ajurrumiyyah', 'الآجرومية', 'Nahwu', [1, 2], 3],
+                ['Safinatun Naja', 'سفينة النجا', 'Fiq', [1, 2, 3], 2],
+                ['Tuhfatul Athfal', 'تحفة الأطفال', 'Tajwid', [], 2],
+            ])->map(fn ($k) => Kitab::firstOrCreate(['nama' => $k[0]], [
+                'nama_arab' => $k[1], 'tahun_ajaran_id' => $tahunAktif?->id, 'bidang_ilmu_id' => $bidang($k[2]),
+                'bulan_ke' => $k[3], 'frekuensi' => $k[4], 'deskripsi' => 'Data percobaan',
+            ]));
 
             // ----- 3 jadwal di bulan aktif -----
             $waktu = WaktuPelajaran::ordered()->where('is_active', true)->pluck('id');
@@ -106,7 +102,7 @@ class AkademikPercobaanSeeder extends Seeder
                         'bulan_ajaran_id' => $bulanAktif->id,
                         'hari' => $hari,
                         'waktu_pelajaran_id' => $waktu[$iWaktu] ?? $waktu->first(),
-                        'kelas_id' => $k->kelas()->value('kelas.id') ?? $kelas->first(),
+                        'kelas_id' => $kelas[$n] ?? $kelas->first(),
                     ], [
                         'kitab_id' => $k->id,
                         'user_id' => $ustadz->isNotEmpty() ? $ustadz[$n % $ustadz->count()] : null,
@@ -115,6 +111,6 @@ class AkademikPercobaanSeeder extends Seeder
             }
         });
 
-        $this->command?->info('Akademik percobaan: 3 tahun ajaran (3 bulan per tahun), 3 kitab, 3 jadwal.');
+        $this->command?->info('Akademik percobaan: 3 tahun ajaran (3 bulan per tahun), 3 kitab di tahun aktif, 3 jadwal.');
     }
 }

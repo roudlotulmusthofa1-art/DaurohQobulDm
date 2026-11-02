@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PendaftaranAdmin;
 use App\Services\WhatsAppService;
+use App\Support\PesanWa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -58,11 +59,11 @@ class AdminDataAdminController extends Controller
         // Terima + buat akun di tabel users dengan role admin
         $a->terima($request->input('catatan_admin'));
 
-        $pesan = "Assalamu'alaikum *{$a->nama_lengkap}*, alhamdulillah pendaftaran Anda sebagai *ADMIN* dinyatakan *DITERIMA*.\n\n"
-            . ($a->catatan_admin ? "*Catatan:*\n{$a->catatan_admin}\n\n" : '')
-            . "Silakan masuk ke akun admin:\n" . url('/login') . "\n"
-            . "Email: *{$a->email}*\n"
-            . "Password: sesuai yang Anda isi saat mendaftar.";
+        // Isi pesan diatur di Pengaturan > Pesan
+        $pesan = PesanWa::buat('admin_terima', ['nama' => $a->nama_lengkap, 'catatan' => $a->catatan_admin, 'email' => $a->email]);
+        if (! $pesan) {
+            return redirect()->route('admin.data-admin.show', $a)->with('success', 'Admin diterima. (Pesan WhatsApp dimatikan di Pengaturan › Pesan.)');
+        }
 
         $terkirim = $wa->kirim($a->no_hp, $pesan);
 
@@ -82,11 +83,9 @@ class AdminDataAdminController extends Controller
 
         $dataAdmin->tolak($request->catatan_admin);
 
-        $wa->kirim(
-            $dataAdmin->no_hp,
-            "Assalamu'alaikum *{$dataAdmin->nama_lengkap}*, mohon maaf pendaftaran Anda sebagai admin *DITOLAK*.\n\n"
-                . "Alasan:\n" . $request->catatan_admin
-        );
+        if ($pesan = PesanWa::buat('admin_tolak', ['nama' => $dataAdmin->nama_lengkap, 'alasan' => $request->catatan_admin])) {
+            $wa->kirim($dataAdmin->no_hp, $pesan);
+        }
 
         return redirect()->route('admin.data-admin.index')->with('success', 'Pendaftar admin ditolak.');
     }
@@ -109,7 +108,7 @@ class AdminDataAdminController extends Controller
         $nama = $dataAdmin->nama_lengkap;
         $foto = $dataAdmin->berkas_foto;
 
-        DB::transaction(function () use ($dataAdmin) {
+        DB::connection('pusat')->transaction(function () use ($dataAdmin) {
             $user = $dataAdmin->user;
             $dataAdmin->delete();
 
@@ -119,7 +118,7 @@ class AdminDataAdminController extends Controller
         });
 
         if ($foto) {
-            Storage::disk('public')->delete($foto);
+            Storage::disk('bersama')->delete($foto);
         }
 
         return redirect()->route('admin.data-admin.index')->with('success', "Data {$nama} berhasil dihapus.");

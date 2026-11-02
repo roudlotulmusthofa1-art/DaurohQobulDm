@@ -28,10 +28,11 @@ class StorePendaftaranAdminRequest extends FormRequest
             // Email tidak boleh sudah dipakai pendaftar lain atau akun mana pun
             'email_login'       => [
                 'required', 'email', 'max:255',
-                'unique:pendaftaran_admin,email',
-                'unique:pendaftaran_asatid,email',
+                'unique:pusat.pendaftaran_admin,email', // data asatid & admin ada di database utama
+                'unique:pusat.pendaftaran_asatid,email',
                 'unique:pendaftaran_siswas,email',
                 'unique:users,email',
+                'unique:pusat.users,email',
             ],
             'password_login'    => ['required', 'string', 'min:8', 'max:100'],
 

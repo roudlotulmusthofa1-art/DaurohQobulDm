@@ -20,6 +20,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
         // Sudah login lalu membuka /login -> diarahkan ke halaman sesuai role (admin / asatid / siswa)
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->halamanAwal() ?? '/admin/beranda');
+        // Peserta dikeluarkan bila sesi aktif berganti; admin & asatid tetap login
+        $middleware->web(append: [\App\Http\Middleware\CekSesiLogin::class]);
         $middleware->alias([
             'peran' => \App\Http\Middleware\PeranMiddleware::class,
         ]);

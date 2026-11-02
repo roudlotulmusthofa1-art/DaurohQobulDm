@@ -334,7 +334,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <div class="min-w-0">
                                 <p class="text-sm font-semibold text-slate-800 truncate">{{ $nama }}</p>
                                 @if ($p->$kolom)
-                                <a href="{{ asset('storage/' . $p->$kolom) }}" target="_blank" rel="noopener"
+                                <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($p->$kolom) }}" target="_blank" rel="noopener"
                                     class="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:underline">{!! $svg('open', 'w-3 h-3') !!} Lihat berkas saat ini</a>
                                 @else
                                 <p class="text-xs text-slate-400">Belum ada berkas</p>

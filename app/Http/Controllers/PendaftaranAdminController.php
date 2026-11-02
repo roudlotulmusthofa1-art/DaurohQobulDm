@@ -27,24 +27,22 @@ class PendaftaranAdminController extends Controller
 
         $data = $request->safe()->except(['berkas_foto', 'email_login', 'password_login']);
 
-        $admin = DB::transaction(function () use ($request, $data) {
+        $admin = DB::connection('pusat')->transaction(function () use ($request, $data) {
             $nomor = PendaftaranAdmin::buatNomor();
 
             return PendaftaranAdmin::create($data + [
                 'nomor_pendaftaran' => $nomor,
                 'email'             => $request->input('email_login'),
                 'password'          => Hash::make($request->input('password_login')),
-                'berkas_foto'       => $request->file('berkas_foto')->store("admin/{$nomor}", 'public'),
+                'berkas_foto'       => $request->file('berkas_foto')->store("admin/{$nomor}", 'bersama'),
                 'status'            => PendaftaranAdmin::MENUNGGU,
             ]);
         });
 
-        $wa->kirim(
-            $admin->no_hp,
-            "Assalamu'alaikum *{$admin->nama_lengkap}*, pendaftaran Anda sebagai admin berhasil kami terima.\n"
-                . "Nomor pendaftaran: *{$admin->nomor_pendaftaran}*\n"
-                . "Data sedang diverifikasi. Kami akan menghubungi kembali setelah ada keputusan."
-        );
+        // Isi pesan diatur di Pengaturan > Pesan
+        if ($pesan = \App\Support\PesanWa::buat('admin_daftar', ['nama' => $admin->nama_lengkap, 'nomor' => $admin->nomor_pendaftaran])) {
+            $wa->kirim($admin->no_hp, $pesan);
+        }
 
         session(['admin_daftar_sukses' => $admin->nomor_pendaftaran]);
 
