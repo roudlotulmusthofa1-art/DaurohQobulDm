@@ -77,15 +77,15 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
                 </label>
                 <label class="block">
                     <span class="{{ $label }}">Nama Lengkap (Arab)</span>
-                    <input type="text" name="nama_lengkap_arab" value="{{ old('nama_lengkap_arab', $a->nama_lengkap_arab) }}" required maxlength="150" dir="rtl" class="{{ $isian }} text-lg {{ $salah('nama_lengkap_arab') }}">
+                    <input type="text" name="nama_lengkap_arab" value="{{ old('nama_lengkap_arab', $a->nama_lengkap_arab) }}" maxlength="150" dir="rtl" class="{{ $isian }} text-lg {{ $salah('nama_lengkap_arab') }}">
                 </label>
                 <label class="block">
                     <span class="{{ $label }}">Tempat Lahir <span class="font-normal text-slate-400">(huruf Arab)</span></span>
-                    <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $a->tempat_lahir) }}" required maxlength="100" dir="rtl" class="{{ $isian }} text-lg {{ $salah('tempat_lahir') }}">
+                    <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $a->tempat_lahir) }}" maxlength="100" dir="rtl" class="{{ $isian }} text-lg {{ $salah('tempat_lahir') }}">
                 </label>
                 <label class="block">
                     <span class="{{ $label }}">Tanggal Lahir</span>
-                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', optional($a->tanggal_lahir)->format('Y-m-d')) }}" required class="{{ $isian }} {{ $salah('tanggal_lahir') }}">
+                    <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', optional($a->tanggal_lahir)->format('Y-m-d')) }}" class="{{ $isian }} {{ $salah('tanggal_lahir') }}">
                 </label>
                 <label class="block">
                     <span class="{{ $label }}">No. WhatsApp</span>
@@ -94,7 +94,7 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
                 <div class="hidden md:block"></div>
                 <label class="block md:col-span-2">
                     <span class="{{ $label }}">Alamat Lengkap <span class="font-normal text-slate-400">(huruf Arab)</span></span>
-                    <textarea name="alamat" rows="3" required maxlength="500" dir="rtl" class="{{ $isian }} text-lg {{ $salah('alamat') }}">{{ old('alamat', $a->alamat) }}</textarea>
+                    <textarea name="alamat" rows="3" maxlength="500" dir="rtl" class="{{ $isian }} text-lg {{ $salah('alamat') }}">{{ old('alamat', $a->alamat) }}</textarea>
                 </label>
             </div>
         </section>
@@ -106,11 +106,11 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
                 <div class="grid sm:grid-cols-2 gap-4">
                     <label class="block">
                         <span class="{{ $label }}">Lama Belajar</span>
-                        <input type="text" name="lama_belajar" value="{{ old('lama_belajar', $a->lama_belajar) }}" required maxlength="100" placeholder="mis. 5 tahun" class="{{ $isian }} {{ $salah('lama_belajar') }}">
+                        <input type="text" name="lama_belajar" value="{{ old('lama_belajar', $a->lama_belajar) }}" maxlength="100" placeholder="mis. 5 tahun" class="{{ $isian }} {{ $salah('lama_belajar') }}">
                     </label>
                     <label class="block">
                         <span class="{{ $label }}">Tahun Selesai</span>
-                        <input type="text" name="tahun_selesai" value="{{ old('tahun_selesai', $a->tahun_selesai) }}" required inputmode="numeric" maxlength="4" placeholder="2020" class="{{ $isian }} {{ $salah('tahun_selesai') }}">
+                        <input type="text" name="tahun_selesai" value="{{ old('tahun_selesai', $a->tahun_selesai) }}" inputmode="numeric" maxlength="4" placeholder="2020" class="{{ $isian }} {{ $salah('tahun_selesai') }}">
                     </label>
                 </div>
             </section>

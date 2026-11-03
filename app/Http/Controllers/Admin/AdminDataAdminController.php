@@ -47,6 +47,14 @@ class AdminDataAdminController extends Controller
         return view('admin.data-admin.show', ['a' => $dataAdmin]);
     }
 
+    /** Tambah Cepat: admin langsung membuat data + akun login (status diterima) */
+    public function tambahCepat(Request $request, WhatsAppService $wa)
+    {
+        [$baru, $pesan] = \App\Support\TambahCepat::simpan($request, PendaftaranAdmin::class, 'admin_terima', $wa);
+
+        return redirect()->route('admin.data-admin.show', $baru)->with('success', $pesan);
+    }
+
     public function terima(Request $request, PendaftaranAdmin $dataAdmin, WhatsAppService $wa)
     {
         $a = $dataAdmin;

@@ -47,6 +47,14 @@ class AdminDataAsatidController extends Controller
         return view('admin.asatid.show', ['a' => $asatid]);
     }
 
+    /** Tambah Cepat: admin langsung membuat data + akun login (status diterima) */
+    public function tambahCepat(Request $request, WhatsAppService $wa)
+    {
+        [$baru, $pesan] = \App\Support\TambahCepat::simpan($request, PendaftaranAsatid::class, 'asatid_terima', $wa);
+
+        return redirect()->route('admin.asatid.show', $baru)->with('success', $pesan);
+    }
+
     /** Form ubah data asatid (oleh admin) */
     public function edit(PendaftaranAsatid $asatid)
     {
@@ -67,13 +75,13 @@ class AdminDataAsatidController extends Controller
 
         $data = $request->validate([
             'nama_lengkap'      => ['required', 'string', 'max:150'],
-            'nama_lengkap_arab' => ['required', 'string', 'max:150', "regex:$polaArab"],
-            'tempat_lahir'      => ['required', 'string', 'max:100', "regex:$polaArab"],
-            'tanggal_lahir'     => ['required', 'date', 'before:today'],
+            'nama_lengkap_arab' => ['nullable', 'string', 'max:150', "regex:$polaArab"],
+            'tempat_lahir'      => ['nullable', 'string', 'max:100', "regex:$polaArab"],
+            'tanggal_lahir'     => ['nullable', 'date', 'before:today'],
             'no_hp'             => ['required', 'string', 'regex:/^\+62[0-9]+$/', 'max:20'],
-            'alamat'            => ['required', 'string', 'max:500', "regex:$polaAlamat"],
-            'lama_belajar'      => ['required', 'string', 'max:100'],
-            'tahun_selesai'     => ['required', 'digits:4'],
+            'alamat'            => ['nullable', 'string', 'max:500', "regex:$polaAlamat"],
+            'lama_belajar'      => ['nullable', 'string', 'max:100'],
+            'tahun_selesai'     => ['nullable', 'digits:4'],
             'email'             => [
                 'required', 'email', 'max:255',
                 Rule::unique('pusat.pendaftaran_asatid', 'email')->ignore($asatid->id),
