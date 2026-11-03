@@ -34,6 +34,16 @@ else
     SSH_CMD="ssh -o StrictHostKeyChecking=no"
 fi
 
+# ===== Token WhatsApp (Fonnte) =====
+# File .env di server tidak ikut git, jadi token Fonnte diambil dari .env laptop ini
+# lalu ditulis ke .env.production di server setiap deploy (supaya chat otomatis jalan).
+WA_TOKEN=$(grep -E '^WA_API_TOKEN=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r"'"'")
+WA_URL=$(grep -E '^WA_API_URL=' .env 2>/dev/null | head -1 | cut -d= -f2- | tr -d '\r"'"'")
+[ -z "$WA_URL" ] && WA_URL="https://api.fonnte.com/send"
+if [ -z "$WA_TOKEN" ]; then
+    echo "⚠️  WA_API_TOKEN di .env laptop kosong: chat WhatsApp otomatis di server tidak akan jalan."
+fi
+
 echo "📥 Menarik (Pull) kode terbaru dari GitHub ke Server..."
 
 # Execute docker command on server
@@ -42,6 +52,8 @@ echo "📥 Menarik (Pull) kode terbaru dari GitHub ke Server..."
 if ! $SSH_CMD $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S git checkout -- package-lock.json && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S git pull origin main && \
+    ENVF=.env; if [ -f .env.production ]; then ENVF=.env.production; fi && \
+    if [ -n '$WA_TOKEN' ]; then echo '$DEPLOY_SUDO_PASS' | sudo -S sh -c \"sed -i '/^WA_API_URL=/d;/^WA_API_TOKEN=/d;/^[[:space:]]*$/d' \$ENVF && printf '\\nWA_API_URL=%s\\nWA_API_TOKEN=%s\\n' '$WA_URL' '$WA_TOKEN' >> \$ENVF\" && echo '✅ Token WhatsApp (Fonnte) dipasang di server'; fi && \
     if [ -f .env.production ]; then cp .env.production .env; fi && \
     mkdir -p storage/framework/views storage/framework/cache/data storage/framework/sessions storage/logs storage/app/public && \
     echo '$DEPLOY_SUDO_PASS' | sudo -S docker compose up -d --build --renew-anon-volumes && \
