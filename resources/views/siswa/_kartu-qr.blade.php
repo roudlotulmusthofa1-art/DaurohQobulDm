@@ -1,7 +1,9 @@
 {{--
     Dasbor siswa: Kartu QR (dipindai asatid untuk absensi atau keperluan lain).
     Kode QR = kolom kode_qr peserta (dibuat otomatis saat mendaftar). Absensi hanya menerima peserta yang sudah DITERIMA.
-    Vue: layar penuh (layar HP dijaga tetap menyala), unduh kartu PNG, salin kode.
+    Tampil sebagai tombol melayang "QR Saya" (kanan bawah); diketuk -> panel muncul dari bawah (buka-tutup),
+    jadi dasbor tetap hanya berisi sapaan + 4 menu.
+    Vue: buka/tutup panel, layar penuh (layar HP dijaga tetap menyala), unduh kartu PNG, salin kode.
 --}}
 @php
 use App\Models\PendaftaranSiswa;
@@ -10,11 +12,58 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
 @endphp
 
 @if ($siswa->kode_qr && $siswa->status !== PendaftaranSiswa::DITOLAK)
-<section id="kartu-qr" class="mt-6 sm:mt-8 relative overflow-hidden rounded-[28px] bg-white ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]">
+{{-- Ruang kosong supaya tombol melayang tidak menutupi kartu menu paling bawah --}}
+<div class="h-20" aria-hidden="true"></div>
+
+{{-- Tombol & panel dicetak di akhir <body> (lewat stack "scripts"), DI LUAR <main>:
+     <main> punya animasi transform yang membuat position:fixed tidak menempel ke layar. --}}
+@push('scripts')
+<style>
+    /* Panel QR: HP -> meluncur dari bawah, layar lebar -> muncul membesar di tengah */
+    .panel-qr[open] { animation: panel-qr-naik .3s cubic-bezier(.2, .8, .2, 1); }
+    .panel-qr.menutup { animation: panel-qr-turun .2s ease-in forwards; }
+    .panel-qr[open]::backdrop { animation: panel-qr-redup .3s ease; }
+    @keyframes panel-qr-naik { from { transform: translateY(100%); } }
+    @keyframes panel-qr-turun { to { transform: translateY(100%); } }
+    @keyframes panel-qr-redup { from { opacity: 0; } }
+    @media (min-width: 640px) {
+        @keyframes panel-qr-naik { from { transform: translateY(24px) scale(.96); opacity: 0; } }
+        @keyframes panel-qr-turun { to { transform: translateY(24px) scale(.96); opacity: 0; } }
+    }
+</style>
+
+<div id="kartu-qr">
+    {{-- ===== Tombol melayang "QR Saya" ===== --}}
+    <button type="button" @click="bukaPanel" title="Tampilkan kartu QR"
+        class="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2.5 pl-2.5 pr-4 py-2.5 rounded-2xl bg-[#0b332c] text-white ring-1 ring-white/10 shadow-[0_14px_32px_-10px_rgba(11,51,44,0.7)] hover:bg-[#135347] hover:-translate-y-0.5 active:scale-95 transition">
+        <span class="relative w-10 h-10 rounded-xl bg-white text-[#0b332c] flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"/></svg>
+            @if ($diterima)
+            <span class="absolute -top-1 -right-1 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[#0b332c]"></span>
+            @endif
+        </span>
+        <span class="text-left leading-tight">
+            <span class="block text-sm font-bold">QR Saya</span>
+            <span class="block text-[10px] text-white/60">{{ $diterima ? 'Untuk absensi' : 'Belum aktif' }}</span>
+        </span>
+    </button>
+    {{-- ===== Panel kartu QR (buka-tutup) ===== --}}
+    <dialog ref="panel" @click.self="tutupPanel" @close="saatPanelTertutup"
+        class="panel-qr m-0 mt-auto sm:m-auto w-full max-w-none sm:max-w-xl max-h-[92vh] overflow-y-auto p-0 rounded-t-[28px] sm:rounded-[28px] bg-white shadow-2xl backdrop:bg-[#071f1a]/60 backdrop:backdrop-blur-sm">
+    <div class="relative overflow-hidden">
     <span class="pointer-events-none absolute -top-20 -left-20 w-64 h-64 rounded-full bg-emerald-300/20 blur-3xl"></span>
     <span class="pointer-events-none absolute -bottom-24 -right-16 w-64 h-64 rounded-full bg-sky-300/20 blur-3xl"></span>
 
-    <div class="relative p-5 sm:p-7 flex flex-col sm:flex-row items-center gap-6">
+    {{-- Pegangan (HP) + tombol tutup --}}
+    <div class="relative flex items-center justify-center pt-3 sm:pt-4 min-h-[2.75rem]">
+        <span class="w-12 h-1.5 rounded-full bg-slate-200 sm:hidden"></span>
+        <button type="button" @click="tutupPanel" title="Tutup"
+            class="absolute right-3 top-2.5 w-9 h-9 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+    </div>
+
+    <div class="relative p-5 pt-2 pb-7 sm:p-7 sm:pt-2 flex flex-col sm:flex-row items-center gap-6">
         {{-- QR: ketuk untuk layar penuh --}}
         <button type="button" @click="bukaLayarPenuh" title="Tampilkan layar penuh"
             class="group relative shrink-0 rounded-3xl bg-white p-3 ring-1 ring-slate-200 shadow-lg shadow-emerald-900/10 hover:ring-emerald-300 transition">
@@ -59,6 +108,8 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
             </div>
         </div>
     </div>
+    </div>
+    </dialog>
 
     {{-- ===== Layar penuh: QR besar di latar putih supaya mudah dipindai ===== --}}
     <dialog ref="layarPenuh" @close="saatTutup" @click="tutupLayarPenuh"
@@ -73,9 +124,8 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
             <p class="text-xs text-slate-400">Naikkan kecerahan layar agar mudah dipindai · ketuk di mana saja untuk menutup</p>
         </div>
     </dialog>
-</section>
+</div>
 
-@push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const DATA = {
@@ -91,6 +141,19 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
                 return { tersalin: false, mengunduh: false, kunciLayar: null };
             },
             methods: {
+                bukaPanel() {
+                    this.$refs.panel.showModal();
+                },
+                // Tutup dengan animasi meluncur turun, baru benar-benar ditutup
+                tutupPanel() {
+                    const panel = this.$refs.panel;
+                    if (!panel.open || panel.classList.contains('menutup')) return;
+                    panel.classList.add('menutup');
+                    setTimeout(() => panel.close(), 190);
+                },
+                saatPanelTertutup() {
+                    this.$refs.panel.classList.remove('menutup');
+                },
                 async bukaLayarPenuh() {
                     this.$refs.layarPenuh.showModal();
                     // Jaga layar HP tetap menyala selama QR ditampilkan (bila browser mendukung)

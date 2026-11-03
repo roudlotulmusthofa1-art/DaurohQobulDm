@@ -78,9 +78,6 @@ $kartuMenu = [
     </div>
 </section>
 
-{{-- ===== Kartu QR (absensi & keperluan lain) ===== --}}
-@include('siswa._kartu-qr')
-
 {{-- ===== Kartu menu ===== --}}
 <div class="mt-6 sm:mt-8 flex items-end justify-between">
     <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">Menu</h3>
@@ -110,4 +107,7 @@ $kartuMenu = [
     </a>
     @endforeach
 </div>
+
+{{-- ===== Kartu QR: tombol melayang "QR Saya" + panel buka-tutup ===== --}}
+@include('siswa._kartu-qr')
 @endsection
