@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DaftarUserController;
+use App\Http\Controllers\Admin\MasukSebagaiController;
 use App\Http\Controllers\Admin\RoleController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,4 +23,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Daftar User (semua akun beserta role-nya)
     Route::get('user', [DaftarUserController::class, 'index'])->name('akun.index');
     Route::put('user/{user}/role', [DaftarUserController::class, 'ubahRole'])->name('akun.role');
+
+    // Masuk sebagai asatid/siswa (khusus Super Admin, hanya untuk melihat dasbor mereka)
+    Route::post('masuk-sebagai/{user}', [MasukSebagaiController::class, 'mulai'])->name('masuk-sebagai');
 });
+
+// Kembali ke akun admin (dipanggil saat sedang "Masuk sebagai" -> role-nya asatid/siswa, jadi di luar grup admin)
+Route::post('masuk-sebagai/selesai', [MasukSebagaiController::class, 'selesai'])->middleware('auth')->name('masuk-sebagai.selesai');
+Route::post('masuk-sebagai/mode', [MasukSebagaiController::class, 'mode'])->middleware('auth')->name('masuk-sebagai.mode'); // izinkan perubahan / mode lihat

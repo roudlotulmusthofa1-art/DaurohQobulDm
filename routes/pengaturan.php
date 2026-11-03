@@ -18,6 +18,8 @@ Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->middleware(['auth'
         Route::put('umum', 'simpanUmum')->name('umum');         // tab Umum: profil pesantren
         Route::delete('logo', 'hapusLogo')->name('logo.hapus'); // tab Umum: hapus logo
         Route::put('profil', 'simpanProfil')->name('profil');   // tab Profil: akun admin
+        Route::post('profil/foto', 'simpanFoto')->name('foto');        // tab Profil: upload foto profil
+        Route::delete('profil/foto', 'hapusFoto')->name('foto.hapus'); // tab Profil: hapus foto profil
         Route::put('pesan', 'simpanPesan')->name('pesan');      // tab Pesan: template WhatsApp
 
         // tab Database (berlaku untuk sesi yang sedang aktif)

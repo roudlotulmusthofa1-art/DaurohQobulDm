@@ -145,6 +145,45 @@ class PengaturanController extends Controller
         return $this->keTab('profil', 'Profil disimpan.' . (! empty($data['password']) ? ' Password sudah diganti.' : ''));
     }
 
+    /**
+     * Upload foto profil akun yang sedang login. Disimpan di disk "bersama" karena akun admin dipakai semua sesi;
+     * user->save() otomatis menyalin kolom foto ke database sesi lain (App\Support\AkunBersama).
+     */
+    public function simpanFoto(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'foto' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
+        ], [
+            'foto.required' => 'Pilih foto terlebih dahulu.',
+            'foto.image'    => 'File harus berupa gambar.',
+            'foto.mimes'    => 'Foto harus JPG, PNG, atau WEBP.',
+            'foto.max'      => 'Ukuran foto maksimal 3 MB.',
+        ]);
+
+        $user = $request->user();
+        $lama = $user->foto;
+        $user->foto = $request->file('foto')->store('akun/foto', 'bersama');
+        $user->save();
+
+        if ($lama) {
+            Storage::disk('bersama')->delete($lama);
+        }
+
+        return $this->keTab('profil', 'Foto profil diperbarui.');
+    }
+
+    public function hapusFoto(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        if ($user->foto) {
+            Storage::disk('bersama')->delete($user->foto);
+            $user->foto = null;
+            $user->save();
+        }
+
+        return $this->keTab('profil', 'Foto profil dihapus.');
+    }
+
     /* ---------------- Notifikasi ---------------- */
 
     public function update(Request $request): RedirectResponse

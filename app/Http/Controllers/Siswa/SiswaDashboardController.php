@@ -23,6 +23,7 @@ class SiswaDashboardController extends Controller
 
         return $this->tampil('siswa.dashboard', [
             'siswa' => $siswa,
+            'diumumkan' => PendaftaranSiswa::kelulusanDiumumkan(), // kartu "Pengumuman Kelulusan"
             'jumlahPesanBaru' => $siswa->pesan()->dariAdmin()->belumDibaca()->count(),
             'jumlahPesanSaya' => $siswa->pesan()->dariPeserta()->count(),
         ]);
@@ -35,7 +36,8 @@ class SiswaDashboardController extends Controller
 
     public function kelulusan(): View
     {
-        return $this->tampil('siswa.kelulusan');
+        // Kelulusan AKHIR dauroh; hasil baru terlihat setelah admin menekan "Umumkan"
+        return $this->tampil('siswa.kelulusan', ['diumumkan' => PendaftaranSiswa::kelulusanDiumumkan()]);
     }
 
     /** Pesan khusus dari admin. Semua pesan yang tampil dianggap sudah dibaca. */
@@ -45,7 +47,8 @@ class SiswaDashboardController extends Controller
         $pesan = $siswa->pesan()->dariAdmin()->with('dibalas')->latest()->paginate(15);
 
         $baru = $pesan->getCollection()->whereNull('dibaca_at')->pluck('id');
-        if ($baru->isNotEmpty()) {
+        // Saat admin "Masuk sebagai" (hanya melihat), pesan tidak ditandai dibaca
+        if ($baru->isNotEmpty() && ! \App\Support\MasukSebagai::aktif()) {
             PesanPeserta::whereIn('id', $baru)->update(['dibaca_at' => now()]);
         }
 
@@ -112,13 +115,15 @@ class SiswaDashboardController extends Controller
                 'ikon' => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
             ];
         }
-        if ($siswa->status !== PendaftaranSiswa::MENUNGGU && $siswa->diproses_at?->gt(now()->subDays(7))) {
-            $diterima = $siswa->status === PendaftaranSiswa::DITERIMA;
+        // Kelulusan akhir dauroh baru diumumkan (14 hari terakhir)
+        $diumumkan = PendaftaranSiswa::kelulusanDiumumkan();
+        if ($siswa->status === PendaftaranSiswa::DITERIMA && $diumumkan?->gt(now()->subDays(14))) {
+            $lulus = $siswa->status_kelulusan === PendaftaranSiswa::LULUS;
             $items[] = [
-                'teks' => 'Pengumuman kelulusan: <b>' . ($diterima ? 'DITERIMA' : 'TIDAK DITERIMA') . '</b>',
-                'ket' => $siswa->diproses_at->diffForHumans(),
+                'teks' => 'Pengumuman kelulusan sudah dibuka: <b>' . ($lulus ? 'LULUS' : ($siswa->status_kelulusan ? 'BELUM LULUS' : 'lihat hasilnya')) . '</b>',
+                'ket' => $diumumkan->locale('id')->diffForHumans(),
                 'url' => route('siswa.kelulusan'),
-                'warna' => $diterima ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' : 'bg-rose-50 text-rose-600 ring-rose-100',
+                'warna' => $lulus ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' : 'bg-amber-50 text-amber-600 ring-amber-100',
                 'ikon' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342',
             ];
         }

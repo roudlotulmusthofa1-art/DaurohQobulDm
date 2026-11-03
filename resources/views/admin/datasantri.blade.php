@@ -36,6 +36,13 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
             <p class="text-teal-100 text-sm mt-0.5">Total @{{ totalSantri }} Santri</p>
         </div>
         <div class="flex flex-wrap items-center gap-2">
+            {{-- Cetak Kartu QR semua santri (tab baru, siap print A4) --}}
+            <a :href="urlKartuQr" target="_blank" rel="noopener" title="Cetak kartu QR semua santri"
+                class="inline-flex items-center gap-2 bg-white hover:bg-emerald-50 text-emerald-800 text-sm font-semibold px-4 py-2.5 rounded-lg transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></svg>
+                Cetak Kartu QR
+            </a>
+
             {{-- Kelola Massal: munculkan centang + panel pindah kelas/kamar --}}
             <button type="button" @click="toggleMassal"
                 class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
@@ -331,9 +338,15 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
             <button type="button" @click="terapkanMassal" :disabled="massal.loading"
                 class="shrink-0 rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-700 disabled:opacity-60"
                 v-text="massal.loading ? 'Menyimpan…' : 'Terapkan'"></button>
+            {{-- Cetak kartu QR santri yang dicentang --}}
+            <button type="button" @click="cetakQrTerpilih" :disabled="!terpilih.length"
+                class="shrink-0 inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></svg>
+                <span v-text="'Cetak QR (' + terpilih.length + ')'"></span>
+            </button>
         </div>
         <p v-if="massal.error" class="mt-2 text-xs text-red-600" v-text="massal.error"></p>
-        <p class="mt-1 text-xs text-purple-700/70">Centang santri di tabel, pilih kelas dan/atau kamar tujuan, lalu klik Terapkan.</p>
+        <p class="mt-1 text-xs text-purple-700/70">Centang santri di tabel, pilih kelas dan/atau kamar tujuan, lalu klik Terapkan. Atau klik Cetak QR untuk mencetak kartu santri yang dicentang.</p>
     </div>
 
     {{-- ================= TABEL SANTRI ================= --}}
@@ -446,6 +459,12 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                                         <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z" />
                                         <circle cx="12" cy="12" r="3" />
                                     </svg>
+                                </a>
+
+                                {{-- Cetak kartu QR santri ini saja (tab baru) --}}
+                                <a :href="urlKartuQr + '?ids=' + santri.id" target="_blank" rel="noopener"
+                                    class="text-gray-400 hover:text-emerald-600 transition" title="Cetak kartu QR santri ini">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></svg>
                                 </a>
 
                                 {{-- Tempat sampah: hapus santri (konfirmasi dulu) --}}
@@ -585,6 +604,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
             return {
                 // Data asli dari controller
                 santriList: @json($santri),
+                urlKartuQr: @json(route('admin.santri.kartu-qr')), // halaman cetak kartu QR
                 kelasOptions: @json($kelasOptions),
                 kamarOptions: @json($kamarOptions),
                 pencarian: '',
@@ -739,6 +759,12 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     if (i === -1) this.santriList.push(baru);
                     else this.santriList.splice(i, 1, baru);
                 });
+            },
+
+            // ----- Cetak kartu QR santri yang dicentang (tab baru) -----
+            cetakQrTerpilih() {
+                if (!this.terpilih.length) return;
+                window.open(this.urlKartuQr + '?ids=' + this.terpilih.join(','), '_blank');
             },
 
             // ----- Kelola Massal -----

@@ -36,6 +36,13 @@ $statKartu = [
 @endphp
 
 <div id="halaman-dashboard" class="space-y-6 mx-4 md:mx-10 lg:mx-20">
+    {{-- Layar kecil: tawarkan tampilan HP (lihat admin/dashboard-hp.blade.php) --}}
+    <a href="{{ route('admin.dashboard.tampilan', 'hp') }}"
+        class="lg:hidden mt-4 flex items-center gap-3 rounded-2xl bg-[#0b332c] text-white px-4 py-3 text-sm">
+        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 1.5H8.25A2.25 2.25 0 006 3.75v16.5a2.25 2.25 0 002.25 2.25h7.5A2.25 2.25 0 0018 20.25V3.75a2.25 2.25 0 00-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"/></svg>
+        <span class="flex-1">Buka <b>tampilan HP</b> yang lebih nyaman di layar kecil</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
+    </a>
     @foreach (['success' => 'bg-emerald-50 ring-emerald-200 text-emerald-900', 'error' => 'bg-amber-50 ring-amber-200 text-amber-900'] as $kunciFlash => $gayaFlash)
     @if (session($kunciFlash))
     <div class="flex items-start gap-3 p-4 rounded-2xl ring-1 text-sm {{ $gayaFlash }}">{{ session($kunciFlash) }}</div>

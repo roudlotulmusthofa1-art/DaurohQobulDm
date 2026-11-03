@@ -8,6 +8,7 @@ use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
 use App\Models\BulanAjaran;
 use App\Models\JadwalMengajar;
+use App\Models\PesanAsatid;
 use App\Models\WaktuPelajaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -26,6 +27,7 @@ class AsatidDashboardController extends Controller
             'jumlahPeserta' => PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count(),
             // Jumlah jam mengajar per minggu (Akademik > Jadwal Mengajar, bulan aktif)
             'jumlahJam'     => self::jadwalSaya()->count(),
+            'jumlahPesanBaru' => PesanAsatid::jumlahBaru(Auth::id()),
         ]);
     }
 
@@ -85,6 +87,20 @@ class AsatidDashboardController extends Controller
         ]);
     }
 
+    /** Pesan dari Admin (kotak masuk). Pesan yang tampil otomatis ditandai sudah dibaca. */
+    public function pesan()
+    {
+        $pesan = PesanAsatid::with('pengirim:id,name')->where('user_id', Auth::id())->latest('id')->paginate(15);
+
+        $baru = $pesan->getCollection()->whereNull('dibaca_at')->pluck('id');
+        // Saat admin "Masuk sebagai" (hanya melihat), pesan tidak ditandai dibaca
+        if ($baru->isNotEmpty() && ! \App\Support\MasukSebagai::aktif()) {
+            PesanAsatid::whereIn('id', $baru)->update(['dibaca_at' => now()]);
+        }
+
+        return $this->tampil('asatid.pesan', ['pesan' => $pesan, 'idBaru' => $baru->all()]);
+    }
+
     public function logout(Request $request)
     {
         Auth::logout();
@@ -124,6 +140,17 @@ class AsatidDashboardController extends Controller
     public static function notifikasi(?PendaftaranAsatid $asatid): array
     {
         $items = [];
+
+        // Pesan dari admin yang belum dibaca (paling atas)
+        if ($pesanBaru = PesanAsatid::jumlahBaru(Auth::id())) {
+            $items[] = [
+                'teks'  => "Ada <b>{$pesanBaru} pesan baru</b> dari admin",
+                'ket'   => 'Buka Pesan dari Admin',
+                'url'   => route('asatid.pesan'),
+                'warna' => 'bg-violet-50 text-violet-600 ring-violet-100',
+                'ikon'  => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
+            ];
+        }
 
         // Peserta baru yang diterima 7 hari terakhir
         $baru = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)

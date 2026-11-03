@@ -189,6 +189,16 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <div class="flex items-center gap-2 shrink-0">
                         <span class="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full ring-1 {{ $warnaStatus }}"
                             v-pre>{{ $p->label_status }}</span>
+                        @if ($admin && $p->user_id && \App\Support\MasukSebagai::bolehDipakai(auth()->user()))
+                        {{-- Super Admin: buka dasbor siswa ini (mode lihat) --}}
+                        <form method="POST" action="{{ route('admin.masuk-sebagai', $p->user_id) }}" @submit="konfirmasi" data-konfirmasi="Buka dasbor siswa {{ $p->nama_lengkap }}? (mode lihat, perubahan tidak disimpan)">
+                            @csrf
+                            <button title="Lihat dasbor siswa (mode lihat)" aria-label="Lihat dasbor siswa"
+                                class="w-10 h-10 rounded-2xl bg-amber-300/90 text-[#3b2a00] hover:bg-amber-200 flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            </button>
+                        </form>
+                        @endif
                         @if ($admin)
                         <a href="{{ route('admin.pendaftaran.edit', $p) }}" title="Edit Data" aria-label="Edit data"
                             class="w-10 h-10 rounded-2xl bg-white/10 ring-1 ring-white/15 text-white hover:bg-white hover:text-[#0b332c] flex items-center justify-center transition-colors">

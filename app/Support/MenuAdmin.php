@@ -45,6 +45,7 @@ class MenuAdmin
                     ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => 'Tahun & Bulan Ajaran', 'icon' => 'calendar-range'],
                     ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => 'Kurikulum & Kitab', 'icon' => 'book-open'],
                     ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => 'Jadwal Mengajar', 'icon' => 'calendar-clock'],
+                    ['route' => 'admin.kelulusan.index',    'active' => 'admin.kelulusan.*',    'label' => 'Kelulusan', 'icon' => 'award'],
                 ],
             ],
 

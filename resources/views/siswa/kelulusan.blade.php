@@ -1,4 +1,7 @@
-{{-- Akun Siswa > Pengumuman Kelulusan: hasil seleksi pendaftaran (status, penempatan, persyaratan, catatan admin) --}}
+{{--
+    Akun Siswa > Pengumuman Kelulusan: hasil KELULUSAN AKHIR dauroh (bukan hasil seleksi pendaftaran).
+    Diisi admin di Akademik > Kelulusan dan baru terlihat setelah admin menekan "Umumkan" ($diumumkan).
+--}}
 @extends('layouts.siswa')
 
 @section('judul', 'Pengumuman Kelulusan')
@@ -8,32 +11,45 @@
 use App\Models\PendaftaranSiswa;
 $s = $siswa;
 $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
-$hasil = match ($s->status) {
-    PendaftaranSiswa::DITERIMA => [
-        'judul' => 'SELAMAT, ANDA DITERIMA',
-        'teks' => 'Alhamdulillah, Anda dinyatakan diterima sebagai peserta dauroh. Lengkapi persyaratan yang belum terpenuhi di bawah ini.',
-        'latar' => 'from-emerald-500 via-emerald-600 to-teal-700',
-        'ikon' => 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
+$peserta = $s->status === PendaftaranSiswa::DITERIMA;
+
+$hasil = match (true) {
+    ! $peserta => [
+        'judul' => 'BELUM MENJADI PESERTA',
+        'teks' => 'Pengumuman kelulusan hanya untuk peserta dauroh. Status pendaftaran Anda: ' . $s->label_status . '.',
+        'latar' => 'from-slate-500 via-slate-600 to-slate-700',
+        'ikon' => 'M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z',
     ],
-    PendaftaranSiswa::DITOLAK => [
-        'judul' => 'MOHON MAAF, ANDA BELUM DITERIMA',
-        'teks' => 'Terima kasih sudah mendaftar. Semoga Allah memberikan kesempatan lain yang lebih baik.',
-        'latar' => 'from-rose-500 via-rose-600 to-pink-700',
-        'ikon' => 'M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
-    ],
-    default => [
-        'judul' => 'MENUNGGU PENGUMUMAN',
-        'teks' => 'Data Anda sedang diverifikasi admin. Hasilnya akan tampil di halaman ini dan dikirim lewat WhatsApp wali.',
+    ! $diumumkan => [
+        'judul' => 'BELUM DIUMUMKAN',
+        'teks' => 'Pengumuman kelulusan dibuka di akhir masa dauroh. Silakan cek kembali halaman ini nanti.',
         'latar' => 'from-amber-400 via-amber-500 to-orange-600',
         'ikon' => 'M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z',
     ],
+    $s->status_kelulusan === PendaftaranSiswa::LULUS => [
+        'judul' => 'SELAMAT, ANDA LULUS',
+        'teks' => 'Alhamdulillah, Anda dinyatakan lulus dari Dauroh Qobul. Semoga ilmu yang didapat berkah dan bermanfaat.',
+        'latar' => 'from-emerald-500 via-emerald-600 to-teal-700',
+        'ikon' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342',
+    ],
+    $s->status_kelulusan === PendaftaranSiswa::TIDAK_LULUS => [
+        'judul' => 'MOHON MAAF, ANDA BELUM LULUS',
+        'teks' => 'Tetap semangat dalam menuntut ilmu. Silakan hubungi admin untuk penjelasan dan langkah selanjutnya.',
+        'latar' => 'from-rose-500 via-rose-600 to-pink-700',
+        'ikon' => 'M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z',
+    ],
+    default => [
+        'judul' => 'HASIL BELUM TERSEDIA',
+        'teks' => 'Kelulusan sudah diumumkan, tetapi hasil Anda belum diisi. Silakan hubungi admin.',
+        'latar' => 'from-slate-500 via-slate-600 to-slate-700',
+        'ikon' => 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z',
+    ],
 };
-$syarat = collect(PendaftaranSiswa::SYARAT)->map(fn ($nama, $kolom) => ['nama' => $nama, 'ok' => (bool) $s->$kolom]);
-$jumlahOk = $syarat->where('ok', true)->count();
+$tampilHasil = $peserta && $diumumkan;
 $langkah = [
-    ['Mendaftar', $s->created_at, true],
-    ['Verifikasi admin', null, $s->status !== PendaftaranSiswa::MENUNGGU],
-    ['Pengumuman', $s->diproses_at, $s->status !== PendaftaranSiswa::MENUNGGU],
+    ['Diterima jadi peserta', $peserta],
+    ['Masa belajar dauroh', $peserta],
+    ['Pengumuman kelulusan', $tampilHasil],
 ];
 @endphp
 
@@ -46,73 +62,48 @@ $langkah = [
             <span class="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-white/20 ring-4 ring-white/25 flex items-center justify-center">
                 <svg class="w-9 h-9 sm:w-11 sm:h-11" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $hasil['ikon'] }}"/></svg>
             </span>
-            <p class="mt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/75">Hasil seleksi · {{ $s->nomor_pendaftaran }}</p>
+            <p class="mt-4 text-[11px] font-semibold uppercase tracking-[0.2em] text-white/75">Pengumuman Kelulusan · {{ $s->nomor_pendaftaran }}</p>
             <h2 class="mt-1 text-2xl sm:text-4xl font-extrabold tracking-tight">{{ $hasil['judul'] }}</h2>
             <p class="mt-1 text-lg font-bold text-white/90">{{ $s->nama_lengkap }}</p>
+
+            @if ($tampilHasil && $s->status_kelulusan === PendaftaranSiswa::LULUS && $s->predikat_kelulusan)
+            <p class="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 ring-1 ring-white/30 px-4 py-1.5 text-sm font-bold">
+                <svg class="w-4 h-4 text-amber-200" fill="currentColor" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+                Predikat: {{ $s->predikat_kelulusan }}
+            </p>
+            @endif
+
             <p class="mx-auto mt-3 max-w-xl text-sm text-white/80">{{ $hasil['teks'] }}</p>
-            @if ($s->diproses_at)
-            <p class="mt-3 text-xs text-white/70">Diumumkan {{ $s->diproses_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('l, d F Y') }}</p>
+            @if ($tampilHasil)
+            <p class="mt-3 text-xs text-white/70">Diumumkan {{ $diumumkan->timezone('Asia/Jakarta')->locale('id')->translatedFormat('l, d F Y') }}</p>
             @endif
         </div>
     </section>
 
+    {{-- ===== Catatan dari admin (bila ada) ===== --}}
+    @if ($tampilHasil && $s->catatan_kelulusan)
+    <section class="{{ $kartu }} p-5 sm:p-6">
+        <h3 class="flex items-center gap-2.5 font-bold text-slate-800"><span class="w-2 h-6 rounded-full bg-gradient-to-b from-sky-400 to-blue-600"></span>Catatan dari Admin</h3>
+        <p dir="auto" class="mt-3 text-[15px] leading-relaxed text-slate-700 whitespace-pre-line">{{ $s->catatan_kelulusan }}</p>
+    </section>
+    @endif
+
     {{-- ===== Tahapan ===== --}}
     <section class="{{ $kartu }} p-5 sm:p-6">
         <ol class="grid grid-cols-3 gap-2">
-            @foreach ($langkah as $i => [$nama, $waktu, $selesai])
+            @foreach ($langkah as $i => [$nama, $selesai])
             <li class="relative text-center">
                 @if ($i > 0)<span class="absolute top-4 right-1/2 w-full h-0.5 {{ $selesai ? 'bg-emerald-400' : 'bg-slate-200' }}"></span>@endif
                 <span class="relative mx-auto w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold {{ $selesai ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400 ring-1 ring-slate-200' }}">{{ $selesai ? '✓' : $i + 1 }}</span>
                 <p class="mt-2 text-xs sm:text-sm font-semibold text-slate-700">{{ $nama }}</p>
-                @if ($waktu)<p class="text-[11px] text-slate-400">{{ $waktu->timezone('Asia/Jakarta')->format('d/m/Y') }}</p>@endif
             </li>
             @endforeach
         </ol>
     </section>
 
-    @if ($s->status === PendaftaranSiswa::DITERIMA)
-    <div class="grid lg:grid-cols-2 gap-5">
-        {{-- ===== Penempatan ===== --}}
-        <section class="{{ $kartu }} p-5 sm:p-6">
-            <h3 class="flex items-center gap-2.5 font-bold text-slate-800"><span class="w-2 h-6 rounded-full bg-gradient-to-b from-emerald-400 to-teal-600"></span>Penempatan</h3>
-            <div class="mt-4 grid grid-cols-2 gap-3">
-                <div class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 p-4">
-                    <p class="text-xs text-sky-700">Kelas</p>
-                    <p class="mt-1 text-lg font-extrabold text-sky-900" dir="auto">{{ $s->kelasMaster?->nama ?? 'Belum ditentukan' }}</p>
-                </div>
-                <div class="rounded-2xl bg-amber-50 ring-1 ring-amber-100 p-4">
-                    <p class="text-xs text-amber-700">Kamar</p>
-                    <p class="mt-1 text-lg font-extrabold text-amber-900" dir="auto">{{ $s->kamarMaster?->nama ?? 'Belum ditentukan' }}</p>
-                    @if ($s->nomor_kasur)<p class="text-xs font-semibold text-amber-700">Kasur nomor {{ $s->nomor_kasur }}</p>@endif
-                </div>
-            </div>
-        </section>
-
-        {{-- ===== Persyaratan ===== --}}
-        <section class="{{ $kartu }} p-5 sm:p-6">
-            <div class="flex items-center justify-between gap-3">
-                <h3 class="flex items-center gap-2.5 font-bold text-slate-800"><span class="w-2 h-6 rounded-full bg-gradient-to-b from-amber-400 to-orange-500"></span>Persyaratan</h3>
-                <span class="text-sm font-extrabold {{ $jumlahOk === $syarat->count() ? 'text-emerald-600' : 'text-amber-600' }}">{{ $jumlahOk }}/{{ $syarat->count() }}</span>
-            </div>
-            <ul class="mt-3 divide-y divide-slate-100">
-                @foreach ($syarat as $sy)
-                <li class="flex items-center justify-between gap-3 py-2.5 text-sm">
-                    <span class="text-slate-700">{{ $sy['nama'] }}</span>
-                    <span class="shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-bold {{ $sy['ok'] ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'bg-rose-50 text-rose-600 ring-1 ring-rose-100' }}">{{ $sy['ok'] ? 'Sudah' : 'Belum' }}</span>
-                </li>
-                @endforeach
-            </ul>
-        </section>
-    </div>
-    @endif
-
-    @if ($s->catatan_admin && $s->status !== PendaftaranSiswa::MENUNGGU)
-    <section class="{{ $kartu }} p-5 sm:p-6">
-        <h3 class="flex items-center gap-2.5 font-bold text-slate-800"><span class="w-2 h-6 rounded-full bg-gradient-to-b from-sky-400 to-blue-600"></span>{{ $s->status === PendaftaranSiswa::DITOLAK ? 'Alasan dari admin' : 'Catatan dari admin' }}</h3>
-        <p class="mt-3 text-sm text-slate-700 whitespace-pre-line">{{ $s->catatan_admin }}</p>
-    </section>
-    @endif
-
-    <p class="text-center text-sm text-slate-500">Ada pertanyaan? <a href="{{ route('siswa.pesan-saya') }}" class="font-semibold text-emerald-700 hover:underline">Kirim pesan ke admin</a></p>
+    <p class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 px-4 py-3 text-sm text-sky-900">
+        Ada pertanyaan tentang kelulusan? Kirim pesan lewat menu
+        <a href="{{ route('siswa.pesan-saya') }}" class="font-semibold underline">Pesan untuk Admin</a>.
+    </p>
 </div>
 @endsection

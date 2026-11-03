@@ -64,6 +64,7 @@ class DaftarUserController extends Controller
             'roleAdmin'  => collect([['id' => null, 'nama' => $bawaan['admin']->nama ?? 'Super Admin', 'warna' => $bawaan['admin']->warna ?? 'emerald']])
                 ->concat($tambahan->values()->map(fn (Role $r) => ['id' => $r->id, 'nama' => $r->nama, 'warna' => $r->warna])),
             'bisaUbah'   => MenuAdmin::izinAkun(Auth::user()) === null, // hanya Super Admin
+            'bisaLihat'  => \App\Support\MasukSebagai::bolehDipakai(Auth::user()), // tombol "Masuk sebagai"
         ]);
     }
 

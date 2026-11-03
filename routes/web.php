@@ -21,12 +21,17 @@ Route::middleware('guest')->group(function () {
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->group(function () {
     Route::get('beranda', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('beranda/tampilan/{mode}', [DashboardController::class, 'tampilan'])->name('dashboard.tampilan'); // ganti tampilan HP / laptop
     Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
     // Manajemen Data
     Route::post('santri/massal', [AdminSantriController::class, 'massal'])->name('santri.massal'); // tombol Kelola Massal
+    Route::get('santri/kartu-qr', [AdminSantriController::class, 'kartuQr'])->name('santri.kartu-qr'); // cetak kartu QR (semua / terpilih / satu)
     Route::resource('santri', AdminSantriController::class);
     // Data Asatid: daftar, detail, terima/tolak, hapus, dan link pendaftaran khusus
+    // Pesan admin -> asatid (dibaca di dasbor asatid)
+    Route::post('asatid/pesan', [AdminDataAsatidController::class, 'kirimPesan'])->name('asatid.pesan.kirim');
+    Route::delete('asatid/pesan/{pesan}', [AdminDataAsatidController::class, 'hapusPesan'])->name('asatid.pesan.hapus');
     Route::post('asatid/tambah-cepat', [AdminDataAsatidController::class, 'tambahCepat'])->name('asatid.tambah-cepat');
     Route::post('asatid/link-baru', [AdminDataAsatidController::class, 'linkBaru'])->name('asatid.link-baru');
     Route::post('asatid/{asatid}/terima', [AdminDataAsatidController::class, 'terima'])->name('asatid.terima');
@@ -53,6 +58,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::put('bulan-ajaran/{bulanAjaran}', 'updateBulan')->name('bulan-ajaran.update');
         Route::delete('bulan-ajaran/{bulanAjaran}', 'destroyBulan')->name('bulan-ajaran.destroy');
         Route::post('bulan-ajaran/{bulanAjaran}/aktifkan', 'aktifkanBulan')->name('bulan-ajaran.aktifkan');
+    });
+    // Kelulusan akhir dauroh (diumumkan ke dasbor peserta)
+    Route::controller(\App\Http\Controllers\Admin\KelulusanController::class)->group(function () {
+        Route::get('kelulusan', 'index')->name('kelulusan.index');
+        Route::post('kelulusan', 'simpan')->name('kelulusan.simpan');
+        Route::post('kelulusan/umumkan', 'umumkan')->name('kelulusan.umumkan');
+        Route::delete('kelulusan/umumkan', 'tarik')->name('kelulusan.tarik');
     });
     // Kurikulum & Kitab
     Route::resource('kurikulum', \App\Http\Controllers\Admin\KurikulumController::class)->only(['index', 'store', 'update', 'destroy']);

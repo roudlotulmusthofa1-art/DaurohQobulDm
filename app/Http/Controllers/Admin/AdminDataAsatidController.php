@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PendaftaranAsatid;
+use App\Models\PesanAsatid;
 use App\Services\WhatsAppService;
 use App\Support\PesanWa;
 use Illuminate\Http\Request;
@@ -39,12 +40,81 @@ class AdminDataAsatidController extends Controller
         // Link pendaftaran yang dibagikan admin ke calon asatid
         $linkDaftar = route('asatid.daftar', PendaftaranAsatid::kodeLink());
 
-        return view('admin.asatid.index', compact('asatid', 'stat', 'status', 'linkDaftar'));
+        return view('admin.asatid.index', compact('asatid', 'stat', 'status', 'linkDaftar') + [
+            'penerimaPesan' => self::penerimaPesan(), // pilihan di pop-up "Kirim Pesan"
+        ]);
     }
 
     public function show(PendaftaranAsatid $asatid)
     {
-        return view('admin.asatid.show', ['a' => $asatid]);
+        return view('admin.asatid.show', [
+            'a'             => $asatid,
+            'penerimaPesan' => self::penerimaPesan(),
+            // Riwayat pesan admin untuk asatid ini (terbaru di atas)
+            'riwayatPesan'  => $asatid->user_id
+                ? PesanAsatid::with('pengirim:id,name')->where('user_id', $asatid->user_id)->latest('id')->limit(30)->get()
+                : collect(),
+        ]);
+    }
+
+    /**
+     * Kirim pesan ke asatid: semua asatid aktif, atau asatid yang dipilih.
+     * Pesan muncul di dasbor asatid > Pesan dari Admin (+ notifikasi lonceng).
+     */
+    public function kirimPesan(Request $request)
+    {
+        $data = $request->validateWithBag('kirimPesan', [
+            'tujuan'     => ['required', Rule::in(['semua', 'pilih'])],
+            'user_ids'   => ['required_if:tujuan,pilih', 'array'],
+            'user_ids.*' => ['integer'],
+            'judul'      => ['nullable', 'string', 'max:150'],
+            'isi'        => ['required', 'string', 'max:3000'],
+        ], [
+            'user_ids.required_if' => 'Pilih minimal satu asatid.',
+            'isi.required'         => 'Isi pesan wajib diisi.',
+            'isi.max'              => 'Isi pesan terlalu panjang (maks. 3000 karakter).',
+        ]);
+
+        // Hanya asatid yang sudah diterima & punya akun login
+        $aktif = collect(self::penerimaPesan())->pluck('user_id');
+        $tujuan = $data['tujuan'] === 'semua' ? $aktif : $aktif->intersect($data['user_ids'] ?? []);
+
+        if ($tujuan->isEmpty()) {
+            return back()->withErrors(['user_ids' => 'Tidak ada asatid aktif yang bisa dikirimi pesan.'], 'kirimPesan')->withInput();
+        }
+
+        $sekarang = now();
+        PesanAsatid::insert($tujuan->values()->map(fn ($id) => [
+            'user_id'     => $id,
+            'pengirim_id' => $request->user()->id,
+            'judul'       => $data['judul'] ?? null,
+            'isi'         => $data['isi'],
+            'created_at'  => $sekarang,
+            'updated_at'  => $sekarang,
+        ])->all());
+
+        return back()->with('success', 'Pesan terkirim ke ' . $tujuan->count() . ' asatid. Pesan tampil di dasbor asatid › Pesan dari Admin.');
+    }
+
+    /** Hapus satu pesan yang sudah dikirim (dari riwayat di halaman detail asatid) */
+    public function hapusPesan(PesanAsatid $pesan)
+    {
+        $pesan->delete();
+
+        return back()->with('success', 'Pesan dihapus.');
+    }
+
+    /** Asatid yang bisa dikirimi pesan: sudah diterima & punya akun login */
+    private static function penerimaPesan(): array
+    {
+        return PendaftaranAsatid::where('status', PendaftaranAsatid::DITERIMA)->whereNotNull('user_id')
+            ->orderBy('nama_lengkap')->get()
+            ->map(fn (PendaftaranAsatid $a) => [
+                'user_id' => $a->user_id,
+                'nama'    => $a->nama_lengkap,
+                'nomor'   => $a->nomor_pendaftaran,
+                'foto'    => $a->foto_url,
+            ])->all();
     }
 
     /** Tambah Cepat: admin langsung membuat data + akun login (status diterima) */

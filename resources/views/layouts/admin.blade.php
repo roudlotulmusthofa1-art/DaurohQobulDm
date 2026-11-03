@@ -207,7 +207,7 @@
                 <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">User Account
                 </p>
                 <div class="sb-user flex items-center gap-3 px-1">
-                    <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=4ade80&color=0b332c"
+                    <img src="{{ auth()->user()?->avatarUrl('4ade80', '0b332c') }}"
                         class="w-10 h-10 rounded-full object-cover ring-2 ring-[#4ade80]/60" alt="Avatar admin" />
                     <div class="sb-teks flex flex-col items-start justify-center min-w-0" v-pre>
                         <p class="text-white text-[15px] font-medium truncate">@yield('page-heading', '' .
@@ -313,7 +313,7 @@
                         <button type="button" @click.stop="bukaTutup('profil')" aria-haspopup="true"
                             :aria-expanded="menuBuka === 'profil' ? 'true' : 'false'"
                             class="flex items-center gap-2.5 rounded-xl pl-1 pr-2.5 py-1 hover:bg-white/60 transition-colors">
-                            <img src="https://ui-avatars.com/api/?name={{ urlencode(auth()->user()->name ?? 'Admin') }}&background=0b332c&color=fff"
+                            <img src="{{ auth()->user()?->avatarUrl('0b332c', 'fff') }}"
                                 class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
                             <span class="hidden sm:flex flex-col items-start leading-tight text-left" v-pre>
                                 <span class="text-[13px] font-semibold text-[#0f1f1a] max-w-[10rem] truncate">{{ auth()->user()->name ?? 'Admin' }}</span>

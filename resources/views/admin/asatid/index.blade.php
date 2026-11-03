@@ -23,6 +23,8 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
 <div id="halaman-data-asatid">
     {{-- Pop-up Tambah Cepat (partials/tambah-cepat.blade.php) --}}
     @include('partials.tambah-cepat', ['jenis' => 'Asatid', 'aksi' => route('admin.asatid.tambah-cepat')])
+    {{-- Pop-up Kirim Pesan ke asatid (partials/kirim-pesan-asatid.blade.php) --}}
+    @include('partials.kirim-pesan-asatid', ['penerimaPesan' => $penerimaPesan])
 <div class="space-y-6">
     @if (session('success'))
     <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm">
@@ -61,6 +63,11 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
             </div>
 
             <div class="flex flex-wrap gap-2">
+                <button type="button" @click="bukaKirimPesan"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-sky-400 text-[#0b332c] text-sm font-bold hover:bg-sky-300 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                    Kirim Pesan
+                </button>
                 <button type="button" @click="bukaTambahCepat"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-[#0b332c] text-sm font-bold hover:bg-emerald-100 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
@@ -161,7 +168,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         Vue.createApp({
-            mixins: [window.mixinTambahCepat], // pop-up Tambah Cepat
+            mixins: [window.mixinTambahCepat, window.mixinKirimPesan], // pop-up Tambah Cepat & Kirim Pesan
             data() {
                 return {
                     linkDaftar: @json($linkDaftar),

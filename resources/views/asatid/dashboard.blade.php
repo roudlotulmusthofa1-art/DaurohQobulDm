@@ -8,7 +8,7 @@ $hariIni = now()->locale('id')->translatedFormat('l, d F Y');
 $jam = (int) now()->format('H');
 $salam = $jam < 11 ? 'Selamat pagi' : ($jam < 15 ? 'Selamat siang' : ($jam < 18 ? 'Selamat sore' : 'Selamat malam'));
 
-// Kartu menu. 'lebar' = kartu yang melebar di baris terakhir.
+// Kartu menu (6 kartu). 'lebar' = kartu yang melebar penuh di HP (tidak dipakai saat jumlah kartu genap).
 $kartuMenu = [
     [
         'judul' => 'Profil',
@@ -56,7 +56,17 @@ $kartuMenu = [
         'cahaya'=> 'bg-rose-400/30',
         'lencana' => [$jumlahPeserta . ' peserta', 'bg-rose-50 text-rose-700 ring-rose-100'],
         'ikon'  => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
-        'lebar' => true,
+    ],
+    [
+        'judul' => 'Pesan dari Admin',
+        'ket'   => 'Pengumuman dan pesan khusus untuk Anda',
+        'url'   => route('asatid.pesan'),
+        'warna' => 'from-violet-400 to-purple-600',
+        'cahaya'=> 'bg-violet-400/30',
+        'lencana' => $jumlahPesanBaru > 0
+            ? [$jumlahPesanBaru . ' pesan baru', 'bg-rose-50 text-rose-700 ring-rose-100']
+            : ['Tidak ada pesan baru', 'bg-slate-100 text-slate-500 ring-slate-200'],
+        'ikon'  => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
     ],
 ];
 @endphp
@@ -93,10 +103,9 @@ $kartuMenu = [
             'group relative overflow-hidden rounded-3xl bg-white ring-1 ring-[#0b332c]/[0.06] p-4 sm:p-6 flex flex-col min-h-[170px] sm:min-h-[210px]',
             'shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]',
             'transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-20px_rgba(11,51,44,0.35)] hover:ring-emerald-200',
-            // HP: 2 kolom, kartu terakhir melebar. Laptop: baris 1 = 3 kartu, baris 2 = 2 kartu lebar.
-            'lg:col-span-2' => $loop->index < 3,
-            'lg:col-span-3' => $loop->index >= 3,
-            'col-span-2'    => !empty($k['lebar']),
+            // HP: 2 kolom. Laptop: 3 kolom (6 kartu = 2 baris rapi). 'lebar' = kartu melebar penuh di HP.
+            'lg:col-span-2',
+            'col-span-2 lg:col-span-2' => !empty($k['lebar']),
         ])>
         {{-- cahaya warna di pojok --}}
         <span class="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 {{ $k['cahaya'] }}"></span>

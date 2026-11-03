@@ -33,6 +33,8 @@ $jumlahNotif = count($notif ?? []);
 @endphp
 
 <body class="min-h-screen bg-[#eef4f1] text-slate-800 antialiased">
+    {{-- Pita "Anda melihat sebagai ..." saat Super Admin Masuk sebagai (hanya tampil bila aktif) --}}
+    @include('partials.pita-masuk-sebagai')
 
     {{-- ================= HEADER ================= --}}
     {{-- Aplikasi Vue #header-akun: menu lonceng & profil + tombol kembali (skrip di bawah).

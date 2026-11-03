@@ -38,6 +38,19 @@ class PendaftaranSiswa extends Model
     public const DITERIMA = 'diterima';
     public const DITOLAK  = 'ditolak';
 
+    /** Kelulusan akhir dauroh (diisi di Akademik > Kelulusan). Bukan hasil seleksi pendaftaran. */
+    public const LULUS = 'lulus';
+    public const TIDAK_LULUS = 'tidak_lulus';
+    public const PREDIKAT = ['Mumtaz', 'Jayyid Jiddan', 'Jayyid', 'Maqbul'];
+
+    /** Waktu admin mengumumkan kelulusan (sesi aktif). null = belum diumumkan, peserta belum bisa melihat hasil. */
+    public static function kelulusanDiumumkan(): ?\Illuminate\Support\Carbon
+    {
+        $waktu = Pengaturan::ambil('kelulusan_diumumkan_at');
+
+        return $waktu ? \Illuminate\Support\Carbon::parse($waktu) : null;
+    }
+
     /** Nomor pendaftaran: PSB20260001 (urut per tahun). Panggil di dalam DB::transaction(). */
     public static function buatNomor(): string
     {

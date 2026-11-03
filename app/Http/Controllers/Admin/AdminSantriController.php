@@ -35,6 +35,48 @@ class AdminSantriController extends Controller
         ]);
     }
 
+    /**
+     * GET /admin/santri/kartu-qr?ids=1,2,3 — halaman cetak kartu QR (dibuka di tab baru).
+     * Tanpa ids = semua santri yang sudah diterima. Satu santri: ?ids=5
+     * Ukuran kartu, saringan kelas & pencarian diatur Vue di halaman cetak.
+     */
+    public function kartuQr(Request $request)
+    {
+        $ids = collect(explode(',', (string) $request->query('ids')))->map(fn ($v) => (int) $v)->filter()->unique();
+
+        $santri = PendaftaranSiswa::with(['kelasMaster', 'kamarMaster'])
+            ->where('status', PendaftaranSiswa::DITERIMA)
+            ->when($ids->isNotEmpty(), fn ($q) => $q->whereIn('id', $ids))
+            ->orderBy('nama_lengkap')
+            ->get()
+            ->map(function (PendaftaranSiswa $s) {
+                // Santri lama yang belum punya kode QR: dibuatkan sekarang
+                if (! $s->kode_qr) {
+                    $s->forceFill(['kode_qr' => PendaftaranSiswa::buatKodeQr()])->saveQuietly();
+                }
+
+                return [
+                    'id'       => $s->id,
+                    'nama'     => $s->nama_lengkap,
+                    'arab'     => $s->nama_lengkap_arab,
+                    'nomor'    => $s->nomor_pendaftaran,
+                    'kelas_id' => $s->kelas_id,
+                    'kelas'    => $s->kelasMaster?->nama,
+                    'kamar'    => $s->kamarMaster?->nama,
+                    'kasur'    => $s->nomor_kasur,
+                    'foto'     => $s->berkas_foto ? \Illuminate\Support\Facades\Storage::disk('public')->url($s->berkas_foto) : null,
+                    'qr'       => $s->qr_svg,
+                ];
+            })->values();
+
+        return view('admin.santri-kartu-qr', [
+            'santri'  => $santri,
+            'kelas'   => Kelas::ordered()->get(['id', 'nama']),
+            'profil'  => \App\Models\Pengaturan::profilPesantren(),
+            'pilihan' => $ids->isNotEmpty(), // dibuka untuk santri tertentu saja
+        ]);
+    }
+
     /** POST /admin/santri — tombol "Tambah Cepat": langsung jadi santri (status diterima) */
     public function store(Request $request): JsonResponse
     {

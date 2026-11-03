@@ -21,10 +21,50 @@ use Illuminate\View\View;
 /**
  * Admin > Dashboard. Semua angka diambil dari data sesi aktif dan tiap kartu menuju menunya.
  * Kotak "Pesan Peserta": daftar percakapan + baca & balas langsung (?pesan={id peserta}).
+ *
+ * Dua tampilan dengan data yang sama:
+ * - admin/dashboard.blade.php     : laptop/komputer
+ * - admin/dashboard-hp.blade.php  : HP (seperti aplikasi, menu di bawah)
+ * Dipilih otomatis dari jenis perangkat; admin bisa berganti manual (diingat lewat cookie "tampilan_dasbor").
  */
 class DashboardController extends Controller
 {
+    /** Nama cookie pilihan tampilan: "hp" atau "laptop" */
+    private const COOKIE_TAMPILAN = 'tampilan_dasbor';
+
     public function index(Request $request): View
+    {
+        if ($this->pakaiTampilanHp($request)) {
+            $request->query->remove('pesan'); // versi HP membuka percakapan di menu Pesan Peserta
+
+            return view('admin.dashboard-hp', $this->data($request));
+        }
+
+        return view('admin.dashboard', $this->data($request));
+    }
+
+    /** GET /admin/beranda/tampilan/{mode} — tombol "Tampilan HP" / "Tampilan laptop" */
+    public function tampilan(string $mode)
+    {
+        abort_unless(in_array($mode, ['hp', 'laptop'], true), 404);
+
+        return redirect()->route('admin.dashboard')
+            ->withCookie(cookie(self::COOKIE_TAMPILAN, $mode, 60 * 24 * 365)); // diingat 1 tahun di perangkat ini
+    }
+
+    /** Pilihan manual (cookie) didahulukan; kalau belum pernah memilih, dilihat dari jenis perangkat */
+    private function pakaiTampilanHp(Request $request): bool
+    {
+        $pilihan = $request->cookie(self::COOKIE_TAMPILAN);
+        if (in_array($pilihan, ['hp', 'laptop'], true)) {
+            return $pilihan === 'hp';
+        }
+
+        return (bool) preg_match('/Mobi|Android|iPhone|iPod/i', (string) $request->userAgent());
+    }
+
+    /** Semua data dashboard (dipakai kedua tampilan) */
+    private function data(Request $request): array
     {
         $hariIni = now('Asia/Jakarta');
 
@@ -53,7 +93,7 @@ class DashboardController extends Controller
         $kelas = Kelas::ordered()->get()->map(fn ($k) => ['nama' => $k->nama, 'isi' => (clone $diterima)->where('kelas_id', $k->id)->count()]);
         $kamar = Kamar::ordered()->withCount(['santri as isi' => fn ($q) => $q->where('status', PendaftaranSiswa::DITERIMA)])->get();
 
-        return view('admin.dashboard', [
+        return [
             'user' => $request->user(),
             'sesi' => SesiAplikasi::aktif(),
             'hariIni' => $hariIni,
@@ -80,7 +120,7 @@ class DashboardController extends Controller
             'kelas' => $kelas,
             'kamar' => $kamar,
             'tindakan' => NotifikasiAdmin::kumpulkan(),
-        ] + $this->kotakPesan($request));
+        ] + $this->kotakPesan($request);
     }
 
     /** Data kotak "Pesan Peserta": percakapan terbaru + percakapan yang sedang dibuka */

@@ -24,7 +24,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->redirectUsersTo(fn (Request $request) => $request->user()?->halamanAwal() ?? '/admin/beranda');
         // Peserta dikeluarkan bila sesi aktif berganti; admin & asatid tetap login
         // CekIzinAdmin: akun admin ber-role pengurus hanya membuka menu yang diizinkan (Sistem > Role & Permission)
-        $middleware->web(append: [\App\Http\Middleware\CekSesiLogin::class, \App\Http\Middleware\CekIzinAdmin::class]);
+        // JagaMasukSebagai: saat Super Admin "Masuk sebagai" asatid/siswa, mode hanya-lihat (tidak bisa menyimpan)
+        $middleware->web(append: [\App\Http\Middleware\CekSesiLogin::class, \App\Http\Middleware\CekIzinAdmin::class, \App\Http\Middleware\JagaMasukSebagai::class]);
         $middleware->alias([
             'peran' => \App\Http\Middleware\PeranMiddleware::class,
         ]);

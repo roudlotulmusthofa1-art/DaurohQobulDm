@@ -40,6 +40,10 @@ $lebar = ['Alamat Lengkap'];
 @endphp
 
 <div id="halaman-detail-asatid">
+@if ($a->user_id)
+{{-- Pop-up Kirim Pesan (asatid ini sudah dicentang) --}}
+@include('partials.kirim-pesan-asatid', ['penerimaPesan' => $penerimaPesan, 'pilihAwal' => $a->user_id])
+@endif
 <div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20">
     <a href="{{ route('admin.asatid.index') }}"
         class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors">
@@ -98,6 +102,23 @@ $lebar = ['Alamat Lengkap'];
                         <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.5-9.75-6.5"/></svg>
                         {{ $a->email }}
                     </span>
+                    @if ($a->user_id)
+                    <button type="button" @click="bukaKirimPesan"
+                        class="inline-flex items-center gap-2 rounded-2xl bg-sky-400 text-[#0b332c] px-3.5 py-2 text-sm font-bold hover:bg-sky-300 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                        Kirim Pesan
+                    </button>
+                    @endif
+                    {{-- Super Admin: buka dasbor asatid ini (mode lihat) --}}
+                    @if ($a->user_id && \App\Support\MasukSebagai::bolehDipakai(auth()->user()))
+                    <form method="POST" action="{{ route('admin.masuk-sebagai', $a->user_id) }}" @submit="konfirmasi" data-konfirmasi="Buka dasbor asatid {{ $a->nama_lengkap }}? (mode lihat, perubahan tidak disimpan)">
+                        @csrf
+                        <button class="inline-flex items-center gap-2 rounded-2xl bg-amber-300 text-[#3b2a00] px-3.5 py-2 text-sm font-bold hover:bg-amber-200 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            Lihat Dasbor Asatid
+                        </button>
+                    </form>
+                    @endif
                     <a href="{{ route('admin.asatid.edit', $a) }}"
                         class="inline-flex items-center gap-2 rounded-2xl bg-white text-[#0b332c] px-3.5 py-2 text-sm font-bold hover:bg-emerald-100 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
@@ -153,6 +174,45 @@ $lebar = ['Alamat Lengkap'];
         @endforeach
     </div>
 
+    {{-- ===== Riwayat pesan admin untuk asatid ini ===== --}}
+    @if ($a->user_id)
+    <section class="{{ $kartu }} p-5 sm:p-6">
+        <div class="flex items-center gap-3 mb-4">
+            <span class="w-10 h-10 rounded-2xl ring-1 flex items-center justify-center bg-sky-50 text-sky-600 ring-sky-100">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+            </span>
+            <div class="flex-1 min-w-0">
+                <h2 class="text-[15px] font-bold text-slate-800">Pesan untuk Asatid Ini</h2>
+                <p class="text-xs text-slate-400">{{ $riwayatPesan->count() }} pesan terakhir · {{ $riwayatPesan->whereNull('dibaca_at')->count() }} belum dibaca</p>
+            </div>
+            <button type="button" @click="bukaKirimPesan" class="shrink-0 px-3.5 py-2 rounded-xl bg-sky-50 text-sky-700 text-sm font-semibold hover:bg-sky-100">+ Pesan baru</button>
+        </div>
+        <div class="space-y-2.5">
+            @forelse ($riwayatPesan as $rp)
+            <div class="rounded-2xl bg-[#f5f9f7] ring-1 ring-slate-100 px-4 py-3">
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="font-semibold text-slate-800 flex-1 min-w-0 truncate">{{ $rp->judul ?: 'Pesan dari admin' }}</p>
+                    @if ($rp->dibaca_at)
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100" title="{{ $rp->dibaca_at->timezone('Asia/Jakarta')->format('d M Y H:i') }}">✓ Dibaca</span>
+                    @else
+                    <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-100">Belum dibaca</span>
+                    @endif
+                    <form method="POST" action="{{ route('admin.asatid.pesan.hapus', $rp) }}" @submit="konfirmasi" data-konfirmasi="Hapus pesan ini? Pesan juga hilang dari dasbor asatid.">
+                        @csrf
+                        @method('DELETE')
+                        <button class="text-xs font-semibold text-rose-500 hover:text-rose-700">Hapus</button>
+                    </form>
+                </div>
+                <p dir="auto" class="mt-1 text-sm text-slate-600 whitespace-pre-line line-clamp-3">{{ $rp->isi }}</p>
+                <p class="mt-1.5 text-[11px] text-slate-400">{{ $rp->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y · H:i') }}{{ $rp->pengirim ? ' · oleh ' . $rp->pengirim->name : '' }}</p>
+            </div>
+            @empty
+            <p class="rounded-2xl border border-dashed border-slate-200 py-6 text-center text-sm text-slate-400">Belum ada pesan untuk asatid ini.</p>
+            @endforelse
+        </div>
+    </section>
+    @endif
+
     {{-- ===== Keputusan admin ===== --}}
     @if ($a->status === 'menunggu')
     <div class="grid md:grid-cols-2 gap-6">
@@ -202,6 +262,9 @@ $lebar = ['Alamat Lengkap'];
 @push('scripts')
 <script>
     // Aplikasi Vue halaman ini: konfirmasi hapus (metode dari partials/vue-metode.blade.php)
-    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-detail-asatid'));
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({
+        mixins: window.mixinKirimPesan ? [window.mixinKirimPesan] : [], // pop-up Kirim Pesan (hanya bila akun asatid sudah ada)
+        methods: { ...metodeHalaman },
+    }).mount('#halaman-detail-asatid'));
 </script>
 @endpush

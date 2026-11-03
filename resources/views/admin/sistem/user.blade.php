@@ -93,6 +93,9 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <div class="flex items-center justify-end gap-1.5">
                                 <button v-if="bisaUbah && u.dasar === 'admin' && !u.saya" type="button" @click="bukaUbah(u)"
                                     class="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#0b332c] bg-[#0b332c]/[0.06] hover:bg-[#0b332c]/[0.12]">Ganti Role</button>
+                                <button v-if="bisaLihat && (u.dasar === 'asatid' || u.dasar === 'siswa')" type="button" @click="masukSebagai(u)"
+                                    title="Buka dasbor akun ini (mode lihat)"
+                                    class="px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200">Masuk sebagai</button>
                                 <a v-if="u.detail" :href="u.detail" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Lihat Data</a>
                             </div>
                         </td>
@@ -112,6 +115,9 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <button type="button" @click="halaman++" :disabled="halaman === jumlahHalaman" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 disabled:opacity-40">Berikutnya</button>
         </div>
     </div>
+
+    {{-- Form "Masuk sebagai" (action diisi Vue) --}}
+    <form ref="formMasuk" method="POST" class="hidden">@csrf</form>
 
     {{-- ===== Pop-up ganti role akun admin ===== --}}
     <dialog ref="dialogRole" @click.self="tutupDialog" class="m-auto w-[min(440px,calc(100%-2rem))] rounded-3xl p-0 backdrop:bg-black/40">
@@ -164,6 +170,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     users: @json($users),
                     roleAdmin: @json($roleAdmin),
                     bisaUbah: @json($bisaUbah),
+                    bisaLihat: @json($bisaLihat),
+                    URL_MASUK: @json(url('admin/masuk-sebagai')),
                     URL_USER: @json(url('admin/user')),
                     PER_HALAMAN: 15,
                     tab: [
@@ -221,6 +229,13 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 },
                 inisial(nama) {
                     return (nama ?? '?').split(/\s+/).filter(Boolean).slice(0, 2).map(k => k[0]).join('').toUpperCase();
+                },
+                // Super Admin: buka dasbor akun asatid/siswa (mode lihat)
+                masukSebagai(u) {
+                    if (!confirm('Buka dasbor ' + u.nama + '? (mode lihat, perubahan tidak disimpan)')) return;
+                    const f = this.$refs.formMasuk;
+                    f.action = this.URL_MASUK + '/' + u.id;
+                    f.submit();
                 },
                 bukaUbah(u) {
                     this.dipilih = u;

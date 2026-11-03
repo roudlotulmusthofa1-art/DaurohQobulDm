@@ -49,6 +49,17 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\PendaftaranAsatid::class);
     }
 
+    /**
+     * Gambar avatar: foto profil (Pengaturan > Profil) bila ada,
+     * kalau belum ada pakai gambar inisial nama dengan warna $latar/$huruf (hex tanpa #).
+     */
+    public function avatarUrl(string $latar = '0b332c', string $huruf = 'fff'): string
+    {
+        return $this->foto
+            ? \Illuminate\Support\Facades\Storage::disk('bersama')->url($this->foto)
+            : 'https://ui-avatars.com/api/?name=' . urlencode($this->name ?? 'Admin') . "&background={$latar}&color={$huruf}&size=128";
+    }
+
     /** Halaman pertama setelah login, sesuai role */
     public function halamanAwal(): string
     {

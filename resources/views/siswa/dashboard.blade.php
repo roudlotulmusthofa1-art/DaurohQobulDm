@@ -23,11 +23,18 @@ $kartuMenu = [
     ],
     [
         'judul' => 'Pengumuman Kelulusan',
-        'ket'   => 'Hasil seleksi, kelas, dan kamar Anda',
+        'ket'   => 'Hasil kelulusan di akhir masa dauroh',
         'url'   => route('siswa.kelulusan'),
         'warna' => 'from-amber-400 to-orange-500',
         'cahaya'=> 'bg-amber-400/30',
-        'lencana' => $status,
+        // Kelulusan akhir: tampil setelah admin mengumumkan
+        'lencana' => match (true) {
+            $siswa->status !== PendaftaranSiswa::DITERIMA => ['Khusus peserta', 'bg-slate-100 text-slate-500 ring-slate-200'],
+            ! $diumumkan => ['Belum diumumkan', 'bg-amber-50 text-amber-700 ring-amber-100'],
+            $siswa->status_kelulusan === PendaftaranSiswa::LULUS => ['Lulus' . ($siswa->predikat_kelulusan ? ' · ' . $siswa->predikat_kelulusan : ''), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
+            $siswa->status_kelulusan === PendaftaranSiswa::TIDAK_LULUS => ['Belum lulus', 'bg-rose-50 text-rose-700 ring-rose-100'],
+            default => ['Sudah diumumkan', 'bg-sky-50 text-sky-700 ring-sky-100'],
+        },
         'ikon'  => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5',
     ],
     [
