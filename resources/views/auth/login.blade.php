@@ -267,6 +267,8 @@
             },
         }).mount('#loginApp'));
     </script>
+{{-- Status koneksi internet + tombol muat ulang --}}
+@include('partials.status-koneksi')
 </body>
 
 </html>

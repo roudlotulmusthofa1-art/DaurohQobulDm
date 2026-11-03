@@ -35,6 +35,9 @@
 
     @include('partials.floating-widgets')
 
+    {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
+    @include('partials.status-koneksi')
+
 
 
     <script src="https://unpkg.com/lucide@latest"></script>

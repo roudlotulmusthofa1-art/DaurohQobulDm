@@ -29,11 +29,4 @@
     </div>
 </div>
 
-{{-- Indikator status (pojok kanan bawah) --}}
-<div class="fixed bottom-5 right-5 z-40">
-    <div class="w-11 h-11 bg-white rounded-xl shadow-lg flex items-center justify-center">
-        <svg class="w-5 h-5 text-teal-700" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2-7 4 14 2-7h6"/>
-        </svg>
-    </div>
-</div>
+{{-- Pojok kanan bawah: status koneksi + muat ulang -> partials/status-koneksi (dipasang di layouts/app) --}}

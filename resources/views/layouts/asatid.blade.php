@@ -195,6 +195,8 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
     </script>
     @include('partials.pratinjau-foto') {{-- klik foto bertanda data-perbesar -> tampil besar --}}
     @include('partials.vue-metode')
+    {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
+    @include('partials.status-koneksi')
     @stack('scripts')
 </body>
 

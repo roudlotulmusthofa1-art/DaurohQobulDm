@@ -110,6 +110,8 @@
 
         <p class="mt-6 text-center text-xs text-white/50">Dauroh Qobul · Darul Musthofa Tarim</p>
     </div>
+    {{-- Status koneksi internet + tombol muat ulang --}}
+    @include('partials.status-koneksi')
 </body>
 
 </html>

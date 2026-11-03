@@ -333,5 +333,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         }).mount('#dashboard-hp');
     });
 </script>
+{{-- Status koneksi internet + tombol muat ulang --}}
+@include('partials.status-koneksi', ['posisi' => 'bottom-24 right-4'])
 </body>
 </html>

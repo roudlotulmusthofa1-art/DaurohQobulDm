@@ -19,7 +19,7 @@ $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none
     <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
         {!! $svg('back', 'w-4 h-4') !!}
     </span>
-    رجوع
+    Kembali
 </a>
 </div>
 <div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20 mt-3" id="psb-detail">
