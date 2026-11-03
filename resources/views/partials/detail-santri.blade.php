@@ -283,6 +283,20 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     </button>
                 </div>
                 @endif
+
+                {{-- Sudah diterima / ditolak: tombol kirim ulang chat konfirmasi selalu ada (bila chat gagal / perlu dikirim lagi) --}}
+                @if ($admin && in_array($p->status, ['diterima', 'ditolak'], true))
+                <form method="POST" action="{{ route('admin.pendaftaran.kirim-ulang-chat', $p) }}" class="mt-5 flex flex-wrap items-center gap-3">
+                    @csrf
+                    <button type="submit" @click="konfirmasi"
+                        data-konfirmasi="Kirim ulang chat konfirmasi {{ $p->status === 'diterima' ? 'PENERIMAAN' : 'PENOLAKAN' }} ke WhatsApp {{ $p->status === 'diterima' ? 'wali' : 'wali & pendaftar' }}?"
+                        class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/10 ring-1 ring-white/25 text-white text-sm font-semibold hover:bg-emerald-400 hover:text-[#0b332c] hover:ring-emerald-400 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                        Kirim Ulang Chat Konfirmasi
+                    </button>
+                    <span class="text-xs text-white/50">Pakai bila chat {{ $p->status === 'diterima' ? 'penerimaan' : 'penolakan' }} sebelumnya gagal terkirim.</span>
+                </form>
+                @endif
             </div>
 
             {{-- QR --}}

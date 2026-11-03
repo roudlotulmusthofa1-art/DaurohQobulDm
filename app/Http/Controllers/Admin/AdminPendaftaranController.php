@@ -140,27 +140,66 @@ class AdminPendaftaranController extends Controller
         // 2) Terima + buat akun siswa di tabel users
         $pendaftaran->terima($data['catatan_admin']);
 
-        // 3) Kirim chat WhatsApp
-        // Isi pesan diatur di Pengaturan > Pesan
-        $pesan = PesanWa::buat('psb_terima', [
-            'nama' => $pendaftaran->nama_lengkap,
-            'penempatan' => $pendaftaran->ringkasanPenempatan(),
-            'syarat' => $pendaftaran->ringkasanSyarat(),
-            'catatan' => $pendaftaran->catatan_admin,
-            'email' => $pendaftaran->email,
-        ]);
-        if (! $pesan) {
+        // 3) Kirim chat WhatsApp (isi pesan diatur di Pengaturan > Pesan)
+        $terkirim = $this->kirimChatKonfirmasi($pendaftaran, $wa);
+        if ($terkirim === null) {
             return redirect()->route('admin.pendaftaran.show', $pendaftaran)->with('success', 'Pendaftar diterima. (Pesan WhatsApp dimatikan di Pengaturan › Pesan.)');
         }
-
-        $terkirim = $wa->kirim($pendaftaran->no_hp_wali, $pesan);
 
         return redirect()->route('admin.pendaftaran.show', $pendaftaran)->with(
             $terkirim ? 'success' : 'error',
             $terkirim
                 ? 'Pendaftar diterima dan chat WhatsApp terkirim.'
-                : 'Pendaftar diterima, tetapi chat WhatsApp GAGAL terkirim. Hubungi wali lewat ikon WhatsApp di halaman ini.'
+                : 'Pendaftar diterima, tetapi chat WhatsApp GAGAL terkirim. Klik "Kirim Ulang Chat Konfirmasi" untuk mencoba lagi.'
         );
+    }
+
+    /**
+     * Tombol "Kirim Ulang Chat Konfirmasi" di detail pendaftar (selalu ada untuk yang sudah diterima/ditolak),
+     * dipakai bila chat sebelumnya gagal terkirim atau wali minta dikirim lagi.
+     */
+    public function kirimUlangChat(PendaftaranSiswa $pendaftaran, WhatsAppService $wa)
+    {
+        if (! in_array($pendaftaran->status, [PendaftaranSiswa::DITERIMA, PendaftaranSiswa::DITOLAK], true)) {
+            return back()->with('error', 'Pendaftar ini belum diterima atau ditolak, jadi belum ada chat konfirmasi.');
+        }
+
+        $terkirim = $this->kirimChatKonfirmasi($pendaftaran->load(['kelasMaster', 'kamarMaster']), $wa);
+
+        return back()->with(...match ($terkirim) {
+            null => ['error', 'Pesan WhatsApp untuk pendaftar ' . ($pendaftaran->status === PendaftaranSiswa::DITERIMA ? 'diterima' : 'ditolak') . ' sedang dimatikan di Pengaturan › Pesan.'],
+            true => ['success', 'Chat konfirmasi berhasil dikirim ulang ke WhatsApp.'],
+            false => ['error', 'Chat konfirmasi GAGAL terkirim. Periksa nomor WhatsApp atau koneksi, lalu coba lagi.'],
+        });
+    }
+
+    /**
+     * Kirim chat konfirmasi sesuai status (diterima / ditolak).
+     * @return bool|null  true = terkirim, false = gagal, null = pesan dimatikan di Pengaturan > Pesan
+     */
+    private function kirimChatKonfirmasi(PendaftaranSiswa $pendaftaran, WhatsAppService $wa): ?bool
+    {
+        if ($pendaftaran->status === PendaftaranSiswa::DITERIMA) {
+            $pesan = PesanWa::buat('psb_terima', [
+                'nama' => $pendaftaran->nama_lengkap,
+                'penempatan' => $pendaftaran->ringkasanPenempatan(),
+                'syarat' => $pendaftaran->ringkasanSyarat(),
+                'catatan' => $pendaftaran->catatan_admin,
+                'email' => $pendaftaran->email,
+            ]);
+
+            return $pesan ? $wa->kirim($pendaftaran->no_hp_wali, $pesan) : null;
+        }
+
+        // Ditolak: ke wali dan ke pendaftar
+        $pesan = PesanWa::buat('psb_tolak', ['nama' => $pendaftaran->nama_lengkap, 'alasan' => $pendaftaran->catatan_admin]);
+        if (! $pesan) {
+            return null;
+        }
+        $keWali = $wa->kirim($pendaftaran->no_hp_wali, $pesan);
+        $kePendaftar = $wa->kirim($pendaftaran->no_hp, $pesan);
+
+        return $keWali || $kePendaftar;
     }
 
     /** Ambil isian ceklis + catatan dari form. Kotak yang tidak dicentang tidak dikirim browser, jadi dianggap false. */
@@ -247,12 +286,12 @@ class AdminPendaftaranController extends Controller
 
         $pendaftaran->tolak($request->catatan_admin);
 
-        if ($pesan = PesanWa::buat('psb_tolak', ['nama' => $pendaftaran->nama_lengkap, 'alasan' => $request->catatan_admin])) {
-            $wa->kirim($pendaftaran->no_hp_wali, $pesan);
-            $wa->kirim($pendaftaran->no_hp, $pesan);
-        }
+        $terkirim = $this->kirimChatKonfirmasi($pendaftaran->refresh(), $wa);
 
-        return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftar ditolak.');
+        return redirect()->route('admin.pendaftaran.index')->with(...match ($terkirim) {
+            false => ['error', 'Pendaftar ditolak, tetapi chat WhatsApp GAGAL terkirim. Buka detailnya lalu klik "Kirim Ulang Chat Konfirmasi".'],
+            default => ['success', 'Pendaftar ditolak.'],
+        });
     }
 
     /**
