@@ -126,6 +126,32 @@ class PendaftaranSiswa extends Model
     ];
 
     /**
+     * Chat konfirmasi untuk pendaftar yang sudah diterima / ditolak (isi diatur di Pengaturan > Pesan).
+     * @return array{pesan: string, tujuan: array<string, string>}|null  null = belum diproses / pesan dimatikan
+     */
+    public function chatKonfirmasi(): ?array
+    {
+        if ($this->status === self::DITERIMA) {
+            $this->loadMissing(['kelasMaster', 'kamarMaster']);
+            $pesan = \App\Support\PesanWa::buat('psb_terima', [
+                'nama' => $this->nama_lengkap,
+                'penempatan' => $this->ringkasanPenempatan(),
+                'syarat' => $this->ringkasanSyarat(),
+                'catatan' => $this->catatan_admin,
+                'email' => $this->email,
+            ]);
+            $tujuan = ['Wali' => $this->no_hp_wali];
+        } elseif ($this->status === self::DITOLAK) {
+            $pesan = \App\Support\PesanWa::buat('psb_tolak', ['nama' => $this->nama_lengkap, 'alasan' => $this->catatan_admin]);
+            $tujuan = ['Wali' => $this->no_hp_wali, 'Pendaftar' => $this->no_hp];
+        } else {
+            return null;
+        }
+
+        return $pesan ? ['pesan' => $pesan, 'tujuan' => array_filter($tujuan)] : null;
+    }
+
+    /**
      * Pendaftaran (formulir /psb/daftar) sedang DIBUKA? Diatur admin di PSB > Data Masuk Peserta.
      * Disimpan di Pengaturan 'psb_dibuka' ('1' / '0'); bawaan: dibuka.
      */

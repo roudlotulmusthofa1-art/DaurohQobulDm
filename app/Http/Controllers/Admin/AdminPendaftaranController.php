@@ -140,7 +140,7 @@ class AdminPendaftaranController extends Controller
         // 2) Terima + buat akun siswa di tabel users
         $pendaftaran->terima($data['catatan_admin']);
 
-        // 3) Kirim chat WhatsApp (isi pesan diatur di Pengaturan > Pesan)
+        // 3) Kirim chat WhatsApp otomatis lewat Fonnte (isi pesan diatur di Pengaturan > Pesan)
         $terkirim = $this->kirimChatKonfirmasi($pendaftaran, $wa);
         if ($terkirim === null) {
             return redirect()->route('admin.pendaftaran.show', $pendaftaran)->with('success', 'Pendaftar diterima. (Pesan WhatsApp dimatikan di Pengaturan › Pesan.)');
@@ -150,7 +150,7 @@ class AdminPendaftaranController extends Controller
             $terkirim ? 'success' : 'error',
             $terkirim
                 ? 'Pendaftar diterima dan chat WhatsApp terkirim.'
-                : 'Pendaftar diterima, tetapi chat WhatsApp GAGAL terkirim. Klik "Kirim Ulang Chat Konfirmasi" untuk mencoba lagi.'
+                : 'Pendaftar diterima, tetapi chat WhatsApp otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol "Kirim lewat WhatsApp saya" di bawah.'
         );
     }
 
@@ -169,7 +169,7 @@ class AdminPendaftaranController extends Controller
         return back()->with(...match ($terkirim) {
             null => ['error', 'Pesan WhatsApp untuk pendaftar ' . ($pendaftaran->status === PendaftaranSiswa::DITERIMA ? 'diterima' : 'ditolak') . ' sedang dimatikan di Pengaturan › Pesan.'],
             true => ['success', 'Chat konfirmasi berhasil dikirim ulang ke WhatsApp.'],
-            false => ['error', 'Chat konfirmasi GAGAL terkirim. Periksa nomor WhatsApp atau koneksi, lalu coba lagi.'],
+            false => ['error', 'Chat otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol "Kirim lewat WhatsApp saya".'],
         });
     }
 
@@ -179,27 +179,20 @@ class AdminPendaftaranController extends Controller
      */
     private function kirimChatKonfirmasi(PendaftaranSiswa $pendaftaran, WhatsAppService $wa): ?bool
     {
-        if ($pendaftaran->status === PendaftaranSiswa::DITERIMA) {
-            $pesan = PesanWa::buat('psb_terima', [
-                'nama' => $pendaftaran->nama_lengkap,
-                'penempatan' => $pendaftaran->ringkasanPenempatan(),
-                'syarat' => $pendaftaran->ringkasanSyarat(),
-                'catatan' => $pendaftaran->catatan_admin,
-                'email' => $pendaftaran->email,
-            ]);
-
-            return $pesan ? $wa->kirim($pendaftaran->no_hp_wali, $pesan) : null;
-        }
-
-        // Ditolak: ke wali dan ke pendaftar
-        $pesan = PesanWa::buat('psb_tolak', ['nama' => $pendaftaran->nama_lengkap, 'alasan' => $pendaftaran->catatan_admin]);
-        if (! $pesan) {
+        $chat = $pendaftaran->chatKonfirmasi(); // diterima: ke wali; ditolak: ke wali & pendaftar
+        if (! $chat) {
             return null;
         }
-        $keWali = $wa->kirim($pendaftaran->no_hp_wali, $pesan);
-        $kePendaftar = $wa->kirim($pendaftaran->no_hp, $pesan);
 
-        return $keWali || $kePendaftar;
+        $terkirim = false;
+        foreach ($chat['tujuan'] as $nomor) {
+            $terkirim = $wa->kirim($nomor, $chat['pesan']) || $terkirim;
+        }
+        if (! $chat['tujuan']) {
+            $wa->alasan = 'nomor WhatsApp wali/pendaftar kosong';
+        }
+
+        return $terkirim;
     }
 
     /** Ambil isian ceklis + catatan dari form. Kotak yang tidak dicentang tidak dikirim browser, jadi dianggap false. */
@@ -288,10 +281,12 @@ class AdminPendaftaranController extends Controller
 
         $terkirim = $this->kirimChatKonfirmasi($pendaftaran->refresh(), $wa);
 
-        return redirect()->route('admin.pendaftaran.index')->with(...match ($terkirim) {
-            false => ['error', 'Pendaftar ditolak, tetapi chat WhatsApp GAGAL terkirim. Buka detailnya lalu klik "Kirim Ulang Chat Konfirmasi".'],
-            default => ['success', 'Pendaftar ditolak.'],
-        });
+        if ($terkirim === false) {
+            return redirect()->route('admin.pendaftaran.show', $pendaftaran)->with('error',
+                'Pendaftar ditolak, tetapi chat WhatsApp otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol "Kirim lewat WhatsApp saya" di bawah.');
+        }
+
+        return redirect()->route('admin.pendaftaran.index')->with('success', 'Pendaftar ditolak.');
     }
 
     /**
