@@ -25,6 +25,35 @@ class PitaPengumuman extends Model
         'info' => 'Info',
     ];
 
+    /** Jenis tambahan buatan admin (disimpan di Pengaturan database utama, kunci 'pita_jenis_tambahan', JSON daftar nama) */
+    public static function jenisTambahan(): array
+    {
+        $isi = rescue(fn () => Pengaturan::ambilPusat('pita_jenis_tambahan'), null, false);
+        $daftar = json_decode((string) $isi, true);
+
+        return is_array($daftar) ? array_values(array_filter($daftar, 'is_string')) : [];
+    }
+
+    public static function simpanJenisTambahan(array $daftar): void
+    {
+        Pengaturan::simpanPusat('pita_jenis_tambahan', json_encode(array_values(array_unique($daftar)), JSON_UNESCAPED_UNICODE));
+    }
+
+    /** Semua jenis: bawaan + tambahan. kunci => nama (jenis tambahan: kunci = namanya) */
+    public static function semuaJenis(): array
+    {
+        $tambahan = self::jenisTambahan();
+
+        return self::JENIS + array_combine($tambahan, $tambahan);
+    }
+
+    /** Tempat pita tampil */
+    public const TUJUAN = [
+        'landing' => 'Landing Page',
+        'asatid' => 'Dasbor Asatid',
+        'siswa' => 'Dasbor Peserta',
+    ];
+
     /** Kunci warna (kelas Tailwind-nya ada di partials/pita-pengumuman-gaya.blade.php); 'sendiri' = pakai warna_hex */
     public const WARNA = ['hijau', 'emas', 'biru', 'merah', 'ungu', 'gelap', 'sendiri'];
 
@@ -46,7 +75,7 @@ class PitaPengumuman extends Model
     }
 
     protected $fillable = [
-        'jenis', 'judul', 'keterangan', 'mulai_at', 'selesai_at', 'tampil_sejak',
+        'jenis', 'tujuan', 'judul', 'keterangan', 'mulai_at', 'selesai_at', 'tampil_sejak',
         'hitung_mundur', 'tombol_teks', 'tombol_url', 'warna', 'warna_hex', 'urutan', 'is_active',
     ];
 
@@ -59,12 +88,12 @@ class PitaPengumuman extends Model
         'urutan' => 'integer',
     ];
 
-    /** Yang sedang boleh tampil di landing page sekarang */
-    public function scopeTampilSekarang(Builder $q): Builder
+    /** Yang sedang boleh tampil sekarang di tempat tertentu (landing / asatid / siswa) */
+    public function scopeTampilSekarang(Builder $q, string $tujuan = 'landing'): Builder
     {
         $kini = now();
 
-        return $q->where('is_active', true)
+        return $q->where('tujuan', $tujuan)->where('is_active', true)
             ->where('selesai_at', '>', $kini)
             ->where(fn ($w) => $w
                 ->where(fn ($a) => $a->whereNotNull('tampil_sejak')->where('tampil_sejak', '<=', $kini))
@@ -106,7 +135,8 @@ class PitaPengumuman extends Model
             'id' => $this->id,
             'versi' => $this->id . '-' . $this->updated_at?->timestamp, // tombol tutup: muncul lagi bila diubah
             'jenis' => $this->jenis,
-            'label' => self::JENIS[$this->jenis] ?? 'Info',
+            'tujuan' => $this->tujuan ?: 'landing',
+            'label' => self::JENIS[$this->jenis] ?? ($this->jenis ?: 'Info'), // jenis tambahan: namanya sendiri
             'judul' => $this->judul,
             'keterangan' => $this->keterangan,
             'warna' => $this->warna,

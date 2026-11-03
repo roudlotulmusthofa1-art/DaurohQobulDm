@@ -327,6 +327,67 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 </div>
                 @endif
                 @endif
+
+                {{-- ===== Akun login peserta (admin): reset password bila peserta lupa ===== --}}
+                @if ($admin && $p->email)
+                <div class="mt-4 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 p-3.5">
+                    <div class="flex flex-wrap items-center gap-3">
+                        <span class="w-9 h-9 shrink-0 rounded-xl bg-sky-300/15 text-sky-200 flex items-center justify-center">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
+                        </span>
+                        <div class="min-w-0 flex-1" v-pre>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">Akun login peserta</p>
+                            <p class="text-sm font-medium truncate">{{ $p->email }}</p>
+                            <p class="text-[11px] text-white/45">
+                                @if ($p->status === 'diterima') Bisa masuk dasbor siswa. Password tersimpan terenkripsi (tidak bisa dilihat), jadi bila lupa: reset.
+                                @else Belum bisa masuk dasbor siswa — baru bisa setelah dinyatakan DITERIMA.
+                                @endif
+                            </p>
+                        </div>
+                        @if ($p->status === 'diterima')
+                        <form method="POST" action="{{ route('admin.pendaftaran.reset-password', $p) }}">
+                            @csrf
+                            <button type="submit" @click="konfirmasi"
+                                data-konfirmasi="Buat password BARU untuk {{ $p->nama_lengkap }}? Password lama tidak bisa dipakai lagi. Password baru dikirim ke WhatsApp peserta."
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-400 text-[#06283a] text-sm font-bold hover:bg-sky-300 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                                Reset Password
+                            </button>
+                        </form>
+                        @endif
+                    </div>
+
+                    {{-- Password baru: tampil SEKALI setelah reset (tidak disimpan dalam bentuk bisa dibaca) --}}
+                    @if ($baruReset = session('password_baru'))
+                    <div class="mt-3 rounded-2xl bg-amber-300/10 ring-1 ring-amber-300/30 p-3.5" v-pre>
+                        <p class="text-xs font-semibold text-amber-100">Password baru (hanya tampil sekali, segera kirim ke peserta):</p>
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <code class="rounded-xl bg-black/30 px-3 py-1.5 font-mono text-lg font-bold tracking-wider text-white select-all">{{ $baruReset['password'] }}</code>
+                            <button type="button" data-teks="{{ $baruReset['password'] }}"
+                                onclick="navigator.clipboard.writeText(this.dataset.teks).then(() => { this.textContent = 'Tersalin ✓'; })"
+                                class="px-3 py-1.5 rounded-xl bg-white/10 ring-1 ring-white/20 text-xs font-semibold hover:bg-white/20">Salin</button>
+                        </div>
+                        @php
+                        $tujuanReset = array_filter([
+                            'Peserta' => [$p->nama_lengkap, $p->no_hp],
+                            'Wali' => [$p->nama_wali, $p->no_hp_wali],
+                        ], fn ($t) => filled($t[1]));
+                        @endphp
+                        @if ($tujuanReset)
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            @foreach ($tujuanReset as $untuk => [$namaTujuan, $nomor])
+                            <a href="https://wa.me/{{ \App\Services\WhatsAppService::nomorWa($nomor) }}?text={{ rawurlencode($baruReset['pesan']) }}" target="_blank" rel="noopener"
+                                title="{{ $namaTujuan }} · {{ $nomor }}"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#25D366] text-[#073b1d] text-sm font-bold hover:bg-[#3ae07a] transition-colors">
+                                Kirim lewat WhatsApp saya: {{ $untuk }}
+                            </a>
+                            @endforeach
+                        </div>
+                        @endif
+                    </div>
+                    @endif
+                </div>
+                @endif
             </div>
 
             {{-- QR --}}

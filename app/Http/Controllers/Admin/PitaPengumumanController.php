@@ -22,7 +22,9 @@ class PitaPengumumanController extends Controller
     {
         return view('admin.landing-pengumuman', [
             'daftar' => $this->daftar(),
-            'jenis' => PitaPengumuman::JENIS,
+            'jenis' => PitaPengumuman::semuaJenis(),
+            'jenisBawaan' => array_keys(PitaPengumuman::JENIS),
+            'tujuan' => PitaPengumuman::TUJUAN,
             'warna' => PitaPengumuman::WARNA,
             'tampilan' => PitaPengumuman::tampilan(),
             'pilihanPosisi' => PitaPengumuman::POSISI,
@@ -54,7 +56,7 @@ class PitaPengumumanController extends Controller
 
     public function update(Request $request, PitaPengumuman $pita): JsonResponse
     {
-        $pita->update($this->validasi($request));
+        $pita->update($this->validasi($request, $pita));
 
         return $this->balas('Pengumuman diperbarui.');
     }
@@ -73,6 +75,40 @@ class PitaPengumumanController extends Controller
         return $this->balas('Pengumuman dihapus.');
     }
 
+    /** Tambah jenis pengumuman baru (mis. "Ujian", "Libur") */
+    public function tambahJenis(Request $request): JsonResponse
+    {
+        $nama = trim(preg_replace('/\s+/', ' ', (string) $request->input('nama')));
+        $request->merge(['nama' => $nama]);
+        $request->validate(['nama' => ['required', 'string', 'max:20']], [], ['nama' => 'nama jenis']);
+
+        $semua = PitaPengumuman::semuaJenis();
+        $sudahAda = collect($semua)->contains(fn ($n, $k) => mb_strtolower($n) === mb_strtolower($nama) || mb_strtolower($k) === mb_strtolower($nama));
+        if ($sudahAda) {
+            return response()->json(['message' => "Jenis \"{$nama}\" sudah ada."], 422);
+        }
+
+        PitaPengumuman::simpanJenisTambahan([...PitaPengumuman::jenisTambahan(), $nama]);
+
+        return response()->json(['pesan' => "Jenis \"{$nama}\" ditambahkan.", 'jenis' => PitaPengumuman::semuaJenis(), 'nama' => $nama]);
+    }
+
+    /** Hapus jenis tambahan. Pengumuman yang sudah memakainya tetap menampilkan nama jenis itu. */
+    public function hapusJenis(Request $request): JsonResponse
+    {
+        $nama = (string) $request->input('nama');
+        if (array_key_exists($nama, PitaPengumuman::JENIS)) {
+            return response()->json(['message' => 'Jenis bawaan tidak bisa dihapus.'], 422);
+        }
+        $dipakai = PitaPengumuman::where('jenis', $nama)->count();
+        PitaPengumuman::simpanJenisTambahan(array_diff(PitaPengumuman::jenisTambahan(), [$nama]));
+
+        return response()->json([
+            'pesan' => "Jenis \"{$nama}\" dihapus dari pilihan." . ($dipakai ? " ({$dipakai} pengumuman lama tetap memakai nama ini.)" : ''),
+            'jenis' => PitaPengumuman::semuaJenis(),
+        ]);
+    }
+
     /** Simpan urutan baru: ids = [3, 1, 2] */
     public function urutan(Request $request): JsonResponse
     {
@@ -84,10 +120,12 @@ class PitaPengumumanController extends Controller
         return $this->balas('Urutan disimpan.');
     }
 
-    private function validasi(Request $request): array
+    private function validasi(Request $request, ?PitaPengumuman $pita = null): array
     {
         $data = $request->validate([
-            'jenis' => ['required', Rule::in(array_keys(PitaPengumuman::JENIS))],
+            // jenis yang sudah dihapus dari pilihan tetap boleh dipakai pengumuman lamanya
+            'jenis' => ['required', Rule::in([...array_keys(PitaPengumuman::semuaJenis()), ...($pita ? [$pita->jenis] : [])])],
+            'tujuan' => ['required', Rule::in(array_keys(PitaPengumuman::TUJUAN))],
             'judul' => ['required', 'string', 'max:150'],
             'keterangan' => ['nullable', 'string', 'max:255'],
             'mulai_lokal' => ['required', 'date'],
@@ -120,6 +158,7 @@ class PitaPengumumanController extends Controller
 
         return [
             'jenis' => $data['jenis'],
+            'tujuan' => $data['tujuan'],
             'judul' => $data['judul'],
             'keterangan' => $data['keterangan'] ?? null,
             'mulai_at' => $utc($data['mulai_lokal']),

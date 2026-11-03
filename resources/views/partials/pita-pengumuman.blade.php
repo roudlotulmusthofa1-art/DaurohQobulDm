@@ -10,7 +10,7 @@
 --}}
 @php
 $pitaPengumuman = rescue(
-    fn () => \App\Models\PitaPengumuman::tampilSekarang()->get()->map->untukPublik()->all(),
+    fn () => \App\Models\PitaPengumuman::tampilSekarang('landing')->get()->map->untukPublik()->all(),
     [], false
 );
 $pitaTampilan = \App\Models\PitaPengumuman::tampilan();

@@ -28,6 +28,7 @@ class PesanWa
         'nama' => 'Nama lengkap pendaftar',
         'nomor' => 'Nomor pendaftaran',
         'email' => 'Email login',
+        'password' => 'Password baru (hanya untuk pesan reset password)',
         'link_login' => 'Alamat halaman login',
         'alasan' => 'Alasan penolakan dari admin',
         'catatan' => 'Catatan admin (beserta judulnya, hilang bila kosong)',
@@ -54,6 +55,12 @@ class PesanWa
             'kapan' => 'Saat admin menolak pendaftar.',
             'isian' => ['nama', 'alasan', 'pesantren'],
             'bawaan' => "Assalamu'alaikum, mohon maaf pendaftaran santri *{nama}* *DITOLAK*.\n\nAlasan:\n{alasan}",
+        ],
+        'psb_reset_password' => [
+            'grup' => 'psb', 'judul' => 'Reset password peserta', 'penerima' => 'Peserta (nomor WhatsApp peserta)',
+            'kapan' => 'Saat admin menekan "Reset Password" di detail peserta (peserta lupa password).',
+            'isian' => ['nama', 'email', 'password', 'link_login', 'pesantren'],
+            'bawaan' => "Assalamu'alaikum *{nama}*, password akun siswa Anda sudah direset oleh admin.\n\nMasuk di:\n{link_login}\nEmail: *{email}*\nPassword baru: *{password}*\n\nMohon simpan pesan ini dan jangan bagikan ke orang lain.",
         ],
         'asatid_daftar' => [
             'grup' => 'asatid', 'judul' => 'Pendaftaran diterima sistem', 'penerima' => 'Pendaftar asatid',

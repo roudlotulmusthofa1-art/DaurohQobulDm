@@ -30,6 +30,7 @@ Route::prefix('admin')->middleware(['auth', 'peran:admin'])->group(function () {
         Route::post('/{pendaftaran}/terima', [AdminPendaftaranController::class, 'terima'])->name('terima');
         Route::post('/{pendaftaran}/tolak', [AdminPendaftaranController::class, 'tolak'])->name('tolak');
         Route::post('/{pendaftaran}/kirim-ulang-chat', [AdminPendaftaranController::class, 'kirimUlangChat'])->name('kirim-ulang-chat');
+        Route::post('/{pendaftaran}/reset-password', [AdminPendaftaranController::class, 'resetPassword'])->name('reset-password');
         Route::delete('/{pendaftaran}', [AdminPendaftaranController::class, 'destroy'])->name('destroy');
         Route::get('/{pendaftaran}/edit', [AdminPendaftaranController::class, 'edit'])->name('edit');
         Route::put('/{pendaftaran}', [AdminPendaftaranController::class, 'update'])->name('update');

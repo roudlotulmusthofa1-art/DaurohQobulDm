@@ -35,9 +35,18 @@ class LoginController extends Controller
         }
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
-            $request->session()->regenerate();
-
             $user = Auth::user();
+
+            // Akun siswa baru bisa dipakai setelah admin menyatakan DITERIMA
+            if ($user->role === 'siswa' && ! $user->pendaftaran?->bolehMasukDasbor()) {
+                $pesan = $user->pendaftaran?->alasanBelumBolehMasuk() ?? 'Akun siswa ini belum terhubung ke data pendaftaran.';
+                Auth::logout();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors(['email' => $pesan])->onlyInput('email');
+            }
+
+            $request->session()->regenerate();
 
             // Admin boleh kembali ke halaman yang tadi dituju; role lain langsung ke halamannya sendiri
             return $user->role === 'admin'

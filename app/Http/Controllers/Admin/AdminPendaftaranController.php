@@ -174,6 +174,40 @@ class AdminPendaftaranController extends Controller
     }
 
     /**
+     * Peserta lupa password: buat password baru, coba kirim otomatis ke WhatsApp peserta (Fonnte),
+     * lalu tampilkan SEKALI di detail peserta (beserta tombol kirim manual lewat WhatsApp admin).
+     */
+    public function resetPassword(PendaftaranSiswa $pendaftaran, WhatsAppService $wa)
+    {
+        if (! $pendaftaran->email) {
+            return back()->with('error', 'Pendaftar ini belum punya email login.');
+        }
+        if (! $pendaftaran->bolehMasukDasbor()) {
+            return back()->with('error', 'Reset password hanya untuk peserta yang sudah DITERIMA (yang lain belum bisa masuk dasbor siswa).');
+        }
+
+        $baru = $pendaftaran->resetPassword();
+        $pesan = PesanWa::buat('psb_reset_password', [
+            'nama' => $pendaftaran->nama_lengkap,
+            'email' => $pendaftaran->email,
+            'password' => $baru,
+        ]) ?? PesanWa::isi(PesanWa::teks('psb_reset_password'), [
+            'nama' => $pendaftaran->nama_lengkap, 'email' => $pendaftaran->email, 'password' => $baru,
+        ]);
+
+        $terkirim = PesanWa::aktif('psb_reset_password') ? $wa->kirim($pendaftaran->no_hp, $pesan) : null;
+
+        return back()
+            // Password tampil sekali saja (flash), tidak disimpan dalam bentuk bisa dibaca
+            ->with('password_baru', ['password' => $baru, 'pesan' => $pesan])
+            ->with(...match ($terkirim) {
+                true => ['success', 'Password baru dibuat dan sudah dikirim otomatis ke WhatsApp peserta.'],
+                false => ['error', 'Password baru dibuat, tetapi chat otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol WhatsApp di bawah.'],
+                null => ['success', 'Password baru dibuat. Kirim ke peserta lewat tombol WhatsApp di bawah.'],
+            });
+    }
+
+    /**
      * Kirim chat konfirmasi sesuai status (diterima / ditolak).
      * @return bool|null  true = terkirim, false = gagal, null = pesan dimatikan di Pengaturan > Pesan
      */

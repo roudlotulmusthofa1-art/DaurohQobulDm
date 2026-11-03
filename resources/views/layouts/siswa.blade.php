@@ -140,6 +140,8 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
             <span class="pt-0.5">{{ session('error') }}</span>
         </div>
         @endif
+        {{-- Pita Pengumuman khusus dasbor ini (Admin > Landing Page > Pita Pengumuman, tujuan: Dasbor Peserta) --}}
+        @include('partials.pita-dasbor', ['tujuan' => 'siswa'])
         @yield('content')
     </main>
 

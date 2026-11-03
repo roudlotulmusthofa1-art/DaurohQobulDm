@@ -25,6 +25,16 @@ class PeranMiddleware
         $user = $request->user();
 
         if ($user?->role === $peran) {
+            // Siswa yang belum DITERIMA tidak boleh membuka dasbor siswa (kecuali Super Admin "Masuk sebagai")
+            if ($peran === 'siswa' && ! \App\Support\MasukSebagai::aktif() && ! $user->pendaftaran?->bolehMasukDasbor()) {
+                $pesan = $user->pendaftaran?->alasanBelumBolehMasuk() ?? 'Akun siswa ini belum terhubung ke data pendaftaran.';
+                auth()->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return redirect()->route('login')->withErrors(['email' => $pesan]);
+            }
+
             return $next($request);
         }
 

@@ -13,6 +13,8 @@ Route::prefix('admin/landing/pita-pengumuman')->name('admin.landing-pengumuman.'
         Route::post('/', 'store')->name('store');
         Route::post('urutan', 'urutan')->name('urutan');
         Route::post('tampilan', 'tampilan')->name('tampilan'); // posisi & ukuran pita
+        Route::post('jenis', 'tambahJenis')->name('jenis.tambah');      // jenis pengumuman buatan admin
+        Route::post('jenis/hapus', 'hapusJenis')->name('jenis.hapus');
         Route::put('{pita}', 'update')->name('update');
         Route::patch('{pita}/toggle', 'toggle')->name('toggle');
         Route::delete('{pita}', 'destroy')->name('destroy');

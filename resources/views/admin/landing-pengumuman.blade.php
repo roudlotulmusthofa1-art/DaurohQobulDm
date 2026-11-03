@@ -22,7 +22,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     <div class="flex flex-wrap items-end gap-3">
         <div class="flex-1 min-w-[220px]">
             <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Pita Pengumuman</h1>
-            <p class="mt-1 text-sm text-slate-500">Kabar singkat di paling atas landing page, misalnya pembukaan pendaftaran atau masa dauroh. Tampil dan hilang sendiri sesuai jadwal.</p>
+            <p class="mt-1 text-sm text-slate-500">Kabar singkat yang tampil dan hilang sendiri sesuai jadwal. Pilih tempatnya: landing page, dasbor asatid, atau dasbor peserta.</p>
         </div>
         <a href="{{ route('landing') }}" target="_blank" rel="noopener"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">
@@ -49,7 +49,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
                 <h2 class="font-bold text-slate-800">Tampilan pita</h2>
-                <p class="text-sm text-slate-500">Letak dan ukuran pita di landing page. Berlaku untuk semua pengumuman.</p>
+                <p class="text-sm text-slate-500">Letak dan ukuran pita di <b>landing page</b> (semua pengumuman landing). Di dasbor asatid &amp; peserta, pita selalu tampil di atas isi halaman.</p>
             </div>
             <button type="button" @click="simpanTampilan" :disabled="sibuk || !tampilanBerubah"
                 class="px-4 py-2 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] disabled:opacity-40" v-text="tampilanBerubah ? 'Simpan tampilan' : 'Tersimpan'"></button>
@@ -90,23 +90,32 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
             <h2 class="font-bold text-slate-800">Daftar pengumuman</h2>
             <p class="text-xs text-slate-400">Urutan atas = tampil lebih dulu</p>
         </div>
+        {{-- Saring per tempat tampil --}}
+        <div class="px-4 sm:px-6 pt-3 pb-1 flex gap-2 overflow-x-auto">
+            <button v-for="t in tabTujuan" :key="t.kunci" type="button" @click="saring = t.kunci"
+                class="shrink-0 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-sm font-semibold ring-1 transition-colors"
+                :class="saring === t.kunci ? 'bg-[#0f6b5c] text-white ring-[#0f6b5c]' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'">
+                <span v-text="t.nama"></span>
+                <span class="rounded-full px-1.5 text-[11px]" :class="saring === t.kunci ? 'bg-white/20' : 'bg-slate-100 text-slate-500'" v-text="t.jumlah"></span>
+            </button>
+        </div>
 
-        <div v-if="!daftar.length" class="px-6 py-14 text-center">
+        <div v-if="!daftarTampil.length" class="px-6 py-14 text-center">
             <span class="mx-auto w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"/></svg>
             </span>
             <p class="mt-3 font-semibold text-slate-700">Belum ada pengumuman</p>
-            <p class="mt-1 text-sm text-slate-500">Klik "Tambah Pengumuman" untuk membuat kabar pertama di landing page.</p>
+            <p class="mt-1 text-sm text-slate-500" v-text="saring === 'semua' ? 'Klik &quot;Tambah Pengumuman&quot; untuk membuat kabar pertama.' : 'Belum ada pengumuman untuk ' + tujuan[saring] + '.'"></p>
         </div>
 
         <ul v-else class="divide-y divide-slate-100">
-            <li v-for="(p, i) in daftar" :key="p.id" class="px-4 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center gap-3" :class="p.is_active ? '' : 'bg-slate-50/70'">
+            <li v-for="(p, i) in daftarTampil" :key="p.id" class="px-4 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center gap-3" :class="p.is_active ? '' : 'bg-slate-50/70'">
                 {{-- Naik / turun --}}
                 <div class="hidden lg:flex flex-col gap-1 shrink-0">
                     <button type="button" @click="geser(i, -1)" :disabled="i === 0 || sibuk" title="Naikkan" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
                     </button>
-                    <button type="button" @click="geser(i, 1)" :disabled="i === daftar.length - 1 || sibuk" title="Turunkan" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
+                    <button type="button" @click="geser(i, 1)" :disabled="i === daftarTampil.length - 1 || sibuk" title="Turunkan" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                     </button>
                 </div>
@@ -118,6 +127,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     </span>
                     <div class="min-w-0">
                         <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[11px] font-semibold rounded-full px-2 py-0.5" :class="warnaTujuan[p.tujuan]" v-text="tujuan[p.tujuan]"></span>
                             <span class="text-[11px] font-bold uppercase tracking-wide text-slate-400" v-text="p.label"></span>
                             <span class="text-[11px] font-semibold rounded-full px-2 py-0.5 ring-1" :class="infoStatus(p).kelas" v-text="infoStatus(p).teks"></span>
                         </div>
@@ -139,7 +149,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 <div class="flex items-center gap-2 shrink-0 lg:pl-3">
                     <div class="flex lg:hidden gap-1 mr-auto">
                         <button type="button" @click="geser(i, -1)" :disabled="i === 0 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">Naik</button>
-                        <button type="button" @click="geser(i, 1)" :disabled="i === daftar.length - 1 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">Turun</button>
+                        <button type="button" @click="geser(i, 1)" :disabled="i === daftarTampil.length - 1 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">Turun</button>
                     </div>
                     <button type="button" @click="hidupMati(p)" :disabled="sibuk" :title="p.is_active ? 'Matikan' : 'Hidupkan'"
                         class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50" :class="p.is_active ? 'bg-emerald-500' : 'bg-slate-300'">
@@ -164,20 +174,68 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
 
             {{-- Pratinjau langsung --}}
             <div class="px-5 sm:px-6 pt-5">
-                <p class="text-xs font-semibold text-slate-500 mb-2">Pratinjau di landing page <span class="font-normal text-slate-400" v-text="'(' + pilihanPosisi[tampilan.posisi] + ', ' + (tampilan.ukuran === 'ringkas' ? 'ringkas' : 'penuh') + ')'"></span></p>
-                @include('admin._pita-pratinjau')
+                <p class="text-xs font-semibold text-slate-500 mb-2">
+                    <span v-text="'Pratinjau di ' + tujuan[form.tujuan]"></span>
+                    <span v-if="form.tujuan === 'landing'" class="font-normal text-slate-400" v-text="' (' + pilihanPosisi[tampilan.posisi] + ', ' + (tampilan.ukuran === 'ringkas' ? 'ringkas' : 'penuh') + ')'"></span>
+                </p>
+                <div v-if="form.tujuan === 'landing'">@include('admin._pita-pratinjau')</div>
+                {{-- Pratinjau di dasbor asatid / peserta: pita di atas isi halaman, di bawah header --}}
+                <div v-else class="rounded-2xl overflow-hidden ring-1 ring-slate-200 bg-[#eef4f1]">
+                    <div class="h-10 bg-white border-b border-slate-100 flex items-center px-4 gap-3">
+                        <span class="w-6 h-6 rounded-lg bg-emerald-100"></span><span class="w-24 h-2.5 rounded bg-slate-200"></span>
+                        <span class="ml-auto w-6 h-6 rounded-full bg-slate-100"></span><span class="w-6 h-6 rounded-full bg-slate-200"></span>
+                    </div>
+                    <div class="p-3 space-y-2.5">
+                        <div class="rounded-2xl overflow-hidden shadow ring-1 ring-black/5">
+                            @include('partials.pita-pengumuman-tampilan')
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <span class="h-12 rounded-xl bg-white"></span><span class="h-12 rounded-xl bg-white"></span>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <form @submit.prevent="simpan" class="px-5 sm:px-6 py-5 space-y-5">
                 <div v-if="galat" class="p-3 rounded-2xl ring-1 ring-rose-200 bg-rose-50 text-rose-800 text-sm" v-text="galat"></div>
 
-                {{-- Jenis --}}
+                {{-- Tempat tampil --}}
+                <div>
+                    <span class="{{ $label }}">Tampil di <span class="text-rose-500">*</span></span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button v-for="(nama, kunci) in tujuan" :key="kunci" type="button" @click="pilihTujuan(kunci)"
+                            class="rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 transition-colors"
+                            :class="form.tujuan === kunci ? 'bg-emerald-50 ring-emerald-500 text-emerald-800' : 'ring-slate-200 text-slate-600 hover:bg-slate-50'" v-text="nama"></button>
+                    </div>
+                </div>
+
+                {{-- Jenis: 3 bawaan + jenis tambahan buatan admin --}}
                 <div>
                     <span class="{{ $label }}">Jenis pengumuman</span>
-                    <div class="grid grid-cols-3 gap-2">
-                        <button v-for="(nama, kunci) in jenis" :key="kunci" type="button" @click="pilihJenis(kunci)"
-                            class="rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 transition-colors"
-                            :class="form.jenis === kunci ? 'bg-emerald-50 ring-emerald-500 text-emerald-800' : 'ring-slate-200 text-slate-600 hover:bg-slate-50'" v-text="nama"></button>
+                    <div class="flex flex-wrap gap-2">
+                        <span v-for="(nama, kunci) in jenis" :key="kunci" class="relative inline-flex">
+                            <button type="button" @click="pilihJenis(kunci)"
+                                class="rounded-xl px-4 py-2.5 text-sm font-semibold ring-1 transition-colors"
+                                :class="[form.jenis === kunci ? 'bg-emerald-50 ring-emerald-500 text-emerald-800' : 'ring-slate-200 text-slate-600 hover:bg-slate-50', jenisBawaan.includes(kunci) ? '' : 'pr-8']" v-text="nama"></button>
+                            <button v-if="!jenisBawaan.includes(kunci)" type="button" @click="hapusJenis(kunci)" :title="'Hapus jenis ' + nama"
+                                class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </span>
+                        {{-- Tambah jenis baru --}}
+                        <button v-if="!jenisBaru.buka" type="button" @click="bukaJenisBaru"
+                            class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-emerald-700 ring-1 ring-dashed ring-emerald-300 border border-dashed border-emerald-300 hover:bg-emerald-50">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
+                            Jenis baru
+                        </button>
+                        <span v-else class="inline-flex items-center gap-1.5">
+                            <input v-model="jenisBaru.nama" ref="isianJenisBaru" type="text" maxlength="20" placeholder="cth. Ujian, Libur"
+                                @keydown.enter.prevent="tambahJenis" @keydown.esc.prevent="jenisBaru.buka = false"
+                                class="w-40 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                            <button type="button" @click="tambahJenis" :disabled="sibuk || !jenisBaru.nama.trim()"
+                                class="rounded-xl bg-[#0f6b5c] px-3 py-2 text-sm font-bold text-white disabled:opacity-50">Tambah</button>
+                            <button type="button" @click="jenisBaru.buka = false" class="rounded-xl px-2.5 py-2 text-sm text-slate-500 hover:bg-slate-100">Batal</button>
+                        </span>
                     </div>
                 </div>
 
@@ -276,7 +334,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     document.addEventListener('DOMContentLoaded', () => {
         const URL_DASAR = @json(route('admin.landing-pengumuman.index'));
         const TOKEN = @json(csrf_token());
-        const JENIS = @json($jenis);
+        let JENIS = @json($jenis); // bawaan + tambahan (bisa bertambah dari form)
         // Dari isian datetime-local (WIB) -> ISO dengan zona +07:00
         const keIso = (v) => (v ? v + ':00+07:00' : '');
         const fmt = new Intl.DateTimeFormat('id-ID', { timeZone: 'Asia/Jakarta', day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
@@ -287,6 +345,11 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 return {
                     daftar: @json($daftar),
                     jenis: JENIS,
+                    jenisBawaan: @json($jenisBawaan),
+                    jenisBaru: { buka: false, nama: '' },
+                    tujuan: @json($tujuan), // landing | asatid | siswa
+                    warnaTujuan: { landing: 'bg-emerald-50 text-emerald-700', asatid: 'bg-sky-50 text-sky-700', siswa: 'bg-violet-50 text-violet-700' },
+                    saring: 'semua',
                     warna: @json($warna),
                     form: null,
                     galat: '',
@@ -303,6 +366,13 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 };
             },
             computed: {
+                daftarTampil() {
+                    return this.saring === 'semua' ? this.daftar : this.daftar.filter((p) => p.tujuan === this.saring);
+                },
+                tabTujuan() {
+                    return [{ kunci: 'semua', nama: 'Semua', jumlah: this.daftar.length }].concat(
+                        Object.entries(this.tujuan).map(([kunci, nama]) => ({ kunci, nama, jumlah: this.daftar.filter((p) => p.tujuan === kunci).length })));
+                },
                 warnaBawaan() {
                     return this.warna.filter((w) => w !== 'sendiri');
                 },
@@ -311,7 +381,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 },
                 // Contoh di kartu "Tampilan pita": pengumuman pertama, atau contoh buatan
                 pitaContoh() {
-                    const p = this.daftar[0];
+                    const p = this.daftar.find((x) => x.tujuan === 'landing');
                     if (p) return p;
                     const nanti = new Date(Date.now() + 3 * 86400000).toISOString();
                     return { jenis: 'pendaftaran', label: 'Pendaftaran', judul: 'Pendaftaran Dauroh Gelombang 1 dibuka', keterangan: '', warna: 'hijau',
@@ -322,7 +392,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     const f = this.form || {};
                     return {
                         ...f,
-                        label: JENIS[f.jenis] || 'Info',
+                        label: this.jenis[f.jenis] || f.jenis || 'Info',
                         mulai: keIso(f.mulai_lokal),
                         selesai: keIso(f.selesai_lokal),
                         rentang: this.rentangLokal(f.mulai_lokal, f.selesai_lokal),
@@ -388,11 +458,13 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 formBaru() {
                     const besok = new Date(Date.now() + 86400000);
                     const tgl = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Jakarta' }).format(besok); // YYYY-MM-DD
+                    const tujuanAwal = this.saring !== 'semua' ? this.saring : 'landing';
+                    const diLanding = tujuanAwal === 'landing';
                     return {
-                        id: null, jenis: 'pendaftaran', judul: '', keterangan: '',
+                        id: null, tujuan: tujuanAwal, jenis: diLanding ? 'pendaftaran' : 'info', judul: '', keterangan: '',
                         mulai_lokal: tgl + 'T08:00', selesai_lokal: '', tampil_sejak_lokal: '',
-                        hitung_mundur: true, tombol_teks: 'Daftar sekarang', tombol_url: '/psb/daftar',
-                        warna: 'hijau', warna_hex: '#0f766e', is_active: true,
+                        hitung_mundur: true, tombol_teks: diLanding ? 'Daftar sekarang' : '', tombol_url: diLanding ? '/psb/daftar' : '',
+                        warna: diLanding ? 'hijau' : 'biru', warna_hex: '#0f766e', is_active: true,
                     };
                 },
                 bukaTambah() {
@@ -402,7 +474,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 bukaUbah(p) {
                     this.galat = '';
                     this.form = {
-                        id: p.id, jenis: p.jenis, judul: p.judul, keterangan: p.keterangan || '',
+                        id: p.id, tujuan: p.tujuan || 'landing', jenis: p.jenis, judul: p.judul, keterangan: p.keterangan || '',
                         mulai_lokal: p.mulai_lokal, selesai_lokal: p.selesai_lokal, tampil_sejak_lokal: p.tampil_sejak_lokal || '',
                         hitung_mundur: p.hitung_mundur, tombol_teks: p.tombol_teks || '', tombol_url: p.tombol_url || '',
                         warna: p.warna, warna_hex: p.warna_hex || '#0f766e', is_active: p.is_active,
@@ -411,12 +483,60 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 tutupForm() {
                     this.form = null;
                 },
+                // Ganti tempat tampil: tombol "Daftar sekarang" hanya cocok untuk landing page
+                pilihTujuan(kunci) {
+                    this.form.tujuan = kunci;
+                    if (!this.form.id && kunci !== 'landing' && this.form.tombol_url === '/psb/daftar') {
+                        this.form.tombol_teks = '';
+                        this.form.tombol_url = '';
+                    }
+                },
                 // Ganti jenis: isi tombol & warna yang cocok bila masih bawaan
                 pilihJenis(kunci) {
                     this.form.jenis = kunci;
-                    if (!this.form.id) {
+                    if (!this.form.id && this.form.tujuan === 'landing') {
                         const bawaan = { pendaftaran: ['Daftar sekarang', '/psb/daftar', 'hijau'], dauroh: ['', '', 'emas'], info: ['', '', 'biru'] }[kunci];
-                        [this.form.tombol_teks, this.form.tombol_url, this.form.warna] = bawaan;
+                        if (bawaan) [this.form.tombol_teks, this.form.tombol_url, this.form.warna] = bawaan; // jenis tambahan: biarkan
+                    }
+                },
+                bukaJenisBaru() {
+                    this.jenisBaru = { buka: true, nama: '' };
+                    this.$nextTick(() => this.$refs.isianJenisBaru?.focus());
+                },
+                // Kirim jenis baru ke server (pakai fetch sendiri: jawabannya daftar jenis, bukan daftar pengumuman)
+                async kirimJenis(alamat, nama) {
+                    this.sibuk = true;
+                    try {
+                        const res = await fetch(URL_DASAR + alamat, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': TOKEN },
+                            body: JSON.stringify({ nama }),
+                        });
+                        const data = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error(data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Gagal menyimpan.'));
+                        this.jenis = data.jenis;
+                        this.tampilkanToast(data.pesan);
+                        return data;
+                    } catch (e) {
+                        this.galat = e.message;
+                        return null;
+                    } finally {
+                        this.sibuk = false;
+                    }
+                },
+                async tambahJenis() {
+                    const nama = this.jenisBaru.nama.trim();
+                    if (!nama) return;
+                    const data = await this.kirimJenis('/jenis', nama);
+                    if (data) {
+                        this.jenisBaru = { buka: false, nama: '' };
+                        this.pilihJenis(data.nama); // langsung terpilih
+                    }
+                },
+                async hapusJenis(nama) {
+                    if (!confirm('Hapus jenis "' + nama + '" dari pilihan?')) return;
+                    if (await this.kirimJenis('/jenis/hapus', nama) && this.form.jenis === nama) {
+                        this.form.jenis = 'info';
                     }
                 },
                 isiTombolDaftar() {
@@ -445,9 +565,12 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 },
                 geser(i, arah) {
                     const j = i + arah;
-                    if (j < 0 || j >= this.daftar.length) return;
+                    const tampil = this.daftarTampil;
+                    if (j < 0 || j >= tampil.length) return;
                     const ids = this.daftar.map((p) => p.id);
-                    [ids[i], ids[j]] = [ids[j], ids[i]];
+                    const a = ids.indexOf(tampil[i].id);
+                    const b = ids.indexOf(tampil[j].id);
+                    [ids[a], ids[b]] = [ids[b], ids[a]];
                     this.kirim('POST', URL_DASAR + '/urutan', { ids });
                 },
             },

@@ -96,6 +96,43 @@ class PendaftaranSiswa extends Model
         return $user;
     }
 
+    /** Akun siswa hanya boleh dipakai (login / dasbor siswa) setelah admin menyatakan DITERIMA */
+    public function bolehMasukDasbor(): bool
+    {
+        return $this->status === self::DITERIMA;
+    }
+
+    /** Pesan untuk akun siswa yang belum boleh masuk (dipakai halaman login) */
+    public function alasanBelumBolehMasuk(): string
+    {
+        return $this->status === self::DITOLAK
+            ? 'Mohon maaf, pendaftaran Anda tidak diterima, jadi akun siswa tidak bisa dipakai.'
+            : 'Pendaftaran Anda masih menunggu verifikasi admin. Akun siswa bisa dipakai setelah Anda dinyatakan DITERIMA (info dikirim lewat WhatsApp).';
+    }
+
+    /**
+     * Reset password login (peserta lupa password). Password asli tidak bisa dilihat karena tersimpan
+     * terenkripsi, jadi dibuatkan password baru, disimpan, lalu dikembalikan SEKALI untuk dikirim ke peserta.
+     */
+    public function resetPassword(): string
+    {
+        $huruf = 'abcdefghjkmnpqrstuvwxyz23456789'; // tanpa huruf/angka yang mirip (l, 1, o, 0, i)
+        $baru = '';
+        for ($i = 0; $i < 8; $i++) {
+            $baru .= $huruf[random_int(0, strlen($huruf) - 1)];
+        }
+
+        $hash = \Illuminate\Support\Facades\Hash::make($baru);
+        DB::transaction(function () use ($hash) {
+            $this->forceFill(['password' => $hash])->save();
+            if ($this->user_id || $this->status === self::DITERIMA) {
+                $this->buatAkun(); // salin password baru ke akun login (users)
+            }
+        });
+
+        return $baru;
+    }
+
     public function terima(?string $catatan = null): void
     {
         DB::transaction(function () use ($catatan) {
