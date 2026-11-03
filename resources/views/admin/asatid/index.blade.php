@@ -115,7 +115,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
             <div class="flex items-center hover:bg-[#f5f9f7] transition-colors">
             <a href="{{ route('admin.asatid.show', $a) }}" class="flex-1 min-w-0 flex items-center gap-4 pl-4 sm:pl-5 pr-2 py-3.5">
                 @if ($a->foto_url)
-                <img src="{{ $a->foto_url }}" alt="" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
+                <img data-perbesar="{{ $a->nama_lengkap }}" src="{{ $a->foto_url }}" alt="" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
                 @else
                 <span class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-300 to-lime-200 text-[#0b332c] font-extrabold flex items-center justify-center shrink-0">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</span>
                 @endif

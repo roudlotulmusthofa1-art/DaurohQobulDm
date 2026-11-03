@@ -105,7 +105,7 @@ $statKartu = [
                 <a href="{{ route('admin.dashboard', ['pesan' => $c->peserta->id]) }}#pesan-peserta"
                     class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 transition-colors {{ $aktif ? 'bg-emerald-50 border-l-4 border-l-emerald-500' : 'hover:bg-[#f8fbfa]' }}">
                     @if ($c->peserta->foto_url)
-                    <img src="{{ $c->peserta->foto_url }}" alt="" class="w-10 h-10 shrink-0 rounded-xl object-cover">
+                    <img data-perbesar="{{ $c->peserta->nama_lengkap }}" src="{{ $c->peserta->foto_url }}" alt="" class="w-10 h-10 shrink-0 rounded-xl object-cover">
                     @else
                     <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold flex items-center justify-center">{{ $inisial($c->peserta->nama_lengkap) }}</span>
                     @endif
@@ -240,7 +240,7 @@ $statKartu = [
                 @forelse ($pendaftarBaru as $p)
                 <a href="{{ route('admin.pendaftaran.show', $p) }}" class="flex items-center gap-3 py-2.5 hover:bg-[#f8fbfa] rounded-xl px-1">
                     @if ($p->foto_url)
-                    <img src="{{ $p->foto_url }}" alt="" class="w-9 h-9 shrink-0 rounded-xl object-cover">
+                    <img data-perbesar="{{ $p->nama_lengkap }}" src="{{ $p->foto_url }}" alt="" class="w-9 h-9 shrink-0 rounded-xl object-cover">
                     @else
                     <span class="w-9 h-9 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ $inisial($p->nama_lengkap) }}</span>
                     @endif

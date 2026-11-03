@@ -22,7 +22,7 @@ $waktu = fn ($t) => $t->timezone('Asia/Jakarta')->locale('id')->translatedFormat
     {{-- Peserta --}}
     <section class="{{ $kartu }} p-5 flex items-center gap-4">
         @if ($peserta->foto_url)
-        <img src="{{ $peserta->foto_url }}" alt="" class="w-14 h-14 rounded-2xl object-cover">
+        <img data-perbesar="{{ $peserta->nama_lengkap }}" src="{{ $peserta->foto_url }}" alt="" class="w-14 h-14 rounded-2xl object-cover">
         @else
         <span class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white text-xl font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($peserta->nama_lengkap, 0, 1)) }}</span>
         @endif

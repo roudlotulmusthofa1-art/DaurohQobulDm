@@ -46,7 +46,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     @foreach ($peserta as $p)
     <a href="{{ route('asatid.peserta.show', $p) }}" class="{{ $kartu }} p-4 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-20px_rgba(11,51,44,0.35)] transition-all">
         @if ($p->foto_url)
-        <img src="{{ $p->foto_url }}" alt="" class="w-16 h-20 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
+        <img data-perbesar="{{ $p->nama_lengkap }}" src="{{ $p->foto_url }}" alt="" class="w-16 h-20 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
         @else
         <span class="w-16 h-20 rounded-2xl bg-gradient-to-br from-rose-200 to-pink-100 text-rose-700 text-2xl font-extrabold flex items-center justify-center shrink-0">{{ mb_strtoupper(mb_substr($p->nama_lengkap, 0, 1)) }}</span>
         @endif

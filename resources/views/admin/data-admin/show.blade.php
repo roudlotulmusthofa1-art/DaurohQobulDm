@@ -62,7 +62,7 @@ $lebar = ['Alamat Lengkap'];
         <div class="relative p-5 sm:p-8 flex flex-col md:flex-row gap-6">
             <div class="shrink-0 self-center md:self-start">
                 @if ($a->foto_url)
-                <img src="{{ $a->foto_url }}" alt="Foto {{ $a->nama_lengkap }}" class="w-36 h-44 sm:w-40 sm:h-48 object-cover rounded-3xl ring-4 ring-white/10 shadow-2xl shadow-black/30">
+                <img data-perbesar src="{{ $a->foto_url }}" alt="Foto {{ $a->nama_lengkap }}" class="w-36 h-44 sm:w-40 sm:h-48 object-cover rounded-3xl ring-4 ring-white/10 shadow-2xl shadow-black/30">
                 @else
                 <div class="w-36 h-44 sm:w-40 sm:h-48 rounded-3xl ring-4 ring-white/10 bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-5xl font-extrabold text-[#0b332c]">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</div>
                 @endif

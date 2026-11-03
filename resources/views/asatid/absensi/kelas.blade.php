@@ -166,7 +166,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         </a>
                     </div>
                     <div class="relative px-5 pb-5 -mt-12 text-center">
-                        <img v-if="sekarang.foto" :src="sekarang.foto" alt="" class="mx-auto w-24 h-24 rounded-3xl object-cover ring-4 ring-white shadow-lg bg-white">
+                        <img :data-perbesar="sekarang.nama" v-if="sekarang.foto" :src="sekarang.foto" alt="" class="mx-auto w-24 h-24 rounded-3xl object-cover ring-4 ring-white shadow-lg bg-white">
                         <span v-else class="mx-auto w-24 h-24 rounded-3xl ring-4 ring-white shadow-lg bg-gradient-to-br from-emerald-400 to-teal-600 text-white text-3xl font-extrabold flex items-center justify-center" v-text="inisial(sekarang.nama)"></span>
                         <h3 class="mt-3 text-xl font-extrabold text-slate-800" v-text="sekarang.nama"></h3>
                         <p v-if="sekarang.arab" dir="rtl" class="mt-0.5 text-lg text-slate-600" v-text="sekarang.arab"></p>

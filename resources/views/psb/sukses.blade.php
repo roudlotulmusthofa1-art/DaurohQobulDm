@@ -91,7 +91,7 @@
                             <p class="text-sm font-bold text-slate-800">Info lewat WhatsApp</p>
                             <p class="text-xs text-slate-500 leading-relaxed">
                                 Jika dinyatakan <strong class="text-slate-700">diterima</strong>, kami akan mengirim chat WhatsApp ke
-                                <strong class="text-emerald-700" dir="ltr">{{ $pendaftar->no_hp_wali }}</strong> berisi email dan kode akses akun siswa.
+                                <strong class="text-emerald-700" dir="ltr">Nomer yang sudah terdaftar</strong> , yang berisi email dan kode akses akun anda.
                             </p>
                         </div>
                     </li>

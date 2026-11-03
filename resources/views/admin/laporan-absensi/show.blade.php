@@ -97,7 +97,7 @@ $info = $kegiatan
                 @forelse ($detail as $d)
                 <div class="px-5 py-3.5 flex items-center gap-3">
                     @if ($d->siswa?->foto_url)
-                        <img src="{{ $d->siswa->foto_url }}" alt="" class="w-11 h-11 rounded-2xl object-cover ring-1 ring-slate-200">
+                        <img data-perbesar="{{ $d->siswa->nama_lengkap }}" src="{{ $d->siswa->foto_url }}" alt="" class="w-11 h-11 rounded-2xl object-cover ring-1 ring-slate-200">
                     @else
                         <span class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($d->siswa?->nama_lengkap ?? '?', 0, 1)) }}</span>
                     @endif

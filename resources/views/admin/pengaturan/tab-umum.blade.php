@@ -9,7 +9,7 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
 <div class="mt-5 rounded-2xl ring-1 ring-slate-200 p-5 flex flex-col sm:flex-row gap-5">
     <div class="w-36 h-36 shrink-0 rounded-2xl ring-1 ring-slate-200 p-3 flex items-center justify-center"
         style="background-image: repeating-conic-gradient(#f1f5f9 0% 25%, #fff 0% 50%); background-size: 16px 16px;">
-        <img :src="pratinjauLogo || logoSekarang" alt="Logo pesantren" class="max-w-full max-h-full object-contain">
+        <img data-perbesar :src="pratinjauLogo || logoSekarang" alt="Logo pesantren" class="max-w-full max-h-full object-contain">
     </div>
     <div class="min-w-0">
         <p class="text-sm font-bold text-slate-800">Logo Pesantren</p>

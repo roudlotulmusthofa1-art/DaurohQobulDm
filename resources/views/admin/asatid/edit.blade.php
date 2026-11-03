@@ -43,7 +43,7 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
         {{-- ===== Judul + pas foto ===== --}}
         <div class="{{ $kartu }} p-5 sm:p-6 flex flex-col sm:flex-row gap-5 items-start">
             <div class="shrink-0">
-                <img v-if="pratinjauFoto" :src="pratinjauFoto" alt="Pas foto" class="w-28 h-36 object-cover rounded-2xl ring-1 ring-slate-200">
+                <img data-perbesar="Pas foto {{ $a->nama_lengkap }}" v-if="pratinjauFoto" :src="pratinjauFoto" alt="Pas foto" class="w-28 h-36 object-cover rounded-2xl ring-1 ring-slate-200">
                 <div v-else class="w-28 h-36 rounded-2xl bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-4xl font-extrabold text-[#0b332c]">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</div>
                 <label class="mt-2 block text-center text-xs font-semibold text-emerald-700 hover:underline cursor-pointer">
                     Ganti foto

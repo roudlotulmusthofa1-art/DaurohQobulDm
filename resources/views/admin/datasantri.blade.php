@@ -227,7 +227,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <div v-if="grup.anggota.length" class="grid gap-2" :class="grup.denah ? '' : 'sm:grid-cols-2 lg:grid-cols-3'">
                             <a v-for="santri in grup.anggota" :key="santri.id" :href="santri.detail_url"
                                 class="flex items-center gap-3 rounded-xl p-2.5 ring-1 ring-gray-100 bg-gray-50/60 transition hover:bg-white hover:ring-emerald-200 hover:shadow-sm">
-                                <img v-if="santri.foto" :src="santri.foto" alt="" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                                <img :data-perbesar="santri.nama" v-if="santri.foto" :src="santri.foto" alt="" class="h-10 w-10 shrink-0 rounded-full object-cover">
                                 <span v-else class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700" v-text="inisial(santri.nama)"></span>
                                 <span class="min-w-0 flex-1">
                                     <span class="block truncate text-sm font-semibold text-gray-800" v-text="santri.nama"></span>
@@ -395,7 +395,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-2.5">
                                 {{-- Pas foto santri. Kalau belum ada / gagal dimuat -> ikon orang --}}
-                                                                <img v-if="santri.foto" :src="santri.foto" :alt="'Foto ' + santri.nama" v-on:error="santri.foto = null" loading="lazy"
+                                                                <img data-perbesar v-if="santri.foto" :src="santri.foto" :alt="'Foto ' + santri.nama" v-on:error="santri.foto = null" loading="lazy"
                                                                     class="w-10 h-10 rounded-full object-cover shrink-0 ring-2 ring-ribath-green-light/60">
                                                                 <div v-else class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
                                                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-400" viewBox="0 0 24 24" fill="none"

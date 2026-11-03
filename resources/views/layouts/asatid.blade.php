@@ -204,6 +204,7 @@ $jumlahNotif = count($notif ?? []);
             }).mount('#header-akun');
         });
     </script>
+    @include('partials.pratinjau-foto') {{-- klik foto bertanda data-perbesar -> tampil besar --}}
     @include('partials.vue-metode')
     @stack('scripts')
 </body>

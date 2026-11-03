@@ -481,6 +481,7 @@
     </script>
 
     {{-- Metode Vue bersama untuk skrip halaman (window.metodeHalaman), lalu skrip tiap halaman --}}
+    @include('partials.pratinjau-foto') {{-- klik foto bertanda data-perbesar -> tampil besar --}}
     @include('partials.vue-metode')
     @stack('scripts')
 

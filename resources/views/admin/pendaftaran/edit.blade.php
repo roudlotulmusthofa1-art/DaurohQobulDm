@@ -140,7 +140,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
         <div class="relative p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-5">
             @if ($p->foto_url)
-            <img src="{{ $p->foto_url }}" alt="Foto {{ $p->nama_lengkap }}"
+            <img data-perbesar src="{{ $p->foto_url }}" alt="Foto {{ $p->nama_lengkap }}"
                 class="w-20 h-20 shrink-0 object-cover rounded-2xl ring-4 ring-white/10 shadow-xl shadow-black/30">
             @else
             <div class="w-20 h-20 shrink-0 rounded-2xl ring-4 ring-white/10 bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-3xl font-extrabold text-[#0b332c] shadow-xl shadow-black/30">

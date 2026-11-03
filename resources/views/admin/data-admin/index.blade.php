@@ -114,7 +114,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran admin Dauroh Qobul Darul 
             @forelse ($admin as $a)
             <a href="{{ route('admin.data-admin.show', $a) }}" class="flex items-center gap-4 px-4 sm:px-5 py-3.5 hover:bg-[#f5f9f7] transition-colors">
                 @if ($a->foto_url)
-                <img src="{{ $a->foto_url }}" alt="" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
+                <img data-perbesar="{{ $a->nama_lengkap }}" src="{{ $a->foto_url }}" alt="" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
                 @else
                 <span class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-300 to-lime-200 text-[#0b332c] font-extrabold flex items-center justify-center shrink-0">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</span>
                 @endif

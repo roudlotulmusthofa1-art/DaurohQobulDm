@@ -203,7 +203,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                 @forelse ($perhatian as $p)
                 <a href="{{ route('admin.pendaftaran.show', $p['id']) }}" class="flex items-center gap-3 p-2.5 -mx-1 rounded-2xl hover:bg-[#f5f9f7] transition-colors">
                     @if ($p['foto'])
-                        <img src="{{ $p['foto'] }}" alt="" class="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200">
+                        <img data-perbesar="{{ $p['nama'] ?? '' }}" src="{{ $p['foto'] }}" alt="" class="w-10 h-10 rounded-xl object-cover ring-1 ring-slate-200">
                     @else
                         <span class="w-10 h-10 shrink-0 rounded-xl bg-rose-50 text-rose-600 font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($p['nama'], 0, 1)) }}</span>
                     @endif
@@ -285,7 +285,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                         <td class="px-5 py-3">
                             <a href="{{ route('admin.pendaftaran.show', $p['id']) }}" class="flex items-center gap-3 min-w-[12rem]">
                                 @if ($p['foto'])
-                                    <img src="{{ $p['foto'] }}" alt="" class="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200">
+                                    <img data-perbesar="{{ $p['nama'] ?? '' }}" src="{{ $p['foto'] }}" alt="" class="w-9 h-9 rounded-xl object-cover ring-1 ring-slate-200">
                                 @else
                                     <span class="w-9 h-9 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($p['nama'], 0, 1)) }}</span>
                                 @endif

@@ -34,7 +34,7 @@ $warnaAbsen = ['hadir' => 'bg-emerald-500', 'terlambat' => 'bg-amber-500', 'saki
         <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
         <div class="relative flex flex-col sm:flex-row items-center sm:items-end gap-5 text-center sm:text-left">
             @if ($s->foto_url)
-                <img src="{{ $s->foto_url }}" alt="Foto {{ $s->nama_lengkap }}" class="w-28 h-36 rounded-3xl object-cover ring-4 ring-white/15 shadow-2xl">
+                <img data-perbesar src="{{ $s->foto_url }}" alt="Foto {{ $s->nama_lengkap }}" class="w-28 h-36 rounded-3xl object-cover ring-4 ring-white/15 shadow-2xl">
             @else
                 <span class="w-28 h-36 rounded-3xl bg-gradient-to-br from-emerald-400 to-teal-600 ring-4 ring-white/15 text-4xl font-extrabold flex items-center justify-center">{{ mb_strtoupper(mb_substr($s->nama_lengkap, 0, 1)) }}</span>
             @endif

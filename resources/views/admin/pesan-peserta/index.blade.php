@@ -53,7 +53,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         @continue(! $p)
         <a href="{{ route('admin.pesan-peserta.show', $p) }}" class="flex items-center gap-4 px-5 py-4 border-b border-slate-100 last:border-0 hover:bg-[#f8fbfa] transition-colors {{ $r->belum ? 'bg-emerald-50/40' : '' }}">
             @if ($p->foto_url)
-            <img src="{{ $p->foto_url }}" alt="" class="w-11 h-11 shrink-0 rounded-2xl object-cover">
+            <img data-perbesar="{{ $p->nama_lengkap }}" src="{{ $p->foto_url }}" alt="" class="w-11 h-11 shrink-0 rounded-2xl object-cover">
             @else
             <span class="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($p->nama_lengkap, 0, 1)) }}</span>
             @endif

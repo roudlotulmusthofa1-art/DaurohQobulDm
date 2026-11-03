@@ -243,7 +243,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
             <div>
                 <span class="text-sm font-semibold text-slate-700">Bukti <span class="font-normal text-slate-400">(foto nota / PDF, opsional, maks 4 MB)</span></span>
                 <div class="mt-1 flex items-center gap-3 p-3 rounded-2xl border border-dashed border-slate-300">
-                    <img v-if="pratinjauBukti" :src="pratinjauBukti" alt="" class="w-14 h-14 rounded-xl object-cover ring-1 ring-slate-200">
+                    <img data-perbesar="Bukti transaksi" v-if="pratinjauBukti" :src="pratinjauBukti" alt="" class="w-14 h-14 rounded-xl object-cover ring-1 ring-slate-200">
                     <span v-else class="w-14 h-14 rounded-xl bg-slate-50 ring-1 ring-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400" v-text="namaBukti ? 'PDF' : '—'"></span>
                     <div class="flex-1 min-w-0 text-sm">
                         <p class="truncate text-slate-700" v-text="namaBukti || (form.bukti && !form.hapus_bukti ? 'Bukti tersimpan' : 'Belum ada file')"></p>

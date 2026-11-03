@@ -108,7 +108,7 @@ $info = [
 
                 <!-- Hasil pindai -->
                 <div v-if="hasil" :key="hasil.kunci" class="anim-muncul absolute inset-x-3 bottom-3 rounded-2xl bg-white p-3 flex items-center gap-3 shadow-2xl">
-                    <img v-if="hasil.siswa.foto" :src="hasil.siswa.foto" alt="" class="w-14 h-14 rounded-2xl object-cover">
+                    <img :data-perbesar="hasil.siswa.nama" v-if="hasil.siswa.foto" :src="hasil.siswa.foto" alt="" class="w-14 h-14 rounded-2xl object-cover">
                     <span v-else class="w-14 h-14 shrink-0 rounded-2xl bg-slate-100 text-slate-500 text-xl font-extrabold flex items-center justify-center" v-text="inisial(hasil.siswa.nama)"></span>
                     <div class="flex-1 min-w-0">
                         <p class="font-extrabold text-slate-800 truncate" v-text="hasil.siswa.nama"></p>
@@ -135,7 +135,7 @@ $info = [
             <h3 class="font-bold text-slate-800">Baru tercatat</h3>
             <div v-if="terakhir.length" class="mt-3 space-y-2">
                 <div v-for="p in terakhir" :key="p.id" class="flex items-center gap-3 p-2.5 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100">
-                    <img v-if="p.foto" :src="p.foto" alt="" class="w-10 h-10 rounded-xl object-cover">
+                    <img :data-perbesar="p.nama" v-if="p.foto" :src="p.foto" alt="" class="w-10 h-10 rounded-xl object-cover">
                     <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>

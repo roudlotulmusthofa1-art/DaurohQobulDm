@@ -35,7 +35,7 @@ $grup = $asatid ? [
         <div class="pointer-events-none absolute -top-20 -right-16 w-64 h-64 rounded-full bg-emerald-400/25 blur-3xl"></div>
         <div class="relative">
             @if ($asatid?->foto_url)
-            <img src="{{ $asatid->foto_url }}" alt="Foto {{ $nama }}" class="mx-auto w-32 h-40 rounded-3xl object-cover ring-4 ring-white/10 shadow-2xl shadow-black/30">
+            <img data-perbesar src="{{ $asatid->foto_url }}" alt="Foto {{ $nama }}" class="mx-auto w-32 h-40 rounded-3xl object-cover ring-4 ring-white/10 shadow-2xl shadow-black/30">
             @else
             <span class="mx-auto w-32 h-40 rounded-3xl bg-gradient-to-br from-emerald-300 to-lime-200 text-[#0b332c] text-5xl font-extrabold flex items-center justify-center">{{ mb_strtoupper(mb_substr($nama, 0, 1)) }}</span>
             @endif
