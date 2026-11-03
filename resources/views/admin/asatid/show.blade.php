@@ -40,7 +40,7 @@ $lebar = ['Alamat Lengkap'];
 @endphp
 
 <div id="halaman-detail-asatid">
-<div class="space-y-6 pb-4">
+<div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20">
     <a href="{{ route('admin.asatid.index') }}"
         class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors">
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
@@ -77,7 +77,7 @@ $lebar = ['Alamat Lengkap'];
             <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Detail Asatid</p>
+                        
                         <h1 class="mt-1 text-2xl sm:text-[32px] leading-tight font-extrabold tracking-tight break-words">{{ $a->nama_lengkap }}</h1>
                         <p class="mt-1 text-2xl text-emerald-100/90" dir="rtl">{{ $a->nama_lengkap_arab }}</p>
                         <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
@@ -98,6 +98,11 @@ $lebar = ['Alamat Lengkap'];
                         <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.5-9.75-6.5"/></svg>
                         {{ $a->email }}
                     </span>
+                    <a href="{{ route('admin.asatid.edit', $a) }}"
+                        class="inline-flex items-center gap-2 rounded-2xl bg-white text-[#0b332c] px-3.5 py-2 text-sm font-bold hover:bg-emerald-100 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                        Edit Data
+                    </a>
                 </div>
 
                 @if ($a->catatan_admin)

@@ -8,7 +8,9 @@ use App\Services\WhatsAppService;
 use App\Support\PesanWa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 /**
  * Admin > Manajemen Data > Data Asatid
@@ -43,6 +45,91 @@ class AdminDataAsatidController extends Controller
     public function show(PendaftaranAsatid $asatid)
     {
         return view('admin.asatid.show', ['a' => $asatid]);
+    }
+
+    /** Form ubah data asatid (oleh admin) */
+    public function edit(PendaftaranAsatid $asatid)
+    {
+        return view('admin.asatid.edit', ['a' => $asatid]);
+    }
+
+    /**
+     * Simpan perubahan data asatid.
+     * Bila akun login sudah dibuat (diterima), nama/email/password akun ikut diperbarui
+     * dan otomatis disalin ke semua sesi (App\Support\AkunBersama).
+     */
+    public function update(Request $request, PendaftaranAsatid $asatid)
+    {
+        $polaArab = '/\A[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\s،؛؟.\x{0027}-]+\z/u';
+        // Alamat: huruf Arab + angka & tanda baca alamat (nomor rumah, RT/RW)
+        $polaAlamat = '/\A[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\s،؛؟.\x{0027}0-9\/,()-]+\z/u';
+        $userId = $asatid->user_id;
+
+        $data = $request->validate([
+            'nama_lengkap'      => ['required', 'string', 'max:150'],
+            'nama_lengkap_arab' => ['required', 'string', 'max:150', "regex:$polaArab"],
+            'tempat_lahir'      => ['required', 'string', 'max:100', "regex:$polaArab"],
+            'tanggal_lahir'     => ['required', 'date', 'before:today'],
+            'no_hp'             => ['required', 'string', 'regex:/^\+62[0-9]+$/', 'max:20'],
+            'alamat'            => ['required', 'string', 'max:500', "regex:$polaAlamat"],
+            'lama_belajar'      => ['required', 'string', 'max:100'],
+            'tahun_selesai'     => ['required', 'digits:4'],
+            'email'             => [
+                'required', 'email', 'max:255',
+                Rule::unique('pusat.pendaftaran_asatid', 'email')->ignore($asatid->id),
+                'unique:pusat.pendaftaran_admin,email',
+                'unique:pendaftaran_siswas,email',
+                Rule::unique('users', 'email')->ignore($userId),
+                Rule::unique('pusat.users', 'email')->ignore($userId),
+            ],
+            'password_baru'     => ['nullable', 'string', 'min:8', 'max:100'],
+            'berkas_foto'       => ['nullable', 'image', 'max:5120'],
+            'catatan_admin'     => ['nullable', 'string', 'max:1000'],
+        ], [
+            '*.regex'             => 'Kolom ini harus ditulis menggunakan huruf Arab.',
+            'no_hp.regex'         => 'Format nomor WhatsApp tidak valid (contoh: +6281234567890).',
+            'email.unique'        => 'Email ini sudah dipakai akun lain.',
+            'password_baru.min'   => 'Password baru minimal 8 karakter.',
+            'berkas_foto.max'     => 'Pas foto maksimal 5 MB.',
+            'tanggal_lahir.before' => 'Tanggal lahir harus sebelum hari ini.',
+        ], [
+            'nama_lengkap' => 'Nama lengkap', 'nama_lengkap_arab' => 'Nama Arab', 'tempat_lahir' => 'Tempat lahir',
+            'tanggal_lahir' => 'Tanggal lahir', 'no_hp' => 'Nomor WhatsApp', 'alamat' => 'Alamat',
+            'lama_belajar' => 'Lama belajar', 'tahun_selesai' => 'Tahun selesai', 'berkas_foto' => 'Pas foto',
+        ]);
+
+        $fotoLama = null;
+        if ($request->hasFile('berkas_foto')) {
+            $fotoLama = $asatid->berkas_foto;
+            $data['berkas_foto'] = $request->file('berkas_foto')->store("asatid/{$asatid->nomor_pendaftaran}", 'bersama');
+        } else {
+            unset($data['berkas_foto']);
+        }
+
+        $passwordBaru = $data['password_baru'] ?? null;
+        unset($data['password_baru']);
+        if ($passwordBaru) {
+            $data['password'] = Hash::make($passwordBaru);
+        }
+
+        DB::connection('pusat')->transaction(function () use ($asatid, $data) {
+            $asatid->update($data);
+
+            // Akun login ikut diperbarui (disimpan lewat model -> disalin ke semua sesi)
+            if ($user = $asatid->user) {
+                $user->forceFill(array_filter([
+                    'name'     => $asatid->nama_lengkap,
+                    'email'    => $asatid->email,
+                    'password' => $data['password'] ?? null, // sudah ter-hash
+                ]))->save();
+            }
+        });
+
+        if ($fotoLama) {
+            Storage::disk('bersama')->delete($fotoLama);
+        }
+
+        return redirect()->route('admin.asatid.show', $asatid)->with('success', 'Data ' . $asatid->nama_lengkap . ' berhasil diperbarui.');
     }
 
     public function terima(Request $request, PendaftaranAsatid $asatid, WhatsAppService $wa)

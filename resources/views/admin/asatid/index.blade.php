@@ -105,7 +105,8 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
 
         <div class="divide-y divide-slate-100">
             @forelse ($asatid as $a)
-            <a href="{{ route('admin.asatid.show', $a) }}" class="flex items-center gap-4 px-4 sm:px-5 py-3.5 hover:bg-[#f5f9f7] transition-colors">
+            <div class="flex items-center hover:bg-[#f5f9f7] transition-colors">
+            <a href="{{ route('admin.asatid.show', $a) }}" class="flex-1 min-w-0 flex items-center gap-4 pl-4 sm:pl-5 pr-2 py-3.5">
                 @if ($a->foto_url)
                 <img src="{{ $a->foto_url }}" alt="" class="w-12 h-12 rounded-2xl object-cover ring-1 ring-slate-200 shrink-0">
                 @else
@@ -123,8 +124,13 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
                     {{ $a->created_at->locale('id')->diffForHumans() }}
                 </div>
                 <span class="shrink-0 text-[11px] font-semibold px-2.5 py-1 rounded-full ring-1 {{ $warnaStatus[$a->status] ?? 'bg-slate-50 text-slate-600 ring-slate-200' }}">{{ $a->label_status }}</span>
-                <svg class="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
             </a>
+            {{-- Tombol edit (di luar link baris supaya tidak bertumpuk) --}}
+            <a href="{{ route('admin.asatid.edit', $a) }}" title="Edit data {{ $a->nama_lengkap }}"
+                class="shrink-0 mr-3 sm:mr-4 w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+            </a>
+            </div>
             @empty
             <div class="px-5 py-14 text-center">
                 <span class="mx-auto w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">

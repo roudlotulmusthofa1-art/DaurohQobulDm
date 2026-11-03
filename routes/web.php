@@ -30,7 +30,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::post('asatid/link-baru', [AdminDataAsatidController::class, 'linkBaru'])->name('asatid.link-baru');
     Route::post('asatid/{asatid}/terima', [AdminDataAsatidController::class, 'terima'])->name('asatid.terima');
     Route::post('asatid/{asatid}/tolak', [AdminDataAsatidController::class, 'tolak'])->name('asatid.tolak');
-    Route::resource('asatid', AdminDataAsatidController::class)->only(['index', 'show', 'destroy']);
+    Route::resource('asatid', AdminDataAsatidController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     // Data Admin: sama seperti Data Asatid, akun yang diterima ber-role admin
     Route::post('data-admin/link-baru', [AdminDataAdminController::class, 'linkBaru'])->name('data-admin.link-baru');
     Route::post('data-admin/{dataAdmin}/terima', [AdminDataAdminController::class, 'terima'])->name('data-admin.terima');
