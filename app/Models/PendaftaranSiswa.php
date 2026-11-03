@@ -140,10 +140,10 @@ class PendaftaranSiswa extends Model
                 'catatan' => $this->catatan_admin,
                 'email' => $this->email,
             ]);
-            $tujuan = ['Wali' => $this->no_hp_wali];
+            $tujuan = ['Peserta' => $this->no_hp]; // chat konfirmasi dikirim ke nomor peserta
         } elseif ($this->status === self::DITOLAK) {
             $pesan = \App\Support\PesanWa::buat('psb_tolak', ['nama' => $this->nama_lengkap, 'alasan' => $this->catatan_admin]);
-            $tujuan = ['Wali' => $this->no_hp_wali, 'Pendaftar' => $this->no_hp];
+            $tujuan = ['Peserta' => $this->no_hp];
         } else {
             return null;
         }

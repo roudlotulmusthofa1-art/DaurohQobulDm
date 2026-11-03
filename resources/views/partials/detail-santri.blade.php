@@ -275,7 +275,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @if ($admin && $p->status === 'menunggu')
                 <div class="mt-5 flex flex-wrap gap-2.5">
                     <button type="submit" form="form-syarat" formaction="{{ route('admin.pendaftaran.terima', $p) }}"
-                        @click="konfirmasi" data-konfirmasi="Terima pendaftar ini? Persyaratan dan catatan di bawah ikut terkirim ke wali lewat WhatsApp."
+                        @click="konfirmasi" data-konfirmasi="Terima pendaftar ini? Persyaratan dan catatan di bawah ikut terkirim ke WhatsApp peserta."
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-400 text-[#0b332c] text-sm font-bold hover:bg-emerald-300 shadow-lg shadow-emerald-500/20 transition-colors">
                         {!! $svg('check', 'w-4 h-4') !!} Terima &amp; Kirim Chat
                     </button>
@@ -291,7 +291,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <form method="POST" action="{{ route('admin.pendaftaran.kirim-ulang-chat', $p) }}" class="mt-5 flex flex-wrap items-center gap-3">
                     @csrf
                     <button type="submit" @click="konfirmasi"
-                        data-konfirmasi="Kirim ulang chat konfirmasi {{ $p->status === 'diterima' ? 'PENERIMAAN' : 'PENOLAKAN' }} ke WhatsApp {{ $p->status === 'diterima' ? 'wali' : 'wali & pendaftar' }}?"
+                        data-konfirmasi="Kirim ulang chat konfirmasi {{ $p->status === 'diterima' ? 'PENERIMAAN' : 'PENOLAKAN' }} ke WhatsApp peserta ({{ $p->no_hp }})?"
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/10 ring-1 ring-white/25 text-white text-sm font-semibold hover:bg-emerald-400 hover:text-[#0b332c] hover:ring-emerald-400 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                         Kirim Ulang Chat Konfirmasi
@@ -304,6 +304,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @php
                 $chatKonfirmasi = $p->chatKonfirmasi();
                 $tujuanManual = array_filter([
+                    'Peserta' => [$p->nama_lengkap, $p->no_hp],
                     'Wali' => [$p->nama_wali, $p->no_hp_wali],
                     'Muarrif' => [$p->nama_muarrif, $p->no_hp_muarrif],
                 ], fn ($t) => filled($t[1]));

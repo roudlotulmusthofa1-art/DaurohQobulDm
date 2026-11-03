@@ -118,7 +118,7 @@
                     <textarea id="catatan_admin" name="catatan_admin" rows="3" dir="auto"
                         placeholder="Contoh: uang pendaftaran masih kurang, mohon dilunasi sebelum berangkat"
                         class="w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-emerald-400 focus:ring-2 focus:ring-emerald-500/20 transition">{{ old('catatan_admin', $p->catatan_admin) }}</textarea>
-                    <p class="text-xs text-slate-400 mt-1.5">Catatan ini ikut terkirim ke wali lewat WhatsApp saat siswa
+                    <p class="text-xs text-slate-400 mt-1.5">Catatan ini ikut terkirim ke WhatsApp peserta saat siswa
                         diterima atau ditolak.</p>
                     @error('catatan_admin')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>

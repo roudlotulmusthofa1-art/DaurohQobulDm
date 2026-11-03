@@ -66,7 +66,7 @@ class PendaftaranController extends Controller
 
         // Isi pesan diatur di Pengaturan > Pesan
         if ($pesan = \App\Support\PesanWa::buat('psb_daftar', ['nama' => $pendaftar->nama_lengkap, 'nomor' => $pendaftar->nomor_pendaftaran])) {
-            $wa->kirim($pendaftar->no_hp_wali, $pesan);
+            $wa->kirim($pendaftar->no_hp, $pesan); // ke nomor WhatsApp peserta
         }
         session(['psb_sukses' => $pendaftar->nomor_pendaftaran]);
         return response()->json([

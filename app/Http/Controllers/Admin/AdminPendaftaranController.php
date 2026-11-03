@@ -149,7 +149,7 @@ class AdminPendaftaranController extends Controller
         return redirect()->route('admin.pendaftaran.show', $pendaftaran)->with(
             $terkirim ? 'success' : 'error',
             $terkirim
-                ? 'Pendaftar diterima dan chat WhatsApp terkirim.'
+                ? 'Pendaftar diterima dan chat WhatsApp terkirim ke nomor peserta.'
                 : 'Pendaftar diterima, tetapi chat WhatsApp otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol "Kirim lewat WhatsApp saya" di bawah.'
         );
     }
@@ -168,7 +168,7 @@ class AdminPendaftaranController extends Controller
 
         return back()->with(...match ($terkirim) {
             null => ['error', 'Pesan WhatsApp untuk pendaftar ' . ($pendaftaran->status === PendaftaranSiswa::DITERIMA ? 'diterima' : 'ditolak') . ' sedang dimatikan di Pengaturan › Pesan.'],
-            true => ['success', 'Chat konfirmasi berhasil dikirim ulang ke WhatsApp.'],
+            true => ['success', 'Chat konfirmasi berhasil dikirim ulang ke WhatsApp peserta.'],
             false => ['error', 'Chat otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol "Kirim lewat WhatsApp saya".'],
         });
     }
@@ -179,7 +179,7 @@ class AdminPendaftaranController extends Controller
      */
     private function kirimChatKonfirmasi(PendaftaranSiswa $pendaftaran, WhatsAppService $wa): ?bool
     {
-        $chat = $pendaftaran->chatKonfirmasi(); // diterima: ke wali; ditolak: ke wali & pendaftar
+        $chat = $pendaftaran->chatKonfirmasi(); // diterima & ditolak: ke nomor WhatsApp peserta
         if (! $chat) {
             return null;
         }
@@ -189,7 +189,7 @@ class AdminPendaftaranController extends Controller
             $terkirim = $wa->kirim($nomor, $chat['pesan']) || $terkirim;
         }
         if (! $chat['tujuan']) {
-            $wa->alasan = 'nomor WhatsApp wali/pendaftar kosong';
+            $wa->alasan = 'nomor WhatsApp peserta kosong';
         }
 
         return $terkirim;

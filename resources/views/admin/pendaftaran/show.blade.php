@@ -19,7 +19,7 @@ $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none
     <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
         {!! $svg('back', 'w-4 h-4') !!}
     </span>
-    Kembali
+    رجوع
 </a>
 </div>
 <div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20 mt-3" id="psb-detail">
@@ -50,7 +50,7 @@ $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none
                 <span class="w-11 h-11 rounded-2xl bg-rose-50 text-rose-600 ring-1 ring-rose-100 flex items-center justify-center">{!! $svg('x') !!}</span>
                 <div>
                     <h3 class="font-bold text-slate-800">Tolak pendaftar</h3>
-                    <p class="text-xs text-slate-400">Alasan akan dikirim ke wali lewat WhatsApp</p>
+                    <p class="text-xs text-slate-400">Alasan akan dikirim ke WhatsApp peserta</p>
                 </div>
             </div>
             <textarea name="catatan_admin" v-model="alasan" rows="4" required

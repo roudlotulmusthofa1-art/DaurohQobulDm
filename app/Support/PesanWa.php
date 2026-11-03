@@ -38,19 +38,19 @@ class PesanWa
 
     public const TEMPLATE = [
         'psb_daftar' => [
-            'grup' => 'psb', 'judul' => 'Pendaftaran diterima sistem', 'penerima' => 'Wali santri',
+            'grup' => 'psb', 'judul' => 'Pendaftaran diterima sistem', 'penerima' => 'Peserta (nomor WhatsApp peserta)',
             'kapan' => 'Setelah calon santri mengirim formulir PSB.',
             'isian' => ['nama', 'nomor', 'pesantren'],
             'bawaan' => "Assalamu'alaikum, pendaftaran santri *{nama}* berhasil kami terima.\nNomor pendaftaran: *{nomor}*\nData sedang diverifikasi admin. Kami akan menghubungi kembali setelah ada keputusan.",
         ],
         'psb_terima' => [
-            'grup' => 'psb', 'judul' => 'Santri diterima', 'penerima' => 'Wali santri',
+            'grup' => 'psb', 'judul' => 'Santri diterima', 'penerima' => 'Peserta (nomor WhatsApp peserta)',
             'kapan' => 'Saat admin menekan tombol Terima di Data Masuk Peserta.',
             'isian' => ['nama', 'penempatan', 'syarat', 'catatan', 'link_login', 'email', 'pesantren'],
             'bawaan' => "Assalamu'alaikum, alhamdulillah santri *{nama}* dinyatakan *DITERIMA*.\n\n{penempatan}\n\n*Status persyaratan:*\n{syarat}\n\n{catatan}\n\nSilakan masuk ke akun siswa:\n{link_login}\nEmail: *{email}*\nPassword: sesuai yang Anda isi saat mendaftar.",
         ],
         'psb_tolak' => [
-            'grup' => 'psb', 'judul' => 'Santri ditolak', 'penerima' => 'Wali & calon santri',
+            'grup' => 'psb', 'judul' => 'Santri ditolak', 'penerima' => 'Peserta (nomor WhatsApp peserta)',
             'kapan' => 'Saat admin menolak pendaftar.',
             'isian' => ['nama', 'alasan', 'pesantren'],
             'bawaan' => "Assalamu'alaikum, mohon maaf pendaftaran santri *{nama}* *DITOLAK*.\n\nAlasan:\n{alasan}",

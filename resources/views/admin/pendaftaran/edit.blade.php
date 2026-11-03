@@ -15,7 +15,7 @@ $bagian = [
 ['tempat_lahir', 'Tempat Lahir', 'text'],
 ['tanggal_lahir', 'Tanggal Lahir', 'date'],
 ['status_pernikahan', 'Status Pernikahan', 'select', ['options' => $p::STATUS_PERNIKAHAN]],
-['no_hp', 'No. WhatsApp', 'text', ['hint' => 'Contoh: +6281234567890']],
+['no_hp', 'No. WhatsApp', 'text', ['hint' => 'Contoh: +6281234567890 · nomor ini dipakai untuk chat diterima/ditolak']],
 ],
 'Alamat' => [
 ['provinsi', 'Provinsi', 'text'],
@@ -28,7 +28,7 @@ $bagian = [
 ['nama_wali', 'Nama Wali', 'text'],
 ['pekerjaan_wali', 'Pekerjaan Wali', 'text'],
 ['hubungan_wali', 'Hubungan dengan Wali', 'text'],
-['no_hp_wali', 'No. WhatsApp Wali', 'text', ['hint' => 'Nomor ini dipakai untuk chat penerimaan']],
+['no_hp_wali', 'No. WhatsApp Wali', 'text'],
 ['nama_muarrif', 'Nama Muarrif', 'text'],
 ['no_hp_muarrif', 'No. WhatsApp Muarrif', 'text'],
 ['nama_butuh', 'Kontak Darurat (Nama)', 'text'],
