@@ -420,7 +420,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                                 <div>
                                     <span class="block text-gray-700">@{{ santri.nama }}</span>
                                     <span v-if="santri.nama_arab" class="block text-sm text-gray-500" dir="rtl" lang="ar">@{{ santri.nama_arab }}</span>
-                                    <span class="block text-xs text-gray-400">@{{ santri.nomor }}</span>
+                                    
                                 </div>
                             </div>
                         </td>

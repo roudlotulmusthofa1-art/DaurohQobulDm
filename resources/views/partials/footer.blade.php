@@ -33,7 +33,7 @@
             <div>
                 <p class="text-white font-bold mb-4">Menu Cepat</p>
                 <ul class="space-y-3 text-sm">
-                    <li><a href="#" class="hover:text-teal-400 transition-colors">Pendaftaran Santri</a></li>
+                    <li><a href="/psb/daftar" class="hover:text-teal-400 transition-colors">Pendaftaran Santri</a></li>
                     <li><a href="#" class="hover:text-teal-400 transition-colors">Berita & Artikel</a></li>
                     <li><a href="#" class="hover:text-teal-400 transition-colors">Galeri Foto</a></li>
                 </ul>

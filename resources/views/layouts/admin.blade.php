@@ -254,6 +254,7 @@
                     </div>
 
                     {{-- ===== Notifikasi (lonceng): pendaftar yang menunggu verifikasi ===== --}}
+                    @php $lonceng = \App\Support\StatusNotifikasi::terapkan($notifItems ?? []); @endphp
                     <div class="relative">
                         <button type="button" @click.stop="bukaTutup('notif')" aria-haspopup="true"
                             :aria-expanded="menuBuka === 'notif' ? 'true' : 'false'" title="Notifikasi"
@@ -263,42 +264,17 @@
                                 <path stroke-linecap="round" stroke-linejoin="round"
                                     d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
                             </svg>
-                            @if ($jumlahNotif > 0)
-                                <span class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-[18px] text-center ring-2 ring-white">{{ $jumlahNotif > 9 ? '9+' : $jumlahNotif }}</span>
-                            @endif
+                            <span v-if="notifTotal > 0" class="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-[18px] text-center ring-2 ring-white" v-text="notifLencana"></span>
                         </button>
 
                         <div v-show="menuBuka === 'notif'" @click.stop style="display: none"
                             class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
                                 <p class="text-sm font-bold text-slate-800">Notifikasi</p>
-                                @if ($jumlahNotif > 0)
-                                    <span class="text-[11px] font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-2 py-0.5">{{ $jumlahNotif }} perlu dicek</span>
-                                @endif
+                                <span v-if="notifTotal > 0" class="text-[11px] font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-2 py-0.5" v-text="notifTotal + ' belum dibaca'"></span>
                             </div>
 
-                            <div class="max-h-[60vh] overflow-y-auto" v-pre>
-                            @forelse ($notifItems as $n)
-                                <a href="{{ $n['url'] ?? '#' }}"
-                                    class="flex items-start gap-3 px-4 py-3 hover:bg-[#f5f9f7] transition-colors border-b border-slate-50 last:border-0">
-                                    <span class="w-9 h-9 shrink-0 rounded-xl ring-1 flex items-center justify-center {{ $n['warna'] }}">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $n['ikon'] }}"/></svg>
-                                    </span>
-                                    <span class="min-w-0">
-                                        {{-- teks sudah di-escape di App\Support\NotifikasiAdmin --}}
-                                        <span class="block text-[13px] text-slate-700 leading-snug [&_b]:font-semibold [&_b]:text-slate-900">{!! $n['teks'] !!}</span>
-                                        <span class="block text-[11px] text-slate-400 mt-0.5">{{ collect([$n['keterangan'], $n['waktu']])->filter()->implode(' · ') }}</span>
-                                    </span>
-                                </a>
-                            @empty
-                                <div class="px-4 py-8 text-center">
-                                    <span class="mx-auto w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                                    </span>
-                                    <p class="mt-2 text-sm text-slate-500">Tidak ada notifikasi baru</p>
-                                </div>
-                            @endforelse
-                            </div>
+                            @include('partials.lonceng-notifikasi')
 
                             <a href="{{ route('admin.pengaturan.index') }}"
                                 class="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-emerald-700 bg-[#f5f9f7] hover:bg-emerald-50 transition-colors">
@@ -401,12 +377,14 @@
     </div>
 
     {{-- ===== Aplikasi Vue layout admin (window.Vue dari resources/js/app.js) ===== --}}
+    @include('partials.lonceng-notifikasi-skrip')
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const { createApp } = window.Vue;
 
-            // 1) Menu lonceng & profil di header
+            // 1) Menu lonceng & profil di header (isi lonceng: partials/lonceng-notifikasi-skrip)
             createApp({
+                mixins: [window.mixinNotifikasi],
                 data() {
                     return { menuBuka: null }; // null | 'notif' | 'profil'
                 },

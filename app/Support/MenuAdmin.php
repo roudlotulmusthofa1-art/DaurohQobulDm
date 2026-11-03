@@ -81,6 +81,7 @@ class MenuAdmin
                 'label' => 'LANDING PAGE',
                 'icon'  => 'globe',
                 'submenu' => [
+                    ['route' => 'admin.landing-pengumuman.index', 'active' => 'admin.landing-pengumuman.*', 'label' => 'Pita Pengumuman', 'icon' => 'megaphone'],
                     ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => 'Hero & Statistik', 'icon' => 'layout-template'],
                     ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => 'Fitur Unggulan', 'icon' => 'sparkles'],
                     ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => 'Kurikulum Terintegrasi', 'icon' => 'layers'],

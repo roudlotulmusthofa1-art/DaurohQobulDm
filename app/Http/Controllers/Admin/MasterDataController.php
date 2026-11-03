@@ -7,6 +7,7 @@ use App\Models\BidangIlmu;
 use App\Models\JenisKegiatan;
 use App\Models\JenisKhidmah;
 use App\Models\JenisPelanggaran;
+use App\Models\JenisPencapaian;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
@@ -21,10 +22,10 @@ use Illuminate\View\View;
 
 /**
  * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan,
- * Jenis Pelanggaran, Jenis Khidmah, Kategori Berita.
+ * Jenis Pelanggaran, Jenis Pencapaian, Jenis Khidmah, Kategori Berita.
  * (Semester dipindah ke menu Akademik > Tahun & Bulan Ajaran.)
  *
- * Satu controller untuk 8 model.
+ * Satu controller untuk 9 model.
  * Definisi tab (kolom tabel, isian form, ikon & warna menu) ada di method tabs() di bawah.
  *
  * Cara menambah menu baru: buat tabel (migration) + model (pakai trait IsMasterData),
@@ -40,6 +41,7 @@ class MasterDataController extends Controller
         'kamar' => Kamar::class,
         'jenis-kegiatan' => JenisKegiatan::class,
         'jenis-pelanggaran' => JenisPelanggaran::class,
+        'jenis-pencapaian' => JenisPencapaian::class,
         'jenis-khidmah' => JenisKhidmah::class,
         'kategori-berita' => KategoriBerita::class,
     ];
@@ -207,7 +209,7 @@ class MasterDataController extends Controller
                 'kasur_per_baris' => ['nullable', 'integer', 'min:1', 'max:12'],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
-            'jenis-kegiatan', 'jenis-pelanggaran', 'jenis-khidmah' => [
+            'jenis-kegiatan', 'jenis-pelanggaran', 'jenis-pencapaian', 'jenis-khidmah' => [
                 'nama' => ['required', 'string', 'max:100'],
                 'warna' => ['nullable', 'string', Rule::in(array_keys(self::COLORS))],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
@@ -365,6 +367,26 @@ class MasterDataController extends Controller
                 'fields' => [
                     ['key' => 'nama', 'label' => 'Nama Pelanggaran', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Terlambat sholat berjamaah'],
                     ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-red-100'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
+                ],
+            ],
+
+            'jenis-pencapaian' => [
+                'icon' => 'trophy',
+                'accent' => '#f59e0b',
+                'label' => 'Jenis Pencapaian',
+                'title' => 'Jenis Pencapaian',
+                'description' => 'Kelola daftar jenis pencapaian/prestasi santri. Seret baris untuk mengubah urutan.',
+                'add_label' => 'Tambah Pencapaian',
+                'singular' => 'Jenis Pencapaian',
+                'columns' => [
+                    ['key' => 'nama', 'label' => 'Nama Pencapaian', 'type' => 'name'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color'],
+                    ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'text'],
+                ],
+                'fields' => [
+                    ['key' => 'nama', 'label' => 'Nama Pencapaian', 'type' => 'text', 'required' => true, 'placeholder' => 'cth. Hafal Juz 30'],
+                    ['key' => 'warna', 'label' => 'Warna', 'type' => 'color', 'default' => 'bg-amber-100'],
                     ['key' => 'deskripsi', 'label' => 'Deskripsi', 'type' => 'textarea'],
                 ],
             ],

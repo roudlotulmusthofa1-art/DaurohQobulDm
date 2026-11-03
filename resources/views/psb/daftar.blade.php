@@ -616,6 +616,31 @@
                                         placeholder="tulis dalam bahasa Arab atau Latin" dir="auto"></textarea>
                                     <p class="err" v-if="e.rencana">{{ e . rencana }}</p>
                                 </div>
+                                <!-- Pernah ikut Dauroh Qobul sebelumnya? (لا / نعم) -->
+                                <div class="sm:col-span-2">
+                                    <label class="lbl">Apakah Anda pernah mengikuti Dauroh Qobul sebelumnya?
+                                        <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="grid grid-cols-2 gap-3 max-w-md">
+                                        <button type="button" @click="f.pernah_dauroh = 'tidak'; delete e.pernah_dauroh"
+                                            class="flex items-center justify-center gap-2 rounded-xl px-4 py-3 ring-1 transition-colors"
+                                            :class="f.pernah_dauroh === 'tidak' ? 'bg-emerald-50 ring-2 ring-emerald-500 text-emerald-800' : 'bg-white ring-slate-200 text-slate-600 hover:bg-slate-50'">
+                                            <span class="w-4 h-4 rounded-full ring-2 flex items-center justify-center" :class="f.pernah_dauroh === 'tidak' ? 'ring-emerald-500' : 'ring-slate-300'">
+                                                <span v-if="f.pernah_dauroh === 'tidak'" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            </span>
+                                            <span class="text-xl font-bold" lang="ar">لا</span>
+                                        </button>
+                                        <button type="button" @click="f.pernah_dauroh = 'ya'; delete e.pernah_dauroh"
+                                            class="flex items-center justify-center gap-2 rounded-xl px-4 py-3 ring-1 transition-colors"
+                                            :class="f.pernah_dauroh === 'ya' ? 'bg-emerald-50 ring-2 ring-emerald-500 text-emerald-800' : 'bg-white ring-slate-200 text-slate-600 hover:bg-slate-50'">
+                                            <span class="w-4 h-4 rounded-full ring-2 flex items-center justify-center" :class="f.pernah_dauroh === 'ya' ? 'ring-emerald-500' : 'ring-slate-300'">
+                                                <span v-if="f.pernah_dauroh === 'ya'" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                            </span>
+                                            <span class="text-xl font-bold" lang="ar">نعم</span>
+                                        </button>
+                                    </div>
+                                    <p class="err" v-if="e.pernah_dauroh">{{ e . pernah_dauroh }}</p>
+                                </div>
                             </div>
 
                             <!-- Akun login -->
@@ -974,6 +999,7 @@
                             alumni: '',
                             tujuan: '',
                             rencana: '',
+                            pernah_dauroh: '', // 'tidak' (لا) / 'ya' (نعم)
                             email_login: '',
                             password_login: '',
                             catatan_peserta: '',
@@ -1191,7 +1217,7 @@
                             ],
                             ['pendidikan_terakhir', 'nama_sekolah', 'nama_daerah', ],
                             ['marhalah', 'lama_belajar', 'kesehatan', 'status_ekonomi', 'persentasimuslim',
-                                'alumni', 'tujuan', 'rencana', 'email_login', 'password_login'
+                                'alumni', 'tujuan', 'rencana', 'pernah_dauroh', 'email_login', 'password_login'
                             ],
                             ['berkas_foto', 'berkas_rekomendasi', 'berkas_raport_ijazah', 'berkas_izin_belajar', 'setuju'],
                         ];

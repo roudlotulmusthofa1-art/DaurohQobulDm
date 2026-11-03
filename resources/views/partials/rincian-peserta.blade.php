@@ -39,6 +39,7 @@ $seksi = [
         'Status ekonomi' => $s->status_ekonomi,
         'Tujuan belajar' => $s->tujuan,
         'Rencana setelah lulus' => $s->rencana,
+        'Pernah mengikuti Dauroh Qobul' => $s::PERNAH_DAUROH[$s->pernah_dauroh] ?? null,
     ]],
 ];
 $pondok = $s->riwayat_pondok ?? [];

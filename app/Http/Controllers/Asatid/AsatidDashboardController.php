@@ -144,6 +144,7 @@ class AsatidDashboardController extends Controller
         // Pesan dari admin yang belum dibaca (paling atas)
         if ($pesanBaru = PesanAsatid::jumlahBaru(Auth::id())) {
             $items[] = [
+                'kunci' => 'pesan_admin:' . PesanAsatid::where('user_id', Auth::id())->belumDibaca()->max('id'),
                 'teks'  => "Ada <b>{$pesanBaru} pesan baru</b> dari admin",
                 'ket'   => 'Buka Pesan dari Admin',
                 'url'   => route('asatid.pesan'),
@@ -157,6 +158,7 @@ class AsatidDashboardController extends Controller
             ->where('diproses_at', '>=', now()->subDays(7))->count();
         if ($baru > 0) {
             $items[] = [
+                'kunci' => 'peserta_baru:' . $baru . ':' . PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->max('id'),
                 'teks'  => "<b>{$baru}</b> peserta baru diterima minggu ini",
                 'ket'   => 'Lihat di Daftar Peserta',
                 'url'   => route('asatid.peserta'),
@@ -168,6 +170,7 @@ class AsatidDashboardController extends Controller
         // Catatan dari admin saat menerima pendaftaran
         if ($asatid?->catatan_admin) {
             $items[] = [
+                'kunci' => 'catatan_admin:' . crc32($asatid->catatan_admin),
                 'teks'  => 'Catatan dari admin: <b>' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($asatid->catatan_admin, 80)) . '</b>',
                 'ket'   => optional($asatid->diproses_at)->locale('id')->diffForHumans(),
                 'url'   => route('asatid.profil'),
@@ -180,6 +183,7 @@ class AsatidDashboardController extends Controller
         $jadwal = self::jadwalSaya();
         $hariIni = $jadwal->where('hari', now('Asia/Jakarta')->dayOfWeekIso)->count();
         $items[] = [
+            'kunci' => 'jadwal:' . now('Asia/Jakarta')->toDateString() . ':' . ($jadwal->isEmpty() ? 'kosong' : $hariIni), // muncul lagi tiap hari
             'teks'  => $jadwal->isEmpty()
                 ? 'Jadwal mengajar Anda <b>belum diatur</b> oleh admin'
                 : ($hariIni ? "Hari ini Anda mengajar <b>{$hariIni} jam</b>" : 'Hari ini <b>tidak ada</b> jadwal mengajar'),

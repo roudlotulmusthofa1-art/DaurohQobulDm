@@ -281,6 +281,11 @@ class StorePendaftaranRequest extends FormRequest
                 'max:500',
             ],
 
+            'pernah_dauroh' => [
+                'required',
+                'in:tidak,ya',
+            ],
+
             'email_login'    => ['required', 'email', 'max:255', 'unique:pendaftaran_siswas,email', 'unique:users,email'],
             'password_login' => ['required', 'string', 'min:8', 'max:100'],
 
@@ -329,6 +334,9 @@ class StorePendaftaranRequest extends FormRequest
 
     protected function prepareForValidation(): void
     {
+        // Pendaftaran dinonaktifkan admin (PSB > Data Masuk Peserta) -> tolak sebelum validasi
+        abort_unless(\App\Models\PendaftaranSiswa::pendaftaranDibuka(), 403, 'Mohon maaf, pendaftaran sedang ditutup.');
+
         $riwayat = $this->input('riwayat_pondok');
 
         if (is_string($riwayat)) {
@@ -408,6 +416,7 @@ class StorePendaftaranRequest extends FormRequest
             'alumni' => 'Alumni',
             'tujuan' => 'Tujuan',
             'rencana' => 'Rencana',
+            'pernah_dauroh' => 'Pernah mengikuti Dauroh Qobul',
             'email_login' => 'Email login',
             'password_login' => 'Password login',
             'berkas_foto' => 'Berkas pas foto',

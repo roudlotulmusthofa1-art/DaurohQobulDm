@@ -14,7 +14,7 @@ use Throwable;
 class PengelolaSesi
 {
     /** Tabel master data yang bisa disalin dari sesi lain saat membuat sesi baru */
-    public const MASTER_DATA = ['bidang_ilmu', 'waktu_pelajaran', 'kelas', 'kamar', 'jenis_kegiatan', 'jenis_pelanggaran', 'jenis_khidmah', 'kategori_berita'];
+    public const MASTER_DATA = ['bidang_ilmu', 'waktu_pelajaran', 'kelas', 'kamar', 'jenis_kegiatan', 'jenis_pelanggaran', 'jenis_pencapaian', 'jenis_khidmah', 'kategori_berita'];
 
     /** Kunci pengaturan yang TIDAK disalin (berlaku untuk semua sesi / milik sesi asal) */
     private const PENGATURAN_TIDAK_DISALIN = ['asatid_daftar_kode', 'admin_daftar_kode', 'pesantren_logo'];

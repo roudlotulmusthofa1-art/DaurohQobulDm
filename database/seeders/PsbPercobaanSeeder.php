@@ -102,6 +102,7 @@ class PsbPercobaanSeeder extends Seeder
                     'alumni'            => 'لا',
                     'tujuan'            => 'طلب العلم',
                     'rencana'           => 'التدريس بعد التخرج',
+                    'pernah_dauroh'     => $i % 3 === 0 ? 'ya' : 'tidak',
                     'catatan_peserta'   => $i === 0 ? 'Data percobaan dari seeder.' : null,
                     'email'             => $email,
                     'password'          => $kataSandi,

@@ -14,7 +14,8 @@
         <form @submit="konfirmasi" data-konfirmasi="Hapus?">  tanya dulu sebelum dikirim
         <select @change="kirimForm">                        kirim form saat pilihan diganti
         <select @change="pindahHalaman">                    buka alamat dari value pilihan
-        <a href="..." @click="kembali">                     kembali ke halaman sebelumnya
+        <a href="..." @click="kembali">                     kembali ke halaman sebelumnya (href = cadangan bila tidak ada riwayat)
+        <a href="..." @click="kembali" data-lewati="/kegiatan/">  sama, tapi halaman sebelumnya yang alamatnya memuat teks itu dilewati
 
     Ingat: teks dari database di dalam elemen yang di-mount Vue diberi v-pre
     (atau ditampilkan lewat v-text), supaya tulisan "{{ ... }}" di data tidak dijalankan Vue.
@@ -39,17 +40,25 @@
         pindahHalaman(e) {
             if (e.target.value) location.href = e.target.value;
         },
-        // Kembali ke halaman sebelumnya. Bila dibuka di tab baru: tab ditutup, atau pindah ke href.
+        // Kembali ke halaman sebelumnya. Bila tidak ada (mis. dibuka langsung / tab baru): pindah ke href.
+        // Halaman sebelumnya dilewati (pakai href) bila: halaman yang sama, halaman login,
+        // atau cocok dengan data-lewati="potongan-alamat,..." (mis. halaman yang otomatis melempar balik ke sini).
         kembali(e) {
             e.preventDefault();
             const tautan = e.currentTarget.getAttribute('href');
-            const dariSitusIni = document.referrer && new URL(document.referrer).origin === location.origin;
-            if (history.length > 1 && dariSitusIni) {
+            const lewati = (e.currentTarget.dataset.lewati || '').split(',').map((x) => x.trim()).filter(Boolean);
+            let asal = null;
+            try { asal = document.referrer ? new URL(document.referrer) : null; } catch (err) { asal = null; }
+            const layak = asal && asal.origin === location.origin
+                && asal.pathname !== location.pathname
+                && !asal.pathname.startsWith('/login')
+                && !lewati.some((p) => asal.pathname.includes(p));
+            if (history.length > 1 && layak) {
                 history.back();
                 return;
             }
-            window.close();
-            setTimeout(() => (location.href = tautan), 250);
+            // Tidak ada halaman sebelumnya yang layak -> buka alamat cadangan (tab tidak ditutup)
+            location.href = tautan;
         },
     };
 </script>

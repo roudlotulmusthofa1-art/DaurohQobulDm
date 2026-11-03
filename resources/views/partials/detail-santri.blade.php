@@ -3,6 +3,9 @@
     - admin/pendaftaran/show.blade.php  -> ['admin' => true,  'sisipan' => 'admin.pendaftaran._persyaratan']
     - siswa/profil.blade.php            -> ['admin' => false, 'sisipan' => 'siswa._persyaratan']
     $admin = false: tombol edit & Terima/Tolak tidak tampil (hanya melihat).
+    $judul (opsional): label kecil di kartu atas, mis. 'Detail Peserta' untuk dasbor asatid.
+    Dipakai juga di asatid/peserta-detail.blade.php -> ['admin' => false, 'judul' => 'Detail Peserta', 'rahasia' => true, 'sisipan' => 'siswa._persyaratan']
+    $rahasia (opsional, bawaan false): sembunyikan email, catatan admin, dan berkas (untuk asatid).
     $sisipan: view tambahan yang ditaruh di akhir grid (form persyaratan admin / daftar persyaratan siswa).
 --}}
 @php
@@ -49,8 +52,15 @@ $seksi = [
 'Alumni di Daerah' => $p->alumni,
 'Tujuan Belajar' => $p->tujuan,
 'Rencana Setelah Lulus' => $p->rencana,
+'Pernah Mengikuti Dauroh Qobul' => $p::PERNAH_DAUROH[$p->pernah_dauroh] ?? null,
 ],
 ];
+
+// Mode rahasia (dasbor asatid): email tidak ditampilkan
+$rahasia = $rahasia ?? false;
+if ($rahasia) {
+    unset($seksi['Data Pribadi']['Email']);
+}
 
 // Label yang isinya panjang -> ditampilkan bertumpuk & memakai lebar penuh
 $lebar = ['Alamat Lengkap', 'Tujuan Belajar', 'Rencana Setelah Lulus'];
@@ -170,7 +180,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0" v-pre>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ $admin ? 'Detail Santri' : 'Profil Saya' }}</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ $judul ?? ($admin ? 'Detail Santri' : 'Profil Saya') }}</p>
                         <h1 class="mt-1 text-2xl sm:text-[34px] leading-tight font-extrabold tracking-tight break-words">{{ $p->nama_lengkap }}</h1>
                         @if ($p->nama_lengkap_arab)
                         <p class="mt-1 text-2xl text-emerald-100/90" dir="rtl">{{ $p->nama_lengkap_arab }}</p>
@@ -220,6 +230,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             @else <p class="text-white/50">-</p> @endif
                         </div>
                     </div>
+                    @if ($rahasia)
+                    <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
+                        <span class="w-8 h-8 shrink-0 rounded-xl bg-cyan-400/15 text-cyan-300 flex items-center justify-center">{!! $svg('cap', 'w-4 h-4') !!}</span>
+                        <div class="min-w-0">
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">Kelas</p>
+                            <p class="font-medium truncate">{{ $p->kelasMaster?->nama ?? 'Belum dipilih' }}</p>
+                        </div>
+                    </div>
+                    @else
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-cyan-400/15 text-cyan-300 flex items-center justify-center">{!! $svg('mail', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
@@ -227,6 +246,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <p class="font-medium truncate">{{ $p->email ?: '-' }}</p>
                         </div>
                     </div>
+                    @endif
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-amber-300/15 text-amber-200 flex items-center justify-center">{!! $svg('pin', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
@@ -243,7 +263,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     </div>
                 </div>
 
-                @if ($p->catatan_admin)
+                @if ($p->catatan_admin && ! $rahasia)
                 <div class="mt-3 flex gap-2.5 text-sm rounded-2xl bg-amber-300/10 ring-1 ring-amber-300/25 px-3.5 py-2.5 text-amber-50" v-pre>
                     <span class="font-semibold text-amber-200 shrink-0">Catatan:</span>
                     <span class="whitespace-pre-line">{{ $p->catatan_admin }}</span>
@@ -494,7 +514,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         @endif
         @endforeach
 
-        {{-- Berkas --}}
+        {{-- Berkas (disembunyikan dalam mode rahasia) --}}
+        @unless ($rahasia)
         <section class="{{ $kartu }} p-5 sm:p-6 xl:col-span-2">
             <div class="mb-5">{!! $judulKartu('Berkas', 'file', 'teal', 'Dokumen yang diunggah pendaftar') !!}</div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 text-sm">
@@ -521,6 +542,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @endforeach
             </div>
         </section>
+        @endunless
 
         @if (!empty($sisipan))
         @include($sisipan)

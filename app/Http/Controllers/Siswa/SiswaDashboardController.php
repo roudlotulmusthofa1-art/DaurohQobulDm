@@ -108,6 +108,7 @@ class SiswaDashboardController extends Controller
         $items = [];
         foreach ($siswa->pesan()->dariAdmin()->belumDibaca()->latest()->take(5)->get() as $p) {
             $items[] = [
+                'kunci' => 'pesan:' . $p->id,
                 'teks' => ($p->balasan_untuk_id ? 'Admin membalas pesan Anda: ' : 'Pesan baru dari admin: ') . '<b>' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($p->judul ?: $p->isi, 40)) . '</b>',
                 'ket' => $p->created_at->diffForHumans(),
                 'url' => route('siswa.pesan-admin'),
@@ -120,6 +121,7 @@ class SiswaDashboardController extends Controller
         if ($siswa->status === PendaftaranSiswa::DITERIMA && $diumumkan?->gt(now()->subDays(14))) {
             $lulus = $siswa->status_kelulusan === PendaftaranSiswa::LULUS;
             $items[] = [
+                'kunci' => 'kelulusan:' . $diumumkan->timestamp,
                 'teks' => 'Pengumuman kelulusan sudah dibuka: <b>' . ($lulus ? 'LULUS' : ($siswa->status_kelulusan ? 'BELUM LULUS' : 'lihat hasilnya')) . '</b>',
                 'ket' => $diumumkan->locale('id')->diffForHumans(),
                 'url' => route('siswa.kelulusan'),

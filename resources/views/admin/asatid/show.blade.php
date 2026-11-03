@@ -45,12 +45,12 @@ $lebar = ['Alamat Lengkap'];
 @include('partials.kirim-pesan-asatid', ['penerimaPesan' => $penerimaPesan, 'pilihAwal' => $a->user_id])
 @endif
 <div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20">
-    <a href="{{ route('admin.asatid.index') }}"
+    <a href="{{ route('admin.asatid.index') }}" @click="kembali"
         class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors">
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
         </span>
-        Kembali ke Data Asatid
+        Kembali
     </a>
 
     @if (session('success'))
@@ -64,7 +64,7 @@ $lebar = ['Alamat Lengkap'];
     @endif
 
     {{-- ===== Kartu profil ===== --}}
-    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white shadow-[0_24px_48px_-24px_rgba(7,31,26,0.6)]">
+    <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white shadow-[0_24px_48px_-24px_rgba(7,31,26,0.6)] ">
         <div class="pointer-events-none absolute inset-0 opacity-60"
             style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -top-28 -right-20 w-80 h-80 rounded-full bg-emerald-400/25 blur-3xl"></div>
@@ -81,7 +81,7 @@ $lebar = ['Alamat Lengkap'];
             <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        
+
                         <h1 class="mt-1 text-2xl sm:text-[32px] leading-tight font-extrabold tracking-tight break-words">{{ $a->nama_lengkap }}</h1>
                         <p class="mt-1 text-2xl text-emerald-100/90" dir="rtl">{{ $a->nama_lengkap_arab }}</p>
                         <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">

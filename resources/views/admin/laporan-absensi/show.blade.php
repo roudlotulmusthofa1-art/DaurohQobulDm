@@ -33,10 +33,10 @@ $info = $kegiatan
 @endphp
 
 <div id="halaman-detail-absensi">
-<div class="space-y-6">
-    <a href="{{ route('admin.laporan-absensi.index') }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-emerald-700">
+<div class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-8">
+    <a href="{{ route('admin.laporan-absensi.index') }}" @click="kembali" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-500 hover:text-emerald-700">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-        Kembali ke Laporan Absensi
+        Kembali
     </a>
 
     <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br {{ $kegiatan ? 'from-emerald-500 via-teal-600 to-[#0b332c]' : 'from-sky-500 via-blue-600 to-indigo-700' }} text-white p-6 sm:p-8">

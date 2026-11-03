@@ -48,6 +48,7 @@ $bagian = [
 ['alumni', 'Alumni di Daerah', 'text'],
 ['tujuan', 'Tujuan Belajar', 'textarea'],
 ['rencana', 'Rencana Setelah Lulus', 'textarea'],
+['pernah_dauroh', 'Pernah Mengikuti Dauroh Qobul Sebelumnya?', 'select', ['options' => $p::PERNAH_DAUROH]],
 ],
 ];
 
@@ -123,13 +124,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @endphp
 
 <div class="space-y-6">
-    <a href="{{ route('admin.pendaftaran.show', $p) }}"
+    <div id="kembali-edit">
+    <a href="{{ route('admin.pendaftaran.show', $p) }}" @click="kembali"
         class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors">
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
             {!! $svg('back', 'w-4 h-4') !!}
         </span>
-        Kembali ke detail
+        Kembali
     </a>
+    </div>
 
     {{-- ================= HEADER (hijau tua, senada dengan halaman detail) ================= --}}
     <div class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white shadow-[0_24px_48px_-24px_rgba(7,31,26,0.6)]">
@@ -407,5 +410,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             },
         },
     }).mount('#riwayat-app'));
+    // Tombol kembali di atas (di luar #riwayat-app): kembali ke halaman sebelumnya
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#kembali-edit'));
 </script>
 @endpush

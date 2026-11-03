@@ -17,11 +17,19 @@ class PendaftaranController extends Controller
 {
     public function create()
     {
+        // Pendaftaran ditutup admin -> tampilkan halaman "Pendaftaran ditutup"
+        if (! PendaftaranSiswa::pendaftaranDibuka()) {
+            return view('psb.ditutup');
+        }
+
         return view('psb.daftar');
     }
 
     public function store(StorePendaftaranRequest $request, WhatsAppService $wa)
     {
+        // Ditutup saat formulir sedang diisi -> tolak, tidak ada data yang masuk
+        abort_unless(PendaftaranSiswa::pendaftaranDibuka(), 403, 'Mohon maaf, pendaftaran sedang ditutup.');
+
         // Ambil data yang lolos validasi, TANPA berkas dan TANPA email/password dari form
         $data = $request->safe()->except([
             'berkas_foto',

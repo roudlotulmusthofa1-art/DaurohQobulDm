@@ -25,6 +25,7 @@ Route::prefix('admin')->middleware(['auth', 'peran:admin'])->group(function () {
     // Detail dan aksi, dipakai oleh tombol di view
     Route::prefix('pendaftaran')->name('admin.pendaftaran.')->group(function () {
         Route::get('/', [AdminPendaftaranController::class, 'index'])->name('index');
+        Route::post('/buka-tutup', [AdminPendaftaranController::class, 'bukaTutup'])->name('buka-tutup'); // Aktif/Nonaktif pendaftaran
         Route::get('/{pendaftaran}', [AdminPendaftaranController::class, 'show'])->name('show');
         Route::post('/{pendaftaran}/terima', [AdminPendaftaranController::class, 'terima'])->name('terima');
         Route::post('/{pendaftaran}/tolak', [AdminPendaftaranController::class, 'tolak'])->name('tolak');

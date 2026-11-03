@@ -120,67 +120,72 @@ class NotifikasiAdmin
         // 1. Pendaftar baru: satu baris per pendaftar (5 terbaru)
         if (static::aktif('pendaftar_baru')) {
             $q = PendaftaranSiswa::where('status', PendaftaranSiswa::MENUNGGU);
-            $total += (clone $q)->count();
-            foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $p) {
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $p) {
                 $items[] = static::item('pendaftar_baru',
                     'Pendaftar baru: <b>' . \App\Support\TeksAman::e($p->nama_lengkap) . '</b>',
                     $p->nomor_pendaftaran,
                     route('admin.pendaftaran.show', $p->id),
-                    $p->created_at);
+                    $p->created_at, 'pendaftar_baru:' . $p->id);
             }
+            $items[] = static::lainnya('pendaftar_baru', $n, $q, 'dan :n pendaftar baru lainnya', Route::has('admin.pendaftaran.index') ? route('admin.pendaftaran.index') : null);
         }
 
         // 1b. Pendaftar asatid baru: satu baris per pendaftar (5 terbaru)
         if (static::aktif('asatid_baru')) {
             $q = PendaftaranAsatid::where('status', PendaftaranAsatid::MENUNGGU);
-            $total += (clone $q)->count();
-            foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
                 $items[] = static::item('asatid_baru',
                     'Pendaftar asatid baru: <b>' . \App\Support\TeksAman::e($a->nama_lengkap) . '</b>',
                     $a->nomor_pendaftaran,
                     route('admin.asatid.show', $a->id),
-                    $a->created_at);
+                    $a->created_at, 'asatid_baru:' . $a->id);
             }
+            $items[] = static::lainnya('asatid_baru', $n, $q, 'dan :n pendaftar asatid lainnya', Route::has('admin.asatid.index') ? route('admin.asatid.index') : null);
         }
 
         // 1c. Pendaftar admin baru: satu baris per pendaftar (5 terbaru)
         if (static::aktif('admin_baru')) {
             $q = PendaftaranAdmin::where('status', PendaftaranAdmin::MENUNGGU);
-            $total += (clone $q)->count();
-            foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'created_at']) as $a) {
                 $items[] = static::item('admin_baru',
                     'Pendaftar admin baru: <b>' . \App\Support\TeksAman::e($a->nama_lengkap) . '</b>',
                     $a->nomor_pendaftaran,
                     route('admin.data-admin.show', $a->id),
-                    $a->created_at);
+                    $a->created_at, 'admin_baru:' . $a->id);
             }
+            $items[] = static::lainnya('admin_baru', $n, $q, 'dan :n pendaftar admin lainnya', Route::has('admin.data-admin.index') ? route('admin.data-admin.index') : null);
         }
 
         // 2. Catatan dari peserta: satu baris per pendaftar (5 terbaru)
         if (static::aktif('catatan_peserta')) {
             $q = PendaftaranSiswa::where('status', PendaftaranSiswa::MENUNGGU)
                 ->whereNotNull('catatan_peserta')->where('catatan_peserta', '!=', '');
-            $total += (clone $q)->count();
-            foreach ($q->latest()->take(5)->get(['id', 'nama_lengkap', 'created_at']) as $p) {
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->latest()->take(5)->get(['id', 'nama_lengkap', 'catatan_peserta', 'created_at']) as $p) {
                 $items[] = static::item('catatan_peserta',
                     '<b>' . \App\Support\TeksAman::e($p->nama_lengkap) . '</b> menulis catatan untuk admin',
                     'Baca di detail siswa',
                     route('admin.pendaftaran.show', $p->id),
-                    $p->created_at);
+                    $p->created_at, 'catatan_peserta:' . $p->id . ':' . crc32((string) $p->catatan_peserta));
             }
+            $items[] = static::lainnya('catatan_peserta', $n, $q, 'dan :n catatan peserta lainnya', Route::has('admin.pendaftaran.index') ? route('admin.pendaftaran.index') : null);
         }
 
         // Pesan dari peserta (dasbor siswa) yang belum dibaca admin
         if (static::aktif('pesan_peserta') && \Illuminate\Support\Facades\Schema::hasTable('pesan_peserta')) {
             $q = \App\Models\PesanPeserta::dariPeserta()->belumDibaca();
-            $total += (clone $q)->count();
-            foreach ($q->with('peserta:id,nama_lengkap')->latest()->take(5)->get() as $p) {
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->with('peserta:id,nama_lengkap')->latest()->take(5)->get() as $p) {
                 $items[] = static::item('pesan_peserta',
                     '<b>' . \App\Support\TeksAman::e($p->peserta?->nama_lengkap ?? 'Peserta') . '</b> mengirim pesan: ' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($p->judul ?: $p->isi, 40)),
                     'Buka Pesan Peserta',
                     route('admin.pesan-peserta.show', $p->pendaftaran_siswa_id),
-                    $p->created_at);
+                    $p->created_at, 'pesan_peserta:' . $p->id);
             }
+            $items[] = static::lainnya('pesan_peserta', $n, $q, 'dan :n pesan peserta lainnya', Route::has('admin.pesan-peserta.index') ? route('admin.pesan-peserta.index') : null);
         }
 
         // 3-5. Ringkasan per jenis (satu baris berisi jumlah)
@@ -209,7 +214,7 @@ class NotifikasiAdmin
             $n = $saring($diterima())->count();
             if ($n > 0) {
                 $total += $n;
-                $items[] = static::item($jenis, str_replace(':n', '<b>' . $n . '</b>', $teks), 'Lihat data santri', $urlSantri);
+                $items[] = static::item($jenis, str_replace(':n', '<b>' . $n . '</b>', $teks), 'Lihat data santri', $urlSantri, null, "{$jenis}:{$n}", $n);
             }
         }
 
@@ -220,23 +225,41 @@ class NotifikasiAdmin
                 ->withCount('santri')->get()
                 ->filter(fn ($k) => $k->santri_count >= $k->kapasitas);
             $total += $kamarPenuh->count();
-            foreach ($kamarPenuh->take(5) as $k) {
+            foreach ($kamarPenuh as $k) {
                 $items[] = static::item('kamar_penuh',
                     'Kamar <b>' . \App\Support\TeksAman::e($k->nama) . '</b> sudah penuh',
                     "{$k->santri_count}/{$k->kapasitas} santri",
-                    $urlKamar);
+                    $urlKamar, null, "kamar_penuh:{$k->id}:{$k->santri_count}");
             }
         }
 
-        return ['items' => $items, 'total' => $total];
+        return ['items' => array_values(array_filter($items)), 'total' => $total];
     }
 
-    private static function item(string $jenis, string $teksHtml, ?string $keterangan, ?string $url, $waktu = null): array
+    /**
+     * @param  string  $kunci  pengenal unik notifikasi (untuk status dibaca/dihapus, lihat StatusNotifikasi)
+     * @param  int  $bobot  berapa angka di lonceng yang diwakili baris ini
+     */
+    /** Bila data lebih dari 5: satu baris tambahan "dan N lainnya" supaya angka lonceng = jumlah baris. */
+    private static function lainnya(string $jenis, int $total, $q, string $teks, ?string $url): ?array
+    {
+        $sisa = $total - 5;
+        if ($sisa <= 0) {
+            return null;
+        }
+        $idTerbaru = (int) (clone $q)->max('id');
+
+        return static::item($jenis, str_replace(':n', '<b>' . $sisa . '</b>', $teks), null, $url, null, "{$jenis}:lain:{$total}:{$idTerbaru}", $sisa);
+    }
+
+    private static function item(string $jenis, string $teksHtml, ?string $keterangan, ?string $url, $waktu = null, ?string $kunci = null, int $bobot = 1): array
     {
         $j = static::JENIS[$jenis];
 
         return [
             'jenis' => $jenis,
+            'kunci' => $kunci ?? $jenis,
+            'bobot' => $bobot,
             'teks' => $teksHtml, // sudah di-escape di atas (e()), aman ditampilkan dengan {!! !!}
             'keterangan' => $keterangan,
             'url' => $url,

@@ -3,7 +3,8 @@
     <!-- ========================================= -->
     <!-- NAVBAR -->
     <!-- ========================================= -->
-    <header class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-slate-100">
+    {{-- top mengikuti tinggi Pita Pengumuman bila pita berada DI ATAS top bar (0 bila tidak ada / di bawah) --}}
+    <header class="fixed left-0 right-0 z-50 bg-white/95 backdrop-blur border-b border-slate-100 transition-[top] duration-300" style="top: var(--tinggi-pita-atas, 0px)">
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -303,7 +304,7 @@
                         class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-teal-100 hover:text-teal-700 transition">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
                         Masuk</a>
-                    <a href="#" @click="mobilOpen = false"
+                    <a href="/psb/daftar" @click="mobilOpen = false"
                         class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-teal-100 hover:text-teal-700 transition">
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
                         Daftar Sekarang</a>

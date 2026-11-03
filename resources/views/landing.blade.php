@@ -61,7 +61,7 @@
             {{-- Tombol --}}
             <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-8">
 
-                <a href="#"
+                <a href="/psb/daftar"
                     class="card w-full sm:w-auto px-7 py-3 rounded-lg border border-white/60 font-semibold hover:bg-white/20 transition-colors">
                     Daftar Sekarang
                 </a>

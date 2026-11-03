@@ -16,6 +16,18 @@ use Illuminate\Validation\Rule;
 
 class AdminPendaftaranController extends Controller
 {
+    /** Tombol Aktif/Nonaktif pendaftaran di halaman Data Masuk Peserta */
+    public function bukaTutup(Request $request)
+    {
+        $dibuka = $request->validate(['dibuka' => ['required', 'boolean']])['dibuka'];
+        \App\Models\Pengaturan::simpan('psb_dibuka', $dibuka ? '1' : '0');
+
+        return response()->json([
+            'dibuka' => (bool) $dibuka,
+            'pesan' => $dibuka ? 'Pendaftaran DIBUKA. Peserta bisa mendaftar.' : 'Pendaftaran DITUTUP. Tidak ada pendaftar baru yang bisa masuk.',
+        ]);
+    }
+
     public function index(Request $request)
     {
         // status tetap dari route (data-diterima); kalau tidak ada, pakai dropdown filter
@@ -36,7 +48,9 @@ class AdminPendaftaranController extends Controller
             'ditolak'  => PendaftaranSiswa::where('status', 'ditolak')->count(),
         ];
 
-        return view('admin.pendaftaran.index', compact('pendaftar', 'stat', 'statusTetap'));
+        $psbDibuka = PendaftaranSiswa::pendaftaranDibuka();
+
+        return view('admin.pendaftaran.index', compact('pendaftar', 'stat', 'statusTetap', 'psbDibuka'));
     }
 
     public function show(PendaftaranSiswa $pendaftaran)

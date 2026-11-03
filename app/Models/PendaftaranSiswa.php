@@ -125,6 +125,21 @@ class PendaftaranSiswa extends Model
         'L' => 'Belum menikah (عازب)',
     ];
 
+    /**
+     * Pendaftaran (formulir /psb/daftar) sedang DIBUKA? Diatur admin di PSB > Data Masuk Peserta.
+     * Disimpan di Pengaturan 'psb_dibuka' ('1' / '0'); bawaan: dibuka.
+     */
+    public static function pendaftaranDibuka(): bool
+    {
+        return rescue(fn () => Pengaturan::ambil('psb_dibuka', '1'), '1', false) !== '0';
+    }
+
+    /** "Apakah Anda pernah mengikuti Dauroh Qobul sebelumnya?" (kolom pernah_dauroh) */
+    public const PERNAH_DAUROH = [
+        'tidak' => 'لا (Tidak)',
+        'ya' => 'نعم (Ya)',
+    ];
+
     public const PENDIDIKAN_TERAKHIR = [
         'K' => 'Ibtidaiyah (إبتدائية)',
         'L' => 'Tsanawiyah (ثانوية)',

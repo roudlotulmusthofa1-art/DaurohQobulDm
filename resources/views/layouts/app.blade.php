@@ -21,9 +21,13 @@
 
 <body class="antialiased font-sans text-slate-800 bg-white">
 
+    {{-- Pita Pengumuman (Admin > Landing Page > Pita Pengumuman) — paling atas, di atas navbar --}}
+    @include('partials.pita-pengumuman')
+
     @include('partials.navbar')
 
-    <main>
+    {{-- isi halaman ikut turun setinggi Pita Pengumuman --}}
+    <main style="padding-top: var(--tinggi-pita, 0px)">
         @yield('content')
     </main>
 

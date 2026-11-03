@@ -11,6 +11,33 @@
             <p class="text-sm text-teal-100">Verifikasi pendaftar baru, lalu terima atau tolak.</p>
         </div>
 
+        {{-- ===== Status pendaftaran: Aktif (formulir dibuka) / Nonaktif (ditutup) ===== --}}
+        <div class="rounded-2xl ring-1 p-4 sm:p-5 flex flex-wrap items-center gap-4 transition-colors"
+            :class="psbDibuka ? 'bg-emerald-50 ring-emerald-200' : 'bg-rose-50 ring-rose-200'">
+            <span class="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center text-white"
+                :class="psbDibuka ? 'bg-emerald-500' : 'bg-rose-500'">
+                <svg v-if="psbDibuka" class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V6.75a4.5 4.5 0 119 0v3.75M3.75 21.75h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H3.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+                <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+            </span>
+            <div class="flex-1 min-w-[200px]">
+                <p class="font-bold" :class="psbDibuka ? 'text-emerald-800' : 'text-rose-800'" v-text="psbDibuka ? 'Pendaftaran AKTIF' : 'Pendaftaran NONAKTIF'"></p>
+                <p class="text-sm" :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'"
+                    v-text="psbDibuka ? 'Formulir pendaftaran dibuka, peserta baru bisa mendaftar.' : 'Formulir pendaftaran ditutup, tidak ada pendaftar baru yang bisa masuk.'"></p>
+            </div>
+            <a href="{{ route('psb.daftar') }}" target="_blank" rel="noopener" class="text-sm font-semibold underline underline-offset-2"
+                :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'">Lihat formulir</a>
+            <button type="button" @click="ubahPsb" :disabled="psbSibuk" role="switch" :aria-checked="psbDibuka ? 'true' : 'false'"
+                :title="psbDibuka ? 'Klik untuk menonaktifkan pendaftaran' : 'Klik untuk mengaktifkan pendaftaran'"
+                class="inline-flex items-center gap-3 rounded-full pl-1.5 pr-4 py-1.5 text-sm font-bold text-white shadow-sm disabled:opacity-60 transition-colors"
+                :class="psbDibuka ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'">
+                <span class="relative inline-flex h-6 w-11 rounded-full bg-white/30">
+                    <span class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" :class="psbDibuka ? 'translate-x-5' : ''"></span>
+                </span>
+                <span v-text="psbDibuka ? 'Aktif' : 'Nonaktif'"></span>
+            </button>
+            <p v-if="psbPesan" class="basis-full text-xs font-semibold" :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'" v-text="psbPesan"></p>
+        </div>
+
         @if (session('success'))
             <div class="p-3 rounded-lg bg-emerald-50 text-emerald-700 text-sm">{{ session('success') }}</div>
         @endif
@@ -126,6 +153,34 @@
 @push('scripts')
 <script>
     // Aplikasi Vue halaman ini: konfirmasi hapus pendaftar (metode dari partials/vue-metode.blade.php)
-    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-data-masuk'));
+    // + tombol Aktif/Nonaktif pendaftaran
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({
+        data() {
+            return { psbDibuka: @json($psbDibuka), psbSibuk: false, psbPesan: '' };
+        },
+        methods: {
+            ...metodeHalaman,
+            async ubahPsb() {
+                const baru = !this.psbDibuka;
+                if (!baru && !confirm('Nonaktifkan pendaftaran? Formulir akan ditutup dan tidak ada pendaftar baru yang bisa masuk.')) return;
+                this.psbSibuk = true;
+                try {
+                    const res = await fetch(@json(route('admin.pendaftaran.buka-tutup')), {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) },
+                        body: JSON.stringify({ dibuka: baru }),
+                    });
+                    const data = await res.json();
+                    if (!res.ok) throw new Error(data.message || 'Gagal menyimpan.');
+                    this.psbDibuka = data.dibuka;
+                    this.psbPesan = data.pesan;
+                } catch (e) {
+                    this.psbPesan = e.message || 'Gagal menyimpan. Coba lagi.';
+                } finally {
+                    this.psbSibuk = false;
+                }
+            },
+        },
+    }).mount('#halaman-data-masuk'));
 </script>
 @endpush

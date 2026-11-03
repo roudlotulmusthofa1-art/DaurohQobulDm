@@ -76,6 +76,7 @@ class UpdatePendaftaranRequest extends FormRequest
             'alumni'           => 'required|string|max:255',
             'tujuan'           => 'required|string|max:2000',
             'rencana'          => 'required|string|max:2000',
+            'pernah_dauroh'    => 'nullable|in:tidak,ya',
 
             // Berkas: boleh kosong (berarti tidak diganti)
             'berkas_foto'          => 'nullable|image|max:5120',
@@ -138,6 +139,7 @@ class UpdatePendaftaranRequest extends FormRequest
             'alumni' => 'Alumni',
             'tujuan' => 'Tujuan belajar',
             'rencana' => 'Rencana setelah lulus',
+            'pernah_dauroh' => 'Pernah mengikuti Dauroh Qobul',
             'berkas_foto' => 'Pas foto',
             'berkas_rekomendasi' => 'Surat rekomendasi',
             'berkas_raport_ijazah' => 'Raport/ijazah',

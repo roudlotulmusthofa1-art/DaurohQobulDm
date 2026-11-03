@@ -6,6 +6,7 @@ use App\Models\BidangIlmu;
 use App\Models\JenisKegiatan;
 use App\Models\JenisKhidmah;
 use App\Models\JenisPelanggaran;
+use App\Models\JenisPencapaian;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
@@ -72,6 +73,14 @@ class MasterDataSeeder extends Seeder
             ['nama' => 'Tidur saat pelajaran',       'warna' => 'bg-yellow-100', 'deskripsi' => 'Tidur ketika pelajaran berlangsung.'],
         ]);
 
+        $this->isi(JenisPencapaian::class, [
+            ['nama' => 'Hafal Juz 30',         'warna' => 'bg-emerald-100', 'deskripsi' => 'Menyelesaikan hafalan Juz Amma.'],
+            ['nama' => 'Khatam Kitab',         'warna' => 'bg-teal-100',    'deskripsi' => 'Menyelesaikan satu kitab pelajaran.'],
+            ['nama' => 'Juara Lomba',          'warna' => 'bg-amber-100',   'deskripsi' => 'Juara lomba di dalam atau luar pondok.'],
+            ['nama' => 'Santri Teladan',       'warna' => 'bg-sky-100',     'deskripsi' => 'Akhlak dan kedisiplinan terbaik.'],
+            ['nama' => 'Kehadiran Sempurna',   'warna' => 'bg-violet-100',  'deskripsi' => 'Hadir penuh selama satu bulan.'],
+        ]);
+
         $this->isi(JenisKhidmah::class, [
             ['nama' => 'Kebersihan Masjid', 'warna' => 'bg-sky-100',     'deskripsi' => 'Menyapu dan merapikan masjid.'],
             ['nama' => 'Dapur',             'warna' => 'bg-orange-100',  'deskripsi' => 'Membantu memasak dan mencuci alat dapur.'],
@@ -88,7 +97,7 @@ class MasterDataSeeder extends Seeder
             ['nama' => 'Alumni',     'warna' => 'bg-pink-100'],
         ]);
 
-        $this->command?->info('Master Data contoh: 8 menu × 5 data.');
+        $this->command?->info('Master Data contoh: 9 menu × 5 data.');
     }
 
     /** Simpan / perbarui berdasarkan nama; urutan mengikuti urutan array. */

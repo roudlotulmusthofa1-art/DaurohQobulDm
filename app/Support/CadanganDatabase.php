@@ -51,8 +51,8 @@ class CadanganDatabase
         ],
         'master' => [
             'label' => 'Master Data',
-            'keterangan' => 'Bidang ilmu, waktu pelajaran, kelas, kamar, jenis kegiatan/pelanggaran/khidmah, kategori berita.',
-            'tabel' => ['bidang_ilmu', 'waktu_pelajaran', 'kelas', 'kamar', 'jenis_kegiatan', 'jenis_pelanggaran', 'jenis_khidmah', 'kategori_berita'],
+            'keterangan' => 'Bidang ilmu, waktu pelajaran, kelas, kamar, jenis kegiatan/pelanggaran/pencapaian/khidmah, kategori berita.',
+            'tabel' => ['bidang_ilmu', 'waktu_pelajaran', 'kelas', 'kamar', 'jenis_kegiatan', 'jenis_pelanggaran', 'jenis_pencapaian', 'jenis_khidmah', 'kategori_berita'],
         ],
         'pengaturan' => [
             'label' => 'Pengaturan',

@@ -12,14 +12,17 @@ $ikonHalaman = [
 ];
 $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="' . $ikonHalaman[$nama] . '"/></svg>';
 @endphp
-<div class="space-y-6 pb-4" id="psb-detail">
-    <a href="{{ route('admin.pendaftaran.index') }}"
-        class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors">
-        <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
-            {!! $svg('back', 'w-4 h-4') !!}
-        </span>
-        Kembali ke daftar
-    </a>
+{{-- Tombol kembali berada di luar #psb-detail -> aplikasi Vue kecil sendiri (#kembali-detail) --}}
+<div id="kembali-detail">
+<a href="{{ route('admin.pendaftaran.index') }}" @click="kembali"
+    class="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#0b332c] transition-colors mt-4">
+    <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
+        {!! $svg('back', 'w-4 h-4') !!}
+    </span>
+    Kembali
+</a>
+</div>
+<div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20 mt-3" id="psb-detail">
 
     @if (session('success'))
     <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm" v-pre>
@@ -111,6 +114,8 @@ $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none
             },
             methods: { ...metodeHalaman }, // konfirmasi tombol Terima
         }).mount('#psb-detail');
+        // Tombol kembali di atas: kembali ke halaman sebelumnya
+        Vue.createApp({ methods: { ...metodeHalaman } }).mount('#kembali-detail');
     });
 </script>
 @endpush
