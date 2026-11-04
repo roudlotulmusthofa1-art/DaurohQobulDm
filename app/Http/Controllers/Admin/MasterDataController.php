@@ -269,11 +269,11 @@ class MasterDataController extends Controller
             'waktu-pelajaran' => [
                 'icon' => 'clock',
                 'accent' => '#f59e0b',
-                'label' => 'Waktu Pelajaran',
-                'title' => 'Waktu Pelajaran',
-                'description' => 'Kelola sesi/waktu pelajaran harian. Seret baris untuk mengubah urutan.',
-                'add_label' => 'Tambah Waktu',
-                'singular' => 'Waktu Pelajaran',
+                'label' => __('Waktu Pelajaran'),
+                'title' => __('Waktu Pelajaran'),
+                'description' => __('Kelola sesi/waktu pelajaran harian. Seret baris untuk mengubah urutan.'),
+                'add_label' => __('Tambah Waktu'),
+                'singular' => __('Waktu Pelajaran'),
                 'columns' => [
                     ['key' => 'nama', 'label' => 'Nama', 'type' => 'name'],
                     ['key' => 'jam', 'label' => 'Jam', 'type' => 'time-range'],
