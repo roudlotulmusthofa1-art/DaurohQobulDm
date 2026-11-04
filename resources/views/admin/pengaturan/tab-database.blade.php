@@ -182,18 +182,19 @@ $meterList = [$meter(__('Penyimpanan (disk) server'), $server['disk'], 'bg-emera
 @endif
 
 <details class="mt-5 rounded-2xl ring-1 ring-slate-200 overflow-hidden">
-    <summary class="cursor-pointer px-5 py-3 bg-[#f8fbfa] text-sm font-bold text-slate-700">{{ __('Isi tabel (:jumlah)', ['jumlah' => $db['tabel']->count()]) }}</summary>
+    <summary class="cursor-pointer px-3 lg:px-5 py-3 bg-[#f8fbfa] text-sm font-bold text-slate-700">{{ __('Isi tabel (:jumlah)', ['jumlah' => $db['tabel']->count()]) }}</summary>
     <div class="max-h-96 overflow-y-auto">
-        <table class="w-full text-sm">
+        {{-- HP: jarak tepi lebih kecil, nama tabel panjang dipotong (…) --}}
+        <table class="w-full text-sm table-fixed lg:table-auto">
             <thead class="sticky top-0 bg-white text-xs text-slate-400">
-                <tr><th class="px-5 py-2 text-left font-semibold">{{ __('Tabel') }}</th><th class="px-5 py-2 text-right font-semibold">{{ __('Jumlah data') }}</th><th class="px-5 py-2 text-right font-semibold">{{ __('Ukuran') }}</th></tr>
+                <tr><th class="px-3 lg:px-5 py-2 text-left font-semibold">{{ __('Tabel') }}</th><th class="w-24 lg:w-auto px-3 lg:px-5 py-2 text-right font-semibold">{{ __('Jumlah data') }}</th><th class="w-20 lg:w-auto px-3 lg:px-5 py-2 text-right font-semibold">{{ __('Ukuran') }}</th></tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
                 @foreach ($db['tabel'] as $t)
                 <tr class="hover:bg-[#f8fbfa]">
-                    <td class="px-5 py-2 font-mono text-[13px] text-slate-700">{{ $t['nama'] }}</td>
-                    <td class="px-5 py-2 text-right tabular-nums text-slate-700">{{ number_format($t['baris'], 0, ',', '.') }}</td>
-                    <td class="px-5 py-2 text-right tabular-nums text-slate-400">{{ $ukuran($t['ukuran']) }}</td>
+                    <td class="px-3 lg:px-5 py-2 font-mono text-xs lg:text-[13px] text-slate-700 truncate" title="{{ $t['nama'] }}">{{ $t['nama'] }}</td>
+                    <td class="px-3 lg:px-5 py-2 text-right tabular-nums text-slate-700">{{ number_format($t['baris'], 0, ',', '.') }}</td>
+                    <td class="px-3 lg:px-5 py-2 text-right tabular-nums text-slate-400 whitespace-nowrap">{{ $ukuran($t['ukuran']) }}</td>
                 </tr>
                 @endforeach
             </tbody>

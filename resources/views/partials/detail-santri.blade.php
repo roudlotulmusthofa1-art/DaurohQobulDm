@@ -489,7 +489,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     {{-- ================= BAGIAN-BAGIAN DATA =================
          Tidak memakai v-pre: form Persyaratan di bawah memakai Vue (kamar & nomor kasur).
          Teks data aman karena {{ }} Blade sudah dilindungi App\Support\TeksAman. --}}
-    <div class="grid xl:grid-cols-2 gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         @foreach ($seksi as $judul => $baris)
         @php [$namaIkon, $warna, $ket] = $gayaSeksi[$judul]; $penuh = in_array($judul, $seksiPenuh); @endphp
 

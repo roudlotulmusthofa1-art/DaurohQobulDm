@@ -95,8 +95,9 @@
 <body class="font-sans antialiased text-gray-800 bg-[#0b312a]">
 
     {{-- Bingkai hijau gelap (seperti di desain) --}}
+    {{-- Layar kecil (HP, di bawah lg): tanpa bingkai & sidebar, menu pindah ke bawah (partials/menu-bawah-admin) --}}
     <div
-        class="flex h-screen min-h-0 overflow-hidden p-3 bg-[linear-gradient(180deg,#0f4238_0%,#0b332c_55%,#0a2b25_100%)]">
+        class="flex h-dvh min-h-0 overflow-hidden lg:p-3 bg-[linear-gradient(180deg,#0f4238_0%,#0b332c_55%,#0a2b25_100%)]">
 
         {{-- ============================= SIDEBAR =============================
              Aplikasi Vue #sidebar-app (skrip di bawah halaman): buka/tutup sidebar + menu.
@@ -106,7 +107,7 @@
         {{-- data-tertutup-awal: posisi dari server, dipakai CSS hanya sebelum Vue terpasang (lihat <style> di atas) --}}
         <div id="sidebar-app" class="contents" data-tertutup-awal="{{ $sidebarTertutup ? '1' : '0' }}">
         <aside id="sidebar" :data-collapsed="tertutup ? 'true' : 'false'" :data-ready="siap ? '1' : null"
-            class="w-65 h-full min-h-0 shrink-0 text-gray-100 flex flex-col pl-4 pr-5 pt-5 pb-4">
+            class="w-65 h-full min-h-0 shrink-0 text-gray-100 hidden lg:flex flex-col pl-4 pr-5 pt-5 pb-4">
 
             {{-- Logo --}}
             <div class="sb-logo w-full flex items-center justify-between">
@@ -222,17 +223,29 @@
 
         {{-- ============================= KONTEN ============================= --}}
         <div
-            class="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden rounded-[26px] bg-[#eef4f1]">
+            class="flex-1 min-w-0 min-h-0 flex flex-col overflow-hidden lg:rounded-[26px] bg-[#eef4f1]">
 
             {{-- Topbar: tetap di atas, di luar area scroll, jadi sudut kanan atas tertutup rapi --}}
             {{-- Aplikasi Vue #header-akun: menu lonceng & profil (skrip di bawah halaman).
                  Teks dari database di sini diberi v-pre agar tidak dibaca Vue sebagai template. --}}
-            <header id="header-akun" class="shrink-0 z-30 flex items-center justify-between px-6 pt-6 pb-5 bg-[#0b312a4e] border-b border-[#0b312a99] backdrop-blur-md">
-                <div>
+            {{-- Di HP: bilah hijau tua ringkas (tombol kembali + judul halaman), seperti Dashboard HP --}}
+            <header id="header-akun" class="shrink-0 z-30 flex items-center justify-between gap-2 px-3 py-3 max-lg:bg-[#0b332c] max-lg:rounded-b-[22px] max-lg:shadow-lg lg:px-6 lg:pt-6 lg:pb-5 lg:bg-[#0b312a4e] lg:border-b lg:border-[#0b312a99] lg:backdrop-blur-md">
+                {{-- HP: kembali + judul --}}
+                <div class="lg:hidden flex items-center gap-2 min-w-0 flex-1">
+                    <button type="button" @click="kembali" aria-label="{{ __('Kembali') }}"
+                        class="shrink-0 w-10 h-10 rounded-xl bg-white/10 text-white flex items-center justify-center active:scale-95 transition">
+                        <svg class="w-5 h-5 rtl:rotate-180" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+                    </button>
+                    {{-- Judul: @section('title'); kalau kosong pakai nama menu terakhir di breadcrumb --}}
+                    {{-- yieldContent sudah di-escape (& jadi &amp;), dikembalikan dulu supaya tidak dobel saat ditampilkan --}}
+                    @php $judulHp = html_entity_decode(trim($__env->yieldContent('title')), ENT_QUOTES) ?: (collect($breadcrumbs ?? [])->last()['label'] ?? __('Dashboard')); @endphp
+                    <p class="min-w-0 truncate text-[16px] font-extrabold text-white" v-pre>{{ $judulHp }}</p>
+                </div>
+                <div class="hidden lg:block">
                     <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]" v-pre>@yield('page-heading', __('Selamat Datang, :nama 👋', ['nama' => auth()->user()->name ?? 'Admin']))</h1>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 lg:gap-3">
                     {{-- Sesi aktif (Pengaturan > Sesi): semua data yang tampil milik sesi ini --}}
                     @php $sesiAktifHeader = \App\Support\SesiAplikasi::aktif(); @endphp
                     @if ($sesiAktifHeader)
@@ -254,7 +267,8 @@
                     </div>
 
                     {{-- Tombol ganti bahasa tampilan (Indonesia / العربية) --}}
-                    @include('partials.pilih-bahasa')
+                    @include('partials.pilih-bahasa', ['kelas' => 'bg-white max-lg:hidden'])
+                    @include('partials.pilih-bahasa', ['kelas' => 'bg-white/90 !px-2.5 lg:hidden', 'ringkas' => true])
 
                     {{-- ===== Notifikasi (lonceng): pendaftar yang menunggu verifikasi ===== --}}
                     @php $lonceng = \App\Support\StatusNotifikasi::terapkan($notifItems ?? []); @endphp
@@ -294,11 +308,11 @@
                             class="flex items-center gap-2.5 rounded-xl pl-1 pr-2.5 py-1 hover:bg-white/60 transition-colors">
                             <img src="{{ auth()->user()?->avatarUrl('0b332c', 'fff') }}"
                                 class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
-                            <span class="hidden sm:flex flex-col items-start leading-tight text-left" v-pre>
+                            <span class="hidden lg:flex flex-col items-start leading-tight text-left" v-pre>
                                 <span class="text-[13px] font-semibold text-[#0f1f1a] max-w-[10rem] truncate">{{ auth()->user()->name ?? 'Admin' }}</span>
                                 <span class="text-[11px] text-gray-600">{{ __('Super Admin') }}</span>
                             </span>
-                            <svg class="hidden sm:block w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
+                            <svg class="hidden lg:block w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </button>
 
                         <div v-show="menuBuka === 'profil'" @click.stop style="display: none"
@@ -328,10 +342,12 @@
 
             {{-- Di sinilah konten tiap halaman disuntikkan --}}
             {{-- Hanya bagian ini yang di-scroll, scrollbar mulai di bawah header --}}
-            <main class="flex-1 min-h-0 overflow-y-auto px-6 pt-5 pb-6 space-y-4 scrollbar-custom scrollbar-small">
+            {{-- HP: pb-28 supaya isi paling bawah tidak tertutup menu bawah --}}
+            <main class="flex-1 min-h-0 overflow-y-auto px-3 pt-4 pb-28 lg:px-6 lg:pt-5 lg:pb-6 space-y-4 scrollbar-custom scrollbar-small">
                 {{-- Breadcrumb: Beranda > Halaman. Datanya ($breadcrumbs) dibuat otomatis di AppServiceProvider.
-                     Halaman bisa mengganti langkah terakhir dengan @section('breadcrumb-akhir', 'Nama') --}}
-                <nav aria-label="Breadcrumb">
+                     Halaman bisa mengganti langkah terakhir dengan @section('breadcrumb-akhir', 'Nama').
+                     Di HP disembunyikan (judul sudah ada di bilah atas). --}}
+                <nav aria-label="Breadcrumb" class="hidden lg:block">
                     <ol class="flex flex-wrap items-center gap-1.5 text-[13px] text-gray-500">
                         @foreach ($breadcrumbs as $crumb)
                             <li class="flex items-center gap-1.5">
@@ -379,6 +395,9 @@
         </div>
     </div>
 
+    {{-- Menu bawah + lembar "Semua Menu" (hanya di HP) --}}
+    @include('partials.menu-bawah-admin')
+
     {{-- ===== Aplikasi Vue layout admin (window.Vue dari resources/js/app.js) ===== --}}
     @include('partials.lonceng-notifikasi-skrip')
     <script>
@@ -400,6 +419,11 @@
                     },
                     tutupDenganEsc(e) {
                         if (e.key === 'Escape') this.tutupSemua();
+                    },
+                    // Tombol kembali di bilah atas HP (tanpa riwayat -> ke Dashboard)
+                    kembali() {
+                        if (window.history.length > 1) window.history.back();
+                        else window.location.href = @js(route('admin.dashboard'));
                     },
                     // Tanya dulu sebelum form dikirim (dipakai tombol Keluar)
                     konfirmasi(e, pesan) {
@@ -465,7 +489,7 @@
     @include('partials.pratinjau-foto') {{-- klik foto bertanda data-perbesar -> tampil besar --}}
     @include('partials.vue-metode')
     {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
-    @include('partials.status-koneksi')
+    @include('partials.status-koneksi', ['posisi' => 'bottom-24 right-4 lg:bottom-5 lg:right-5'])
     @stack('scripts')
 
 </body>

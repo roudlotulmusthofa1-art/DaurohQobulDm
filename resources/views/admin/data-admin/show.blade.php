@@ -125,7 +125,7 @@ $lebar = [__('Alamat Lengkap')];
     @endif
 
     {{-- ===== Data ===== --}}
-    <div class="grid xl:grid-cols-2 gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
         @foreach ($seksi as [$judul, $warna, $ikon, $baris])
         <section @class([$kartu, 'p-5 sm:p-6', 'xl:col-span-2' => $loop->first])>
             <div class="flex items-center gap-3 mb-5">
@@ -134,7 +134,7 @@ $lebar = [__('Alamat Lengkap')];
                 </span>
                 <h2 class="text-[15px] font-bold text-slate-800">{{ $judul }}</h2>
             </div>
-            <dl @class(['grid gap-2.5 text-sm', 'md:grid-cols-2' => $loop->first])>
+            <dl @class(['grid grid-cols-1 gap-2.5 text-sm', 'md:grid-cols-2' => $loop->first])>
                 @foreach ($baris as $label => $nilai)
                 @if (in_array($label, $lebar))
                 <div class="md:col-span-2 rounded-2xl bg-[#f5f9f7] ring-1 ring-slate-100 px-4 py-3">
@@ -155,7 +155,7 @@ $lebar = [__('Alamat Lengkap')];
 
     {{-- ===== Keputusan admin ===== --}}
     @if ($a->status === 'menunggu')
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <form method="POST" action="{{ route('admin.data-admin.terima', $a) }}" class="{{ $kartu }} p-5 sm:p-6 flex flex-col"
             @submit="konfirmasi" data-konfirmasi="{{ __('Terima :nama sebagai admin? Akun admin dibuat (bisa membuka seluruh panel admin) dan chat WhatsApp dikirim.', ['nama' => $a->nama_lengkap]) }}">
             @csrf

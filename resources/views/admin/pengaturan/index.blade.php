@@ -51,7 +51,7 @@ $ukuran = fn ($b) => $b >= 1073741824 ? number_format($b / 1073741824, 1, ',', '
     </div>
     @endif
 
-    <div class="grid lg:grid-cols-[220px_1fr] gap-6 items-start">
+    <div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-6 items-start">
         {{-- ===== Menu kiri ===== --}}
         <nav class="{{ $kartu }} p-3 flex lg:flex-col gap-1 overflow-x-auto lg:sticky lg:top-4">
             @foreach ($tabList as $kode => $t)

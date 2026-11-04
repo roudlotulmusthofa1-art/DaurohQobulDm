@@ -115,8 +115,51 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
         </div>
     </form>
 
-    {{-- ===== Tabel transaksi ===== --}}
-    <div class="{{ $kartu }} overflow-hidden">
+    {{-- ===== HP (di bawah lg): satu transaksi = satu kartu ===== --}}
+    <div class="lg:hidden space-y-2.5">
+        <article v-for="t in baris" :key="t.id" class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+            <div class="flex items-center gap-3">
+                {{-- Ikon panah: hijau = masuk, merah = keluar --}}
+                <span class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center"
+                    :class="t.tipe === 'masuk' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-600'">
+                    <svg v-if="t.tipe === 'masuk'" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 13.5L12 21m0 0l-7.5-7.5M12 21V3"/></svg>
+                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18"/></svg>
+                </span>
+                <span class="min-w-0 flex-1">
+                    <span class="block font-bold text-slate-800 truncate" :title="t.deskripsi" v-text="t.deskripsi"></span>
+                    <span class="block text-[11px] text-slate-400" v-text="t.tanggal_label"></span>
+                </span>
+                <span class="shrink-0 text-base font-extrabold whitespace-nowrap tabular-nums" :class="t.tipe === 'masuk' ? 'text-emerald-700' : 'text-rose-600'"
+                    v-text="(t.tipe === 'masuk' ? '+' : '−') + rupiah(t.jumlah)"></span>
+            </div>
+            <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                <span v-if="t.kategori" class="inline-flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.872 2.607.33a18.095 18.095 0 005.223-5.223c.542-.827.369-1.908-.33-2.607L11.16 3.66A2.25 2.25 0 009.568 3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z"/></svg>
+                    <span v-text="t.kategori"></span>
+                </span>
+                <span v-if="t.pihak" class="inline-flex items-center gap-1 min-w-0">
+                    <svg class="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"/></svg>
+                    <span class="truncate" v-text="(t.tipe === 'masuk' ? @js(__('dari')) : @js(__('kepada'))) + ' ' + t.pihak"></span>
+                </span>
+                <a v-if="t.bukti" :href="t.bukti" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-semibold text-emerald-700">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
+                    {{ __('Lihat bukti') }}
+                </a>
+            </div>
+            <div class="mt-3 grid grid-cols-2 gap-2">
+                <button type="button" @click="bukaUbah(t)" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-sky-50 py-2 text-sm font-semibold text-sky-700 active:scale-95 transition">{{ __('Ubah') }}</button>
+                <button type="button" @click="hapusTransaksi(t)" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-50 py-2 text-sm font-semibold text-rose-700 active:scale-95 transition">{{ __('Hapus') }}</button>
+            </div>
+        </article>
+        <p v-if="!baris.length" class="rounded-2xl bg-white py-10 text-center text-sm text-slate-400 ring-1 ring-slate-200/80">{{ __('Belum ada transaksi pada periode ini.') }}</p>
+        {{-- Halaman (HP) --}}
+        @if ($transaksi->hasPages())
+        <div class="rounded-2xl bg-white px-4 py-3 ring-1 ring-slate-200/80">{{ $transaksi->links() }}</div>
+        @endif
+    </div>
+
+    {{-- ===== Laptop (lg ke atas): tabel transaksi ===== --}}
+    <div class="hidden lg:block {{ $kartu }} overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-slate-50/80 text-left text-xs font-semibold text-slate-500">

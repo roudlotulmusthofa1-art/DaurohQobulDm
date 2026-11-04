@@ -54,7 +54,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 class="px-4 py-2 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] disabled:opacity-40" v-text="tampilanBerubah ? @js(__('Simpan tampilan')) : @js(__('Tersimpan'))"></button>
         </div>
 
-        <div class="mt-4 grid lg:grid-cols-2 gap-5">
+        <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-5">
             <div class="space-y-4">
                 <div>
                     <span class="{{ $label }}">{{ __('Letak') }}</span>
@@ -322,7 +322,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     </div>
 
     {{-- ===== Pesan singkat ===== --}}
-    <div v-if="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-[90] px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold text-white"
+    <div v-if="toast" class="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[90] px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold text-white"
         :class="toast.galat ? 'bg-rose-600' : 'bg-emerald-700'" v-text="toast.teks"></div>
 </div>
 @endsection

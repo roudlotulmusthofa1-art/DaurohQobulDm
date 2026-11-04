@@ -4,12 +4,25 @@
       Diperiksa saat browser online/offline, dan tiap 20 detik ke /up (rute kesehatan Laravel).
     - Tombol muat ulang halaman.
     Klik titik untuk menampilkan/menyembunyikan keterangan. Saat offline / baru tersambung lagi, keterangan muncul sendiri.
+    Bisa DITARIK ke mana saja (jari / mouse). Saat dilepas menempel ke sisi kiri/kanan terdekat,
+    posisinya diingat di perangkat ini (localStorage "posisi_status_koneksi"). Klik dua kali pegangan = kembali ke posisi awal.
     Pemakaian: @include('partials.status-koneksi')  atau  @include('partials.status-koneksi', ['posisi' => 'bottom-24 right-5'])
 --}}
 <style>[v-cloak] { display: none !important; }</style>
-<div id="status-koneksi" v-cloak class="fixed z-[60] {{ $posisi ?? 'bottom-5 right-5' }} print:hidden">
+{{-- $posisi = posisi awal (sebelum pernah ditarik). Setelah ditarik, posisi diatur lewat :style --}}
+{{-- Atribut Vue dipasang di <div ref="widget"> (Vue tidak membaca atribut pada elemen #status-koneksi sendiri) --}}
+<div id="status-koneksi" v-cloak class="print:hidden">
+<div ref="widget" class="fixed z-[60] touch-none select-none"
+    :class="[pos ? '' : @js($posisi ?? 'bottom-5 right-5'), menarik ? 'cursor-grabbing' : 'cursor-grab', menempel ? 'transition-[left,top] duration-200 ease-out' : '']"
+    :style="pos ? { left: pos.x + 'px', top: pos.y + 'px' } : null"
+    @pointerdown="mulaiTarik" @click.capture="cegahKlikSetelahTarik">
     <div class="flex items-center gap-0.5 rounded-full bg-white/90 backdrop-blur-md p-1 shadow-[0_8px_24px_-8px_rgba(11,51,44,0.35)] ring-1 transition-colors"
-        :class="gaya.cincin">
+        :class="[gaya.cincin, menarik ? 'scale-105 shadow-[0_16px_32px_-8px_rgba(11,51,44,0.45)]' : '']">
+        {{-- Pegangan untuk ditarik (klik dua kali = kembali ke posisi awal) --}}
+        <span @dblclick="kembaliKeAwal" title="{{ __('Tarik untuk memindahkan · klik dua kali untuk kembali ke posisi awal') }}"
+            class="flex items-center h-8 pl-1 pr-0.5 text-slate-300" aria-hidden="true">
+            <svg class="w-3 h-4" viewBox="0 0 12 16" fill="currentColor"><circle cx="3" cy="3" r="1.5"/><circle cx="9" cy="3" r="1.5"/><circle cx="3" cy="8" r="1.5"/><circle cx="9" cy="8" r="1.5"/><circle cx="3" cy="13" r="1.5"/><circle cx="9" cy="13" r="1.5"/></svg>
+        </span>
         {{-- Status koneksi --}}
         <button type="button" @click="buka = !buka" :title="judul" :aria-label="judul"
             class="flex items-center gap-2 h-8 rounded-full pl-2.5 transition-all" :class="tampilLabel ? 'pr-3' : 'pr-2.5'">
@@ -27,6 +40,7 @@
         </button>
     </div>
 </div>
+</div>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -35,6 +49,13 @@
 
         const ALAMAT_CEK = @json(url('/up'));
         const BATAS_LAMBAT = 1500; // ms
+        const KUNCI_POSISI = 'posisi_status_koneksi'; // { sisi: 'kiri' | 'kanan', y: jarak dari atas (px) }
+        const JARAK_TEPI = 12;  // px dari tepi layar
+        const AMBANG_TARIK = 6; // px; geser kurang dari ini dianggap klik biasa
+
+        // localStorage bisa diblokir (mode privat) -> abaikan saja
+        const bacaPosisi = () => { try { return JSON.parse(localStorage.getItem(KUNCI_POSISI)); } catch (e) { return null; } };
+        const simpanPosisi = (p) => { try { p ? localStorage.setItem(KUNCI_POSISI, JSON.stringify(p)) : localStorage.removeItem(KUNCI_POSISI); } catch (e) {} };
 
         window.Vue.createApp({
             data() {
@@ -44,6 +65,10 @@
                     buka: false,      // keterangan ditampilkan (klik titik)
                     baruPulih: false, // sebentar menampilkan "Tersambung kembali"
                     memuat: false,
+                    pos: null,          // { x, y } bila sudah pernah ditarik; null = posisi awal
+                    menarik: false,     // sedang ditarik
+                    menempel: false,    // animasi menempel ke sisi layar
+                    baruDitarik: false, // cegah klik tombol tepat setelah ditarik
                 };
             },
             computed: {
@@ -73,8 +98,74 @@
                 document.addEventListener('visibilitychange', () => { if (!document.hidden) this.cek(); });
                 this.cek();
                 this.jadwal = setInterval(() => { if (!document.hidden) this.cek(); }, 20000);
+
+                // Pakai posisi yang tersimpan (setelah tampil, supaya ukuran widget sudah diketahui)
+                this.$nextTick(() => this.terapkanPosisi(bacaPosisi()));
+                window.addEventListener('resize', () => this.terapkanPosisi(bacaPosisi()));
             },
             methods: {
+                // ===== Tarik & pindahkan =====
+                mulaiTarik(e) {
+                    if (e.button !== 0) return; // hanya klik kiri / sentuhan
+                    const kotak = this.$refs.widget.getBoundingClientRect();
+                    this.awalTarik = { x: e.clientX, y: e.clientY, kiri: kotak.left, atas: kotak.top };
+                    this.geser = (ev) => this.saatTarik(ev);
+                    this.lepas = () => this.selesaiTarik();
+                    window.addEventListener('pointermove', this.geser);
+                    window.addEventListener('pointerup', this.lepas);
+                    window.addEventListener('pointercancel', this.lepas);
+                },
+                saatTarik(e) {
+                    const dx = e.clientX - this.awalTarik.x;
+                    const dy = e.clientY - this.awalTarik.y;
+                    if (!this.menarik && Math.hypot(dx, dy) < AMBANG_TARIK) return;
+                    this.menarik = true;
+                    this.menempel = false;
+                    this.pos = this.dalamLayar(this.awalTarik.kiri + dx, this.awalTarik.atas + dy);
+                },
+                selesaiTarik() {
+                    window.removeEventListener('pointermove', this.geser);
+                    window.removeEventListener('pointerup', this.lepas);
+                    window.removeEventListener('pointercancel', this.lepas);
+                    if (!this.menarik) return;
+                    this.menarik = false;
+                    this.baruDitarik = true;
+                    setTimeout(() => (this.baruDitarik = false), 80);
+                    // Tempel ke sisi kiri/kanan yang paling dekat
+                    const lebar = this.$refs.widget.offsetWidth;
+                    const sisi = this.pos.x + lebar / 2 < window.innerWidth / 2 ? 'kiri' : 'kanan';
+                    const simpan = { sisi, y: this.pos.y };
+                    simpanPosisi(simpan);
+                    this.menempel = true;
+                    this.terapkanPosisi(simpan);
+                    setTimeout(() => (this.menempel = false), 250);
+                },
+                // Klik yang terjadi tepat setelah menarik tidak dihitung (tidak memuat ulang / membuka keterangan)
+                cegahKlikSetelahTarik(e) {
+                    if (!this.baruDitarik) return;
+                    e.stopPropagation();
+                    e.preventDefault();
+                },
+                // Ubah { sisi, y } tersimpan jadi posisi di layar sekarang
+                terapkanPosisi(simpan) {
+                    if (!simpan || !['kiri', 'kanan'].includes(simpan.sisi)) return;
+                    const x = simpan.sisi === 'kiri' ? JARAK_TEPI : window.innerWidth - this.$refs.widget.offsetWidth - JARAK_TEPI;
+                    this.pos = this.dalamLayar(x, Number(simpan.y) || 0);
+                },
+                // Jaga supaya widget tidak keluar dari layar
+                dalamLayar(x, y) {
+                    const maksX = window.innerWidth - this.$refs.widget.offsetWidth - JARAK_TEPI;
+                    const maksY = window.innerHeight - this.$refs.widget.offsetHeight - JARAK_TEPI;
+                    return {
+                        x: Math.round(Math.min(Math.max(x, JARAK_TEPI), Math.max(maksX, JARAK_TEPI))),
+                        y: Math.round(Math.min(Math.max(y, JARAK_TEPI), Math.max(maksY, JARAK_TEPI))),
+                    };
+                },
+                kembaliKeAwal() {
+                    simpanPosisi(null);
+                    this.pos = null;
+                },
+
                 // Ukur koneksi ke server (permintaan kecil, tidak disimpan cache)
                 async cek() {
                     if (!navigator.onLine) return this.saatOffline();

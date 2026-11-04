@@ -173,7 +173,8 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
 
     {{-- ===== Tren harian + perlu perhatian ===== --}}
     <div class="grid lg:grid-cols-3 gap-6">
-        <section class="lg:col-span-2 {{ $kartu }} p-5 sm:p-6">
+        {{-- max-lg:overflow-x-clip: keterangan batang di tepi kanan tidak membuat halaman HP bergeser ke samping --}}
+        <section class="lg:col-span-2 {{ $kartu }} p-5 sm:p-6 max-lg:overflow-x-clip">
             <div class="flex items-center justify-between">
                 <h2 class="font-bold text-slate-800">{{ __('Kehadiran per hari') }}</h2>
                 <span class="text-xs text-slate-400">{{ __('% hadir + terlambat') }}</span>
@@ -267,7 +268,41 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
                 <input type="search" name="q" value="{{ $f['q'] }}" placeholder="{{ __('Cari peserta…') }}" class="flex-1 min-w-0 bg-transparent border-0 p-1.5 text-sm outline-none focus:ring-0">
             </form>
         </div>
-        <div class="overflow-x-auto">
+        {{-- ===== HP (di bawah lg): satu peserta = satu kartu ===== --}}
+        <div class="lg:hidden px-3 pb-3 space-y-2.5">
+            @forelse ($tabelPeserta as $p)
+            @php [$batang, $teks] = $warnaPersen($p['persen']); @endphp
+            <article class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+                <a href="{{ route('admin.pendaftaran.show', $p['id']) }}" class="flex items-center gap-3">
+                    @if ($p['foto'])
+                        <img src="{{ $p['foto'] }}" alt="" class="w-11 h-11 shrink-0 rounded-xl object-cover ring-1 ring-slate-200">
+                    @else
+                        <span class="w-11 h-11 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($p['nama'], 0, 1)) }}</span>
+                    @endif
+                    <span class="min-w-0 flex-1">
+                        <span class="block font-bold text-slate-800 truncate">{{ $p['nama'] }}</span>
+                        <span class="block text-[11px] text-slate-400 truncate">{{ $p['nomor'] }}{{ $p['kelas'] ? ' · ' . $p['kelas'] : '' }}</span>
+                    </span>
+                    <span class="shrink-0 text-sm font-extrabold {{ $teks }}">{{ $p['persen'] }}%</span>
+                </a>
+                {{-- Jumlah tiap keterangan, warnanya sama dengan rekap di atas --}}
+                <div class="mt-3 grid grid-cols-5 gap-1.5">
+                    @foreach (Absensi::STATUS as $k => [$l, $singkat])
+                    <span class="rounded-lg ring-1 py-1 text-center {{ $p[$k] ? $gaya[$k][1] : 'bg-slate-50 text-slate-300 ring-slate-100' }}" title="{{ __($l) }}">
+                        <span class="block text-[10px] font-semibold">{{ __($singkat) }}</span>
+                        <span class="block text-sm font-extrabold">{{ $p[$k] }}</span>
+                    </span>
+                    @endforeach
+                </div>
+                <div class="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full {{ $batang }}" style="width: {{ $p['persen'] }}%"></div></div>
+            </article>
+            @empty
+            <p class="rounded-2xl bg-white py-10 text-center text-sm text-slate-400 ring-1 ring-slate-200/80">{{ __('Peserta tidak ditemukan.') }}</p>
+            @endforelse
+        </div>
+
+        {{-- ===== Laptop (lg ke atas): tabel ===== --}}
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-[#f8fbfa] text-[11px] uppercase tracking-wider text-slate-500">
                     <tr>

@@ -103,7 +103,51 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <button type="button" @click="dipilih = []" class="ml-auto text-xs font-semibold text-slate-500 hover:text-slate-700">{{ __('Batal centang') }}</button>
         </div>
 
-        <div class="overflow-x-auto">
+        {{-- ===== HP (di bawah lg): satu santri = satu kartu. Memakai data Vue yang sama dengan tabel (tanpa name), yang dikirim tetap bilah simpan ===== --}}
+        <div class="lg:hidden p-3 space-y-2.5 bg-slate-50/60">
+            <label v-if="tampil.length" class="flex items-center gap-2 px-1 text-xs font-semibold text-slate-500">
+                <input type="checkbox" :checked="semuaDicentang" @change="centangSemua($event.target.checked)" class="w-4 h-4 accent-emerald-600">
+                {{ __('Centang semua yang tampil') }}
+            </label>
+            <article v-for="s in tampil" :key="s.id" class="rounded-2xl p-4 ring-1 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+                :class="sudahDiubah(s) ? 'bg-amber-50 ring-amber-200' : 'bg-white ring-slate-200/80'">
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" :value="s.id" v-model="dipilih" class="w-4 h-4 shrink-0 accent-emerald-600">
+                    <img v-if="s.foto" :src="s.foto" :data-perbesar="s.nama" alt="" class="w-11 h-11 shrink-0 rounded-xl object-cover ring-1 ring-slate-200">
+                    <span v-else class="w-11 h-11 shrink-0 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center" v-text="s.nama.charAt(0).toUpperCase()"></span>
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-slate-800 truncate" v-text="s.nama"></p>
+                        <p class="text-[11px] text-slate-400 truncate" v-text="s.nomor + (s.kelas ? ' · ' + s.kelas : '')"></p>
+                    </div>
+                    <span v-if="sudahDiubah(s)" class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">{{ __('Diubah') }}</span>
+                </div>
+                {{-- Pilihan hasil: tombolnya sama dengan di tabel --}}
+                <div class="mt-3 grid grid-cols-3 rounded-xl bg-slate-100 p-0.5 text-xs font-semibold">
+                    <button type="button" @click="s.status = 'lulus'" class="py-2 rounded-lg transition"
+                        :class="s.status === 'lulus' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-500'">{{ __('Lulus') }}</button>
+                    <button type="button" @click="s.status = 'tidak_lulus'; s.predikat = ''" class="py-2 rounded-lg transition"
+                        :class="s.status === 'tidak_lulus' ? 'bg-rose-600 text-white shadow-sm' : 'text-slate-500'">{{ __('Tidak Lulus') }}</button>
+                    <button type="button" @click="s.status = ''; s.predikat = ''" class="py-2 rounded-lg transition"
+                        :class="s.status === '' ? 'bg-white text-slate-700 shadow-sm' : 'text-slate-400'">{{ __('Belum diisi') }}</button>
+                </div>
+                <div class="mt-2.5 grid grid-cols-[auto_1fr] items-center gap-x-3 gap-y-2">
+                    <span class="text-xs font-semibold text-slate-500">{{ __('Predikat') }}</span>
+                    <select v-model="s.predikat" :disabled="s.status !== 'lulus'"
+                        class="w-full rounded-lg border border-slate-200 px-2 py-1.5 text-sm disabled:bg-slate-50 disabled:text-slate-300">
+                        <option value="">—</option>
+                        <option v-for="p in daftarPredikat" :key="p" :value="p" v-text="p"></option>
+                    </select>
+                    <span class="text-xs font-semibold text-slate-500">{{ __('Catatan') }}</span>
+                    <input type="text" v-model="s.catatan" maxlength="500" placeholder="{{ __('opsional') }}" dir="auto"
+                        class="w-full min-w-0 rounded-lg border border-slate-200 px-2.5 py-1.5 text-sm focus:outline-none focus:border-emerald-400">
+                </div>
+            </article>
+            <p v-if="!tampil.length" class="rounded-2xl bg-white py-10 text-center text-sm text-slate-400 ring-1 ring-slate-200/80"
+                v-text="santri.length ? @js(__('Tidak ada santri yang cocok.')) : @js(__('Belum ada santri yang diterima di sesi ini.'))"></p>
+        </div>
+
+        {{-- ===== Laptop (lg ke atas): tabel ===== --}}
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-slate-50/80 text-left text-xs font-semibold text-slate-500">
                     <tr>
@@ -160,7 +204,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
     {{-- ===== Bilah simpan (muncul bila ada perubahan) ===== --}}
     <form v-if="diubah.length" method="POST" action="{{ route('admin.kelulusan.simpan') }}" @submit="menyimpan = true"
-        class="fixed bottom-5 inset-x-4 md:left-auto md:right-8 md:w-[460px] z-30 flex items-center gap-3 rounded-2xl bg-[#0b332c] text-white px-4 py-3 shadow-2xl">
+        class="fixed bottom-24 lg:bottom-5 inset-x-4 md:left-auto md:right-8 md:w-[460px] z-30 flex items-center gap-3 rounded-2xl bg-[#0b332c] text-white px-4 py-3 shadow-2xl">
         @csrf
         <template v-for="s in diubah" :key="s.id">
             <input type="hidden" :name="'hasil[' + s.id + '][status]'" :value="s.status">

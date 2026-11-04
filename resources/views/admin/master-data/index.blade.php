@@ -25,7 +25,7 @@
                     @foreach ($tabs as $key => $t)
                         <a href="?tab={{ $key }}" role="tab" style="--aksen: {{ $t['accent'] }}"
                             :aria-selected="activeKey === '{{ $key }}'"
-                            class="group flex items-center gap-2.5 whitespace-nowrap rounded-xl py-1.5 pl-1.5 pr-3 text-sm font-medium transition-all duration-200"
+                            class="group flex shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl py-1.5 pl-1.5 pr-3 text-sm font-medium transition-all duration-200"
                             :class="activeKey === '{{ $key }}'
                                 ? 'bg-[linear-gradient(135deg,#0f4238,#0b332c)] text-white shadow-md shadow-[#0b332c]/25'
                                 : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'"
@@ -67,7 +67,116 @@
                         </button>
                     </div>
 
-                    <div class="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
+                    {{-- ===== HP (di bawah lg): satu data = satu kartu =====
+                         Seret-urutkan hanya di laptop. Isi data tetap lewat v-text. --}}
+                    @php $kolomUtama = $t['columns'][0]; @endphp
+                    <div class="lg:hidden space-y-2.5">
+                        {{-- Kosong --}}
+                        <div v-if="!rows['{{ $key }}'].length"
+                            class="rounded-2xl bg-white py-10 text-center text-sm text-slate-400 ring-1 ring-slate-200/80">
+                            <x-master-data.icon name="inbox" size="32" class="mx-auto mb-2 text-gray-300" />
+                            {{ __('Belum ada data :nama.', ['nama' => strtolower($t['singular'])]) }}
+                        </div>
+
+                        <article v-for="(row, index) in rows['{{ $key }}']" :key="'hp' + row.id"
+                            class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
+                            :class="{ 'opacity-60': !row.is_active }">
+                            {{-- baris atas: nomor urut, nama, status --}}
+                            <div class="flex items-center gap-3">
+                                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 font-bold text-emerald-700"
+                                    v-text="index + 1"></span>
+                                <span class="min-w-0 flex-1">
+                                    <span class="block truncate font-bold text-slate-800" v-text="row.{{ $kolomUtama['key'] }}"></span>
+                                    @isset($kolomUtama['sub'])
+                                        <span class="block truncate text-[11px] text-slate-400"
+                                            v-text="'#' + row.id + (row.{{ $kolomUtama['sub'] }} ? ' • ' + row.{{ $kolomUtama['sub'] }} : '')"></span>
+                                    @else
+                                        <span class="block text-[11px] text-slate-400" v-text="'#' + row.id"></span>
+                                    @endisset
+                                </span>
+                                {{-- klik untuk aktif / nonaktif (sama seperti tabel) --}}
+                                <button type="button" class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold active:scale-95 transition"
+                                    :class="row.is_active ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-100 text-gray-500'"
+                                    :title="row.is_active ? @js(__('Aktif — klik untuk nonaktifkan')) : @js(__('Nonaktif — klik untuk aktifkan'))"
+                                    @click="toggle(row)" v-text="row.is_active ? @js(__('Aktif')) : @js(__('Nonaktif'))"></button>
+                            </div>
+
+                            {{-- kolom lainnya: "label: isi" --}}
+                            @if (count($t['columns']) > 1)
+                                <div class="mt-3 space-y-1.5 text-xs">
+                                    @foreach (array_slice($t['columns'], 1) as $col)
+                                        @php $value = 'row.'.$col['key']; @endphp
+                                        <div class="flex items-start gap-2">
+                                            <span class="w-24 shrink-0 text-slate-400">{{ $col['label'] }}</span>
+                                            <div class="min-w-0 flex-1 text-slate-600">
+                                                @switch($col['type'])
+                                                    @case('color')
+                                                        <span class="inline-flex items-center gap-1.5">
+                                                            <span class="h-4 w-4 rounded ring-1 ring-inset ring-black/5" :style="{ backgroundColor: colorHex({{ $value }}) }"></span>
+                                                            <span v-text="{{ $value }} || '-'"></span>
+                                                        </span>
+                                                        @break
+                                                    @case('count')
+                                                        <span class="inline-flex h-5 min-w-6 items-center justify-center rounded-full bg-amber-500 px-2 text-[11px] font-semibold text-white" v-text="{{ $value }} ?? 0"></span>
+                                                        @break
+                                                    @case('badge')
+                                                        <span class="inline-flex rounded-full px-2 py-0.5 text-[11px] font-medium capitalize ring-1 ring-inset"
+                                                            :class="(@js($col['badges']))[{{ $value }}] || 'bg-gray-50 text-gray-700 ring-gray-200'"
+                                                            v-text="{{ $value }}"></span>
+                                                        @break
+                                                    @case('time-range')
+                                                        <span v-text="timeRange(row)"></span>
+                                                        @break
+                                                    @case('tahun-ganda')
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span class="w-4 rounded bg-sky-50 text-center font-semibold text-sky-700">{{ __('M') }}</span>
+                                                            <span v-text="show(row.tahun_ajaran)"></span>
+                                                        </div>
+                                                        <div class="mt-0.5 flex items-center gap-1.5">
+                                                            <span class="w-4 rounded bg-emerald-50 text-center font-semibold text-emerald-700">{{ __('H') }}</span>
+                                                            <span v-text="show(row.tahun_ajaran_hijriyah)"></span>
+                                                        </div>
+                                                        @break
+                                                    @case('periode-ganda')
+                                                        <div class="flex items-center gap-1.5">
+                                                            <span class="w-4 rounded bg-sky-50 text-center font-semibold text-sky-700">{{ __('M') }}</span>
+                                                            <span v-text="periodeMasehi(row)"></span>
+                                                        </div>
+                                                        <div class="mt-0.5 flex items-center gap-1.5">
+                                                            <span class="w-4 rounded bg-emerald-50 text-center font-semibold text-emerald-700">{{ __('H') }}</span>
+                                                            <span v-text="periodeHijriyah(row)"></span>
+                                                        </div>
+                                                        @break
+                                                    @case('suffix')
+                                                        <span v-text="({{ $value }} ?? 0) + ' {{ $col['suffix'] }}'"></span>
+                                                        @break
+                                                    @default
+                                                        <span class="line-clamp-2" v-text="show({{ $value }})"></span>
+                                                @endswitch
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- tombol aksi (sama seperti kolom Aksi di tabel) --}}
+                            <div class="mt-3 grid grid-cols-2 gap-2">
+                                <button type="button" @click="openModal(row)"
+                                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-sky-50 py-2 text-sm font-semibold text-sky-700 active:scale-95 transition">
+                                    <x-master-data.icon name="pencil" size="16" />
+                                    {{ __('Edit') }}
+                                </button>
+                                <button type="button" @click="askDelete(row)"
+                                    class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-50 py-2 text-sm font-semibold text-rose-700 active:scale-95 transition">
+                                    <x-master-data.icon name="trash" size="16" />
+                                    {{ __('Hapus') }}
+                                </button>
+                            </div>
+                        </article>
+                    </div>
+
+                    {{-- ===== Laptop (lg ke atas): tabel ===== --}}
+                    <div class="hidden lg:block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
                         {{-- garis tipis berwarna sesuai menu --}}
                         <div class="h-1 bg-[var(--aksen)]"></div>
                         <div class="overflow-x-auto">
@@ -342,7 +451,7 @@
 
             {{-- ================= Notifikasi ================= --}}
             <div v-if="toast.show"
-                class="fixed bottom-6 right-6 z-[60] flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
+                class="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-[60] flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
                 :class="toast.type === 'error' ? 'bg-red-600' : 'bg-[#0b332c]'">
                 <span v-if="toast.type === 'error'"><x-master-data.icon name="alert" /></span>
                 <span v-else><x-master-data.icon name="check" /></span>

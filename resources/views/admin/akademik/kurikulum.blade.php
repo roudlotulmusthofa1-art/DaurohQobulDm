@@ -124,21 +124,58 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
         </h2>
         <div class="mt-4 grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
             @foreach ($kitabList as $k)
-            @php $nKelas = $terjadwal[$k->id] ?? 0; @endphp
-            <article class="group flex flex-col rounded-2xl ring-1 ring-slate-200 bg-white overflow-hidden hover:ring-emerald-300 hover:shadow-[0_16px_36px_-20px_rgba(11,51,44,0.4)] transition-all">
-                <div class="flex items-center gap-2 px-4 py-2.5 bg-[#f8fbfa] border-b border-slate-100 text-xs font-semibold text-slate-500">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikonStat[0] }}"/></svg>
-                    {{ $bidang?->nama ?? __('Tanpa bidang') }}
-                </div>
-                <div class="flex-1 p-4">
-                    <h3 class="font-bold text-slate-800">{{ $k->nama }}</h3>
-                    @if ($k->nama_arab)<p class="text-sm text-slate-500" dir="rtl">{{ $k->nama_arab }}</p>@endif
-                    <span class="mt-2 inline-block rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {{ $k->tahunAjaran?->is_active ? 'bg-teal-50 text-teal-700 ring-teal-200' : 'bg-slate-50 text-slate-500 ring-slate-200' }}">
-                        {{ $k->tahunAjaran ? __('TA') . ' ' . $k->tahunAjaran->nama : __('Tahun ajaran belum dipilih') }}
-                    </span>
+            @php
+                $nKelas = $terjadwal[$k->id] ?? 0;
+                // Kitab ini diajarkan bulan ini? (kosong = semua bulan)
+                $diBulanIni = $bulanAktif && $k->tahun_ajaran_id === $bulanAktif->tahun_ajaran_id
+                    && (empty($k->bulan_ke) || in_array((int) $bulanAktif->urutan, array_map('intval', $k->bulan_ke), true));
+            @endphp
+            <article class="group relative flex flex-col rounded-3xl bg-white ring-1 ring-slate-200/80 overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.04)] hover:-translate-y-0.5 hover:ring-emerald-300 hover:shadow-[0_20px_40px_-20px_rgba(11,51,44,0.35)] transition-all duration-300">
+                {{-- Garis warna bidang ilmu --}}
+                <div class="h-1.5 {{ $bidang?->warna ?: 'bg-slate-200' }}"></div>
 
-                    <p class="mt-3 text-[11px] font-semibold text-slate-400">{{ __('Bulan ke:') }}</p>
-                    <div class="mt-1 flex flex-wrap gap-1.5">
+                <div class="flex-1 p-5">
+                    {{-- Kepala: ikon + nama + tahun ajaran + label bulan ini --}}
+                    <div class="flex items-start gap-3">
+                        <span class="shrink-0 w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikonStat[0] }}"/></svg>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="font-bold text-slate-800 leading-snug">{{ $k->nama }}</h3>
+                            <p class="mt-0.5 text-[11px] font-semibold {{ $k->tahunAjaran?->is_active ? 'text-teal-600' : 'text-slate-400' }}">
+                                {{ $k->tahunAjaran ? __('TA') . ' ' . $k->tahunAjaran->nama : __('Tahun ajaran belum dipilih') }}{{ $k->tahunAjaran?->is_active ? ' · ' . __('aktif') : '' }}
+                            </p>
+                        </div>
+                        @if ($diBulanIni)
+                        <span class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200">{{ __('Bulan ini') }}</span>
+                        @endif
+                    </div>
+
+                    {{-- Nama Arab besar (font Amiri otomatis) --}}
+                    @if ($k->nama_arab)
+                    <p dir="rtl" class="mt-4 rounded-2xl bg-[#f8fbfa] ring-1 ring-[#0b332c]/[0.05] px-4 py-2 text-right text-2xl leading-relaxed text-[#0b332c]">{{ $k->nama_arab }}</p>
+                    @endif
+
+                    {{-- Deskripsi (maks 2 baris) --}}
+                    @if ($k->deskripsi)
+                    <p class="mt-3 text-xs leading-relaxed text-slate-500 line-clamp-2">{{ $k->deskripsi }}</p>
+                    @endif
+
+                    {{-- Dua kotak info --}}
+                    <div class="mt-4 grid grid-cols-2 gap-2">
+                        <div class="rounded-2xl bg-slate-50 px-3 py-2.5">
+                            <p class="text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ __('Frekuensi') }}</p>
+                            <p class="text-sm font-extrabold text-slate-800">{{ $k->frekuensi }}{{ __('x/minggu') }}</p>
+                        </div>
+                        <div class="rounded-2xl px-3 py-2.5 {{ $nKelas ? 'bg-emerald-50' : 'bg-slate-50' }}">
+                            <p class="text-[10px] font-semibold uppercase tracking-wider truncate {{ $nKelas ? 'text-emerald-600' : 'text-slate-400' }}">{{ __('Jadwal') }}{{ $bulanAktif ? ' · ' . $bulanAktif->nama : '' }}</p>
+                            <p class="text-sm font-extrabold {{ $nKelas ? 'text-emerald-700' : 'text-slate-400' }}">{{ $nKelas ? __(':jumlah kelas', ['jumlah' => $nKelas]) : __('Belum dijadwalkan') }}</p>
+                        </div>
+                    </div>
+
+                    {{-- Bulan ke --}}
+                    <p class="mt-4 text-[10px] font-semibold uppercase tracking-wider text-slate-400">{{ __('Diajarkan bulan ke') }}</p>
+                    <div class="mt-1.5 flex flex-wrap gap-1.5">
                         @forelse ($k->bulan_label as $b)
                             @php $bulanIni = $bulanAktif && $k->tahun_ajaran_id === $bulanAktif->tahun_ajaran_id && (int) $b === (int) $bulanAktif->urutan; @endphp
                             <span class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold ring-1 {{ $bulanIni ? 'bg-amber-400 text-[#0b332c] ring-amber-400' : 'bg-white text-slate-600 ring-slate-200' }}">{{ $b }}</span>
@@ -146,22 +183,16 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                             <span class="rounded-full bg-slate-50 px-2.5 py-0.5 text-[11px] font-semibold text-slate-500 ring-1 ring-slate-200">{{ __('Semua bulan') }}{{ $k->tahunAjaran ? ' (' . __(':jumlah bulan', ['jumlah' => $k->tahunAjaran->bulan->count()]) . ')' : '' }}</span>
                         @endforelse
                     </div>
-
-                    <dl class="mt-3 space-y-1 text-xs">
-                        <div class="flex justify-between"><dt class="text-slate-500">{{ __('Frekuensi:') }}</dt><dd class="font-semibold text-slate-700">{{ $k->frekuensi }}{{ __('x/minggu') }}</dd></div>
-                    </dl>
-
-                    <p class="mt-3 inline-block rounded-lg px-2.5 py-1 text-[11px] font-semibold {{ $nKelas ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-50 text-slate-400' }}">
-                        {{ $nKelas ? __('Dijadwalkan di :jumlah kelas', ['jumlah' => $nKelas]) : __('Belum dijadwalkan') }}{{ $bulanAktif ? ' · ' . $bulanAktif->nama : '' }}
-                    </p>
                 </div>
-                <div class="flex items-center justify-between border-t border-slate-100 px-4 py-2.5">
-                    <button type="button" @click="bukaDialog('dialog-kitab-{{ $k->id }}')" class="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-600 hover:text-sky-700">
+
+                {{-- Tombol --}}
+                <div class="grid grid-cols-2 gap-2 border-t border-slate-100 p-3">
+                    <button type="button" @click="bukaDialog('dialog-kitab-{{ $k->id }}')" class="inline-flex items-center justify-center gap-1.5 rounded-xl bg-sky-50 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>{{ __('Edit') }}
                     </button>
                     <form method="POST" action="{{ route('admin.kurikulum.destroy', $k) }}" @submit="konfirmasi" data-konfirmasi="{{ __('Hapus kitab :nama?', ['nama' => $k->nama]) }}">
                         @csrf @method('DELETE')
-                        <button class="inline-flex items-center gap-1.5 text-sm font-semibold text-rose-600 hover:text-rose-700">
+                        <button class="w-full inline-flex items-center justify-center gap-1.5 rounded-xl bg-rose-50 py-2 text-sm font-semibold text-rose-700 hover:bg-rose-100 transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>{{ __('Hapus') }}
                         </button>
                     </form>

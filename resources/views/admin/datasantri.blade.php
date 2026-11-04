@@ -335,9 +335,74 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
         <p class="mt-1 text-xs text-purple-700/70">{{ __('Centang santri di tabel, pilih kelas dan/atau kamar tujuan, lalu klik Terapkan. Atau klik Cetak QR untuk mencetak kartu santri yang dicentang.') }}</p>
     </div>
 
-    {{-- ================= TABEL SANTRI ================= --}}
+    {{-- ===== HP (di bawah lg): satu santri = satu kartu ===== --}}
+    <div class="lg:hidden space-y-2.5 mx-4 md:mx-10">
+        {{-- Centang semua (hanya saat kelola massal) --}}
+        <label v-if="kelolaMassal && santriTersaring.length" class="flex items-center gap-2 px-1 text-sm text-slate-600 cursor-pointer">
+            <input type="checkbox" v-model="pilihSemua" @change="toggleSemua" class="w-4 h-4 accent-emerald-600">
+            <span>{{ __('Pilih semua') }}</span>
+        </label>
+
+        <article v-for="santri in santriTersaring" :key="santri.id"
+            class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+            {{-- Baris atas: centang, foto, nama, status --}}
+            <div class="flex items-center gap-3">
+                <input v-if="kelolaMassal" type="checkbox" :value="santri.id" v-model="terpilih"
+                    class="w-4 h-4 shrink-0 accent-emerald-600" :aria-label="@js(__('Pilih')) + ' ' + santri.nama">
+                <img data-perbesar v-if="santri.foto" :src="santri.foto" :alt="@js(__('Foto')) + ' ' + santri.nama" v-on:error="santri.foto = null" loading="lazy"
+                    class="w-11 h-11 shrink-0 rounded-xl object-cover">
+                <span v-else class="w-11 h-11 shrink-0 rounded-xl bg-teal-50 text-teal-700 font-bold flex items-center justify-center">@{{ (santri.nama || '?').charAt(0).toUpperCase() }}</span>
+                <span class="min-w-0 flex-1">
+                    <span class="block font-bold text-slate-800 truncate">@{{ santri.nama }}</span>
+                    <span v-if="santri.nama_arab" class="block text-sm text-slate-400 truncate" dir="rtl" lang="ar">@{{ santri.nama_arab }}</span>
+                </span>
+                <span class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+                    :class="santri.status === 'aktif' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'"
+                    v-text="({ 'aktif': @js(__('aktif')), 'belum punya akun': @js(__('belum punya akun')) })[santri.status] || santri.status"></span>
+            </div>
+
+            {{-- Keterangan singkat: kelas, kamar, kasur, tanggal masuk, wali --}}
+            <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
+                <span v-if="santri.kelas" class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-md"
+                    :class="warnaBadgeKelas(santri.kelas)">@{{ santri.kelas }}</span>
+                <span v-else class="text-amber-600">{{ __('Kelas') }}: {{ __('Belum dipilih') }}</span>
+                <span class="inline-flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5V21H3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6"/></svg>
+                    <span v-if="santri.kamar">@{{ santri.kamar }}</span>
+                    <span v-else class="text-amber-600">{{ __('Belum dipilih') }}</span>
+                </span>
+                <span v-if="santri.nomor_kasur" class="inline-flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 18V7m0 7h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/></svg>
+                    {{ __('No. Kasur') }} @{{ santri.nomor_kasur }}
+                </span>
+                <span v-if="santri.tanggal_masuk" class="inline-flex items-center gap-1">
+                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                    @{{ santri.tanggal_masuk }}
+                </span>
+                <span v-if="santri.wali" class="inline-flex items-center gap-1 min-w-0">
+                    <svg class="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
+                    <span class="truncate">@{{ santri.wali }}</span>
+                </span>
+            </div>
+
+            {{-- Tombol aksi --}}
+            <div class="mt-3 grid grid-cols-3 gap-2">
+                <a :href="santri.detail_url" class="inline-flex items-center justify-center rounded-xl bg-teal-50 py-2 text-sm font-semibold text-teal-700 active:scale-95 transition">{{ __('Lihat detail') }}</a>
+                <a :href="urlKartuQr + '?ids=' + santri.id" target="_blank" rel="noopener"
+                    class="inline-flex items-center justify-center rounded-xl bg-emerald-50 py-2 text-sm font-semibold text-emerald-700 active:scale-95 transition">{{ __('Cetak QR') }}</a>
+                <button type="button" @click="hapus(santri)" :disabled="menghapus === santri.id"
+                    class="inline-flex items-center justify-center rounded-xl bg-rose-50 py-2 text-sm font-semibold text-rose-700 active:scale-95 transition disabled:opacity-40">{{ __('Hapus') }}</button>
+            </div>
+        </article>
+
+        {{-- Kosong --}}
+        <p v-if="santriTersaring.length === 0" class="rounded-2xl bg-white py-10 text-center text-sm text-slate-400 ring-1 ring-slate-200/80"
+            v-text="santriList.length === 0 ? @js(__('Belum ada santri. Santri muncul di sini setelah pendaftarannya diterima.')) : @js(__('Tidak ada santri yang cocok dengan pencarian.'))"></p>
+    </div>
+
+    {{-- ================= TABEL SANTRI (laptop, lg ke atas) ================= --}}
     <div
-        class="bg-white border border-ribath-green-light rounded-xl overflow-hidden shadow-sm mx-4 md:mx-10 lg:mx-20">
+        class="hidden lg:block bg-white border border-ribath-green-light rounded-xl overflow-hidden shadow-sm mx-4 md:mx-10 lg:mx-20">
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead>
@@ -538,7 +603,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
     </div>
 
     {{-- ================= NOTIFIKASI ================= --}}
-    <div v-if="toast.show" class="fixed bottom-6 right-6 z-[60] rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
+    <div v-if="toast.show" class="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-[60] rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
         :class="toast.error ? 'bg-red-600' : 'bg-[#0b332c]'" v-text="toast.text"></div>
 </div>
 

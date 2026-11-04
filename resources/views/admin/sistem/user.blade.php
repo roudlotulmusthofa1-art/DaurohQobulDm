@@ -58,7 +58,43 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             </select>
         </div>
 
-        <div class="overflow-x-auto">
+        {{-- ===== HP (di bawah lg): satu user = satu kartu ===== --}}
+        <div class="lg:hidden space-y-2.5 p-3 bg-slate-50/60">
+            <article v-for="u in tampil" :key="u.id" class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+                <div class="flex items-center gap-3">
+                    <span class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center text-sm font-bold ring-1" :class="gaya(u.warna)" v-text="inisial(u.nama)"></span>
+                    <span class="min-w-0 flex-1">
+                        <span class="flex items-center gap-1 min-w-0">
+                            <span class="font-bold text-slate-800 truncate" v-text="u.nama"></span>
+                            <span v-if="u.saya" class="shrink-0 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold">{{ __('Anda') }}</span>
+                        </span>
+                        <span class="block text-[11px] text-slate-400 truncate" v-text="u.email"></span>
+                    </span>
+                    <span class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ring-1" :class="gaya(u.warna)">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                        <span v-text="u.role"></span>
+                    </span>
+                </div>
+                <div v-if="u.daftar" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
+                    <span class="inline-flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
+                        <span v-text="u.daftar"></span>
+                    </span>
+                </div>
+                {{-- Tombol aksi: sama dengan kolom Aksi di tabel --}}
+                <div v-if="(bisaUbah && u.dasar === 'admin' && !u.saya) || (bisaLihat && (u.dasar === 'asatid' || u.dasar === 'siswa')) || u.detail" class="mt-3 flex gap-2">
+                    <button v-if="bisaUbah && u.dasar === 'admin' && !u.saya" type="button" @click="bukaUbah(u)"
+                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-sky-50 py-2 text-sm font-semibold text-sky-700 active:scale-95 transition">{{ __('Ganti Role') }}</button>
+                    <button v-if="bisaLihat && (u.dasar === 'asatid' || u.dasar === 'siswa')" type="button" @click="masukSebagai(u)"
+                        class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-amber-50 py-2 text-sm font-semibold text-amber-800 active:scale-95 transition">{{ __('Masuk sebagai') }}</button>
+                    <a v-if="u.detail" :href="u.detail" class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-teal-50 py-2 text-sm font-semibold text-teal-700 active:scale-95 transition">{{ __('Lihat Data') }}</a>
+                </div>
+            </article>
+            <p v-if="!tampil.length" class="rounded-2xl bg-white py-10 text-center text-sm text-slate-400 ring-1 ring-slate-200/80">{{ __('Tidak ada user yang cocok.') }}</p>
+        </div>
+
+        {{-- ===== Laptop (lg ke atas): tabel ===== --}}
+        <div class="hidden lg:block overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                     <tr>

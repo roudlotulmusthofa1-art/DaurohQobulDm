@@ -121,13 +121,13 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             <input type="search" v-model.trim="cari" placeholder="{{ __('Cari jadwal (kitab, ustadz, kelas)…') }}" class="flex-1 bg-transparent border-0 py-2.5 text-sm outline-none focus:ring-0">
         </label>
         <label class="flex items-center gap-2 text-sm text-slate-600">{{ __('Kelas:') }}
-            <select @change="pindahHalaman" class="rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm">
+            <select @change="pindahHalaman" class="min-w-0 flex-1 lg:flex-none rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm">
                 <option value="{{ $tautan(['kelas' => null]) }}">{{ __('Semua Kelas') }}</option>
                 @foreach ($kelasList as $k)<option value="{{ $tautan(['kelas' => $k->id]) }}" @selected((string) $kelasFilter === (string) $k->id)>{{ $k->nama }}</option>@endforeach
             </select></label>
-        <div class="flex gap-1.5">
+        <div class="flex flex-wrap gap-1.5">
             @foreach (['grid' => __('Grid'), 'kelas' => __('Per Kelas'), 'ustadz' => __('Per Ustadz')] as $kode => $nama)
-            <a href="{{ $tautan(['tampilan' => $kode]) }}" class="rounded-xl px-4 py-2.5 text-sm font-semibold transition-colors {{ $tampilan === $kode ? 'bg-[#0b332c] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">{{ $nama }}</a>
+            <a href="{{ $tautan(['tampilan' => $kode]) }}" class="flex-1 lg:flex-none text-center whitespace-nowrap rounded-xl px-3 sm:px-4 py-2.5 text-sm font-semibold transition-colors {{ $tampilan === $kode ? 'bg-[#0b332c] text-white' : 'bg-slate-100 text-slate-600 hover:bg-slate-200' }}">{{ $nama }}</a>
             @endforeach
         </div>
     </section>
@@ -138,11 +138,46 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
 
     {{-- ===== Tampilan GRID (digambar Vue dari data) ===== --}}
     @if ($tampilan === 'grid' && $waktuList->isNotEmpty())
-    <p class="mb-5 flex items-center gap-2 px-1 text-xs text-slate-500">
+    <p class="mb-5 hidden lg:flex items-center gap-2 px-1 text-xs text-slate-500">
         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/></svg>
         <span>{{ __('Geser kartu ke hari/jam lain untuk memindahkan jadwal, lalu klik') }} <b>{{ __('Simpan') }}</b>. {{ __('Klik ikon pensil untuk mengubah isi jadwal.') }}</span>
     </p>
-    <section class="{{ $kartu }} overflow-x-auto">
+    {{-- ===== HP (di bawah lg): pilih hari, lalu daftar jam pelajaran hari itu ===== --}}
+    <div class="lg:hidden space-y-3">
+        <p class="px-1 text-xs text-slate-500">{{ __('Ketuk jadwal untuk mengubah, atau ketuk slot kosong untuk menambah.') }}</p>
+        {{-- Deretan hari (bisa digeser ke samping) --}}
+        <div class="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+            <button type="button" v-for="(namaHari, nomor) in hari" :key="nomor" @click="hariDipilih = Number(nomor)"
+                class="shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition-colors"
+                :class="hariDipilih === Number(nomor) ? 'bg-[#0b332c] text-white' : 'bg-white text-slate-600 ring-1 ring-slate-200'"
+                v-text="namaHari"></button>
+        </div>
+        {{-- Satu kartu = satu jam pelajaran di hari terpilih --}}
+        <article v-for="w in waktu" :key="w.id" class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)] flex gap-3">
+            <div class="w-16 shrink-0 self-start rounded-xl bg-emerald-50 text-emerald-700 px-2 py-2 text-center">
+                <p class="text-xs font-bold leading-tight" v-text="w.nama"></p>
+                <p v-if="w.jam" class="mt-0.5 text-[10px] tabular-nums" v-text="w.jam.split('–')[0]"></p>
+            </div>
+            <div class="min-w-0 flex-1 space-y-2">
+                {{-- Ketuk jadwal = buka form ubah (sama seperti ikon pensil di grid) --}}
+                <button type="button" v-for="j in isiSlot(hariDipilih, w.id)" :key="j.id" @click="bukaUbah(j)"
+                    class="block w-full rounded-xl px-3 py-2 text-left ring-1" :class="[warnaKartu(j)[0], { 'ring-2 ring-rose-500': pesanBentrok[j.id] }]">
+                    <span class="block text-sm font-bold leading-tight" :class="warnaKartu(j)[1]" v-text="j.kitab || @js(__('Tanpa kitab'))"></span>
+                    <span class="mt-0.5 block text-[11px] font-semibold text-slate-700" v-text="j.kelas"></span>
+                    <span class="mt-0.5 block text-xs" :class="j.ustadz ? 'text-slate-600' : 'text-amber-600'" v-text="j.ustadz || @js(__('Ustadz belum ditentukan'))"></span>
+                    <span v-if="j.ustadz_arab" dir="rtl" lang="ar" class="block text-right text-sm text-slate-600" v-text="j.ustadz_arab"></span>
+                    <span v-if="pesanBentrok[j.id]" class="mt-0.5 block text-[10px] text-rose-600" v-text="pesanBentrok[j.id]"></span>
+                </button>
+                {{-- Ketuk slot = buka form tambah untuk hari & jam ini --}}
+                <button type="button" @click="bukaTambah(hariDipilih, w.id)"
+                    class="w-full rounded-xl border border-dashed border-slate-200 py-2 text-xs text-slate-400 hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-600"
+                    v-text="isiSlot(hariDipilih, w.id).length ? '+' : @js(__('Kosong'))"></button>
+            </div>
+        </article>
+    </div>
+
+    {{-- Laptop: grid jam × hari --}}
+    <section class="{{ $kartu }} overflow-x-auto hidden lg:block">
         {{-- table-fixed: semua kolom hari sama lebar, sel berbentuk agak kotak --}}
         <table class="w-full min-w-[1040px] table-fixed border-collapse text-sm">
             <thead>
@@ -179,7 +214,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
     {{-- Bar simpan: muncul setelah ada kartu yang digeser --}}
     <form v-show="pindahan.length" style="display: none" method="POST" action="{{ route('admin.jadwal.pindah') }}"
         @submit="adaPerubahan = false"
-        class="fixed bottom-5 left-1/2 z-40 -translate-x-1/2 w-[min(640px,calc(100vw-2rem))] flex items-center gap-3 rounded-2xl bg-[#0b332c] px-4 py-3 text-white shadow-2xl shadow-[#0b332c]/40 ring-1 ring-white/10">
+        class="fixed bottom-24 lg:bottom-5 left-1/2 z-40 -translate-x-1/2 w-[min(640px,calc(100vw-2rem))] flex items-center gap-3 rounded-2xl bg-[#0b332c] px-4 py-3 text-white shadow-2xl shadow-[#0b332c]/40 ring-1 ring-white/10">
         @csrf
         <input type="hidden" name="bulan_ajaran_id" value="{{ $bulan->id }}">
         <template v-for="(j, i) in pindahan" :key="j.id">
@@ -226,7 +261,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
 @if ($bulan)
 {{-- ===== Dialog tambah / ubah jadwal (isian memakai v-model ke data "form") ===== --}}
 <dialog id="dialog-jadwal" ref="dialog-jadwal" class="dialog-akademik" @click.self="tutupDialog">
-    <form method="POST" :action="form.id ? alamatUbah.replace('__ID__', form.id) : '{{ route('admin.jadwal.store') }}'" class="p-6 space-y-4">
+    <form method="POST" :action="form.id ? alamatUbah.replace('__ID__', form.id) : '{{ route('admin.jadwal.store') }}'" class="p-5 sm:p-6 space-y-4">
         @csrf
         <input type="hidden" name="_method" :value="form.id ? 'PUT' : 'POST'">
         <input type="hidden" name="bulan_ajaran_id" value="{{ $bulan->id }}">
@@ -266,7 +301,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
 
 {{-- ===== Dialog salin jadwal ===== --}}
 <dialog id="dialog-salin" ref="dialog-salin" class="dialog-akademik" @click.self="tutupDialog">
-    <form method="POST" action="{{ route('admin.jadwal.salin') }}" class="p-6 space-y-4">
+    <form method="POST" action="{{ route('admin.jadwal.salin') }}" class="p-5 sm:p-6 space-y-4">
         @csrf
         <input type="hidden" name="ke" value="{{ $bulan->id }}">
         <div class="flex items-center justify-between">
@@ -295,7 +330,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
 
 {{-- ===== Dialog ganti ustadz ===== --}}
 <dialog id="dialog-ganti" ref="dialog-ganti" class="dialog-akademik" @click.self="tutupDialog">
-    <form method="POST" action="{{ route('admin.jadwal.ganti-ustadz') }}" class="p-6 space-y-4">
+    <form method="POST" action="{{ route('admin.jadwal.ganti-ustadz') }}" class="p-5 sm:p-6 space-y-4">
         @csrf
         <input type="hidden" name="bulan_ajaran_id" value="{{ $bulan->id }}">
         <div class="flex items-center justify-between">
@@ -386,6 +421,8 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                     tampilan: @json($tampilan),
                     kelasFilter: @json($kelasFilter),
                     cari: '',
+                    // Hari yang dipilih di HP: hari ini (Ahad = 7) bila ada, kalau tidak hari pertama
+                    hariDipilih: HARI[new Date().getDay() || 7] ? (new Date().getDay() || 7) : Number(Object.keys(HARI)[0]),
                     seret: null,        // kartu yang sedang digeser
                     sorot: null,        // slot "hari-jam" yang sedang dilewati kartu
                     adaPerubahan: true, // false saat form Simpan dikirim (agar tidak ditanya "tinggalkan halaman?")
@@ -449,6 +486,10 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 isiSlot(hari, waktu) {
                     return this.jadwalTampil.filter((j) => j.hari === hari && j.waktu === waktu)
                         .sort((a, b) => a.warna - b.warna || a.kelas_id - b.kelas_id);
+                },
+                // Warna kartu kelas (dipakai daftar HP)
+                warnaKartu(j) {
+                    return WARNA[j.warna] ?? WARNA[0];
                 },
                 sudahDipindah(j) {
                     return j.hari !== j.asalHari || j.waktu !== j.asalWaktu;

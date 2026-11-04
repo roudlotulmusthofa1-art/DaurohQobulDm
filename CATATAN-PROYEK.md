@@ -76,6 +76,21 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 ### Data Admin: Edit Data
 - **Tombol Edit Data** di detail Data Admin (khusus Super Admin). Bisa mengubah nama, nama Arab, nomor WhatsApp, alamat, foto, email, dan password.
 
+### Admin versi HP (layout)
+- **Cara kerja:** dilihat dari **lebar layar**. Di bawah 1024px (`lg`), sidebar disembunyikan, bilah atas jadi hijau tua ringkas (tombol kembali + judul halaman), dan muncul menu bawah: Beranda, PSB, Santri, Pesan, Menu.
+- **Tombol Menu** membuka lembar berisi semua menu sesuai izin role, Lihat Website, dan Keluar.
+- **File penting:** `resources/views/layouts/admin.blade.php`, `resources/views/partials/menu-bawah-admin.blade.php`.
+- Dashboard tetap punya file HP sendiri (`admin/dashboard-hp.blade.php`).
+- **Tabel jadi kartu (pola):** di atas tabel ada blok `lg:hidden` berisi kartu per baris; tabelnya diberi `hidden lg:block`. Tombol di kartu memakai aksi/handler yang sama dengan tabel. Dipakai di Data Masuk, Data Santri, Buku Kas, Kelulusan, Laporan Absensi, Master Data, Daftar User.
+- **Jadwal Mengajar di HP:** pilihan hari (bisa digeser) + daftar jam pelajaran hari itu. Hapus & geser jadwal hanya di laptop atau tampilan Per Kelas/Per Ustadz.
+- **Aturan grid untuk HP:** grid satu kolom tulis `grid grid-cols-1 md:grid-cols-2` (bukan `grid md:grid-cols-2`), supaya teks panjang (email) tidak mendorong kotak lebih lebar dari layar.
+- Bilah simpan & toast yang menempel di bawah dinaikkan di HP (`bottom-24 lg:bottom-…`) agar tidak tertutup menu bawah.
+
+### Tombol koneksi & muat ulang bisa ditarik
+- Satu file untuk semua halaman: `resources/views/partials/status-koneksi.blade.php`.
+- Bisa ditarik (jari/mouse); saat dilepas menempel ke sisi kiri/kanan terdekat. Posisi diingat per perangkat (localStorage `posisi_status_koneksi`).
+- Klik dua kali pegangan (titik-titik) = kembali ke posisi awal.
+
 ### Header halaman admin seragam
 - **Gaya header:** kartu hijau tua dengan label kecil, judul, keterangan, dan tombol di kanan.
 - **Komponen bersama:** `resources/views/components/header-admin.blade.php`. Contoh pemakaian dan daftar gaya tombol ada di bagian atas file itu.
@@ -111,4 +126,4 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Halaman publik dan login** belum punya tombol bahasa dan belum berbalik kanan-ke-kiri.
 - **Cache terjemahan:** kalau tab Bahasa dibuka sebelum tabel `terjemahan` dibuat di server, daftarnya bisa "tersangkut kosong". Untuk sementara jalankan `php artisan optimize:clear`. Kodenya bisa diperbaiki supaya tidak terjadi lagi.
 - **Foto 404 di server:** file fotonya tidak ada di server. Ini bukan penyebab gagal simpan.
-- **Semua halaman admin versi HP:** sekarang baru Dasbor. Rencananya semua halaman diganti sekaligus.
+- **Semua halaman admin versi HP:** Tahap 1–3 selesai (2026-11-05). Sisa kecil: hapus/geser jadwal di tampilan per hari Jadwal (HP) belum ada; beberapa kata baru belum diterjemahkan Arab ("Pilih semua", "Diubah", "Nonaktif").
