@@ -214,7 +214,9 @@ class NotifikasiAdmin
             $n = $saring($diterima())->count();
             if ($n > 0) {
                 $total += $n;
-                $items[] = static::item($jenis, str_replace(':n', '<b>' . $n . '</b>', $teks), 'Lihat data santri', $urlSantri, null, "{$jenis}:{$n}", $n);
+                // Persyaratan: langsung buka Data Santri yang tersaring "Belum lengkap"
+                $url = $jenis === 'syarat_belum_lengkap' && $urlSantri ? $urlSantri . '?syarat=kurang' : $urlSantri;
+                $items[] = static::item($jenis, str_replace(':n', '<b>' . $n . '</b>', $teks), 'Lihat data santri', $url, null, "{$jenis}:{$n}", $n);
             }
         }
 

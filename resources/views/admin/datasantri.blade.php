@@ -241,6 +241,44 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
         </transition>
     </div>
 
+    {{-- ================= PERSYARATAN BELUM LENGKAP =================
+         Ringkasan syarat yang belum dicentang (dicentang di detail santri > Persyaratan & Ketentuan).
+         Klik tombol syarat = saring tabel ke santri yang belum memenuhi syarat itu (filter.syarat). --}}
+    <section v-if="santriList.length" class="mb-4 mx-4 md:mx-10 lg:mx-20 rounded-2xl bg-white p-4 sm:p-5 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]">
+        <div class="flex items-center gap-3">
+            <span class="w-11 h-11 shrink-0 rounded-xl flex items-center justify-center"
+                :class="jumlahSyaratKurang ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z"/></svg>
+            </span>
+            <div class="min-w-0 flex-1">
+                <p class="font-bold text-slate-800" v-text="jumlahSyaratKurang ? @js(__('Persyaratan belum lengkap')) : @js(__('Semua persyaratan sudah lengkap'))"></p>
+                <p class="text-xs text-slate-500">
+                    <span v-text="jumlahSyaratKurang + ' ' + @js(__('dari')) + ' ' + santriList.length + ' ' + @js(__('santri'))"></span>
+                    <span v-if="jumlahSyaratKurang"> · {{ __('klik syarat untuk melihat siapa saja') }}</span>
+                </p>
+            </div>
+            <div class="hidden sm:block w-28 h-2 shrink-0 rounded-full bg-slate-100 overflow-hidden" :title="persenSyaratLengkap + '% ' + @js(__('lengkap'))">
+                <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500" :style="{ width: persenSyaratLengkap + '%' }"></div>
+            </div>
+        </div>
+        <div v-if="jumlahSyaratKurang" class="mt-3 flex flex-wrap gap-2">
+            <button type="button" @click="saringSyarat('kurang')"
+                class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 transition-colors"
+                :class="filter.syarat === 'kurang' ? 'bg-[#0b332c] text-white ring-[#0b332c]' : 'bg-white text-slate-700 ring-slate-200 hover:bg-slate-50'">
+                {{ __('Semua belum lengkap') }}
+                <span class="rounded-full px-1.5 text-[11px]" :class="filter.syarat === 'kurang' ? 'bg-white/20' : 'bg-slate-100'" v-text="jumlahSyaratKurang"></span>
+            </button>
+            <button v-for="s in ringkasSyarat" :key="s.kolom" type="button" @click="s.kurang && saringSyarat(s.kolom)"
+                class="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ring-1 transition-colors"
+                :class="filter.syarat === s.kolom ? 'bg-rose-600 text-white ring-rose-600'
+                    : (s.kurang ? 'bg-rose-50 text-rose-700 ring-rose-200 hover:bg-rose-100' : 'bg-emerald-50 text-emerald-700 ring-emerald-200 cursor-default')">
+                <span v-text="s.nama"></span>
+                <span class="rounded-full px-1.5 text-[11px]" :class="filter.syarat === s.kolom ? 'bg-white/20' : 'bg-white/70'"
+                    v-text="s.kurang ? s.kurang : @js(__('lengkap'))"></span>
+            </button>
+        </div>
+    </section>
+
     {{-- ================= SEARCH + FILTER ================= --}}
     <div class="flex flex-col sm:flex-row gap-3 mb-4 mx-4 md:mx-10 lg:mx-20">
         <div class="relative flex-1">
@@ -272,7 +310,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 {{-- ================= PANEL FILTER ================= --}}
     <div v-if="filterTerbuka"
         class="mb-4 mx-4 md:mx-10 lg:mx-20 rounded-xl border border-ribath-green-light bg-white px-4 py-3 shadow-sm">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <label class="text-xs font-medium text-gray-500">{{ __('Kelas') }}
                 <select v-model="filter.kelas"
                     class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-ribath-green-light">
@@ -297,10 +335,19 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     <option value="belum punya akun">{{ __('Belum punya akun') }}</option>
                 </select>
             </label>
+            <label class="text-xs font-medium text-gray-500">{{ __('Persyaratan') }}
+                <select v-model="filter.syarat"
+                    class="mt-1 w-full rounded-lg border border-gray-300 px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-ribath-green-light">
+                    <option value="">{{ __('Semua') }}</option>
+                    <option value="kurang">{{ __('Belum lengkap') }}</option>
+                    <option value="lengkap">{{ __('Sudah lengkap') }}</option>
+                    <option v-for="(nama, kolom) in syaratList" :key="kolom" :value="kolom" v-text="@js(__('Belum:')) + ' ' + nama"></option>
+                </select>
+            </label>
         </div>
         <div class="mt-3 flex items-center justify-between text-xs text-gray-500">
             <span>{{ __('Menampilkan') }} <b v-text="santriTersaring.length"></b> {{ __('dari') }} <b v-text="santriList.length"></b> {{ __('santri') }}</span>
-            <button type="button" @click="filter = { kelas: '', kamar: '', status: '' }"
+            <button type="button" @click="filter = { kelas: '', kamar: '', status: '', syarat: '' }"
                 class="font-medium text-red-600 hover:underline">{{ __('Reset filter') }}</button>
         </div>
     </div>
@@ -385,6 +432,15 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 </span>
             </div>
 
+            {{-- Persyaratan: angka terpenuhi + nama syarat yang belum --}}
+            <div class="mt-3 flex flex-wrap items-center gap-1.5">
+                <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold"
+                    :class="santri.syarat_kurang.length ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'"
+                    v-text="teksSyarat(santri)"></span>
+                <span v-for="kolom in santri.syarat_kurang" :key="kolom"
+                    class="rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-medium text-rose-700 ring-1 ring-rose-100" v-text="syaratList[kolom] || kolom"></span>
+            </div>
+
             {{-- Tombol aksi --}}
             <div class="mt-3 grid grid-cols-3 gap-2">
                 <a :href="santri.detail_url" class="inline-flex items-center justify-center rounded-xl bg-teal-50 py-2 text-sm font-semibold text-teal-700 active:scale-95 transition">{{ __('Lihat detail') }}</a>
@@ -431,6 +487,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <th class="px-4 py-5 font-medium text-base whitespace-nowrap">{{ __('No. Kasur') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Tanggal Masuk') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Wali Santri') }}</th>
+                        <th class="px-4 py-5 font-medium text-base">{{ __('Persyaratan') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Status') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Aksi') }}</th>
                     </tr>
@@ -493,6 +550,14 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         </td>
                         <td class="px-4 py-3 text-gray-600">@{{ santri.tanggal_masuk }}</td>
                         <td class="px-4 py-3 text-gray-400">@{{ santri.wali || '-' }}</td>
+                        {{-- Persyaratan: 3/5 + syarat yang belum dicentang --}}
+                        <td class="px-4 py-3 min-w-[11rem]">
+                            <span class="inline-block rounded-full px-2 py-0.5 text-[11px] font-bold"
+                                :class="santri.syarat_kurang.length ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'"
+                                v-text="teksSyarat(santri)"></span>
+                            <span v-if="santri.syarat_kurang.length" class="mt-1 block text-[11px] leading-snug text-rose-600"
+                                v-text="@js(__('Belum:')) + ' ' + santri.syarat_kurang.map(k => syaratList[k] || k).join(', ')"></span>
+                        </td>
                         <td class="px-4 py-3">
                             <span class="inline-block text-xs font-medium px-2.5 py-1 rounded-md"
                                 :class="santri.status === 'aktif' ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-500'"
@@ -535,7 +600,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     </tr>
 
                     <tr v-if="santriTersaring.length === 0">
-                        <td :colspan="kelolaMassal ? 10 : 9" class="px-4 py-10 text-center text-gray-400 text-sm">
+                        <td :colspan="kelolaMassal ? 11 : 10" class="px-4 py-10 text-center text-gray-400 text-sm">
                             <span v-text="santriList.length === 0 ? @js(__('Belum ada santri. Santri muncul di sini setelah pendaftarannya diterima.')) : @js(__('Tidak ada santri yang cocok dengan pencarian.'))"></span>
                         </td>
                     </tr>
@@ -659,7 +724,9 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 kamarOptions: @json($kamarOptions),
                 pencarian: '',
                 filterTerbuka: false,
-                filter: { kelas: '', kamar: '', status: '' },
+                syaratList: @json($syaratList), // { kolom: 'Nama syarat' }
+                // syarat: '' | 'kurang' | 'lengkap' | kolom syarat (mis. 'syarat_paspor'). Bisa dari alamat: ?syarat=kurang
+                filter: { kelas: '', kamar: '', status: '', syarat: new URLSearchParams(location.search).get('syarat') || '' },
                 kelolaMassal: false,
                 pilihSemua: false,
                 terpilih: [],
@@ -742,6 +809,21 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
             totalSantri() {
                 return this.santriList.length;
             },
+            // ===== Persyaratan =====
+            // Jumlah santri yang masih punya syarat belum dicentang
+            jumlahSyaratKurang() {
+                return this.santriList.filter(santri => santri.syarat_kurang.length).length;
+            },
+            persenSyaratLengkap() {
+                const total = this.santriList.length;
+                return total ? Math.round((total - this.jumlahSyaratKurang) / total * 100) : 0;
+            },
+            // Per syarat: berapa santri yang belum memenuhinya (urut dari yang paling banyak kurang)
+            ringkasSyarat() {
+                return Object.entries(this.syaratList)
+                    .map(([kolom, nama]) => ({ kolom, nama, kurang: this.santriList.filter(s => s.syarat_kurang.includes(kolom)).length }))
+                    .sort((a, b) => b.kurang - a.kurang);
+            },
             santriTersaring() {
                         const kata = rapikan(this.pencarian);
                         const f = this.filter;
@@ -758,6 +840,11 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         // 3) Filter status
                         if (f.status && santri.status !== f.status) return false;
 
+                        // 3b) Filter persyaratan
+                        if (f.syarat === 'kurang' && !santri.syarat_kurang.length) return false;
+                        if (f.syarat === 'lengkap' && santri.syarat_kurang.length) return false;
+                        if (f.syarat.startsWith('syarat_') && !santri.syarat_kurang.includes(f.syarat)) return false;
+
                         // 4) Kotak pencarian
                         if (!kata) return true;
                         return [santri.nama, santri.nama_arab, santri.nomor, santri.kelas, santri.kamar, santri.wali]
@@ -770,6 +857,18 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         },
         },
         methods: {
+            // ----- Persyaratan -----
+            // Klik tombol syarat di kotak ringkasan: saring tabel (klik lagi = batal)
+            saringSyarat(nilai) {
+                this.filter.syarat = this.filter.syarat === nilai ? '' : nilai;
+            },
+            // "3/5" atau "5/5 lengkap"
+            teksSyarat(santri) {
+                const total = Object.keys(this.syaratList).length;
+                const terpenuhi = total - santri.syarat_kurang.length;
+                return terpenuhi + '/' + total + (santri.syarat_kurang.length ? '' : ' ' + @js(__('lengkap')));
+            },
+
             // ----- Kartu kelas / kamar -----
             bukaGrup(jenis, id) {
                 this.grupAktif = this.aktif(jenis, id) ? null : { jenis, id };

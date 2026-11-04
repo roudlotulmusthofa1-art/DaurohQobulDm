@@ -86,6 +86,12 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Aturan grid untuk HP:** grid satu kolom tulis `grid grid-cols-1 md:grid-cols-2` (bukan `grid md:grid-cols-2`), supaya teks panjang (email) tidak mendorong kotak lebih lebar dari layar.
 - Bilah simpan & toast yang menempel di bawah dinaikkan di HP (`bottom-24 lg:bottom-…`) agar tidak tertutup menu bawah.
 
+### Data Santri: cek persyaratan belum lengkap
+- Kotak "Persyaratan belum lengkap" di atas pencarian: jumlah santri + satu tombol per syarat (klik = saring tabel).
+- Saringan "Persyaratan" di panel Filter; kolom "Persyaratan" (3/5 + nama syarat yang belum) di tabel & kartu HP.
+- Alamat `admin/santri?syarat=kurang` langsung tersaring; notifikasi lonceng "Persyaratan belum lengkap" memakai alamat ini.
+- Data dari `AdminSantriController::baris()` → `syarat_kurang`. Syarat baru cukup ditambah di `PendaftaranSiswa::SYARAT`.
+
 ### Tombol koneksi & muat ulang bisa ditarik
 - Satu file untuk semua halaman: `resources/views/partials/status-koneksi.blade.php`.
 - Bisa ditarik (jari/mouse); saat dilepas menempel ke sisi kiri/kanan terdekat. Posisi diingat per perangkat (localStorage `posisi_status_koneksi`).

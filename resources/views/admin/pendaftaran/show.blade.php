@@ -78,6 +78,7 @@ $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none
             data() {
                 return {
                     tolakBuka: false, // pop-up alasan penolakan
+                    alatBuka: @json(session()->has('password_baru') || $errors->any()), // ⋮ alat lainnya; terbuka sendiri setelah reset password
                     alasan: '',
                     kamarId: @json((string) old('kamar_id', $p->kamar_id ?? '')),
                     nomorKasur: @json((string) old('nomor_kasur', $p->nomor_kasur ?? '')),

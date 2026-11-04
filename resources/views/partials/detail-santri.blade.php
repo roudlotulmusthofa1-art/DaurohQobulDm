@@ -175,30 +175,26 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         {{ __($p->label_status) }}
                     </span>
                 </div>
+                {{-- Nomor pendaftaran + waktu mendaftar (di bawah foto) --}}
+                <div class="mt-6 flex flex-col items-center gap-1.5 text-xs" v-pre>
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1 font-semibold tracking-wide">
+                        # {{ $p->nomor_pendaftaran }}
+                    </span>
+                    <span class="inline-flex items-center gap-1.5 whitespace-nowrap text-white/60">
+                        {!! $svg('clock', 'w-3.5 h-3.5') !!} {{ __('mendaftar :waktu', ['waktu' => $p->created_at->diffForHumans()]) }}
+                    </span>
+                </div>
             </div>
 
             {{-- Identitas --}}
             <div class="flex-1 min-w-0">
-                {{-- flex-wrap: bila sempit, tombol turun ke baris baru (nama tidak dipersempit) --}}
-                <div class="flex flex-wrap-reverse items-start justify-between gap-3">
-                    <div class="min-w-[min(100%,16rem)] flex-1" v-pre>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ $judul ?? ($admin ? __('Detail Santri') : __('Profil Saya')) }}</p>
-                        <h1 class="mt-1 text-2xl sm:text-[34px] leading-tight font-extrabold tracking-tight break-words">{{ $p->nama_lengkap }}</h1>
-                        @if ($p->nama_lengkap_arab)
-                        <p class="mt-1 text-2xl text-emerald-100/90" dir="rtl">{{ $p->nama_lengkap_arab }}</p>
-                        @endif
-                        <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1 font-semibold tracking-wide">
-                                # {{ $p->nomor_pendaftaran }}
-                            </span>
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1 text-white/60">
-                                {!! $svg('clock', 'w-3.5 h-3.5') !!} {{ __('mendaftar :waktu', ['waktu' => $p->created_at->diffForHumans()]) }}
-                            </span>
-                        </div>
-                    </div>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80" v-pre>{{ $judul ?? ($admin ? __('Detail Santri') : __('Profil Saya')) }}</p>
+                {{-- Nama Indonesia + 4 tombol sejajar (status, lihat dasbor, edit, ⋮). Nama panjang turun baris, tombol tetap di kanan --}}
+                <div class="mt-1 flex items-start gap-3">
+                    <h1 class="min-w-0 flex-1 text-2xl sm:text-[34px] leading-tight font-extrabold tracking-tight break-words" v-pre>{{ $p->nama_lengkap }}</h1>
 
-                    {{-- Status + tombol edit --}}
-                    <div class="flex items-center gap-2 shrink-0">
+                    {{-- Status + tombol --}}
+                    <div class="flex items-center gap-1.5 shrink-0 mt-0.5 sm:mt-1">
                         <span class="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full ring-1 {{ $warnaStatus }}"
                             v-pre>{{ __($p->label_status) }}</span>
                         @if ($admin && $p->user_id && \App\Support\MasukSebagai::bolehDipakai(auth()->user()))
@@ -206,19 +202,32 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <form method="POST" action="{{ route('admin.masuk-sebagai', $p->user_id) }}" @submit="konfirmasi" data-konfirmasi="{{ __('Buka dasbor siswa :nama? (mode lihat, perubahan tidak disimpan)', ['nama' => $p->nama_lengkap]) }}">
                             @csrf
                             <button title="{{ __('Lihat dasbor siswa (mode lihat)') }}" aria-label="{{ __('Lihat dasbor siswa') }}"
-                                class="w-10 h-10 rounded-2xl bg-amber-300/90 text-[#3b2a00] hover:bg-amber-200 flex items-center justify-center transition-colors">
+                                class="w-9 h-9 rounded-xl bg-amber-300/90 text-[#3b2a00] hover:bg-amber-200 flex items-center justify-center transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </button>
                         </form>
                         @endif
                         @if ($admin)
                         <a href="{{ route('admin.pendaftaran.edit', $p) }}" title="{{ __('Edit Data') }}" aria-label="{{ __('Edit data') }}"
-                            class="w-10 h-10 rounded-2xl bg-white/10 ring-1 ring-white/15 text-white hover:bg-white hover:text-[#0b332c] flex items-center justify-center transition-colors">
+                            class="w-9 h-9 rounded-xl bg-white/10 ring-1 ring-white/15 text-white hover:bg-white hover:text-[#0b332c] flex items-center justify-center transition-colors">
                             {!! $svg('pencil', 'w-4 h-4') !!}
                         </a>
                         @endif
+                        @if ($admin && ($p->email || in_array($p->status, ['diterima', 'ditolak'], true)))
+                        {{-- ⋮ Buka/tutup alat lainnya: "Kirim lewat WhatsApp saya" & "Akun login peserta" (Vue: alatBuka) --}}
+                        <button type="button" @click="alatBuka = !alatBuka" title="{{ __('Alat lainnya') }}" aria-label="{{ __('Alat lainnya') }}"
+                            :aria-expanded="alatBuka ? 'true' : 'false'"
+                            class="w-9 h-9 rounded-xl ring-1 flex items-center justify-center transition-colors"
+                            :class="alatBuka ? 'bg-white text-[#0b332c] ring-white' : 'bg-white/10 ring-white/15 text-white hover:bg-white hover:text-[#0b332c]'">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                        </button>
+                        @endif
                     </div>
                 </div>
+                {{-- Nama Arab tepat di bawah nama Indonesia (w-fit: tidak menempel ke kanan) --}}
+                @if ($p->nama_lengkap_arab)
+                <p class="mt-1 w-fit max-w-full text-2xl text-emerald-100/90 break-words" dir="rtl" v-pre>{{ $p->nama_lengkap_arab }}</p>
+                @endif
 
                 {{-- Kontak --}}
                 <div class="mt-5 grid sm:grid-cols-2 gap-2.5 text-sm" v-pre>
@@ -310,7 +319,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 ], fn ($t) => filled($t[1]));
                 @endphp
                 @if ($chatKonfirmasi && $tujuanManual)
-                <div class="mt-4 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 p-3.5">
+                {{-- Tersembunyi sampai tombol ⋮ di pojok kanan atas ditekan --}}
+                <div v-show="alatBuka" style="display: none" class="mt-4 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 p-3.5">
                     <p class="text-xs font-semibold text-white/70">{{ __('Kirim lewat WhatsApp saya — pilih tujuan:') }}</p>
                     <div class="mt-2.5 flex flex-wrap gap-2">
                     @foreach ($tujuanManual as $untuk => [$namaTujuan, $nomor])
@@ -330,7 +340,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
                 {{-- ===== Akun login peserta (admin): reset password bila peserta lupa ===== --}}
                 @if ($admin && $p->email)
-                <div class="mt-4 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 p-3.5">
+                {{-- Tersembunyi sampai tombol ⋮ ditekan (terbuka sendiri setelah reset password / ada isian salah) --}}
+                <div v-show="alatBuka" style="display: none" class="mt-4 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 p-3.5">
                     <div class="flex flex-wrap items-center gap-3">
                         <span class="w-9 h-9 shrink-0 rounded-xl bg-sky-300/15 text-sky-200 flex items-center justify-center">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
@@ -389,11 +400,17 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
             {{-- QR --}}
             @if ($p->status === 'diterima' && $p->kode_qr)
-            <div class="text-center self-center xl:pl-8 xl:border-l xl:border-white/10">
+            {{-- data-qr: dipakai unduhQr() (partials/pratinjau-foto) untuk menyimpan QR sebagai PNG --}}
+            <div data-qr class="text-center self-center xl:pl-8 xl:border-l xl:border-white/10" v-pre>
                 <div class="inline-block p-3 bg-white rounded-3xl shadow-xl shadow-black/20 [&_svg]:block [&_svg]:w-32 [&_svg]:h-32 sm:[&_svg]:w-36 sm:[&_svg]:h-36">
                     {!! $p->qr_svg !!}
                 </div>
-                <p class="text-[11px] text-white/50 mt-2 tracking-wide" v-pre>{{ __('Kode:') }} <span class="font-semibold text-white/80">{{ $p->kode_qr }}</span></p>
+                <p class="text-[11px] text-white/50 mt-2 tracking-wide">{{ __('Kode:') }} <span class="font-semibold text-white/80">{{ $p->kode_qr }}</span></p>
+                <button type="button" onclick="unduhQr(this)" data-nama="QR-{{ $p->nomor_pendaftaran }}-{{ $p->nama_lengkap }}"
+                    class="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-white/10 ring-1 ring-white/20 px-3 py-1.5 text-xs font-semibold text-white hover:bg-white hover:text-[#0b332c] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    {{ __('Unduh QR') }}
+                </button>
             </div>
             @endif
         </div>

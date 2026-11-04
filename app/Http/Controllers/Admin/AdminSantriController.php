@@ -32,6 +32,8 @@ class AdminSantriController extends Controller
             // Kelas aktif, untuk kotak statistik & pilihan di form
             'kelasOptions' => Kelas::ordered()->where('is_active', true)->get(['id', 'nama', 'kode']),
             'kamarOptions' => $this->kamarOptions(),
+            // Daftar persyaratan (kolom => nama) untuk kotak "Persyaratan belum lengkap" & saringan
+            'syaratList'   => collect(PendaftaranSiswa::SYARAT)->map(fn ($nama) => __($nama)),
         ]);
     }
 
@@ -175,6 +177,8 @@ class AdminSantriController extends Controller
             'tanggal_masuk' => ($s->diproses_at ?? $s->created_at)?->translatedFormat('d M Y'),
             'wali'          => $s->nama_wali,
             'status'        => $s->user_id ? 'aktif' : 'belum punya akun',
+            // Kolom persyaratan yang BELUM dicentang admin, mis. ['syarat_paspor', 'syarat_raport']
+            'syarat_kurang' => collect(PendaftaranSiswa::SYARAT)->reject(fn ($nama, $kolom) => $s->$kolom)->keys()->values(),
             'detail_url'    => route('admin.pendaftaran.show', $s),
             'hapus_url'     => route('admin.pendaftaran.destroy', $s), // tombol tempat sampah
         ];

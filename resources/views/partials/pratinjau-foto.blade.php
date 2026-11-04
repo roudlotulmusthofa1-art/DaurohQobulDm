@@ -28,6 +28,12 @@
                 class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-lg font-bold">+</button>
             <a :href="sekarang.src" target="_blank" rel="noopener" title="{{ __('Buka foto asli di tab baru') }}"
                 class="hidden sm:inline-flex h-9 px-3 items-center rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold">{{ __('Buka asli') }}</a>
+            {{-- Unduh foto ke perangkat (nama file dari judul foto) --}}
+            <button type="button" @click="unduh" :disabled="mengunduh" title="{{ __('Unduh foto') }}" aria-label="{{ __('Unduh foto') }}"
+                class="inline-flex h-9 px-2.5 sm:px-3 items-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-[#0b332c] text-xs font-bold disabled:opacity-50">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                <span class="hidden sm:inline">{{ __('Unduh') }}</span>
+            </button>
             <button type="button" @click="tutup" title="{{ __('Tutup (Esc)') }}" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-lg">✕</button>
         </div>
 
@@ -51,6 +57,40 @@
 </div>
 
 <script>
+    /**
+     * Unduh QR (SVG) sebagai gambar PNG besar berlatar putih — supaya tajam & mudah dicetak.
+     * Pemakaian: <div data-qr> ...svg QR... <button onclick="unduhQr(this)" data-nama="QR-nomor-nama"> </div>
+     */
+    window.unduhQr = function (tombol) {
+        const svg = tombol.closest('[data-qr]')?.querySelector('svg');
+        if (!svg) return;
+        const UKURAN = 1024, TEPI = 64;
+        const salinan = svg.cloneNode(true);
+        salinan.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+        salinan.setAttribute('width', UKURAN - TEPI * 2);
+        salinan.setAttribute('height', UKURAN - TEPI * 2);
+        const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(salinan)], { type: 'image/svg+xml' }));
+        const gambar = new Image();
+        gambar.onload = () => {
+            const kanvas = Object.assign(document.createElement('canvas'), { width: UKURAN, height: UKURAN });
+            const ctx = kanvas.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, UKURAN, UKURAN);
+            ctx.drawImage(gambar, TEPI, TEPI, UKURAN - TEPI * 2, UKURAN - TEPI * 2);
+            URL.revokeObjectURL(url);
+            kanvas.toBlob((blob) => {
+                const nama = (tombol.dataset.nama || 'QR').replace(/[\\/:*?"<>|]+/g, ' ').trim();
+                const link = URL.createObjectURL(blob);
+                const a = Object.assign(document.createElement('a'), { href: link, download: nama + '.png' });
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(link), 1000);
+            }, 'image/png');
+        };
+        gambar.src = url;
+    };
+
     document.addEventListener('DOMContentLoaded', function () {
         window.pratinjauFoto = Vue.createApp({
             data() {
@@ -61,6 +101,7 @@
                     skala: 1,
                     posisi: { x: 0, y: 0 },
                     geser: { aktif: false, x: 0, y: 0 },
+                    mengunduh: false,
                 };
             },
             computed: {
@@ -97,6 +138,30 @@
                 pindah(arah) {
                     this.indeks = (this.indeks + arah + this.daftar.length) % this.daftar.length;
                     this.aturUlang();
+                },
+                // Simpan foto yang sedang tampil ke perangkat. Nama file = judul foto + ekstensi aslinya.
+                // Bila gagal diambil (mis. foto dari situs lain), foto dibuka di tab baru saja.
+                async unduh() {
+                    const { src, judul } = this.sekarang;
+                    if (!src) return;
+                    this.mengunduh = true;
+                    try {
+                        const res = await fetch(src);
+                        if (!res.ok) throw new Error(res.status);
+                        const blob = await res.blob();
+                        const ext = (blob.type.split('/')[1] || src.split('?')[0].split('.').pop() || 'jpg').replace('jpeg', 'jpg');
+                        const nama = (judul || 'foto').replace(/[\\/:*?"<>|]+/g, ' ').trim().slice(0, 80) || 'foto';
+                        const url = URL.createObjectURL(blob);
+                        const a = Object.assign(document.createElement('a'), { href: url, download: nama + '.' + ext });
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        setTimeout(() => URL.revokeObjectURL(url), 1000);
+                    } catch (e) {
+                        window.open(src, '_blank', 'noopener');
+                    } finally {
+                        this.mengunduh = false;
+                    }
                 },
                 aturUlang() {
                     this.skala = 1;
