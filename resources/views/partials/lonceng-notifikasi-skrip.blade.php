@@ -48,7 +48,7 @@
                 this.kirimStatusNotif(kunci, 'baca');
             },
             hapusSemuaNotif() {
-                if (!confirm('Hapus semua notifikasi?')) return;
+                if (!confirm(@js(__('Hapus semua notifikasi?')))) return;
                 const kunci = this.notif.map((n) => n.kunci);
                 this.notif = [];
                 this.notifTotal = 0;

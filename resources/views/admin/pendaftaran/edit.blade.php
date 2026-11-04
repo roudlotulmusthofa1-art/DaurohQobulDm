@@ -10,45 +10,45 @@
 */
 $bagian = [
 'Data Pribadi' => [
-['nama_lengkap', 'Nama Lengkap (Indonesia)', 'text'],
-['nama_lengkap_arab', 'Nama Lengkap (Arab)', 'text', ['dir' => 'rtl']],
-['tempat_lahir', 'Tempat Lahir', 'text'],
-['tanggal_lahir', 'Tanggal Lahir', 'date'],
-['status_pernikahan', 'Status Pernikahan', 'select', ['options' => $p::STATUS_PERNIKAHAN]],
-['no_hp', 'No. WhatsApp', 'text', ['hint' => 'Contoh: +6281234567890 · nomor ini dipakai untuk chat diterima/ditolak']],
+['nama_lengkap', __('Nama Lengkap (Indonesia)'), 'text'],
+['nama_lengkap_arab', __('Nama Lengkap (Arab)'), 'text', ['dir' => 'rtl']],
+['tempat_lahir', __('Tempat Lahir'), 'text'],
+['tanggal_lahir', __('Tanggal Lahir'), 'date'],
+['status_pernikahan', __('Status Pernikahan'), 'select', ['options' => $p::STATUS_PERNIKAHAN]],
+['no_hp', __('No. WhatsApp'), 'text', ['hint' => __('Contoh: +6281234567890 · nomor ini dipakai untuk chat diterima/ditolak')]],
 ],
 'Alamat' => [
-['provinsi', 'Provinsi', 'text'],
-['kota', 'Kota/Kabupaten', 'text'],
-['kecamatan', 'Kecamatan', 'text'],
-['kelurahan', 'Kelurahan/Desa', 'text'],
-['alamat', 'Alamat Lengkap', 'textarea'],
+['provinsi', __('Provinsi'), 'text'],
+['kota', __('Kota/Kabupaten'), 'text'],
+['kecamatan', __('Kecamatan'), 'text'],
+['kelurahan', __('Kelurahan/Desa'), 'text'],
+['alamat', __('Alamat Lengkap'), 'textarea'],
 ],
 'Wali & Muarrif' => [
-['nama_wali', 'Nama Wali', 'text'],
-['pekerjaan_wali', 'Pekerjaan Wali', 'text'],
-['hubungan_wali', 'Hubungan dengan Wali', 'text'],
-['no_hp_wali', 'No. WhatsApp Wali', 'text'],
-['nama_muarrif', 'Nama Muarrif', 'text'],
-['no_hp_muarrif', 'No. WhatsApp Muarrif', 'text'],
-['nama_butuh', 'Kontak Darurat (Nama)', 'text'],
-['no_hp_nya', 'Kontak Darurat (WhatsApp)', 'text'],
+['nama_wali', __('Nama Wali'), 'text'],
+['pekerjaan_wali', __('Pekerjaan Wali'), 'text'],
+['hubungan_wali', __('Hubungan dengan Wali'), 'text'],
+['no_hp_wali', __('No. WhatsApp Wali'), 'text'],
+['nama_muarrif', __('Nama Muarrif'), 'text'],
+['no_hp_muarrif', __('No. WhatsApp Muarrif'), 'text'],
+['nama_butuh', __('Kontak Darurat (Nama)'), 'text'],
+['no_hp_nya', __('Kontak Darurat (WhatsApp)'), 'text'],
 ],
 'Pendidikan Formal' => [
-['pendidikan_terakhir', 'Pendidikan Terakhir', 'select', ['options' => $p::PENDIDIKAN_TERAKHIR]],
-['nama_sekolah', 'Nama Sekolah / Lembaga', 'text'],
-['nama_daerah', 'Daerah Lembaga', 'text'],
+['pendidikan_terakhir', __('Pendidikan Terakhir'), 'select', ['options' => $p::PENDIDIKAN_TERAKHIR]],
+['nama_sekolah', __('Nama Sekolah / Lembaga'), 'text'],
+['nama_daerah', __('Daerah Lembaga'), 'text'],
 ],
 'Data Tambahan' => [
-['marhalah', 'Marhalah yang Diinginkan', 'text'],
-['lama_belajar', 'Lama Belajar yang Diinginkan', 'text'],
-['kesehatan', 'Kesehatan', 'text'],
-['status_ekonomi', 'Status Ekonomi', 'text'],
-['persentasimuslim', 'Persentase Muslim di Daerah (%)', 'number', ['step' => '0.01']],
-['alumni', 'Alumni di Daerah', 'text'],
-['tujuan', 'Tujuan Belajar', 'textarea'],
-['rencana', 'Rencana Setelah Lulus', 'textarea'],
-['pernah_dauroh', 'Pernah Mengikuti Dauroh Qobul Sebelumnya?', 'select', ['options' => $p::PERNAH_DAUROH]],
+['marhalah', __('Marhalah yang Diinginkan'), 'text'],
+['lama_belajar', __('Lama Belajar yang Diinginkan'), 'text'],
+['kesehatan', __('Kesehatan'), 'text'],
+['status_ekonomi', __('Status Ekonomi'), 'text'],
+['persentasimuslim', __('Persentase Muslim di Daerah (%)'), 'number', ['step' => '0.01']],
+['alumni', __('Alumni di Daerah'), 'text'],
+['tujuan', __('Tujuan Belajar'), 'textarea'],
+['rencana', __('Rencana Setelah Lulus'), 'textarea'],
+['pernah_dauroh', __('Pernah Mengikuti Dauroh Qobul Sebelumnya?'), 'select', ['options' => $p::PERNAH_DAUROH]],
 ],
 ];
 
@@ -104,11 +104,11 @@ $nada = [
 'sky' => 'bg-sky-50 text-sky-600 ring-sky-100',
 ];
 $gayaSeksi = [
-'Data Pribadi' => ['user', 'emerald', 'Identitas diri santri'],
-'Alamat' => ['pin', 'teal', 'Domisili sesuai data pendaftaran'],
-'Wali & Muarrif' => ['users', 'amber', 'Kontak keluarga & pemberi rekomendasi'],
-'Pendidikan Formal' => ['cap', 'sky', 'Jenjang pendidikan terakhir'],
-'Data Tambahan' => ['sparkles', 'lime', 'Minat, kondisi & rencana belajar'],
+'Data Pribadi' => ['user', 'emerald', __('Identitas diri santri')],
+'Alamat' => ['pin', 'teal', __('Domisili sesuai data pendaftaran')],
+'Wali & Muarrif' => ['users', 'amber', __('Kontak keluarga & pemberi rekomendasi')],
+'Pendidikan Formal' => ['cap', 'sky', __('Jenjang pendidikan terakhir')],
+'Data Tambahan' => ['sparkles', 'lime', __('Minat, kondisi & rencana belajar')],
 ];
 // Bagian yang kartunya selebar halaman (isinya banyak)
 $seksiPenuh = ['Wali & Muarrif', 'Pendidikan Formal', 'Data Tambahan'];
@@ -130,7 +130,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
             {!! $svg('back', 'w-4 h-4') !!}
         </span>
-        Kembali
+        {{ __('Kembali') }}
     </a>
     </div>
 
@@ -143,7 +143,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
         <div class="relative p-5 sm:p-7 flex flex-col sm:flex-row sm:items-center gap-5">
             @if ($p->foto_url)
-            <img data-perbesar src="{{ $p->foto_url }}" alt="Foto {{ $p->nama_lengkap }}"
+            <img data-perbesar src="{{ $p->foto_url }}" alt="{{ __('Foto :nama', ['nama' => $p->nama_lengkap]) }}"
                 class="w-20 h-20 shrink-0 object-cover rounded-2xl ring-4 ring-white/10 shadow-xl shadow-black/30">
             @else
             <div class="w-20 h-20 shrink-0 rounded-2xl ring-4 ring-white/10 bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-3xl font-extrabold text-[#0b332c] shadow-xl shadow-black/30">
@@ -153,18 +153,18 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
             <div class="flex-1 min-w-0">
                 <p class="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">
-                    {!! $svg('pencil', 'w-3.5 h-3.5') !!} Edit Data Santri
+                    {!! $svg('pencil', 'w-3.5 h-3.5') !!} {{ __('Edit Data Santri') }}
                 </p>
                 <h1 class="mt-1 text-2xl sm:text-3xl leading-tight font-extrabold tracking-tight break-words">{{ $p->nama_lengkap }}</h1>
                 <div class="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
                     <span class="inline-flex items-center rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1 font-semibold tracking-wide"># {{ $p->nomor_pendaftaran }}</span>
-                    <span class="inline-flex items-center rounded-full ring-1 px-3 py-1 font-semibold {{ $warnaStatus }}">{{ $p->label_status }}</span>
+                    <span class="inline-flex items-center rounded-full ring-1 px-3 py-1 font-semibold {{ $warnaStatus }}">{{ __($p->label_status) }}</span>
                 </div>
             </div>
 
             <a href="{{ route('admin.pendaftaran.show', $p) }}"
                 class="self-start sm:self-center inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 ring-1 ring-white/15 text-sm font-semibold hover:bg-white hover:text-[#0b332c] transition-colors">
-                {!! $svg('eye', 'w-4 h-4') !!} Lihat Detail
+                {!! $svg('eye', 'w-4 h-4') !!} {{ __('Lihat Detail') }}
             </a>
         </div>
     </div>
@@ -174,7 +174,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     <div class="flex gap-3 p-4 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">
         <span class="w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0">{!! $svg('warn', 'w-4 h-4') !!}</span>
         <div>
-            <p class="font-semibold mb-1">Data belum bisa disimpan:</p>
+            <p class="font-semibold mb-1">{{ __('Data belum bisa disimpan:') }}</p>
             <ul class="list-disc pl-5 space-y-0.5 text-rose-700">
                 @foreach ($errors->all() as $pesan)
                 <li>{{ $pesan }}</li>
@@ -199,7 +199,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 {{-- Pondok --}}
                 <section class="{{ $kartu }} p-5 sm:p-6">
                     <div class="flex items-center justify-between gap-3 mb-5">
-                        {!! $judulKartu('Riwayat Pondok Pesantren', 'home', 'amber', 'Maksimal 5 pondok') !!}
+                        {!! $judulKartu(__('Riwayat Pondok Pesantren'), 'home', 'amber', __('Maksimal 5 pondok')) !!}
                         <span class="text-xs font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-3 py-1" v-text="pondok.length + '/5'"></span>
                     </div>
 
@@ -210,36 +210,36 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <div class="flex items-center justify-between mb-3">
                                 <span class="inline-flex items-center gap-2 text-sm font-bold text-slate-700">
                                     <span class="w-7 h-7 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center" v-text="i + 1"></span>
-                                    <span v-text="'Pondok ' + (i + 1)"></span>
+                                    <span v-text="@js(__('Pondok')) + ' ' + (i + 1)"></span>
                                 </span>
-                                <button type="button" v-if="pondok.length > 1" @click="hapusPondok(i)" title="Hapus pondok"
+                                <button type="button" v-if="pondok.length > 1" @click="hapusPondok(i)" title="{{ __('Hapus pondok') }}"
                                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 rounded-xl px-2.5 py-1.5 hover:bg-rose-50 transition-colors">
-                                    {!! $svg('trash', 'w-4 h-4') !!} Hapus
+                                    {!! $svg('trash', 'w-4 h-4') !!} {{ __('Hapus') }}
                                 </button>
                             </div>
                             <div class="grid sm:grid-cols-2 gap-3">
                                 <input :name="'riwayat_pondok[' + i + '][asal_pondok]'" v-model="row.asal_pondok"
-                                    placeholder="Asal pondok pesantren" dir="auto" class="{{ $kelasInputPutih }}">
+                                    placeholder="{{ __('Asal pondok pesantren') }}" dir="auto" class="{{ $kelasInputPutih }}">
                                 <input :name="'riwayat_pondok[' + i + '][nama_pengasuh]'" v-model="row.nama_pengasuh"
-                                    placeholder="Nama pengasuh" dir="auto" class="{{ $kelasInputPutih }}">
+                                    placeholder="{{ __('Nama pengasuh') }}" dir="auto" class="{{ $kelasInputPutih }}">
                                 <input :name="'riwayat_pondok[' + i + '][nama_daerah]'" v-model="row.nama_daerah"
-                                    placeholder="Daerah / kota pondok" dir="auto" class="{{ $kelasInputPutih }}">
+                                    placeholder="{{ __('Daerah / kota pondok') }}" dir="auto" class="{{ $kelasInputPutih }}">
                                 <input :name="'riwayat_pondok[' + i + '][tahun_belajar]'" v-model="row.tahun_belajar"
-                                    type="number" min="0" max="30" placeholder="Lama belajar (tahun)" class="{{ $kelasInputPutih }}">
+                                    type="number" min="0" max="30" placeholder="{{ __('Lama belajar (tahun)') }}" class="{{ $kelasInputPutih }}">
                             </div>
                         </div>
                     </div>
 
                     <button type="button" @click="tambahPondok" :disabled="pondok.length >= 5"
                         class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-dashed border-amber-200 text-amber-700 text-sm font-semibold hover:bg-amber-50 hover:border-amber-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                        {!! $svg('plus', 'w-4 h-4') !!} Tambah Pondok
+                        {!! $svg('plus', 'w-4 h-4') !!} {{ __('Tambah Pondok') }}
                     </button>
                 </section>
 
                 {{-- Kitab --}}
                 <section class="{{ $kartu }} p-5 sm:p-6">
                     <div class="flex items-center justify-between gap-3 mb-5">
-                        {!! $judulKartu('Kitab yang Pernah Dipelajari', 'book', 'cyan', 'Maksimal 20 kitab') !!}
+                        {!! $judulKartu(__('Kitab yang Pernah Dipelajari'), 'book', 'cyan', __('Maksimal 20 kitab')) !!}
                         <span class="text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-100 rounded-full px-3 py-1" v-text="kitab.length + '/20'"></span>
                     </div>
 
@@ -249,24 +249,24 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <div class="flex items-center justify-between mb-3">
                                 <span class="inline-flex items-center gap-2 text-sm font-bold text-slate-700">
                                     <span class="w-7 h-7 rounded-lg bg-cyan-500 text-white text-xs font-bold flex items-center justify-center" v-text="i + 1"></span>
-                                    <span v-text="'Kitab ' + (i + 1)"></span>
+                                    <span v-text="@js(__('Kitab')) + ' ' + (i + 1)"></span>
                                 </span>
-                                <button type="button" v-if="kitab.length > 1" @click="hapusKitab(i)" title="Hapus kitab"
+                                <button type="button" v-if="kitab.length > 1" @click="hapusKitab(i)" title="{{ __('Hapus kitab') }}"
                                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-rose-600 rounded-xl px-2.5 py-1.5 hover:bg-rose-50 transition-colors">
-                                    {!! $svg('trash', 'w-4 h-4') !!} Hapus
+                                    {!! $svg('trash', 'w-4 h-4') !!} {{ __('Hapus') }}
                                 </button>
                             </div>
                             <div class="grid sm:grid-cols-3 gap-3">
                                 <input :name="'riwayat_kitab[' + i + '][nama_kitab]'" v-model="row.nama_kitab"
-                                    placeholder="Nama kitab" dir="auto" class="{{ $kelasInputPutih }}">
+                                    placeholder="{{ __('Nama kitab') }}" dir="auto" class="{{ $kelasInputPutih }}">
                                 <select :name="'riwayat_kitab[' + i + '][fan_kitab]'" v-model="row.fan_kitab"
                                     class="{{ $kelasInputPutih }}">
-                                    <option value="">Pilih fan...</option>
+                                    <option value="">{{ __('Pilih fan...') }}</option>
                                     <option v-for="f in fan" :key="f" :value="f" v-text="f"></option>
                                 </select>
                                 <select :name="'riwayat_kitab[' + i + '][sudah_diujikan]'" v-model="row.sudah_diujikan"
                                     class="{{ $kelasInputPutih }}">
-                                    <option value="">Sudah diujikan?</option>
+                                    <option value="">{{ __('Sudah diujikan?') }}</option>
                                     <option value="sudah">أختبر</option>
                                     <option value="belum">لا</option>
                                 </select>
@@ -276,14 +276,14 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
                     <button type="button" @click="tambahKitab" :disabled="kitab.length >= 20"
                         class="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl border-2 border-dashed border-cyan-200 text-cyan-700 text-sm font-semibold hover:bg-cyan-50 hover:border-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                        {!! $svg('plus', 'w-4 h-4') !!} Tambah Kitab
+                        {!! $svg('plus', 'w-4 h-4') !!} {{ __('Tambah Kitab') }}
                     </button>
                 </section>
             </div>
             @endif
 
             <section @class([$kartu, 'p-5 sm:p-6', 'xl:col-span-2' => $penuh])>
-                <div class="mb-5">{!! $judulKartu($judul, $namaIkon, $warna, $ket) !!}</div>
+                <div class="mb-5">{!! $judulKartu(__($judul), $namaIkon, $warna, $ket) !!}</div>
                 <div @class(['grid sm:grid-cols-2 gap-4', 'xl:grid-cols-3' => $judul === 'Pendidikan Formal', 'xl:grid-cols-4' => $judul === 'Wali & Muarrif'])>
                     @foreach ($isian as $k)
                     @php
@@ -298,9 +298,9 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
                         @if ($tipe === 'select')
                         <select id="{{ $nama }}" name="{{ $nama }}" @class([$kelasInput, 'border-rose-300 ring-2 ring-rose-400/20' => $errors->has($nama)])>
-                            <option value="">Pilih...</option>
+                            <option value="">{{ __('Pilih...') }}</option>
                             @foreach ($opsi['options'] as $kode => $teks)
-                            <option value="{{ $kode }}" @selected((string) $nilai===(string) $kode)>{{ $teks }}</option>
+                            <option value="{{ $kode }}" @selected((string) $nilai===(string) $kode)>{{ __($teks) }}</option>
                             @endforeach
                         </select>
                         @elseif ($tipe === 'textarea')
@@ -326,7 +326,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
             {{-- Berkas --}}
             <section class="{{ $kartu }} p-5 sm:p-6 xl:col-span-2">
-                <div class="mb-5">{!! $judulKartu('Berkas', 'file', 'teal', 'Pilih file hanya kalau ingin menggantinya. Kosongkan kalau berkas tidak berubah.') !!}</div>
+                <div class="mb-5">{!! $judulKartu(__('Berkas'), 'file', 'teal', __('Pilih file hanya kalau ingin menggantinya. Kosongkan kalau berkas tidak berubah.')) !!}</div>
                 <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     @foreach ($p::BERKAS as $kolom => $nama)
                     <div @class(['rounded-2xl p-3.5 ring-1', 'bg-white ring-teal-100' => $p->$kolom, 'bg-slate-50/60 ring-slate-100' => ! $p->$kolom, 'ring-rose-300' => $errors->has($kolom)])>
@@ -335,12 +335,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 'bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-sm' => $p->$kolom,
                                 'bg-slate-100 text-slate-300' => ! $p->$kolom])>{!! $svg('file', 'w-5 h-5') !!}</span>
                             <div class="min-w-0">
-                                <p class="text-sm font-semibold text-slate-800 truncate">{{ $nama }}</p>
+                                <p class="text-sm font-semibold text-slate-800 truncate">{{ __($nama) }}</p>
                                 @if ($p->$kolom)
                                 <a href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($p->$kolom) }}" target="_blank" rel="noopener"
-                                    class="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:underline">{!! $svg('open', 'w-3 h-3') !!} Lihat berkas saat ini</a>
+                                    class="inline-flex items-center gap-1 text-xs font-medium text-teal-600 hover:underline">{!! $svg('open', 'w-3 h-3') !!} {{ __('Lihat berkas saat ini') }}</a>
                                 @else
-                                <p class="text-xs text-slate-400">Belum ada berkas</p>
+                                <p class="text-xs text-slate-400">{{ __('Belum ada berkas') }}</p>
                                 @endif
                             </div>
                         </div>
@@ -359,13 +359,13 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         {{-- Tombol simpan: menempel di bawah layar saat halaman digulir --}}
         <div class="sticky bottom-0 z-20 mt-6 -mx-1 px-1 pb-1">
             <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white/85 backdrop-blur-md ring-1 ring-[#0b332c]/10 shadow-[0_-8px_24px_-12px_rgba(11,51,44,0.25)] px-4 py-3">
-                <p class="hidden sm:block text-xs text-slate-500">Periksa kembali data sebelum menyimpan.</p>
+                <p class="hidden sm:block text-xs text-slate-500">{{ __('Periksa kembali data sebelum menyimpan.') }}</p>
                 <div class="flex gap-2 ml-auto">
                     <a href="{{ route('admin.pendaftaran.show', $p) }}"
-                        class="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-sm font-semibold hover:bg-slate-200 transition-colors">Batal</a>
+                        class="px-5 py-2.5 rounded-2xl bg-slate-100 text-slate-600 text-sm font-semibold hover:bg-slate-200 transition-colors">{{ __('Batal') }}</a>
                     <button
                         class="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-semibold hover:bg-[#135347] shadow-lg shadow-[#0b332c]/20 transition-colors">
-                        {!! $svg('check', 'w-4 h-4') !!} Simpan Perubahan
+                        {!! $svg('check', 'w-4 h-4') !!} {{ __('Simpan Perubahan') }}
                     </button>
                 </div>
             </div>

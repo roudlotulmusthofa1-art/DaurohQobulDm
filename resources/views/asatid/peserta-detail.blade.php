@@ -5,7 +5,7 @@
 --}}
 @extends('layouts.asatid')
 
-@section('judul', 'Detail Peserta')
+@section('judul', __('Detail Peserta'))
 {{-- Panah kiri atas kembali ke halaman sebelumnya (mis. absensi kelas), bukan ke beranda --}}
 @section('kembali', route('asatid.peserta'))
 
@@ -24,18 +24,18 @@ $warnaAbsen = ['hadir' => 'bg-emerald-500', 'terlambat' => 'bg-amber-500', 'saki
     <a href="{{ route('asatid.peserta') }}" @click="kembali"
         class="inline-flex items-center gap-2 rounded-2xl bg-white ring-1 ring-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 hover:ring-emerald-200 transition-colors">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-        Kembali ke halaman sebelumnya
+        {{ __('Kembali ke halaman sebelumnya') }}
     </a>
 
     {{-- Data peserta: tampilan sama dengan Profil di dasbor siswa --}}
-    @include('partials.detail-santri', ['admin' => false, 'judul' => 'Detail Peserta', 'rahasia' => true, 'sisipan' => 'siswa._persyaratan'])
+    @include('partials.detail-santri', ['admin' => false, 'judul' => __('Detail Peserta'), 'rahasia' => true, 'sisipan' => 'siswa._persyaratan'])
 
     {{-- ===== Rekap kehadiran (khusus asatid) ===== --}}
     <section class="{{ $kartuAbsen }} p-5 sm:p-6">
         <div class="flex items-center justify-between gap-3">
-            <h3 class="font-bold text-slate-800">Rekap kehadiran</h3>
+            <h3 class="font-bold text-slate-800">{{ __('Rekap kehadiran') }}</h3>
             <span class="text-sm font-extrabold {{ $persen === null ? 'text-slate-400' : ($persen >= 80 ? 'text-emerald-600' : ($persen >= 70 ? 'text-amber-600' : 'text-rose-600')) }}">
-                {{ $persen !== null ? $persen . '% hadir' : 'Belum ada absensi' }}
+                {{ $persen !== null ? __(':persen% hadir', ['persen' => $persen]) : __('Belum ada absensi') }}
             </span>
         </div>
         @if ($totalAbsen)
@@ -49,7 +49,7 @@ $warnaAbsen = ['hadir' => 'bg-emerald-500', 'terlambat' => 'bg-amber-500', 'saki
             @foreach ($absensi as $k => $n)
             <div class="rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100 px-2 py-2.5 text-center">
                 <span class="block text-xl font-extrabold text-slate-800">{{ $n }}</span>
-                <span class="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full {{ $warnaAbsen[$k] }}"></span>{{ Absensi::STATUS[$k][0] }}</span>
+                <span class="flex items-center justify-center gap-1 text-[10px] sm:text-[11px] text-slate-500"><span class="w-1.5 h-1.5 rounded-full {{ $warnaAbsen[$k] }}"></span>{{ __(Absensi::STATUS[$k][0]) }}</span>
             </div>
             @endforeach
         </div>

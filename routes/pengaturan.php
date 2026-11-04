@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 | Route Sistem > Pengaturan (file terpisah)
 |--------------------------------------------------------------------------
 | Dimuat dari routes/web.php:  require __DIR__ . '/pengaturan.php';
-| URL: /admin/pengaturan?tab=umum | profil | notifikasi | database | sesi
+| URL: /admin/pengaturan?tab=umum | profil | notifikasi | database | sesi | bahasa
 */
 
 Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->middleware(['auth', 'peran:admin'])
@@ -21,6 +21,7 @@ Route::prefix('admin/pengaturan')->name('admin.pengaturan.')->middleware(['auth'
         Route::post('profil/foto', 'simpanFoto')->name('foto');        // tab Profil: upload foto profil
         Route::delete('profil/foto', 'hapusFoto')->name('foto.hapus'); // tab Profil: hapus foto profil
         Route::put('pesan', 'simpanPesan')->name('pesan');      // tab Pesan: template WhatsApp
+        Route::put('bahasa', 'simpanBahasa')->name('bahasa');   // tab Bahasa: terjemahan Arab per halaman
 
         // tab Database (berlaku untuk sesi yang sedang aktif)
         Route::get('database/backup', 'backup')->name('backup');                       // unduh langsung

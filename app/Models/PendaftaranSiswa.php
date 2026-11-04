@@ -112,16 +112,10 @@ class PendaftaranSiswa extends Model
 
     /**
      * Reset password login (peserta lupa password). Password asli tidak bisa dilihat karena tersimpan
-     * terenkripsi, jadi dibuatkan password baru, disimpan, lalu dikembalikan SEKALI untuk dikirim ke peserta.
+     * terenkripsi, jadi admin mengetik password baru (detail santri > Reset Password), lalu disimpan di sini.
      */
-    public function resetPassword(): string
+    public function resetPassword(string $baru): string
     {
-        $huruf = 'abcdefghjkmnpqrstuvwxyz23456789'; // tanpa huruf/angka yang mirip (l, 1, o, 0, i)
-        $baru = '';
-        for ($i = 0; $i < 8; $i++) {
-            $baru .= $huruf[random_int(0, strlen($huruf) - 1)];
-        }
-
         $hash = \Illuminate\Support\Facades\Hash::make($baru);
         DB::transaction(function () use ($hash) {
             $this->forceFill(['password' => $hash])->save();

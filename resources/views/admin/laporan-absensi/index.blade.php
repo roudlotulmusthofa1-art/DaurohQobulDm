@@ -1,7 +1,7 @@
 {{-- Admin > Laporan > Laporan Absensi --}}
 @extends('layouts.admin')
 
-@section('title', 'Laporan Absensi')
+@section('title', __('Laporan Absensi'))
 
 @section('content')
 @php
@@ -25,13 +25,13 @@ $warnaPersen = fn ($p) => match (true) {
 $titikKesimpulan = ['emerald' => 'bg-emerald-500', 'teal' => 'bg-teal-500', 'amber' => 'bg-amber-500', 'rose' => 'bg-rose-500', 'sky' => 'bg-sky-500', 'slate' => 'bg-slate-400'];
 $periode = \Illuminate\Support\Carbon::parse($f['dari'])->locale('id')->translatedFormat('d M Y') . ' – ' . \Illuminate\Support\Carbon::parse($f['sampai'])->locale('id')->translatedFormat('d M Y');
 $cepat = [
-    'Hari ini' => [now()->toDateString(), now()->toDateString()],
-    '7 hari' => [now()->subDays(6)->toDateString(), now()->toDateString()],
-    'Bulan ini' => [now()->startOfMonth()->toDateString(), now()->toDateString()],
-    'Bulan lalu' => [now()->subMonthNoOverflow()->startOfMonth()->toDateString(), now()->subMonthNoOverflow()->endOfMonth()->toDateString()],
+    __('Hari ini') => [now()->toDateString(), now()->toDateString()],
+    __('7 hari') => [now()->subDays(6)->toDateString(), now()->toDateString()],
+    __('Bulan ini') => [now()->startOfMonth()->toDateString(), now()->toDateString()],
+    __('Bulan lalu') => [now()->subMonthNoOverflow()->startOfMonth()->toDateString(), now()->subMonthNoOverflow()->endOfMonth()->toDateString()],
 ];
 $saringLain = array_filter(['jenis' => $f['jenis'], 'kelas_id' => $f['kelas_id'], 'jenis_kegiatan_id' => $f['jenis_kegiatan_id']]);
-$labelStatus = fn ($k) => Absensi::STATUS[$k][0];
+$labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
 @endphp
 
 <div class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-8">
@@ -50,15 +50,15 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
         <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
         <div class="relative flex flex-col lg:flex-row lg:items-center gap-6">
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Laporan</p>
-                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">Laporan Absensi</h1>
-                <p class="mt-1.5 text-sm text-white/70">Rekap kehadiran peserta dari absensi kelas dan kegiatan yang diisi asatid.</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Laporan') }}</p>
+                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Laporan Absensi') }}</h1>
+                <p class="mt-1.5 text-sm text-white/70">{{ __('Rekap kehadiran peserta dari absensi kelas dan kegiatan yang diisi asatid.') }}</p>
                 <p class="mt-3 inline-flex items-center gap-1.5 rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5 text-xs font-semibold">
                     <svg class="w-3.5 h-3.5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
                     {{ $periode }}
                 </p>
                 <div class="mt-5 grid grid-cols-3 gap-2 max-w-md">
-                    @foreach ([['Total absensi', $jumlahSesi], ['Absensi kelas', $jumlahSesiKelas], ['Absensi kegiatan', $jumlahSesiKegiatan]] as [$l, $n])
+                    @foreach ([[__('Total absensi'), $jumlahSesi], [__('Absensi kelas'), $jumlahSesiKelas], [__('Absensi kegiatan'), $jumlahSesiKegiatan]] as [$l, $n])
                     <div class="rounded-2xl bg-white/10 ring-1 ring-white/15 px-3 py-2.5">
                         <span class="block text-2xl font-extrabold">{{ $n }}</span>
                         <span class="block text-[11px] text-white/60">{{ $l }}</span>
@@ -74,7 +74,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
                     <span class="text-4xl font-extrabold">{{ $persen !== null ? $persen . '%' : '–' }}</span>
-                    <span class="text-[11px] text-white/60">kehadiran</span>
+                    <span class="text-[11px] text-white/60">{{ __('kehadiran') }}</span>
                 </div>
             </div>
         </div>
@@ -83,29 +83,29 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
     {{-- ===== Saringan ===== --}}
     <form method="GET" class="{{ $kartu }} p-4 sm:p-5">
         <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 items-end">
-            <label class="block"><span class="text-xs font-semibold text-slate-500">Dari</span>
+            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Dari') }}</span>
                 <input type="date" name="dari" value="{{ $f['dari'] }}" class="mt-1 {{ $input }}"></label>
-            <label class="block"><span class="text-xs font-semibold text-slate-500">Sampai</span>
+            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Sampai') }}</span>
                 <input type="date" name="sampai" value="{{ $f['sampai'] }}" class="mt-1 {{ $input }}"></label>
-            <label class="block"><span class="text-xs font-semibold text-slate-500">Jenis</span>
+            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Jenis') }}</span>
                 <select name="jenis" class="mt-1 {{ $input }}">
-                    <option value="">Semua</option>
-                    <option value="kelas" @selected($f['jenis'] === 'kelas')>Absensi kelas</option>
-                    <option value="kegiatan" @selected($f['jenis'] === 'kegiatan')>Absensi kegiatan</option>
+                    <option value="">{{ __('Semua') }}</option>
+                    <option value="kelas" @selected($f['jenis'] === 'kelas')>{{ __('Absensi kelas') }}</option>
+                    <option value="kegiatan" @selected($f['jenis'] === 'kegiatan')>{{ __('Absensi kegiatan') }}</option>
                 </select></label>
-            <label class="block"><span class="text-xs font-semibold text-slate-500">Kelas</span>
+            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Kelas') }}</span>
                 <select name="kelas_id" class="mt-1 {{ $input }}">
-                    <option value="">Semua kelas</option>
+                    <option value="">{{ __('Semua kelas') }}</option>
                     @foreach ($kelasList as $k)<option value="{{ $k->id }}" @selected($f['kelas_id'] == $k->id)>{{ $k->nama }}</option>@endforeach
                 </select></label>
-            <label class="block"><span class="text-xs font-semibold text-slate-500">Kegiatan</span>
+            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Kegiatan') }}</span>
                 <select name="jenis_kegiatan_id" class="mt-1 {{ $input }}">
-                    <option value="">Semua kegiatan</option>
+                    <option value="">{{ __('Semua kegiatan') }}</option>
                     @foreach ($kegiatanList as $k)<option value="{{ $k->id }}" @selected($f['jenis_kegiatan_id'] == $k->id)>{{ $k->nama }}</option>@endforeach
                 </select></label>
             <div class="flex gap-2">
-                <button class="flex-1 px-4 py-2.5 rounded-xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">Terapkan</button>
-                <a href="{{ route('admin.laporan-absensi.index') }}" title="Atur ulang" class="px-3 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50">
+                <button class="flex-1 px-4 py-2.5 rounded-xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Terapkan') }}</button>
+                <a href="{{ route('admin.laporan-absensi.index') }}" title="{{ __('Atur ulang') }}" class="px-3 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
                 </a>
             </div>
@@ -124,16 +124,16 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
         <div class="mx-auto w-16 h-16 rounded-3xl bg-[#f5f9f7] ring-1 ring-slate-200/70 flex items-center justify-center text-slate-300">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m8.9-4.414c.376.023.75.05 1.124.08 1.131.094 1.976 1.057 1.976 2.192V16.5A2.25 2.25 0 0118 18.75h-2.25m-7.5-10.5H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V18.75m-7.5-10.5h6.375c.621 0 1.125.504 1.125 1.125v9.375m-8.25-3l1.5 1.5 3-3.75"/></svg>
         </div>
-        <p class="mt-4 font-bold text-slate-700">Belum ada data absensi pada periode ini</p>
-        <p class="mt-1 text-sm text-slate-500">Data muncul setelah asatid mengisi absensi kelas atau kegiatan dari dasbor asatid.</p>
+        <p class="mt-4 font-bold text-slate-700">{{ __('Belum ada data absensi pada periode ini') }}</p>
+        <p class="mt-1 text-sm text-slate-500">{{ __('Data muncul setelah asatid mengisi absensi kelas atau kegiatan dari dasbor asatid.') }}</p>
     </div>
     @else
 
     {{-- ===== Jumlah per keterangan ===== --}}
     <section class="{{ $kartu }} p-5 sm:p-6">
         <div class="flex items-center justify-between">
-            <h2 class="font-bold text-slate-800">Rekap keterangan</h2>
-            <span class="text-xs text-slate-400">{{ number_format($total) }} catatan kehadiran</span>
+            <h2 class="font-bold text-slate-800">{{ __('Rekap keterangan') }}</h2>
+            <span class="text-xs text-slate-400">{{ __(':jumlah catatan kehadiran', ['jumlah' => number_format($total)]) }}</span>
         </div>
         <div class="mt-4 flex h-3.5 rounded-full overflow-hidden bg-slate-100">
             @foreach ($hitung as $k => $n)
@@ -158,7 +158,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
             <span class="w-8 h-8 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18"/></svg>
             </span>
-            Kesimpulan
+            {{ __('Kesimpulan') }}
         </h2>
         <ul class="relative mt-4 space-y-2.5">
             @foreach ($kesimpulan as [$teks, $warna])
@@ -175,15 +175,15 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
     <div class="grid lg:grid-cols-3 gap-6">
         <section class="lg:col-span-2 {{ $kartu }} p-5 sm:p-6">
             <div class="flex items-center justify-between">
-                <h2 class="font-bold text-slate-800">Kehadiran per hari</h2>
-                <span class="text-xs text-slate-400">% hadir + terlambat</span>
+                <h2 class="font-bold text-slate-800">{{ __('Kehadiran per hari') }}</h2>
+                <span class="text-xs text-slate-400">{{ __('% hadir + terlambat') }}</span>
             </div>
             <div class="mt-6 h-48 flex items-end gap-1.5 sm:gap-2 border-b border-slate-100">
                 @foreach ($harian as $h)
                 @php [$batang] = $warnaPersen($h['persen']); @endphp
                 <div class="group relative flex-1 min-w-0 h-full flex flex-col justify-end items-center">
                     <span class="pointer-events-none absolute -top-7 z-10 whitespace-nowrap rounded-lg bg-slate-800 text-white text-[10px] font-semibold px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                        {{ $h['tanggal']->locale('id')->translatedFormat('d M') }} · {{ $h['persen'] }}% · {{ $h['total'] }} catatan
+                        {{ $h['tanggal']->locale('id')->translatedFormat('d M') }} · {{ $h['persen'] }}% · {{ __(':jumlah catatan', ['jumlah' => $h['total']]) }}
                     </span>
                     <div class="w-full max-w-[28px] rounded-t-lg {{ $batang }} opacity-85 group-hover:opacity-100 transition-all" style="height: {{ max($h['persen'], 3) }}%"></div>
                 </div>
@@ -197,8 +197,8 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
         </section>
 
         <section class="{{ $kartu }} p-5 sm:p-6">
-            <h2 class="font-bold text-slate-800">Perlu perhatian</h2>
-            <p class="text-xs text-slate-400">Kehadiran &lt; 75% atau alfa ≥ 3 kali</p>
+            <h2 class="font-bold text-slate-800">{{ __('Perlu perhatian') }}</h2>
+            <p class="text-xs text-slate-400">{{ __('Kehadiran < 75% atau alfa ≥ 3 kali') }}</p>
             <div class="mt-4 space-y-2.5">
                 @forelse ($perhatian as $p)
                 <a href="{{ route('admin.pendaftaran.show', $p['id']) }}" class="flex items-center gap-3 p-2.5 -mx-1 rounded-2xl hover:bg-[#f5f9f7] transition-colors">
@@ -209,7 +209,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                     @endif
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate">{{ $p['nama'] }}</span>
-                        <span class="block text-[11px] text-slate-400">{{ $p['kelas'] ?? 'Tanpa kelas' }} · alfa {{ $p['alfa'] }}×</span>
+                        <span class="block text-[11px] text-slate-400">{{ $p['kelas'] ?? __('Tanpa kelas') }} · {{ __('alfa :jumlah×', ['jumlah' => $p['alfa']]) }}</span>
                     </span>
                     <span class="shrink-0 text-sm font-extrabold {{ $warnaPersen($p['persen'])[1] }}">{{ $p['persen'] }}%</span>
                 </a>
@@ -218,7 +218,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                     <span class="mx-auto w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-500 ring-1 ring-emerald-100 flex items-center justify-center">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                     </span>
-                    <p class="mt-2 text-sm text-slate-500">Semua peserta kehadirannya baik.</p>
+                    <p class="mt-2 text-sm text-slate-500">{{ __('Semua peserta kehadirannya baik.') }}</p>
                 </div>
                 @endforelse
             </div>
@@ -227,7 +227,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
 
     {{-- ===== Rekap per kelas & kegiatan ===== --}}
     <div class="grid lg:grid-cols-2 gap-6">
-        @foreach ([['Rekap per kelas', $perKelas, 'Belum ada absensi kelas.'], ['Rekap per kegiatan', $perKegiatan, 'Belum ada absensi kegiatan.']] as [$judul, $rekap, $kosong])
+        @foreach ([[__('Rekap per kelas'), $perKelas, __('Belum ada absensi kelas.')], [__('Rekap per kegiatan'), $perKegiatan, __('Belum ada absensi kegiatan.')]] as [$judul, $rekap, $kosong])
         <section class="{{ $kartu }} p-5 sm:p-6">
             <h2 class="font-bold text-slate-800">{{ $judul }}</h2>
             <div class="mt-4 space-y-4">
@@ -236,7 +236,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                     <div class="flex items-center justify-between gap-3">
                         <span class="min-w-0">
                             <span class="block text-sm font-semibold text-slate-800 truncate">{{ $r['nama'] }}</span>
-                            <span class="block text-[11px] text-slate-400">{{ $r['sesi'] }} kali absen · H {{ $r['hadir'] }} · T {{ $r['terlambat'] }} · S {{ $r['sakit'] }} · I {{ $r['izin'] }} · A {{ $r['alfa'] }}</span>
+                            <span class="block text-[11px] text-slate-400">{{ __(':jumlah kali absen', ['jumlah' => $r['sesi']]) }} · {{ __('H') }} {{ $r['hadir'] }} · {{ __('T') }} {{ $r['terlambat'] }} · {{ __('S') }} {{ $r['sakit'] }} · {{ __('I') }} {{ $r['izin'] }} · {{ __('A') }} {{ $r['alfa'] }}</span>
                         </span>
                         <span class="shrink-0 text-sm font-extrabold {{ $warnaPersen($r['persen'])[1] }}">{{ $r['persen'] }}%</span>
                     </div>
@@ -258,24 +258,24 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
     <section class="{{ $kartu }} overflow-hidden">
         <div class="p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-3">
             <div class="flex-1">
-                <h2 class="font-bold text-slate-800">Rekap per peserta</h2>
-                <p class="text-xs text-slate-400">{{ $jumlahPeserta }} peserta · urut dari kehadiran terendah</p>
+                <h2 class="font-bold text-slate-800">{{ __('Rekap per peserta') }}</h2>
+                <p class="text-xs text-slate-400">{{ __(':jumlah peserta', ['jumlah' => $jumlahPeserta]) }} · {{ __('urut dari kehadiran terendah') }}</p>
             </div>
             <form method="GET" class="flex items-center gap-2 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 pl-3 pr-1 py-1 sm:w-72">
                 @foreach (array_filter(['dari' => $f['dari'], 'sampai' => $f['sampai']] + $saringLain) as $n => $v)<input type="hidden" name="{{ $n }}" value="{{ $v }}">@endforeach
                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                <input type="search" name="q" value="{{ $f['q'] }}" placeholder="Cari peserta…" class="flex-1 min-w-0 bg-transparent border-0 p-1.5 text-sm outline-none focus:ring-0">
+                <input type="search" name="q" value="{{ $f['q'] }}" placeholder="{{ __('Cari peserta…') }}" class="flex-1 min-w-0 bg-transparent border-0 p-1.5 text-sm outline-none focus:ring-0">
             </form>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
                 <thead class="bg-[#f8fbfa] text-[11px] uppercase tracking-wider text-slate-500">
                     <tr>
-                        <th class="px-5 py-3 text-left font-semibold">Peserta</th>
+                        <th class="px-5 py-3 text-left font-semibold">{{ __('Peserta') }}</th>
                         @foreach (Absensi::STATUS as $k => [$l, $p])
-                        <th class="px-2 py-3 text-center font-semibold" title="{{ $l }}"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full {{ $gaya[$k][0] }}"></span>{{ $p }}</span></th>
+                        <th class="px-2 py-3 text-center font-semibold" title="{{ __($l) }}"><span class="inline-flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full {{ $gaya[$k][0] }}"></span>{{ __($p) }}</span></th>
                         @endforeach
-                        <th class="px-5 py-3 text-left font-semibold w-48">Kehadiran</th>
+                        <th class="px-5 py-3 text-left font-semibold w-48">{{ __('Kehadiran') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -306,7 +306,7 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                         </td>
                     </tr>
                     @empty
-                    <tr><td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">Peserta tidak ditemukan.</td></tr>
+                    <tr><td colspan="7" class="px-5 py-10 text-center text-sm text-slate-400">{{ __('Peserta tidak ditemukan.') }}</td></tr>
                     @endforelse
                 </tbody>
             </table>
@@ -322,8 +322,8 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
     @if ($jumlahSesi > 0)
     <section class="{{ $kartu }} overflow-hidden">
         <div class="p-5 sm:p-6">
-            <h2 class="font-bold text-slate-800">Riwayat absensi</h2>
-            <p class="text-xs text-slate-400">Klik untuk melihat detail per peserta dan catatan mudarris</p>
+            <h2 class="font-bold text-slate-800">{{ __('Riwayat absensi') }}</h2>
+            <p class="text-xs text-slate-400">{{ __('Klik untuk melihat detail per peserta dan catatan mudarris') }}</p>
         </div>
         <div class="divide-y divide-slate-100">
             @foreach ($daftarSesi as $s)
@@ -332,19 +332,19 @@ $labelStatus = fn ($k) => Absensi::STATUS[$k][0];
                 $p = $s->detail_count ? (int) round($s->hadir_count / $s->detail_count * 100) : null;
             @endphp
             <a href="{{ route('admin.laporan-absensi.show', $s) }}" class="px-5 sm:px-6 py-3.5 flex items-center gap-3 hover:bg-[#fafcfb] transition-colors">
-                <span class="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center ring-1 text-[10px] font-extrabold {{ $kegiatan ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' : 'bg-sky-50 text-sky-600 ring-sky-100' }}">{{ $kegiatan ? 'KGT' : 'KLS' }}</span>
+                <span class="w-11 h-11 shrink-0 rounded-2xl flex items-center justify-center ring-1 text-[10px] font-extrabold {{ $kegiatan ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' : 'bg-sky-50 text-sky-600 ring-sky-100' }}">{{ $kegiatan ? __('KGT') : __('KLS') }}</span>
                 <span class="flex-1 min-w-0">
                     <span class="block text-sm font-semibold text-slate-800 truncate">{{ $s->judul }}</span>
                     <span class="block text-xs text-slate-400 truncate">
-                        {{ $s->tanggal->locale('id')->translatedFormat('d M Y') }} · {{ $s->tanggal_hijriyah }} · {{ $s->keterangan_waktu }} · oleh {{ $s->pengabsen?->name ?? '-' }}
+                        {{ $s->tanggal->locale('id')->translatedFormat('d M Y') }} · {{ $s->tanggal_hijriyah }} · {{ $s->keterangan_waktu }} · {{ __('oleh') }} {{ $s->pengabsen?->name ?? '-' }}
                     </span>
                 </span>
                 @if ($kegiatan && ! $s->selesai_at)
-                    <span class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200">Berjalan</span>
+                    <span class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200">{{ __('Berjalan') }}</span>
                 @endif
                 <span class="shrink-0 text-right">
                     <span class="block text-sm font-extrabold {{ $warnaPersen($p)[1] }}">{{ $p !== null ? $p . '%' : '–' }}</span>
-                    <span class="block text-[11px] text-slate-400">{{ $s->detail_count }} peserta</span>
+                    <span class="block text-[11px] text-slate-400">{{ __(':jumlah peserta', ['jumlah' => $s->detail_count]) }}</span>
                 </span>
             </a>
             @endforeach

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dashboard') - Dauroh</title>
+    <title>@yield('title', __('Dashboard')) - {{ __('Dauroh') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -88,6 +88,8 @@
         :is(#sidebar[data-collapsed="true"], #sidebar-app[data-tertutup-awal="1"]:not([data-v-app]) #sidebar) .sb-ikon { display: flex; }
     </style>
     @stack('styles')
+    {{-- Font Arab modern (huruf Arab otomatis memakai font ini) --}}
+    @include('partials.font-arab')
 </head>
 
 <body class="font-sans antialiased text-gray-800 bg-[#0b312a]">
@@ -118,7 +120,7 @@
                 </a>
                 {{-- Tombol buka/tutup sidebar --}}
                 <button type="button" id="sidebar-toggle" aria-controls="sidebar" @click="aturSidebar(!tertutup)"
-                    :aria-expanded="tertutup ? 'false' : 'true'" :title="tertutup ? 'Buka sidebar' : 'Tutup sidebar'"
+                    :aria-expanded="tertutup ? 'false' : 'true'" :title="tertutup ? @js(__('Buka sidebar')) : @js(__('Tutup sidebar'))"
                     class="shrink-0 rounded-md p-1 text-white/40 hover:text-white/80 hover:bg-white/5 transition-colors">
                     <svg class="w-5 h-5 transition-transform duration-200"
                         aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
@@ -135,7 +137,7 @@
             <div class="mt-5 mb-6 h-px bg-white/10"></div>
 
             {{-- Label NAVIGATION --}}
-            <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">Navigation</p>
+            <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">{{ __('Navigation') }}</p>
 
             <div id="sidebar-nav"
                 class="flex-1 min-h-0 overflow-y-auto pr-1 scrollbar-custom scrollbar-dark scrollbar-small">
@@ -204,15 +206,14 @@
 
             {{-- USER ACCOUNT --}}
             <div class="mt-6">
-                <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">User Account
-                </p>
+                <p class="sb-teks px-1 mb-3 text-[10px] font-medium uppercase tracking-[0.08em] text-white/40">{{ __('User Account') }}</p>
                 <div class="sb-user flex items-center gap-3 px-1">
                     <img src="{{ auth()->user()?->avatarUrl('4ade80', '0b332c') }}"
                         class="w-10 h-10 rounded-full object-cover ring-2 ring-[#4ade80]/60" alt="Avatar admin" />
                     <div class="sb-teks flex flex-col items-start justify-center min-w-0" v-pre>
                         <p class="text-white text-[15px] font-medium truncate">@yield('page-heading', '' .
                             (auth()->user()->name ?? 'Admin'))</p>
-                        <p class="text-white/45 text-xs">Super Admin</p>
+                        <p class="text-white/45 text-xs">{{ __('Super Admin') }}</p>
                     </div>
                 </div>
             </div>
@@ -228,15 +229,14 @@
                  Teks dari database di sini diberi v-pre agar tidak dibaca Vue sebagai template. --}}
             <header id="header-akun" class="shrink-0 z-30 flex items-center justify-between px-6 pt-6 pb-5 bg-[#0b312a4e] border-b border-[#0b312a99] backdrop-blur-md">
                 <div>
-                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]" v-pre>@yield('page-heading', 'Selamat
-                        Datang, ' . (auth()->user()->name ?? 'Admin') . ' 👋')</h1>
+                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]" v-pre>@yield('page-heading', __('Selamat Datang, :nama 👋', ['nama' => auth()->user()->name ?? 'Admin']))</h1>
                 </div>
 
                 <div class="flex items-center gap-3">
                     {{-- Sesi aktif (Pengaturan > Sesi): semua data yang tampil milik sesi ini --}}
                     @php $sesiAktifHeader = \App\Support\SesiAplikasi::aktif(); @endphp
                     @if ($sesiAktifHeader)
-                    <a href="{{ route('admin.pengaturan.index', ['tab' => 'sesi']) }}" title="Sesi aktif. Klik untuk mengganti."
+                    <a href="{{ route('admin.pengaturan.index', ['tab' => 'sesi']) }}" title="{{ __('Sesi aktif. Klik untuk mengganti.') }}"
                         class="hidden lg:inline-flex items-center gap-2 max-w-[14rem] rounded-xl bg-white/80 px-3 py-2.5 text-[12px] font-semibold text-[#0b332c] ring-1 ring-emerald-200 hover:bg-white">
                         <span class="w-2 h-2 shrink-0 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20"></span>
                         <span class="truncate" v-pre>{{ $sesiAktifHeader->nama }}</span>
@@ -249,15 +249,18 @@
                             <path stroke-linecap="round" stroke-linejoin="round"
                                 d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
                         </svg>
-                        <input type="text" placeholder="Cari Santri, Ustadz..."
+                        <input type="text" placeholder="{{ __('Cari Santri, Ustadz...') }}"
                             class="bg-white rounded-xl text-[13px] pl-10 pr-4 py-2.5 w-64 border border-transparent focus:outline-none focus:border-[#0b332c]/20 focus:ring-2 focus:ring-[#22c55e]/20" />
                     </div>
+
+                    {{-- Tombol ganti bahasa tampilan (Indonesia / العربية) --}}
+                    @include('partials.pilih-bahasa')
 
                     {{-- ===== Notifikasi (lonceng): pendaftar yang menunggu verifikasi ===== --}}
                     @php $lonceng = \App\Support\StatusNotifikasi::terapkan($notifItems ?? []); @endphp
                     <div class="relative">
                         <button type="button" @click.stop="bukaTutup('notif')" aria-haspopup="true"
-                            :aria-expanded="menuBuka === 'notif' ? 'true' : 'false'" title="Notifikasi"
+                            :aria-expanded="menuBuka === 'notif' ? 'true' : 'false'" title="{{ __('Notifikasi') }}"
                             class="relative w-10 h-10 rounded-xl bg-white flex items-center justify-center hover:bg-white/70 transition-colors">
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" fill="none"
                                 viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
@@ -270,8 +273,8 @@
                         <div v-show="menuBuka === 'notif'" @click.stop style="display: none"
                             class="absolute right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
                             <div class="flex items-center justify-between px-4 py-3 border-b border-slate-100">
-                                <p class="text-sm font-bold text-slate-800">Notifikasi</p>
-                                <span v-if="notifTotal > 0" class="text-[11px] font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-2 py-0.5" v-text="notifTotal + ' belum dibaca'"></span>
+                                <p class="text-sm font-bold text-slate-800">{{ __('Notifikasi') }}</p>
+                                <span v-if="notifTotal > 0" class="text-[11px] font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-2 py-0.5" v-text="notifTotal + ' ' + @js(__('belum dibaca'))"></span>
                             </div>
 
                             @include('partials.lonceng-notifikasi')
@@ -279,7 +282,7 @@
                             <a href="{{ route('admin.pengaturan.index') }}"
                                 class="flex items-center justify-center gap-1.5 px-4 py-2.5 text-xs font-semibold text-emerald-700 bg-[#f5f9f7] hover:bg-emerald-50 transition-colors">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
-                                Atur notifikasi
+                                {{ __('Atur notifikasi') }}
                             </a>
                         </div>
                     </div>
@@ -293,7 +296,7 @@
                                 class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
                             <span class="hidden sm:flex flex-col items-start leading-tight text-left" v-pre>
                                 <span class="text-[13px] font-semibold text-[#0f1f1a] max-w-[10rem] truncate">{{ auth()->user()->name ?? 'Admin' }}</span>
-                                <span class="text-[11px] text-gray-600">Super Admin</span>
+                                <span class="text-[11px] text-gray-600">{{ __('Super Admin') }}</span>
                             </span>
                             <svg class="hidden sm:block w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                         </button>
@@ -307,15 +310,15 @@
                             <a href="/" target="_blank" rel="noopener"
                                 class="flex items-center gap-2.5 px-4 py-2.5 text-sm text-slate-600 hover:bg-[#f5f9f7] transition-colors">
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418"/></svg>
-                                Lihat Website
+                                {{ __('Lihat Website') }}
                             </a>
                             <form method="POST" action="{{ route('admin.logout') }}"
-                                @submit="konfirmasi($event, 'Keluar dari akun admin?')" class="border-t border-slate-100">
+                                @submit="konfirmasi($event, @js(__('Keluar dari akun admin?')))" class="border-t border-slate-100">
                                 @csrf
                                 <button type="submit"
                                     class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
-                                    Keluar
+                                    {{ __('Keluar') }}
                                 </button>
                             </form>
                         </div>

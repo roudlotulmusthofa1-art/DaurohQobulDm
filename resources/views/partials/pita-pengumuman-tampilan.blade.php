@@ -22,7 +22,7 @@
 
         {{-- Judul + keterangan + tanggal --}}
         <span class="min-w-0 flex-1 basis-64 leading-snug">
-            <span class="font-bold" v-text="pita.judul || 'Judul pengumuman'"></span>
+            <span class="font-bold" v-text="pita.judul || @js(__('Judul pengumuman'))"></span>
             <span v-if="pita.keterangan" class="opacity-90" v-text="' — ' + pita.keterangan"></span>
             <span class="flex items-center gap-1 text-[12px] opacity-80 mt-0.5">
                 <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path></svg>
@@ -33,7 +33,7 @@
         {{-- Hitung mundur --}}
         <span v-if="pita.hitung_mundur" class="inline-flex items-center gap-1.5 shrink-0">
             <span class="text-[11px] opacity-80" v-text="labelSisaPita(pita)"></span>
-            <span v-if="sisaPita(pita).hari > 0" class="rounded-md px-1.5 py-0.5 font-bold tabular-nums" :class="gayaPita(pita).kotak" v-text="sisaPita(pita).hari + ' hari'"></span>
+            <span v-if="sisaPita(pita).hari > 0" class="rounded-md px-1.5 py-0.5 font-bold tabular-nums" :class="gayaPita(pita).kotak" v-text="sisaPita(pita).hari + ' ' + @js(__('hari'))"></span>
             <span class="rounded-md px-1.5 py-0.5 font-bold font-mono tabular-nums" :class="gayaPita(pita).kotak" v-text="sisaPita(pita).jam"></span>
         </span>
 
@@ -48,14 +48,14 @@
     {{-- Kanan: pindah pengumuman (bila lebih dari satu) + tutup --}}
     <div v-if="bisaTutup || banyakPita > 1" class="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 flex items-center gap-0.5">
         <template v-if="banyakPita > 1">
-            <button type="button" @click="pitaSebelum" class="w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-white/15" title="Pengumuman sebelumnya" aria-label="Pengumuman sebelumnya">
+            <button type="button" @click="pitaSebelum" class="w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-white/15" title="{{ __('Pengumuman sebelumnya') }}" aria-label="{{ __('Pengumuman sebelumnya') }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
             </button>
-            <button type="button" @click="pitaBerikut" class="w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-white/15" title="Pengumuman berikutnya" aria-label="Pengumuman berikutnya">
+            <button type="button" @click="pitaBerikut" class="w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-white/15" title="{{ __('Pengumuman berikutnya') }}" aria-label="{{ __('Pengumuman berikutnya') }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
             </button>
         </template>
-        <button v-if="bisaTutup" type="button" @click="tutupPita" class="w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-white/15" title="Tutup pengumuman" aria-label="Tutup pengumuman">
+        <button v-if="bisaTutup" type="button" @click="tutupPita" class="w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100 hover:bg-white/15" title="{{ __('Tutup pengumuman') }}" aria-label="{{ __('Tutup pengumuman') }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>

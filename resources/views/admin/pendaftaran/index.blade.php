@@ -6,9 +6,9 @@
     <div class="space-y-5 mx-4 md:mx-10 lg:mx-20 mt-8">
         <div class="rounded-2xl bg-teal-700 text-white p-5">
             <h1 class="text-xl font-bold">
-                {{ ($statusTetap ?? null) === 'diterima' ? 'Data Terkonfirmasi Peserta' : 'Data Masuk Peserta' }}
+                {{ ($statusTetap ?? null) === 'diterima' ? __('Data Terkonfirmasi Peserta') : __('Data Masuk Peserta') }}
             </h1>
-            <p class="text-sm text-teal-100">Verifikasi pendaftar baru, lalu terima atau tolak.</p>
+            <p class="text-sm text-teal-100">{{ __('Verifikasi pendaftar baru, lalu terima atau tolak.') }}</p>
         </div>
 
         {{-- ===== Status pendaftaran: Aktif (formulir dibuka) / Nonaktif (ditutup) ===== --}}
@@ -20,20 +20,20 @@
                 <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
             </span>
             <div class="flex-1 min-w-[200px]">
-                <p class="font-bold" :class="psbDibuka ? 'text-emerald-800' : 'text-rose-800'" v-text="psbDibuka ? 'Pendaftaran AKTIF' : 'Pendaftaran NONAKTIF'"></p>
+                <p class="font-bold" :class="psbDibuka ? 'text-emerald-800' : 'text-rose-800'" v-text="psbDibuka ? @js(__('Pendaftaran AKTIF')) : @js(__('Pendaftaran NONAKTIF'))"></p>
                 <p class="text-sm" :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'"
-                    v-text="psbDibuka ? 'Formulir pendaftaran dibuka, peserta baru bisa mendaftar.' : 'Formulir pendaftaran ditutup, tidak ada pendaftar baru yang bisa masuk.'"></p>
+                    v-text="psbDibuka ? @js(__('Formulir pendaftaran dibuka, peserta baru bisa mendaftar.')) : @js(__('Formulir pendaftaran ditutup, tidak ada pendaftar baru yang bisa masuk.'))"></p>
             </div>
             <a href="{{ route('psb.daftar') }}" target="_blank" rel="noopener" class="text-sm font-semibold underline underline-offset-2"
-                :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'">Lihat formulir</a>
+                :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'">{{ __('Lihat formulir') }}</a>
             <button type="button" @click="ubahPsb" :disabled="psbSibuk" role="switch" :aria-checked="psbDibuka ? 'true' : 'false'"
-                :title="psbDibuka ? 'Klik untuk menonaktifkan pendaftaran' : 'Klik untuk mengaktifkan pendaftaran'"
+                :title="psbDibuka ? @js(__('Klik untuk menonaktifkan pendaftaran')) : @js(__('Klik untuk mengaktifkan pendaftaran'))"
                 class="inline-flex items-center gap-3 rounded-full pl-1.5 pr-4 py-1.5 text-sm font-bold text-white shadow-sm disabled:opacity-60 transition-colors"
                 :class="psbDibuka ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-rose-600 hover:bg-rose-700'">
                 <span class="relative inline-flex h-6 w-11 rounded-full bg-white/30">
                     <span class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" :class="psbDibuka ? 'translate-x-5' : ''"></span>
                 </span>
-                <span v-text="psbDibuka ? 'Aktif' : 'Nonaktif'"></span>
+                <span v-text="psbDibuka ? @js(__('Aktif')) : @js(__('Nonaktif'))"></span>
             </button>
             <p v-if="psbPesan" class="basis-full text-xs font-semibold" :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'" v-text="psbPesan"></p>
         </div>
@@ -47,7 +47,7 @@
 
         {{-- Kartu statistik --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-            @foreach ([['Total', $stat['total'], 'slate', ''], ['Menunggu', $stat['menunggu'], 'amber', 'menunggu'], ['Diterima', $stat['diterima'], 'emerald', 'diterima'], ['Ditolak', $stat['ditolak'], 'red', 'ditolak']] as [$label, $jml, $warna, $filter])
+            @foreach ([[__('Total'), $stat['total'], 'slate', ''], [__('Menunggu'), $stat['menunggu'], 'amber', 'menunggu'], [__('Diterima'), $stat['diterima'], 'emerald', 'diterima'], [__('Ditolak'), $stat['ditolak'], 'red', 'ditolak']] as [$label, $jml, $warna, $filter])
                 <a href="{{ route('admin.pendaftaran.index', array_filter(['status' => $filter])) }}"
                     class="bg-white rounded-xl border border-slate-200 p-4 hover:shadow-sm">
                     <p class="text-xs text-slate-500">{{ $label }}</p>
@@ -58,17 +58,17 @@
 
         {{-- Pencarian --}}
         <form method="GET" class="flex flex-wrap gap-2">
-            <input name="q" value="{{ request('q') }}" placeholder="Cari nama / nomor / wali..."
+            <input name="q" value="{{ request('q') }}" placeholder="{{ __('Cari nama / nomor / wali...') }}"
                 class="flex-1 min-w-[200px] border border-slate-300 rounded-lg px-3 py-2 text-sm">
             @unless ($statusTetap ?? null)
                 <select name="status" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
-                    <option value="">Semua status</option>
+                    <option value="">{{ __('Semua status') }}</option>
                     @foreach (['menunggu', 'diterima', 'ditolak'] as $s)
-                        <option value="{{ $s }}" @selected(request('status') === $s)>{{ ucfirst($s) }}</option>
+                        <option value="{{ $s }}" @selected(request('status') === $s)>{{ __(ucfirst($s)) }}</option>
                     @endforeach
                 </select>
             @endunless
-            <button class="px-4 py-2 rounded-lg bg-teal-600 text-white text-sm">Cari</button>
+            <button class="px-4 py-2 rounded-lg bg-teal-600 text-white text-sm">{{ __('Cari') }}</button>
         </form>
 
         {{-- Tabel --}}
@@ -76,12 +76,12 @@
             <table class="w-full text-sm">
                 <thead class="bg-slate-50 text-slate-500 text-left">
                     <tr>
-                        <th class="px-4 py-3">No. Pendaftaran</th>
-                        <th class="px-4 py-3">Nama</th>
-                        <th class="px-4 py-3">Kota</th>
-                        <th class="px-4 py-3">Tanggal</th>
-                        <th class="px-4 py-3">Status</th>
-                        <th class="px-4 py-3 text-center">Aksi</th>
+                        <th class="px-4 py-3">{{ __('No. Pendaftaran') }}</th>
+                        <th class="px-4 py-3">{{ __('Nama') }}</th>
+                        <th class="px-4 py-3">{{ __('Kota') }}</th>
+                        <th class="px-4 py-3">{{ __('Tanggal') }}</th>
+                        <th class="px-4 py-3">{{ __('Status') }}</th>
+                        <th class="px-4 py-3 text-center">{{ __('Aksi') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -98,14 +98,14 @@
                                     'bg-amber-100 text-amber-700' => $p->status === 'menunggu',
                                     'bg-emerald-100 text-emerald-700' => $p->status === 'diterima',
                                     'bg-red-100 text-red-700' => $p->status === 'ditolak',
-                                ])>{{ $p->label_status }}</span>
+                                ])>{{ __($p->label_status) }}</span>
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-center gap-1">
                                     {{-- Ikon mata: buka detail siswa --}}
                                     <a href="{{ route('admin.pendaftaran.show', $p) }}"
                                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-teal-700 transition hover:bg-teal-50"
-                                        title="Lihat detail siswa" aria-label="Lihat detail {{ $p->nama_lengkap }}">
+                                        title="{{ __('Lihat detail siswa') }}" aria-label="{{ __('Lihat detail :nama', ['nama' => $p->nama_lengkap]) }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
                                             fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                             stroke-linejoin="round">
@@ -116,12 +116,12 @@
 
                                     {{-- Ikon tempat sampah: hapus (minta konfirmasi dulu) --}}
                                     <form method="POST" action="{{ route('admin.pendaftaran.destroy', $p) }}"
-                                        @submit="konfirmasi" data-konfirmasi="{{ 'Hapus data ' . $p->nama_lengkap . "?\nBerkas unggahan dan akun login siswanya juga ikut terhapus." }}">
+                                        @submit="konfirmasi" data-konfirmasi="{{ __('Hapus data :nama?', ['nama' => $p->nama_lengkap]) . "\n" . __('Berkas unggahan dan akun login siswanya juga ikut terhapus.') }}">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
                                             class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-red-600 transition hover:bg-red-50"
-                                            title="Hapus" aria-label="Hapus {{ $p->nama_lengkap }}">
+                                            title="{{ __('Hapus') }}" aria-label="{{ __('Hapus :nama', ['nama' => $p->nama_lengkap]) }}">
                                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"
                                                 fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                                 stroke-linejoin="round">
@@ -138,7 +138,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-8 text-center text-slate-400">Belum ada pendaftar.</td>
+                            <td colspan="6" class="px-4 py-8 text-center text-slate-400">{{ __('Belum ada pendaftar.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -162,7 +162,7 @@
             ...metodeHalaman,
             async ubahPsb() {
                 const baru = !this.psbDibuka;
-                if (!baru && !confirm('Nonaktifkan pendaftaran? Formulir akan ditutup dan tidak ada pendaftar baru yang bisa masuk.')) return;
+                if (!baru && !confirm(@js(__('Nonaktifkan pendaftaran? Formulir akan ditutup dan tidak ada pendaftar baru yang bisa masuk.')))) return;
                 this.psbSibuk = true;
                 try {
                     const res = await fetch(@json(route('admin.pendaftaran.buka-tutup')), {
@@ -171,11 +171,11 @@
                         body: JSON.stringify({ dibuka: baru }),
                     });
                     const data = await res.json();
-                    if (!res.ok) throw new Error(data.message || 'Gagal menyimpan.');
+                    if (!res.ok) throw new Error(data.message || @js(__('Gagal menyimpan.')));
                     this.psbDibuka = data.dibuka;
                     this.psbPesan = data.pesan;
                 } catch (e) {
-                    this.psbPesan = e.message || 'Gagal menyimpan. Coba lagi.';
+                    this.psbPesan = e.message || @js(__('Gagal menyimpan. Coba lagi.'));
                 } finally {
                     this.psbSibuk = false;
                 }

@@ -6,15 +6,15 @@
 use App\Models\PendaftaranSiswa;
 $hariIni = now()->locale('id')->translatedFormat('l, d F Y');
 $status = [
-    PendaftaranSiswa::MENUNGGU => ['Menunggu pengumuman', 'bg-amber-50 text-amber-700 ring-amber-100'],
-    PendaftaranSiswa::DITERIMA => ['Diterima', 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
-    PendaftaranSiswa::DITOLAK => ['Tidak diterima', 'bg-rose-50 text-rose-700 ring-rose-100'],
+    PendaftaranSiswa::MENUNGGU => [__('Menunggu pengumuman'), 'bg-amber-50 text-amber-700 ring-amber-100'],
+    PendaftaranSiswa::DITERIMA => [__('Diterima'), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
+    PendaftaranSiswa::DITOLAK => [__('Tidak diterima'), 'bg-rose-50 text-rose-700 ring-rose-100'],
 ][$siswa->status] ?? ['-', 'bg-slate-100 text-slate-500 ring-slate-200'];
 
 $kartuMenu = [
     [
-        'judul' => 'Profil',
-        'ket'   => 'Data diri yang Anda isi saat mendaftar',
+        'judul' => __('Profil'),
+        'ket'   => __('Data diri yang Anda isi saat mendaftar'),
         'url'   => route('siswa.profil'),
         'warna' => 'from-emerald-400 to-teal-600',
         'cahaya'=> 'bg-emerald-400/30',
@@ -22,40 +22,49 @@ $kartuMenu = [
         'ikon'  => 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
     ],
     [
-        'judul' => 'Pengumuman Kelulusan',
-        'ket'   => 'Hasil kelulusan di akhir masa dauroh',
+        'judul' => __('Pengumuman Kelulusan'),
+        'ket'   => __('Hasil kelulusan di akhir masa dauroh'),
         'url'   => route('siswa.kelulusan'),
         'warna' => 'from-amber-400 to-orange-500',
         'cahaya'=> 'bg-amber-400/30',
         // Kelulusan akhir: tampil setelah admin mengumumkan
         'lencana' => match (true) {
-            $siswa->status !== PendaftaranSiswa::DITERIMA => ['Khusus peserta', 'bg-slate-100 text-slate-500 ring-slate-200'],
-            ! $diumumkan => ['Belum diumumkan', 'bg-amber-50 text-amber-700 ring-amber-100'],
-            $siswa->status_kelulusan === PendaftaranSiswa::LULUS => ['Lulus' . ($siswa->predikat_kelulusan ? ' · ' . $siswa->predikat_kelulusan : ''), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
-            $siswa->status_kelulusan === PendaftaranSiswa::TIDAK_LULUS => ['Belum lulus', 'bg-rose-50 text-rose-700 ring-rose-100'],
-            default => ['Sudah diumumkan', 'bg-sky-50 text-sky-700 ring-sky-100'],
+            $siswa->status !== PendaftaranSiswa::DITERIMA => [__('Khusus peserta'), 'bg-slate-100 text-slate-500 ring-slate-200'],
+            ! $diumumkan => [__('Belum diumumkan'), 'bg-amber-50 text-amber-700 ring-amber-100'],
+            $siswa->status_kelulusan === PendaftaranSiswa::LULUS => [__('Lulus') . ($siswa->predikat_kelulusan ? ' · ' . $siswa->predikat_kelulusan : ''), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
+            $siswa->status_kelulusan === PendaftaranSiswa::TIDAK_LULUS => [__('Belum lulus'), 'bg-rose-50 text-rose-700 ring-rose-100'],
+            default => [__('Sudah diumumkan'), 'bg-sky-50 text-sky-700 ring-sky-100'],
         },
         'ikon'  => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5',
     ],
     [
-        'judul' => 'Pesan dari Admin',
-        'ket'   => 'Pesan khusus dan balasan dari admin',
+        'judul' => __('Pesan dari Admin'),
+        'ket'   => __('Pesan khusus dan balasan dari admin'),
         'url'   => route('siswa.pesan-admin'),
         'warna' => 'from-sky-400 to-blue-600',
         'cahaya'=> 'bg-sky-400/30',
         'lencana' => $jumlahPesanBaru > 0
-            ? [$jumlahPesanBaru . ' pesan baru', 'bg-rose-50 text-rose-700 ring-rose-100']
-            : ['Tidak ada pesan baru', 'bg-slate-100 text-slate-500 ring-slate-200'],
+            ? [__(':jumlah pesan baru', ['jumlah' => $jumlahPesanBaru]), 'bg-rose-50 text-rose-700 ring-rose-100']
+            : [__('Tidak ada pesan baru'), 'bg-slate-100 text-slate-500 ring-slate-200'],
         'ikon'  => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
     ],
     [
-        'judul' => 'Pesan untuk Admin',
-        'ket'   => 'Tanyakan atau sampaikan sesuatu ke admin',
+        'judul' => __('Pesan untuk Admin'),
+        'ket'   => __('Tanyakan atau sampaikan sesuatu ke admin'),
         'url'   => route('siswa.pesan-saya'),
         'warna' => 'from-violet-400 to-purple-600',
         'cahaya'=> 'bg-violet-400/30',
-        'lencana' => [$jumlahPesanSaya ? $jumlahPesanSaya . ' pesan terkirim' : 'Tulis pesan', 'bg-violet-50 text-violet-700 ring-violet-100'],
+        'lencana' => [$jumlahPesanSaya ? __(':jumlah pesan terkirim', ['jumlah' => $jumlahPesanSaya]) : __('Tulis pesan'), 'bg-violet-50 text-violet-700 ring-violet-100'],
         'ikon'  => 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5',
+    ],
+    [
+        'judul' => __('Ganti Password'),
+        'ket'   => __('Ubah password untuk masuk ke akun Anda'),
+        'url'   => route('siswa.ganti-password'),
+        'warna' => 'from-slate-500 to-slate-700',
+        'cahaya'=> 'bg-slate-400/30',
+        'lencana' => [__('Keamanan akun'), 'bg-slate-100 text-slate-600 ring-slate-200'],
+        'ikon'  => 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',
     ],
 ];
 @endphp
@@ -71,15 +80,15 @@ $kartuMenu = [
         <div class="flex-1 min-w-0">
             <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/90">{{ $hariIni }}</p>
             <h2 class="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-                Ahlan Wasahlan,<br><span class="text-emerald-300">{{ $siswa->nama_lengkap }}</span>
+                {{ __('Ahlan Wasahlan,') }}<br><span class="text-emerald-300">{{ $siswa->nama_lengkap }}</span>
             </h2>
             @if ($siswa->nama_lengkap_arab)
             <p class="mt-1 text-xl sm:text-2xl text-emerald-100/80" dir="rtl">{{ $siswa->nama_lengkap_arab }}</p>
             @endif
-            <p class="mt-3 text-sm text-white/65 max-w-lg">Pilih menu di bawah untuk melihat profil, pengumuman, dan pesan dari admin.</p>
+            <p class="mt-3 text-sm text-white/65 max-w-lg">{{ __('Pilih menu di bawah untuk melihat profil, pengumuman, dan pesan dari admin.') }}</p>
         </div>
         <div class="shrink-0 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-3">
-            <p class="text-[11px] text-white/60">Status pendaftaran</p>
+            <p class="text-[11px] text-white/60">{{ __('Status pendaftaran') }}</p>
             <p class="mt-0.5 font-extrabold {{ $siswa->status === PendaftaranSiswa::DITERIMA ? 'text-emerald-300' : ($siswa->status === PendaftaranSiswa::DITOLAK ? 'text-rose-300' : 'text-amber-200') }}">{{ $status[0] }}</p>
         </div>
     </div>
@@ -87,14 +96,17 @@ $kartuMenu = [
 
 {{-- ===== Kartu menu ===== --}}
 <div class="mt-6 sm:mt-8 flex items-end justify-between">
-    <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">Menu</h3>
-    <p class="text-xs text-slate-400">{{ count($kartuMenu) }} menu</p>
+    <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">{{ __('Menu') }}</h3>
+    <p class="text-xs text-slate-400">{{ __(':jumlah menu', ['jumlah' => count($kartuMenu)]) }}</p>
 </div>
 
 <div class="mt-4 grid grid-cols-2 gap-3 sm:gap-5">
     @foreach ($kartuMenu as $k)
-    <a href="{{ $k['url'] }}"
-        class="group relative overflow-hidden rounded-3xl bg-white ring-1 ring-[#0b332c]/[0.06] p-4 sm:p-6 flex flex-col min-h-[170px] sm:min-h-[210px] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-20px_rgba(11,51,44,0.35)] hover:ring-emerald-200">
+    {{-- Kartu terakhir yang sendirian di barisnya (jumlah kartu ganjil) dibuat melebar penuh --}}
+    <a href="{{ $k['url'] }}" @class([
+        'group relative overflow-hidden rounded-3xl bg-white ring-1 ring-[#0b332c]/[0.06] p-4 sm:p-6 flex flex-col min-h-[170px] sm:min-h-[210px] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)] transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-20px_rgba(11,51,44,0.35)] hover:ring-emerald-200',
+        'col-span-2' => $loop->last && $loop->count % 2 === 1,
+    ])>
         <span class="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 {{ $k['cahaya'] }}"></span>
 
         <div class="relative flex items-start justify-between gap-2">

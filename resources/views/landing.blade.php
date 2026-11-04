@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Beranda - Dauroh Qobul Darul Musthofa Tarim')
+@section('title', __('Beranda - Dauroh Qobul Darul Musthofa Tarim'))
 
 @section('content')
 
@@ -35,27 +35,25 @@
 
             <div
                 class="mx-auto w-40 h-40 rounded-2xl bg-white/80 shadow-lg flex items-center justify-center mb-8 mt-24">
-                <img src="{{ asset('images/Logo Dar.png') }}" alt="Logo" class=" w-32 h-32">
+                <img src="{{ asset('images/Logo Dar.png') }}" alt="{{ __('Logo') }}" class=" w-32 h-32">
             </div>
 
             {{-- Judul --}}
             <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold leading-relaxed tracking-wide">
-                DAUROH QOBUL
+                {{ __('DAUROH QOBUL') }}
             </h1>
             <h2
                 class="text-6xl font-bold mb-1 bg-linear-to-r from-white via-yellow-500 to-white bg-clip-text text-transparent">
-                Darul Musthofa</h2>
-            <h2 class="text-3xl font-semibold">Tarim, Hadromaut, Yaman</h2>
+                {{ __('Darul Musthofa') }}</h2>
+            <h2 class="text-3xl font-semibold">{{ __('Tarim, Hadromaut, Yaman') }}</h2>
 
             {{-- Subjudul --}}
             <p class="mt-6 text-lg sm:text-xl font-semibold text-amber-400">
-                Situs Resmi Dauroh Darul Musthofa Tarim
+                {{ __('Situs Resmi Dauroh Darul Musthofa Tarim') }}
             </p>
 
             <p class="mt-2 text-teal-50/90">
-                Bagi para pelajar dari wilayah <span class="text-teal-50/90 font-bold">Asia Tenggara</span> yang ingin
-                melanjutkan pendidikannya <br> di Darul Musthafa,
-                Tarim, Hadramaut, Yaman.
+                {{ __('Bagi para pelajar dari wilayah') }} <span class="text-teal-50/90 font-bold">{{ __('Asia Tenggara') }}</span> {{ __('yang ingin melanjutkan pendidikannya') }} <br> {{ __('di Darul Musthafa, Tarim, Hadramaut, Yaman.') }}
             </p>
 
             {{-- Tombol --}}
@@ -63,12 +61,12 @@
 
                 <a href="/psb/daftar"
                     class="card w-full sm:w-auto px-7 py-3 rounded-lg border border-white/60 font-semibold hover:bg-white/20 transition-colors">
-                    Daftar Sekarang
+                    {{ __('Daftar Sekarang') }}
                 </a>
 
                 <a href="#tentang"
                     class="card w-full sm:w-auto px-7 py-3 rounded-lg border border-white/60 font-semibold hover:bg-white/20 transition-colors">
-                    Informasi Pondok
+                    {{ __('Informasi Pondok') }}
                 </a>
 
             </div>
@@ -84,7 +82,7 @@
                     </svg>
 
                     <span data-target="{{ $jumlahPeserta }}" class="stat-number">0</span>
-                    Peserta
+                    {{ __('Peserta') }}
                 </span>
 
                 <span class="flex items-center gap-2">
@@ -95,7 +93,7 @@
                     </svg>
 
                     <span data-target="{{ $jumlahAssatid }}" class="stat-number">0</span>
-                    Assatid
+                    {{ __('Assatid') }}
                 </span>
 
                 <span class="flex items-center gap-2">
@@ -104,7 +102,7 @@
                             d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0z" />
                     </svg>
 
-                    Program Terpadu
+                    {{ __('Program Terpadu') }}
                 </span>
 
             </div>
@@ -118,18 +116,18 @@
         <div class="max-w-4xl mx-auto px-6">
             <span
                 class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-teal-50 text-teal-700 text-xs font-semibold">
-                ♡ TENTANG KAMI
+                ♡ {{ __('TENTANG KAMI') }}
             </span>
             <h2 class="mt-5 text-4xl sm:text-5xl font-extrabold">
-                <span class="text-teal-700">Dauroh Qobul <i class="mdi mdi-alpha-q-box-outline:"></i></span><br>
-                <span class="text-amber-500">Darul Muthofa Tarim</span>
+                <span class="text-teal-700">{{ __('Dauroh Qobul') }} <i class="mdi mdi-alpha-q-box-outline:"></i></span><br>
+                <span class="text-amber-500">{{ __('Darul Muthofa Tarim') }}</span>
             </h2>
 
             <p class="mt-6 text-slate-600 leading-relaxed">
-                Dauroh Qobul <strong class="text-slate-800">Darul MUsthofa Tarim</strong>
-                adalah pondok pesantren kilat, yang menenerima dan mendidik para pelajar
-                <strong class="text-slate-800">Asia tenggara</strong> yang ingin melanjutkan belajarnya di
-                <strong class="text-slate-800">Darul Musthofa Tarim , hadromaut , yaman</strong>
+                {{ __('Dauroh Qobul') }} <strong class="text-slate-800">{{ __('Darul MUsthofa Tarim') }}</strong>
+                {{ __('adalah pondok pesantren kilat, yang menenerima dan mendidik para pelajar') }}
+                <strong class="text-slate-800">{{ __('Asia tenggara') }}</strong> {{ __('yang ingin melanjutkan belajarnya di') }}
+                <strong class="text-slate-800">{{ __('Darul Musthofa Tarim , hadromaut , yaman') }}</strong>
             </p>
 
 
@@ -138,12 +136,10 @@
                     <div class="w-10 h-10 rounded-lg bg-teal-700 flex items-center justify-center">
                         <x-ribath-icon name="target" class="w-5 h-5 text-white" />
                     </div>
-                    <h3 class="font-bold text-lg">Visi Kami</h3>
+                    <h3 class="font-bold text-lg">{{ __('Visi Kami') }}</h3>
                 </div>
                 <p class="text-slate-600 italic border-l-2 border-teal-200 pl-4">
-                    "Memilih para pelajar terbaik yang layak untuk belajar di Darul Musthofa, dan yang diharapkan dapat
-                    memberikan manfaat
-                    secara umum maupun khusus bagi umat setelah mereka kembali ke negeri masing-masing."
+                    "{{ __('Memilih para pelajar terbaik yang layak untuk belajar di Darul Musthofa, dan yang diharapkan dapat memberikan manfaat secara umum maupun khusus bagi umat setelah mereka kembali ke negeri masing-masing.') }}"
                 </p>
             </div>
 
@@ -152,43 +148,37 @@
                     <div class="w-10 h-10 rounded-lg bg-amber-500 flex items-center justify-center">
                         <x-ribath-icon name="award" class="w-5 h-5 text-white" />
                     </div>
-                    <h3 class="font-bold text-lg">Misi Kami</h3>
+                    <h3 class="font-bold text-lg">{{ __('Misi Kami') }}</h3>
                 </div>
                 <ul class="space-y-2 text-slate-600">
-                    <li>• Tujuan ini diwujudkan dengan menyediakan suasana ilmiah dan ruhani Darul Musthofa bagi para
-                        calon pelajar sebelum mereka
-                        datang ke Tarim. Dengan demikian, calon pelajar dapat menguji dirinya sendiri; melihat dan
-                        memperlihatkan sejauh mana
-                        komitmennya terhadap adab, tata tertib, serta kesungguhannya dalam menuntut ilmu.</li>
-                    <li>• Melalui proses ini, pihak pengelola dapat melakukan seleksi dengan lebih baik terhadap para
-                        pelajar yang benar-benar
-                        layak dan memenuhi syarat untuk melanjutkan studi di Darul Musthofa.</li>
+                    <li>• {{ __('Tujuan ini diwujudkan dengan menyediakan suasana ilmiah dan ruhani Darul Musthofa bagi para calon pelajar sebelum mereka datang ke Tarim. Dengan demikian, calon pelajar dapat menguji dirinya sendiri; melihat dan memperlihatkan sejauh mana komitmennya terhadap adab, tata tertib, serta kesungguhannya dalam menuntut ilmu.') }}</li>
+                    <li>• {{ __('Melalui proses ini, pihak pengelola dapat melakukan seleksi dengan lebih baik terhadap para pelajar yang benar-benar layak dan memenuhi syarat untuk melanjutkan studi di Darul Musthofa.') }}</li>
                 </ul>
             </div>
 
             <div class="mt-6 grid sm:grid-cols-2 gap-4">
                 <div class="rounded-2xl bg-blue-50 p-6">
                     <div class="flex items-center gap-2 text-blue-700 font-bold mb-2">
-                        <x-ribath-icon name="clock" class="w-5 h-5" /> Informasi Waktu Dauroh
+                        <x-ribath-icon name="clock" class="w-5 h-5" /> {{ __('Informasi Waktu Dauroh') }}
                     </div>
                     <p class="text-sm text-slate-600">
-                        Sistem unik 5 tahun: <strong>Tamhidi → Ibtida → Tsanawiyah</strong>
+                        {{ __('Sistem unik 5 tahun:') }} <strong>{{ __('Tamhidi → Ibtida → Tsanawiyah') }}</strong>
                     </p>
                     <a href="#kurikulum"
                         class="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-blue-700">
-                        Struktur Komprehensif <span aria-hidden="true">→</span>
+                        {{ __('Struktur Komprehensif') }} <span aria-hidden="true">→</span>
                     </a>
                 </div>
                 <div class="rounded-2xl bg-amber-50 p-6">
                     <div class="flex items-center gap-2 text-amber-700 font-bold mb-2">
                         <i data-lucide="book-open"></i>
-                        Kurikulum Marhalah Ibtidaiyyah
+                        {{ __('Kurikulum Marhalah Ibtidaiyyah') }}
                     </div>
                     <p class="text-sm text-slate-600">
-                        Aktivitas <strong>03:30 - 22:30</strong> dengan pembinaan menyeluruh
+                        {{ __('Aktivitas') }} <strong>03:30 - 22:30</strong> {{ __('dengan pembinaan menyeluruh') }}
                     </p>
                     <a href="#" class="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-amber-700">
-                        19 Jam Pembelajaran <span aria-hidden="true">→</span>
+                        {{ __('19 Jam Pembelajaran') }} <span aria-hidden="true">→</span>
                     </a>
                 </div>
             </div>
@@ -196,11 +186,11 @@
             <div class="mt-8 flex flex-col sm:flex-row gap-4">
                 <a href="#kurikulum"
                     class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-teal-700 text-white font-semibold hover:bg-teal-800 transition-colors">
-                    <x-ribath-icon name="book-open" class="w-5 h-5" /> Pelajari Program
+                    <x-ribath-icon name="book-open" class="w-5 h-5" /> {{ __('Pelajari Program') }}
                 </a>
                 <a href="#kontak"
                     class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-slate-300 font-semibold text-slate-700 hover:bg-slate-50 transition-colors">
-                    <x-ribath-icon name="users" class="w-5 h-5" /> Hubungi Kami
+                    <x-ribath-icon name="users" class="w-5 h-5" /> {{ __('Hubungi Kami') }}
                 </a>
             </div>
         </div>
@@ -217,19 +207,15 @@
                         <path stroke="currentColor" stroke-linejoin="round" stroke-width="2"
                             d="M12.1429 11v9m0-9c-2.50543-.7107-3.19099-1.39543-6.13657-1.34968-.48057.00746-.86348.38718-.86348.84968v7.2884c0 .4824.41455.8682.91584.8617 2.77491-.0362 3.45995.6561 6.08421 1.3499m0-9c2.5053-.7107 3.1067-1.39542 6.0523-1.34968.4806.00746.9477.38718.9477.84968v7.2884c0 .4824-.4988.8682-1 .8617-2.775-.0362-3.3758.6561-6 1.3499m2-14c0 1.10457-.8955 2-2 2-1.1046 0-2-.89543-2-2s.8954-2 2-2c1.1045 0 2 .89543 2 2Z" />
                     </svg>
-                    PROGRAM DAUROH
+                    {{ __('PROGRAM DAUROH') }}
                 </span>
                 <h2 class="mt-5 text-3xl sm:text-4xl font-extrabold">
-                    Persiapan <span class="text-amber-400">Dauroh</span><br>
+                    {{ __('Persiapan') }} <span class="text-amber-400">{{ __('Dauroh') }}</span><br>
                     <span class="text-[#80daa7]">&</span> <br>
-                    <span class="text-emerald-400">Ujian</span> Penerimaan
+                    <span class="text-emerald-400">{{ __('Ujian') }}</span> {{ __('Penerimaan') }}
                 </h2>
                 <p class="mt-4 text-slate-400">
-                    Darul Musthofa Tarim Menetapkan Bahwa Setiap <span class="text-[#95c92e] font-semibold">PELAJAR ASIA
-                        TENGGARA</span> Yang
-                    Ingin Melanjutkan Studi Di Darul Musthofa Wajib Mengikuti Program Dauroh Persiapan Dan
-                    Ujian Penerimaan (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma'had Yang
-                    Telah Ditunjuk Di Indonesia.
+                    {{ __('Darul Musthofa Tarim Menetapkan Bahwa Setiap') }} <span class="text-[#95c92e] font-semibold">{{ __('PELAJAR ASIA TENGGARA') }}</span> {{ __('Yang Ingin Melanjutkan Studi Di Darul Musthofa Wajib Mengikuti Program Dauroh Persiapan Dan Ujian Penerimaan (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma\'had Yang Telah Ditunjuk Di Indonesia.') }}
                 </p>
             </div>
 
@@ -264,21 +250,16 @@
             <div class="text-center max-w-4xl mx-auto">
                 <span
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-[#332245]/50 text-sm font-semibold tracking-wide text-slate-500">
-                    🎓 PERSIAPAN DAUROH
+                    🎓 {{ __('PERSIAPAN DAUROH') }}
                 </span>
                 <h2 class="mt-5 text-3xl sm:text-4xl font-extrabold">
-                    <span class="text-[#e4a914] leading-relaxed">Hal-Hal Yang Perlu Di Siapkan </span> <br>
-                    <span class="text-emerald-400">Sebelum Mendaftar Online di Dauroh Qobul</span>
+                    <span class="text-[#e4a914] leading-relaxed">{{ __('Hal-Hal Yang Perlu Di Siapkan') }} </span> <br>
+                    <span class="text-emerald-400">{{ __('Sebelum Mendaftar Online di Dauroh Qobul') }}</span>
                 </h2>
                 <p class="mt-4 leading-relaxed ">
-                    <strong class="text-[#190644]">PETUNJUK UMUM</strong>
-                    <span class="text-[#866300]">Disarankan Mengisi Formulir Pendaftaran Menggunakan Komputer Atau
-                        Laptop Agar
-                        Proses Pengisian Lebih Mudah Dan Nyaman.</span>
-                    <span class="text-[#067002]">Pastikan Seluruh Dokumen Berikut Telah Disiapkan Dan Tersimpan Dengan
-                        Baik Di Galeri
-                        Hp Atau Pada Komputer/Laptop Anda Sebelum Memulai Proses Pengisian Formulir
-                        Pendaftaran.</span>
+                    <strong class="text-[#190644]">{{ __('PETUNJUK UMUM') }}</strong>
+                    <span class="text-[#866300]">{{ __('Disarankan Mengisi Formulir Pendaftaran Menggunakan Komputer Atau Laptop Agar Proses Pengisian Lebih Mudah Dan Nyaman.') }}</span>
+                    <span class="text-[#067002]">{{ __('Pastikan Seluruh Dokumen Berikut Telah Disiapkan Dan Tersimpan Dengan Baik Di Galeri Hp Atau Pada Komputer/Laptop Anda Sebelum Memulai Proses Pengisian Formulir Pendaftaran.') }}</span>
                 </p>
             </div>
 
@@ -370,15 +351,15 @@
             <div class="text-center max-w-xl mx-auto">
                 <span
                     class="inline-flex items-center gap-3 px-6 py-2 rounded-xl bg-linear-to-b from-teal-100 to-teal-200 border border-teal-500 text-teal-700 text-sm font-semibold">
-                    📞 KONTAK
+                    📞 {{ __('KONTAK') }}
                 </span>
                 <h2
                     class="mt-5 text-4xl sm:text-5xl font-extrabold bg-linear-to-r from-[#7066f3f0] via-[#09894ef0] to-[#7066f3f0] bg-clip-text text-transparent">
-                    Hubungi Kami
+                    {{ __('Hubungi Kami') }}
                 </h2>
                 <p class="mt-4 text-slate-800">
-                    Mari bergabung dengan kami, untuk anda yang ingin melanjutkan belajarnya ke <strong
-                        class=" text-amber-700">Darul Musthofa Tarim</strong>
+                    {{ __('Mari bergabung dengan kami, untuk anda yang ingin melanjutkan belajarnya ke') }} <strong
+                        class=" text-amber-700">{{ __('Darul Musthofa Tarim') }}</strong>
                 </p>
             </div>
 
@@ -394,13 +375,13 @@
                 <div class="space-y-6">
                     <div class="rounded-2xl bg-[#fafdfb] border border-[#44774455] p-7 shadow-xl transition-shadow ">
                         <div class="flex items-center gap-2 font-bold text-lg mb-5">
-                            <x-ribath-icon name="chat" class="w-5 h-5 text-teal-700" /> Informasi Kontak
+                            <x-ribath-icon name="chat" class="w-5 h-5 text-teal-700" /> {{ __('Informasi Kontak') }}
                         </div>
                         <div class="space-y-5 text-sm">
                             <div class="flex gap-3">
                                 <x-ribath-icon name="map-pin" class="w-5 h-5 text-teal-700 shrink-0 mt-0.5" />
                                 <div>
-                                    <p class="font-semibold text-slate-800">Alamat</p>
+                                    <p class="font-semibold text-slate-800">{{ __('Alamat') }}</p>
                                     <p class="text-slate-600 mt-0.5">{{ $kontak['alamat'] }}</p>
                                 </div>
                             </div>
@@ -425,16 +406,16 @@
                             <div class="flex gap-3">
                                 <x-ribath-icon name="chat" class="w-5 h-5 text-teal-700 shrink-0 mt-0.5" />
                                 <div>
-                                    <p class="font-semibold text-slate-800">Jam Layanan</p>
+                                    <p class="font-semibold text-slate-800">{{ __('Jam Layanan') }}</p>
                                     <p class="text-slate-500 mt-0.5">{{ $kontak['jam'] }}</p>
-                                    <p class="text-slate-400 text-xs">Kami siap melayani pertanyaan Anda</p>
+                                    <p class="text-slate-400 text-xs">{{ __('Kami siap melayani pertanyaan Anda') }}</p>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <div class="rounded-2xl bg-[#fafdfb] border border-[#44774455] p-7 shadow-xl transition-shadow">
-                        <p class="font-bold text-lg mb-4">Media Sosial</p>
+                        <p class="font-bold text-lg mb-4">{{ __('Media Sosial') }}</p>
                         <div class="flex gap-3">
                             <a href="#" class="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center">
                                 <x-ribath-icon name="chat" class="w-4 h-4 text-white" />

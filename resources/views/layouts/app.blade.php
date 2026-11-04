@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#0F766E">
-    <meta name="description" content="Platform digital untuk pengelolaan Pondok Pesantren Ribath Masjid Riyadh Solo. Monitoring santri, akademik, dan keuangan secara real-time.">
-    <title>@yield('title', 'Beranda - Dauroh Qobul Darul Musthofa Tarim')</title>
+    <meta name="description" content="{{ __('Platform digital untuk pengelolaan Pondok Pesantren Ribath Masjid Riyadh Solo. Monitoring santri, akademik, dan keuangan secara real-time.') }}">
+    <title>@yield('title', __('Beranda - Dauroh Qobul Darul Musthofa Tarim'))</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

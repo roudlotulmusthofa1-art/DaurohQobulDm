@@ -80,6 +80,12 @@ class PesanWa
             'isian' => ['nama', 'alasan', 'pesantren'],
             'bawaan' => "Assalamu'alaikum *{nama}*, mohon maaf pendaftaran Anda sebagai asatid *DITOLAK*.\n\nAlasan:\n{alasan}",
         ],
+        'asatid_reset_password' => [
+            'grup' => 'asatid', 'judul' => 'Reset password asatid', 'penerima' => 'Asatid (nomor WhatsApp asatid)',
+            'kapan' => 'Saat admin menekan "Reset Password" di detail Data Asatid (asatid lupa password).',
+            'isian' => ['nama', 'email', 'password', 'link_login', 'pesantren'],
+            'bawaan' => "Assalamu'alaikum *{nama}*, password akun asatid Anda sudah direset oleh admin.\n\nMasuk di:\n{link_login}\nEmail: *{email}*\nPassword baru: *{password}*\n\nMohon simpan pesan ini dan jangan bagikan ke orang lain.",
+        ],
         'admin_daftar' => [
             'grup' => 'admin', 'judul' => 'Pendaftaran diterima sistem', 'penerima' => 'Pendaftar admin',
             'kapan' => 'Setelah calon admin mengirim formulir pendaftaran.',
@@ -97,6 +103,12 @@ class PesanWa
             'kapan' => 'Saat admin menolak pendaftar admin.',
             'isian' => ['nama', 'alasan', 'pesantren'],
             'bawaan' => "Assalamu'alaikum *{nama}*, mohon maaf pendaftaran Anda sebagai admin *DITOLAK*.\n\nAlasan:\n{alasan}",
+        ],
+        'admin_reset_password' => [
+            'grup' => 'admin', 'judul' => 'Reset password admin', 'penerima' => 'Admin (nomor WhatsApp admin)',
+            'kapan' => 'Saat Super Admin menekan "Reset Password" di detail Data Admin (admin lupa password).',
+            'isian' => ['nama', 'email', 'password', 'link_login', 'pesantren'],
+            'bawaan' => "Assalamu'alaikum *{nama}*, password akun admin Anda sudah direset oleh Super Admin.\n\nMasuk di:\n{link_login}\nEmail: *{email}*\nPassword baru: *{password}*\n\nMohon simpan pesan ini dan jangan bagikan ke orang lain.",
         ],
     ];
 

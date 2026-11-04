@@ -21,7 +21,7 @@
         </button>
 
         {{-- Muat ulang --}}
-        <button type="button" @click="muatUlang" title="Muat ulang halaman" aria-label="Muat ulang halaman"
+        <button type="button" @click="muatUlang" title="{{ __('Muat ulang halaman') }}" aria-label="{{ __('Muat ulang halaman') }}"
             class="w-8 h-8 rounded-full flex items-center justify-center text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 transition-colors">
             <svg class="w-4 h-4" :class="memuat ? 'animate-spin' : ''" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"></path></svg>
         </button>
@@ -55,13 +55,13 @@
                     }[this.status];
                 },
                 label() {
-                    if (this.status === 'offline') return 'Offline · tidak ada internet';
-                    if (this.baruPulih) return 'Tersambung kembali';
-                    const waktu = this.ms === null ? '' : ' · ' + (this.ms >= 1000 ? (this.ms / 1000).toFixed(1) + ' dtk' : this.ms + ' ms');
-                    return (this.status === 'lambat' ? 'Koneksi lambat' : 'Online') + waktu;
+                    if (this.status === 'offline') return @js(__('Offline · tidak ada internet'));
+                    if (this.baruPulih) return @js(__('Tersambung kembali'));
+                    const waktu = this.ms === null ? '' : ' · ' + (this.ms >= 1000 ? (this.ms / 1000).toFixed(1) + ' ' + @js(__('dtk')) : this.ms + ' ms');
+                    return (this.status === 'lambat' ? @js(__('Koneksi lambat')) : @js(__('Online'))) + waktu;
                 },
                 judul() {
-                    return this.label + ' (klik untuk ' + (this.buka ? 'menyembunyikan' : 'menampilkan') + ' keterangan)';
+                    return this.label + ' ' + (this.buka ? @js(__('(klik untuk menyembunyikan keterangan)')) : @js(__('(klik untuk menampilkan keterangan)')));
                 },
                 tampilLabel() {
                     return this.buka || this.status !== 'online' || this.baruPulih;

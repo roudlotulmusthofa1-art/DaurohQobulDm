@@ -174,10 +174,10 @@ class AdminPendaftaranController extends Controller
     }
 
     /**
-     * Peserta lupa password: buat password baru, coba kirim otomatis ke WhatsApp peserta (Fonnte),
+     * Peserta lupa password: admin mengetik password baru, lalu dicoba kirim otomatis ke WhatsApp peserta (Fonnte),
      * lalu tampilkan SEKALI di detail peserta (beserta tombol kirim manual lewat WhatsApp admin).
      */
-    public function resetPassword(PendaftaranSiswa $pendaftaran, WhatsAppService $wa)
+    public function resetPassword(Request $request, PendaftaranSiswa $pendaftaran, WhatsAppService $wa)
     {
         if (! $pendaftaran->email) {
             return back()->with('error', 'Pendaftar ini belum punya email login.');
@@ -186,7 +186,9 @@ class AdminPendaftaranController extends Controller
             return back()->with('error', 'Reset password hanya untuk peserta yang sudah DITERIMA (yang lain belum bisa masuk dasbor siswa).');
         }
 
-        $baru = $pendaftaran->resetPassword();
+        // Password baru diketik admin sendiri (sama seperti reset password asatid & admin)
+        $baru = \App\Support\ResetPasswordAkun::validasi($request);
+        $pendaftaran->resetPassword($baru);
         $pesan = PesanWa::buat('psb_reset_password', [
             'nama' => $pendaftaran->nama_lengkap,
             'email' => $pendaftaran->email,
@@ -201,9 +203,9 @@ class AdminPendaftaranController extends Controller
             // Password tampil sekali saja (flash), tidak disimpan dalam bentuk bisa dibaca
             ->with('password_baru', ['password' => $baru, 'pesan' => $pesan])
             ->with(...match ($terkirim) {
-                true => ['success', 'Password baru dibuat dan sudah dikirim otomatis ke WhatsApp peserta.'],
-                false => ['error', 'Password baru dibuat, tetapi chat otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol WhatsApp di bawah.'],
-                null => ['success', 'Password baru dibuat. Kirim ke peserta lewat tombol WhatsApp di bawah.'],
+                true => ['success', 'Password baru disimpan dan sudah dikirim otomatis ke WhatsApp peserta.'],
+                false => ['error', 'Password baru disimpan, tetapi chat otomatis GAGAL: ' . $wa->alasan . '. Kirim lewat tombol WhatsApp di bawah.'],
+                null => ['success', 'Password baru disimpan. Kirim ke peserta lewat tombol WhatsApp di bawah.'],
             });
     }
 

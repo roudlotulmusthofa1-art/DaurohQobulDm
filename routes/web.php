@@ -36,12 +36,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::post('asatid/link-baru', [AdminDataAsatidController::class, 'linkBaru'])->name('asatid.link-baru');
     Route::post('asatid/{asatid}/terima', [AdminDataAsatidController::class, 'terima'])->name('asatid.terima');
     Route::post('asatid/{asatid}/tolak', [AdminDataAsatidController::class, 'tolak'])->name('asatid.tolak');
+    Route::post('asatid/{asatid}/reset-password', [AdminDataAsatidController::class, 'resetPassword'])->middleware('throttle:10,1')->name('asatid.reset-password');
     Route::resource('asatid', AdminDataAsatidController::class)->only(['index', 'show', 'edit', 'update', 'destroy']);
     // Data Admin: sama seperti Data Asatid, akun yang diterima ber-role admin
     Route::post('data-admin/tambah-cepat', [AdminDataAdminController::class, 'tambahCepat'])->name('data-admin.tambah-cepat');
     Route::post('data-admin/link-baru', [AdminDataAdminController::class, 'linkBaru'])->name('data-admin.link-baru');
     Route::post('data-admin/{dataAdmin}/terima', [AdminDataAdminController::class, 'terima'])->name('data-admin.terima');
     Route::post('data-admin/{dataAdmin}/tolak', [AdminDataAdminController::class, 'tolak'])->name('data-admin.tolak');
+    Route::post('data-admin/{dataAdmin}/reset-password', [AdminDataAdminController::class, 'resetPassword'])->middleware('throttle:10,1')->name('data-admin.reset-password'); // khusus Super Admin
     Route::resource('data-admin', AdminDataAdminController::class)->only(['index', 'show', 'destroy'])
         ->parameters(['data-admin' => 'dataAdmin']);
 
@@ -85,6 +87,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Route::resource('wali', AdminWaliController::class);
 });
 
+
+// Ganti bahasa tampilan (Indonesia / Arab) -> cookie "bahasa", lalu kembali ke halaman tadi
+Route::get('bahasa/{kode}', function (string $kode) {
+    return back()->withCookie(cookie()->forever('bahasa', $kode));
+})->whereIn('kode', array_keys(\App\Http\Middleware\PilihBahasa::BAHASA))->name('bahasa');
 
 // Lonceng notifikasi (admin, asatid, siswa): tandai dibaca / hapus
 Route::post('notifikasi/status', [\App\Http\Controllers\NotifikasiController::class, 'status'])

@@ -1,7 +1,7 @@
 {{-- Akun Asatid > Absensi > Absensi Kegiatan (langkah 1: atur kegiatan & waktu) --}}
 @extends('layouts.asatid')
 
-@section('judul', 'Absensi Kegiatan')
+@section('judul', __('Absensi Kegiatan'))
 
 @section('content')
 @php
@@ -23,15 +23,15 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
         <div class="pointer-events-none absolute inset-0 opacity-50" style="background-image: radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -bottom-24 -right-10 w-72 h-72 rounded-full bg-lime-300/25 blur-3xl"></div>
         <div class="relative">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">Langkah 1 dari 2</p>
-            <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">Atur absensi kegiatan</h2>
-            <p class="mt-1.5 text-sm text-white/75">Pilih kegiatan dan atur jamnya. Status terlambat dan alfa dihitung otomatis dari jam kedatangan.</p>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">{{ __('Langkah 1 dari 2') }}</p>
+            <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Atur absensi kegiatan') }}</h2>
+            <p class="mt-1.5 text-sm text-white/75">{{ __('Pilih kegiatan dan atur jamnya. Status terlambat dan alfa dihitung otomatis dari jam kedatangan.') }}</p>
         </div>
     </section>
 
     @if ($errors->any())
     <div class="p-4 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-sm text-rose-700">
-        <p class="font-semibold">Periksa kembali isian Anda:</p>
+        <p class="font-semibold">{{ __('Periksa kembali isian Anda:') }}</p>
         <ul class="mt-1 list-disc pl-5 space-y-0.5">
             @foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach
         </ul>
@@ -40,9 +40,9 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
 
     {{-- 1. Kegiatan --}}
     <section class="{{ $kartu }} p-5 sm:p-6">
-        <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">1</span> Nama kegiatan</h3>
+        <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">1</span> {{ __('Nama kegiatan') }}</h3>
         @if ($kegiatanList->isEmpty())
-            <p class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">Belum ada jenis kegiatan aktif. Minta admin mengisinya di Master Data &rsaquo; Jenis Kegiatan.</p>
+            <p class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada jenis kegiatan aktif. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Jenis Kegiatan.') }}</p>
         @else
         <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             @foreach ($kegiatanList as $k)
@@ -68,15 +68,15 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
     <div class="grid lg:grid-cols-2 gap-5">
         {{-- 2. Tanggal --}}
         <section class="{{ $kartu }} p-5 sm:p-6">
-            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span> Tanggal</h3>
+            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span> {{ __('Tanggal') }}</h3>
             <input type="date" name="tanggal" id="tanggal" v-model="tanggal" required class="mt-4 {{ $input }}">
             <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                 <div class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 px-3 py-2.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-600">Masehi</span>
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-600">{{ __('Masehi') }}</span>
                     <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksMasehi"></span>
                 </div>
                 <div class="rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 px-3 py-2.5">
-                    <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">Hijriyah</span>
+                    <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">{{ __('Hijriyah') }}</span>
                     <span class="mt-0.5 block font-semibold text-slate-700" v-text="teksHijriyah"></span>
                 </div>
             </div>
@@ -84,11 +84,11 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
 
         {{-- 4. Metode --}}
         <section class="{{ $kartu }} p-5 sm:p-6">
-            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">4</span> Cara absen</h3>
+            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">4</span> {{ __('Cara absen') }}</h3>
             <div class="mt-4 grid grid-cols-2 gap-3">
                 @foreach ([
-                    'qr' => ['Pindai QR', 'Pakai kamera HP untuk memindai kartu QR peserta', 'M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z'],
-                    'manual' => ['Cari Nama', 'Ketik nama peserta lalu pilih keterangannya', 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'],
+                    'qr' => [__('Pindai QR'), __('Pakai kamera HP untuk memindai kartu QR peserta'), 'M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z'],
+                    'manual' => [__('Cari Nama'), __('Ketik nama peserta lalu pilih keterangannya'), 'M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z'],
                 ] as $nilai => [$judul, $ket, $ikon])
                 <label class="relative cursor-pointer p-4 rounded-2xl ring-1 ring-slate-200/80 bg-[#f8fbfa] hover:bg-white transition-all
                     has-[:checked]:bg-[#0b332c] has-[:checked]:ring-[#0b332c] has-[:checked]:text-white group">
@@ -99,18 +99,18 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
                 </label>
                 @endforeach
             </div>
-            <p class="mt-3 text-[11px] text-slate-400">Bisa berganti cara kapan saja di halaman berikutnya.</p>
+            <p class="mt-3 text-[11px] text-slate-400">{{ __('Bisa berganti cara kapan saja di halaman berikutnya.') }}</p>
         </section>
     </div>
 
     {{-- 3. Waktu --}}
     <section class="{{ $kartu }} p-5 sm:p-6">
-        <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">3</span> Waktu kegiatan</h3>
+        <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">3</span> {{ __('Waktu kegiatan') }}</h3>
         <div class="mt-4 grid sm:grid-cols-3 gap-3">
             @foreach ([
-                'jam_mulai' => ['Waktu dimulai', 'bg-emerald-500', 'Kegiatan dimulai'],
-                'batas_terlambat' => ['Dianggap terlambat', 'bg-amber-500', 'Datang mulai jam ini = Terlambat'],
-                'batas_alfa' => ['Dianggap tidak hadir (alfa)', 'bg-rose-500', 'Datang mulai jam ini = Alfa'],
+                'jam_mulai' => [__('Waktu dimulai'), 'bg-emerald-500', __('Kegiatan dimulai')],
+                'batas_terlambat' => [__('Dianggap terlambat'), 'bg-amber-500', __('Datang mulai jam ini = Terlambat')],
+                'batas_alfa' => [__('Dianggap tidak hadir (alfa)'), 'bg-rose-500', __('Datang mulai jam ini = Alfa')],
             ] as $nama => [$label, $titik, $ket])
             <label class="block rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 p-4">
                 <span class="flex items-center gap-2 text-xs font-bold text-slate-600"><span class="w-2.5 h-2.5 rounded-full {{ $titik }}"></span>{{ $label }}</span>
@@ -129,9 +129,9 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
                 <div class="flex-1 bg-gradient-to-r from-rose-400 to-rose-500"></div>
             </div>
             <div class="mt-2 grid grid-cols-5 text-[11px] font-semibold">
-                <span class="col-span-2 text-emerald-700">Hadir <span class="text-slate-400 font-normal" v-text="jam.batas_terlambat ? '(sebelum ' + jam.batas_terlambat + ')' : ''"></span></span>
-                <span class="col-span-2 text-amber-700">Terlambat <span class="text-slate-400 font-normal" v-text="jam.batas_terlambat && jam.batas_alfa ? '(' + jam.batas_terlambat + '–' + jam.batas_alfa + ')' : ''"></span></span>
-                <span class="text-rose-700">Alfa <span class="text-slate-400 font-normal" v-text="jam.batas_alfa ? '(mulai ' + jam.batas_alfa + ')' : ''"></span></span>
+                <span class="col-span-2 text-emerald-700">{{ __('Hadir') }} <span class="text-slate-400 font-normal" v-text="jam.batas_terlambat ? '(' + @js(__('sebelum')) + ' ' + jam.batas_terlambat + ')' : ''"></span></span>
+                <span class="col-span-2 text-amber-700">{{ __('Terlambat') }} <span class="text-slate-400 font-normal" v-text="jam.batas_terlambat && jam.batas_alfa ? '(' + jam.batas_terlambat + '–' + jam.batas_alfa + ')' : ''"></span></span>
+                <span class="text-rose-700">{{ __('Alfa') }} <span class="text-slate-400 font-normal" v-text="jam.batas_alfa ? '(' + @js(__('mulai')) + ' ' + jam.batas_alfa + ')' : ''"></span></span>
             </div>
         </div>
     </section>
@@ -139,7 +139,7 @@ $nomor = 'w-7 h-7 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-
     <div class="sticky bottom-4 z-10">
         <button type="submit" @disabled($kegiatanList->isEmpty())
             class="w-full flex items-center justify-center gap-2 py-4 rounded-2xl bg-[#0b332c] text-white text-base font-extrabold hover:bg-[#135347] shadow-[0_16px_32px_-12px_rgba(11,51,44,0.6)] disabled:bg-slate-200 disabled:text-slate-400 disabled:shadow-none">
-            Mulai Absensi Kegiatan
+            {{ __('Mulai Absensi Kegiatan') }}
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
         </button>
     </div>

@@ -5,7 +5,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Daftar User')
+@section('title', __('Daftar User'))
 
 @section('content')
 @php
@@ -28,9 +28,9 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
         <div class="relative">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Sistem</p>
-            <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">Daftar User</h1>
-            <p class="mt-1.5 text-sm text-white/70">Semua akun yang bisa login. Akun admin & asatid berlaku di semua sesi; akun peserta dari sesi yang sedang aktif.</p>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Sistem') }}</p>
+            <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Daftar User') }}</h1>
+            <p class="mt-1.5 text-sm text-white/70">{{ __('Semua akun yang bisa login. Akun admin & asatid berlaku di semua sesi; akun peserta dari sesi yang sedang aktif.') }}</p>
 
             <div class="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <button v-for="t in tab" :key="t.kunci" type="button" @click="saring = t.kunci; halaman = 1"
@@ -48,13 +48,13 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <div class="flex flex-wrap items-center gap-3 p-4 sm:p-5 border-b border-slate-100">
             <label class="relative flex-1 min-w-[220px]">
                 <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                <input type="search" v-model.trim="cari" @input="halaman = 1" placeholder="Cari nama, email, atau role…"
+                <input type="search" v-model.trim="cari" @input="halaman = 1" placeholder="{{ __('Cari nama, email, atau role…') }}"
                     class="w-full rounded-xl border border-slate-200 pl-10 pr-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500">
             </label>
             <select v-model="urut" class="rounded-xl border border-slate-200 px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
-                <option value="nama">Urut nama A–Z</option>
-                <option value="baru">Terbaru dulu</option>
-                <option value="lama">Terlama dulu</option>
+                <option value="nama">{{ __('Urut nama A–Z') }}</option>
+                <option value="baru">{{ __('Terbaru dulu') }}</option>
+                <option value="lama">{{ __('Terlama dulu') }}</option>
             </select>
         </div>
 
@@ -62,10 +62,10 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <table class="w-full text-sm">
                 <thead class="bg-slate-50/80 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
                     <tr>
-                        <th class="px-5 py-3">Nama</th>
-                        <th class="px-5 py-3">Role</th>
-                        <th class="px-5 py-3 hidden md:table-cell">Terdaftar</th>
-                        <th class="px-5 py-3 text-right">Aksi</th>
+                        <th class="px-5 py-3">{{ __('Nama') }}</th>
+                        <th class="px-5 py-3">{{ __('Role') }}</th>
+                        <th class="px-5 py-3 hidden md:table-cell">{{ __('Terdaftar') }}</th>
+                        <th class="px-5 py-3 text-right">{{ __('Aksi') }}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100">
@@ -76,7 +76,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 <div class="min-w-0">
                                     <p class="font-semibold text-slate-800 truncate">
                                         <span v-text="u.nama"></span>
-                                        <span v-if="u.saya" class="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold">Anda</span>
+                                        <span v-if="u.saya" class="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold">{{ __('Anda') }}</span>
                                     </p>
                                     <p class="text-xs text-slate-500 truncate" v-text="u.email"></p>
                                 </div>
@@ -92,16 +92,16 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-1.5">
                                 <button v-if="bisaUbah && u.dasar === 'admin' && !u.saya" type="button" @click="bukaUbah(u)"
-                                    class="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#0b332c] bg-[#0b332c]/[0.06] hover:bg-[#0b332c]/[0.12]">Ganti Role</button>
+                                    class="px-3 py-1.5 rounded-xl text-xs font-semibold text-[#0b332c] bg-[#0b332c]/[0.06] hover:bg-[#0b332c]/[0.12]">{{ __('Ganti Role') }}</button>
                                 <button v-if="bisaLihat && (u.dasar === 'asatid' || u.dasar === 'siswa')" type="button" @click="masukSebagai(u)"
-                                    title="Buka dasbor akun ini (mode lihat)"
-                                    class="px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200">Masuk sebagai</button>
-                                <a v-if="u.detail" :href="u.detail" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">Lihat Data</a>
+                                    title="{{ __('Buka dasbor akun ini (mode lihat)') }}"
+                                    class="px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-800 bg-amber-100 hover:bg-amber-200">{{ __('Masuk sebagai') }}</button>
+                                <a v-if="u.detail" :href="u.detail" class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100">{{ __('Lihat Data') }}</a>
                             </div>
                         </td>
                     </tr>
                     <tr v-if="!tampil.length">
-                        <td colspan="4" class="px-5 py-12 text-center text-slate-400">Tidak ada user yang cocok.</td>
+                        <td colspan="4" class="px-5 py-12 text-center text-slate-400">{{ __('Tidak ada user yang cocok.') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -109,10 +109,10 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
         {{-- Halaman --}}
         <div v-if="jumlahHalaman > 1" class="flex flex-wrap items-center gap-2 px-5 py-4 border-t border-slate-100 text-sm">
-            <span class="text-slate-500 flex-1" v-text="'Menampilkan ' + (awal + 1) + '–' + Math.min(awal + PER_HALAMAN, tersaring.length) + ' dari ' + tersaring.length + ' user'"></span>
-            <button type="button" @click="halaman--" :disabled="halaman === 1" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 disabled:opacity-40">Sebelumnya</button>
+            <span class="text-slate-500 flex-1" v-text="@js(__('Menampilkan :awal–:akhir dari :total user')).replace(':awal', awal + 1).replace(':akhir', Math.min(awal + PER_HALAMAN, tersaring.length)).replace(':total', tersaring.length)"></span>
+            <button type="button" @click="halaman--" :disabled="halaman === 1" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 disabled:opacity-40">{{ __('Sebelumnya') }}</button>
             <span class="px-2 font-semibold text-slate-700" v-text="halaman + ' / ' + jumlahHalaman"></span>
-            <button type="button" @click="halaman++" :disabled="halaman === jumlahHalaman" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 disabled:opacity-40">Berikutnya</button>
+            <button type="button" @click="halaman++" :disabled="halaman === jumlahHalaman" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 hover:bg-slate-50 disabled:opacity-40">{{ __('Berikutnya') }}</button>
         </div>
     </div>
 
@@ -125,7 +125,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             @csrf
             <input type="hidden" name="_method" value="PUT">
             <div>
-                <h2 class="text-lg font-bold text-slate-800">Ganti Role</h2>
+                <h2 class="text-lg font-bold text-slate-800">{{ __('Ganti Role') }}</h2>
                 <p class="text-sm text-slate-500"><span v-text="dipilih.nama"></span> · <span v-text="dipilih.email"></span></p>
             </div>
             <div class="space-y-2">
@@ -135,14 +135,14 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <input type="radio" name="role_id" :value="r.id ?? ''" :checked="pilihanRole === r.id" @change="pilihanRole = r.id" class="accent-emerald-600">
                     <span class="w-2.5 h-2.5 rounded-full" :class="titik(r.warna)"></span>
                     <span class="font-semibold text-slate-800" v-text="r.nama"></span>
-                    <span v-if="r.id === null" class="text-xs text-slate-500">semua menu</span>
+                    <span v-if="r.id === null" class="text-xs text-slate-500">{{ __('semua menu') }}</span>
                 </label>
             </div>
-            <p class="text-xs text-slate-500">Menu yang boleh dibuka tiap role diatur di <a href="{{ route('admin.role.index') }}" class="font-semibold text-emerald-700 hover:underline">Role & Permission</a>.</p>
+            <p class="text-xs text-slate-500">{{ __('Menu yang boleh dibuka tiap role diatur di') }} <a href="{{ route('admin.role.index') }}" class="font-semibold text-emerald-700 hover:underline">{{ __('Role & Permission') }}</a>.</p>
             <div class="flex justify-end gap-2">
-                <button type="button" @click="tutupDialog" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+                <button type="button" @click="tutupDialog" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">{{ __('Batal') }}</button>
                 <button type="submit" :disabled="pilihanRole === dipilih.role_id"
-                    class="px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] disabled:opacity-40 disabled:cursor-not-allowed">Simpan</button>
+                    class="px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] disabled:opacity-40 disabled:cursor-not-allowed">{{ __('Simpan') }}</button>
             </div>
         </form>
     </dialog>
@@ -175,10 +175,10 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     URL_USER: @json(url('admin/user')),
                     PER_HALAMAN: 15,
                     tab: [
-                        { kunci: 'semua', label: 'Semua User' },
-                        { kunci: 'admin', label: 'Admin' },
-                        { kunci: 'asatid', label: 'Asatid' },
-                        { kunci: 'siswa', label: 'Peserta' },
+                        { kunci: 'semua', label: @js(__('Semua User')) },
+                        { kunci: 'admin', label: @js(__('Admin')) },
+                        { kunci: 'asatid', label: @js(__('Asatid')) },
+                        { kunci: 'siswa', label: @js(__('Peserta')) },
                     ],
                     saring: 'semua',
                     cari: '',
@@ -232,7 +232,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 },
                 // Super Admin: buka dasbor akun asatid/siswa (mode lihat)
                 masukSebagai(u) {
-                    if (!confirm('Buka dasbor ' + u.nama + '? (mode lihat, perubahan tidak disimpan)')) return;
+                    if (!confirm(@js(__('Buka dasbor :nama? (mode lihat, perubahan tidak disimpan)')).replace(':nama', u.nama))) return;
                     const f = this.$refs.formMasuk;
                     f.action = this.URL_MASUK + '/' + u.id;
                     f.submit();

@@ -6,67 +6,77 @@
 $nama = $asatid?->nama_lengkap ?? $user->name;
 $hariIni = now()->locale('id')->translatedFormat('l, d F Y');
 $jam = (int) now()->format('H');
-$salam = $jam < 11 ? 'Selamat pagi' : ($jam < 15 ? 'Selamat siang' : ($jam < 18 ? 'Selamat sore' : 'Selamat malam'));
+$salam = $jam < 11 ? __('Selamat pagi') : ($jam < 15 ? __('Selamat siang') : ($jam < 18 ? __('Selamat sore') : __('Selamat malam')));
 
-// Kartu menu (6 kartu). 'lebar' = kartu yang melebar penuh di HP (tidak dipakai saat jumlah kartu genap).
+// Kartu menu (7 kartu). 'lebar' = kartu yang melebar penuh satu baris (dipakai kartu ke-7 supaya baris terakhir rapi).
 $kartuMenu = [
     [
-        'judul' => 'Profil',
-        'ket'   => 'Data diri dan akun Anda',
+        'judul' => __('Profil'),
+        'ket'   => __('Data diri dan akun Anda'),
         'url'   => route('asatid.profil'),
         'warna' => 'from-emerald-400 to-teal-600',
         'cahaya'=> 'bg-emerald-400/30',
-        'lencana' => ['Lengkap', 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
+        'lencana' => [__('Lengkap'), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
         'ikon'  => 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z',
     ],
     [
-        'judul' => 'Absensi',
-        'ket'   => 'Absen peserta di kelas dan kegiatan',
+        'judul' => __('Absensi'),
+        'ket'   => __('Absen peserta di kelas dan kegiatan'),
         'url'   => route('asatid.absensi'),
         'warna' => 'from-sky-400 to-blue-600',
         'cahaya'=> 'bg-sky-400/30',
-        'lencana' => ['Kelas & kegiatan', 'bg-sky-50 text-sky-700 ring-sky-100'],
+        'lencana' => [__('Kelas & kegiatan'), 'bg-sky-50 text-sky-700 ring-sky-100'],
         'ikon'  => 'M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z',
     ],
     [
-        'judul' => 'Jadwal Pelajaran',
-        'ket'   => 'Jadwal mengajar milik Anda',
+        'judul' => __('Jadwal Pelajaran'),
+        'ket'   => __('Jadwal mengajar milik Anda'),
         'url'   => route('asatid.jadwal'),
         'warna' => 'from-amber-400 to-orange-500',
         'cahaya'=> 'bg-amber-400/30',
         'lencana' => $jumlahJam > 0
-            ? [$jumlahJam . ' jam / minggu', 'bg-amber-50 text-amber-700 ring-amber-100']
-            : ['Belum diatur', 'bg-slate-100 text-slate-500 ring-slate-200'],
+            ? [__(':jumlah jam / minggu', ['jumlah' => $jumlahJam]), 'bg-amber-50 text-amber-700 ring-amber-100']
+            : [__('Belum diatur'), 'bg-slate-100 text-slate-500 ring-slate-200'],
         'ikon'  => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5m-9-6h.008v.008H12v-.008zM12 15h.008v.008H12V15zm0 2.25h.008v.008H12v-.008zM9.75 15h.008v.008H9.75V15zm0 2.25h.008v.008H9.75v-.008zM7.5 15h.008v.008H7.5V15zm0 2.25h.008v.008H7.5v-.008zm6.75-4.5h.008v.008h-.008v-.008zm0 2.25h.008v.008h-.008V15zm0 2.25h.008v.008h-.008v-.008zm2.25-4.5h.008v.008H16.5v-.008zm0 2.25h.008v.008H16.5V15z',
     ],
     [
-        'judul' => 'Penilaian',
-        'ket'   => 'Input dan rekap nilai peserta',
+        'judul' => __('Penilaian'),
+        'ket'   => __('Input dan rekap nilai peserta'),
         'url'   => route('asatid.penilaian'),
         'warna' => 'from-violet-400 to-purple-600',
         'cahaya'=> 'bg-violet-400/30',
-        'lencana' => ['Segera hadir', 'bg-slate-100 text-slate-500 ring-slate-200'],
+        'lencana' => [__('Segera hadir'), 'bg-slate-100 text-slate-500 ring-slate-200'],
         'ikon'  => 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
     ],
     [
-        'judul' => 'Daftar Peserta',
-        'ket'   => 'Lihat semua peserta yang sudah diterima',
+        'judul' => __('Daftar Peserta'),
+        'ket'   => __('Lihat semua peserta yang sudah diterima'),
         'url'   => route('asatid.peserta'),
         'warna' => 'from-rose-400 to-pink-600',
         'cahaya'=> 'bg-rose-400/30',
-        'lencana' => [$jumlahPeserta . ' peserta', 'bg-rose-50 text-rose-700 ring-rose-100'],
+        'lencana' => [__(':jumlah peserta', ['jumlah' => $jumlahPeserta]), 'bg-rose-50 text-rose-700 ring-rose-100'],
         'ikon'  => 'M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z',
     ],
     [
-        'judul' => 'Pesan dari Admin',
-        'ket'   => 'Pengumuman dan pesan khusus untuk Anda',
+        'judul' => __('Pesan dari Admin'),
+        'ket'   => __('Pengumuman dan pesan khusus untuk Anda'),
         'url'   => route('asatid.pesan'),
         'warna' => 'from-violet-400 to-purple-600',
         'cahaya'=> 'bg-violet-400/30',
         'lencana' => $jumlahPesanBaru > 0
-            ? [$jumlahPesanBaru . ' pesan baru', 'bg-rose-50 text-rose-700 ring-rose-100']
-            : ['Tidak ada pesan baru', 'bg-slate-100 text-slate-500 ring-slate-200'],
+            ? [__(':jumlah pesan baru', ['jumlah' => $jumlahPesanBaru]), 'bg-rose-50 text-rose-700 ring-rose-100']
+            : [__('Tidak ada pesan baru'), 'bg-slate-100 text-slate-500 ring-slate-200'],
         'ikon'  => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
+    ],
+    [
+        'judul' => __('Ganti Password'),
+        'ket'   => __('Ubah password untuk masuk ke akun Anda'),
+        'url'   => route('asatid.ganti-password'),
+        'warna' => 'from-slate-500 to-slate-700',
+        'cahaya'=> 'bg-slate-400/30',
+        'lencana' => [__('Keamanan akun'), 'bg-slate-100 text-slate-600 ring-slate-200'],
+        'ikon'  => 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',
+        'lebar' => true, // kartu ke-7: melebar penuh supaya baris terakhir tetap rapi
     ],
 ];
 @endphp
@@ -81,19 +91,19 @@ $kartuMenu = [
     <div class="relative">
         <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/90">{{ $hariIni }}</p>
         <h2 class="mt-2 text-2xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-            Ahlan Wasahlan ,<br><span class="text-emerald-300">Ustad {{ $nama }}</span>
+            {{ __('Ahlan Wasahlan ,') }}<br><span class="text-emerald-300">{{ __('Ustad') }} {{ $nama }}</span>
         </h2>
         @if ($asatid?->nama_lengkap_arab)
         <p class="mt-1 text-xl sm:text-2xl text-emerald-100/80" dir="rtl">{{ $asatid->nama_lengkap_arab }}</p>
         @endif
-        <p class="mt-3 text-sm text-white/65 max-w-lg">Pilih menu di bawah untuk mulai. Semoga hari ini penuh keberkahan.</p>
+        <p class="mt-3 text-sm text-white/65 max-w-lg">{{ __('Pilih menu di bawah untuk mulai. Semoga hari ini penuh keberkahan.') }}</p>
     </div>
 </section>
 
 {{-- ===== Kartu menu ===== --}}
 <div class="mt-6 sm:mt-8 flex items-end justify-between">
-    <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">Menu</h3>
-    <p class="text-xs text-slate-400">{{ count($kartuMenu) }} menu</p>
+    <h3 class="text-lg sm:text-xl font-extrabold text-slate-800">{{ __('Menu') }}</h3>
+    <p class="text-xs text-slate-400">{{ __(':jumlah menu', ['jumlah' => count($kartuMenu)]) }}</p>
 </div>
 
 <div class="mt-4 grid grid-cols-2 lg:grid-cols-6 gap-3 sm:gap-5">
@@ -105,7 +115,7 @@ $kartuMenu = [
             'transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-20px_rgba(11,51,44,0.35)] hover:ring-emerald-200',
             // HP: 2 kolom. Laptop: 3 kolom (6 kartu = 2 baris rapi). 'lebar' = kartu melebar penuh di HP.
             'lg:col-span-2',
-            'col-span-2 lg:col-span-2' => !empty($k['lebar']),
+            'col-span-2 lg:col-span-6' => !empty($k['lebar']),
         ])>
         {{-- cahaya warna di pojok --}}
         <span class="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 {{ $k['cahaya'] }}"></span>

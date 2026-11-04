@@ -5,7 +5,7 @@
 --}}
 @extends('layouts.asatid')
 
-@section('judul', 'Pesan dari Admin')
+@section('judul', __('Pesan dari Admin'))
 
 @section('content')
 @php
@@ -16,7 +16,7 @@ $ikonSurat = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-
 <div id="halaman-pesan-asatid" class="space-y-4 max-w-3xl mx-auto">
     @if (count($idBaru))
     <p class="rounded-2xl bg-violet-50 ring-1 ring-violet-100 px-4 py-3 text-sm text-violet-800">
-        Ada <b>{{ count($idBaru) }} pesan baru</b> dari admin. Pesan bertanda <b>BARU</b> kini sudah ditandai dibaca.
+        {{ __('Ada') }} <b>{{ __(':jumlah pesan baru', ['jumlah' => count($idBaru)]) }}</b> {{ __('dari admin. Pesan bertanda') }} <b>{{ __('BARU') }}</b> {{ __('kini sudah ditandai dibaca.') }}
     </p>
     @endif
 
@@ -29,11 +29,11 @@ $ikonSurat = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-
             </span>
             <div class="min-w-0 flex-1">
                 <div class="flex flex-wrap items-center gap-2">
-                    <h2 class="font-bold text-slate-800">{{ $p->judul ?: 'Pesan dari admin' }}</h2>
-                    @if ($baru)<span class="rounded-full bg-violet-500 px-2 py-0.5 text-[10px] font-bold text-white">BARU</span>@endif
+                    <h2 class="font-bold text-slate-800">{{ $p->judul ?: __('Pesan dari admin') }}</h2>
+                    @if ($baru)<span class="rounded-full bg-violet-500 px-2 py-0.5 text-[10px] font-bold text-white">{{ __('BARU') }}</span>@endif
                 </div>
                 <p class="text-xs text-slate-400">
-                    {{ $p->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('l, d F Y · H:i') }}{{ $p->pengirim ? ' · dari ' . $p->pengirim->name : '' }}
+                    {{ $p->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('l, d F Y · H:i') }}{{ $p->pengirim ? ' · ' . __('dari :nama', ['nama' => $p->pengirim->name]) : '' }}
                 </p>
             </div>
         </div>
@@ -42,7 +42,7 @@ $ikonSurat = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-
             @if ($panjang) :class="{ 'line-clamp-4': !terbuka.includes({{ $p->id }}) }" @endif>{{ $p->isi }}</p>
         @if ($panjang)
         <button type="button" @click="bukaTutup({{ $p->id }})" class="mt-2 text-sm font-semibold text-violet-700 hover:underline"
-            v-text="terbuka.includes({{ $p->id }}) ? 'Tutup' : 'Baca selengkapnya'"></button>
+            v-text="terbuka.includes({{ $p->id }}) ? @js(__('Tutup')) : @js(__('Baca selengkapnya'))"></button>
         @endif
     </article>
     @empty
@@ -50,8 +50,8 @@ $ikonSurat = 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-
         <span class="mx-auto w-14 h-14 rounded-2xl bg-violet-50 text-violet-500 flex items-center justify-center">
             <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikonSurat }}"/></svg>
         </span>
-        <p class="mt-3 font-bold text-slate-700">Belum ada pesan dari admin</p>
-        <p class="mt-1 text-sm text-slate-500">Pengumuman dan pesan khusus untuk Anda akan muncul di sini.</p>
+        <p class="mt-3 font-bold text-slate-700">{{ __('Belum ada pesan dari admin') }}</p>
+        <p class="mt-1 text-sm text-slate-500">{{ __('Pengumuman dan pesan khusus untuk Anda akan muncul di sini.') }}</p>
     </div>
     @endforelse
 

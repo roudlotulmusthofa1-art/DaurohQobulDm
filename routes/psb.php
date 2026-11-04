@@ -53,6 +53,8 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'peran:siswa'])->gro
     // Dasbor siswa: kartu menu Profil, Pengumuman Kelulusan, Pesan dari Admin, Pesan untuk Admin
     Route::get('/beranda', [SiswaDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [SiswaDashboardController::class, 'profil'])->name('profil');
+    Route::get('/ganti-password', [SiswaDashboardController::class, 'gantiPassword'])->name('ganti-password');
+    Route::post('/ganti-password', [SiswaDashboardController::class, 'simpanGantiPassword'])->middleware('throttle:10,1')->name('ganti-password.simpan');
     Route::get('/kelulusan', [SiswaDashboardController::class, 'kelulusan'])->name('kelulusan');
     Route::get('/pesan-admin', [SiswaDashboardController::class, 'pesanAdmin'])->name('pesan-admin');
     Route::get('/pesan-saya', [SiswaDashboardController::class, 'pesanSaya'])->name('pesan-saya');

@@ -1,7 +1,7 @@
 {{-- Admin > Data Admin > Detail --}}
 @extends('layouts.admin')
 
-@section('title', 'Detail Admin')
+@section('title', __('Detail Admin'))
 
 @section('content')
 @php
@@ -13,16 +13,16 @@ $warnaStatus = [
 ][$a->status] ?? 'bg-white/10 text-white/80 ring-white/20';
 
 $seksi = [
-    ['Data Diri', 'emerald', 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z', [
-        'Nama Lengkap (Indonesia)' => $a->nama_lengkap,
-        'Nama Lengkap (Arab)'      => $a->nama_lengkap_arab,
-        'No. WhatsApp'             => $a->no_hp,
-        'Alamat Lengkap'           => $a->alamat,
+    [__('Data Diri'), 'emerald', 'M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z', [
+        __('Nama Lengkap (Indonesia)') => $a->nama_lengkap,
+        __('Nama Lengkap (Arab)')      => $a->nama_lengkap_arab,
+        __('No. WhatsApp')             => $a->no_hp,
+        __('Alamat Lengkap')           => $a->alamat,
     ]],
-    ['Akun Login', 'sky', 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z', [
-        'Email'       => $a->email,
-        'Status Akun' => $a->user_id ? 'Aktif (role admin)' : 'Belum dibuat — dibuat saat diterima',
-        'Diproses'    => optional($a->diproses_at)->translatedFormat('d M Y, H:i'),
+    [__('Akun Login'), 'sky', 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z', [
+        __('Email')       => $a->email,
+        __('Status Akun') => $a->user_id ? __('Aktif (role admin)') : __('Belum dibuat — dibuat saat diterima'),
+        __('Diproses')    => optional($a->diproses_at)->translatedFormat('d M Y, H:i'),
     ]],
 ];
 $nada = [
@@ -30,7 +30,7 @@ $nada = [
     'amber'   => 'bg-amber-50 text-amber-600 ring-amber-100',
     'sky'     => 'bg-sky-50 text-sky-600 ring-sky-100',
 ];
-$lebar = ['Alamat Lengkap'];
+$lebar = [__('Alamat Lengkap')];
 @endphp
 
 <div id="halaman-detail-admin">
@@ -40,7 +40,7 @@ $lebar = ['Alamat Lengkap'];
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
         </span>
-        Kembali
+        {{ __('Kembali') }}
     </a>
 
     @if (session('success'))
@@ -62,7 +62,7 @@ $lebar = ['Alamat Lengkap'];
         <div class="relative p-5 sm:p-8 flex flex-col md:flex-row gap-6">
             <div class="shrink-0 self-center md:self-start">
                 @if ($a->foto_url)
-                <img data-perbesar src="{{ $a->foto_url }}" alt="Foto {{ $a->nama_lengkap }}" class="w-36 h-44 sm:w-40 sm:h-48 object-cover rounded-3xl ring-4 ring-white/10 shadow-2xl shadow-black/30">
+                <img data-perbesar src="{{ $a->foto_url }}" alt="{{ __('Foto :nama', ['nama' => $a->nama_lengkap]) }}" class="w-36 h-44 sm:w-40 sm:h-48 object-cover rounded-3xl ring-4 ring-white/10 shadow-2xl shadow-black/30">
                 @else
                 <div class="w-36 h-44 sm:w-40 sm:h-48 rounded-3xl ring-4 ring-white/10 bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-5xl font-extrabold text-[#0b332c]">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</div>
                 @endif
@@ -71,15 +71,15 @@ $lebar = ['Alamat Lengkap'];
             <div class="flex-1 min-w-0">
                 <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Detail Admin</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Detail Admin') }}</p>
                         <h1 class="mt-1 text-2xl sm:text-[32px] leading-tight font-extrabold tracking-tight break-words">{{ $a->nama_lengkap }}</h1>
                         <p class="mt-1 text-2xl text-emerald-100/90" dir="rtl">{{ $a->nama_lengkap_arab }}</p>
                         <div class="mt-3 flex flex-wrap items-center gap-2 text-xs">
                             <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1 font-semibold tracking-wide"># {{ $a->nomor_pendaftaran }}</span>
-                            <span class="rounded-full bg-white/5 px-3 py-1 text-white/60">mendaftar {{ $a->created_at->locale('id')->diffForHumans() }}</span>
+                            <span class="rounded-full bg-white/5 px-3 py-1 text-white/60">{{ __('mendaftar :waktu', ['waktu' => $a->created_at->locale('id')->diffForHumans()]) }}</span>
                         </div>
                     </div>
-                    <span class="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ring-1 {{ $warnaStatus }}">{{ $a->label_status }}</span>
+                    <span class="shrink-0 text-xs font-semibold px-3 py-1.5 rounded-full ring-1 {{ $warnaStatus }}">{{ __($a->label_status) }}</span>
                 </div>
 
                 <div class="mt-5 flex flex-wrap gap-2.5">
@@ -96,10 +96,13 @@ $lebar = ['Alamat Lengkap'];
 
                 @if ($a->catatan_admin)
                 <div class="mt-3 flex gap-2.5 text-sm rounded-2xl bg-amber-300/10 ring-1 ring-amber-300/25 px-3.5 py-2.5 text-amber-50">
-                    <span class="font-semibold text-amber-200 shrink-0">Catatan admin:</span>
+                    <span class="font-semibold text-amber-200 shrink-0">{{ __('Catatan admin:') }}</span>
                     <span class="whitespace-pre-line">{{ $a->catatan_admin }}</span>
                 </div>
                 @endif
+
+                {{-- Akun login + Reset Password (khusus Super Admin) --}}
+                @include('partials.reset-password-akun', ['routeReset' => route('admin.data-admin.reset-password', $a)])
             </div>
         </div>
     </div>
@@ -108,7 +111,7 @@ $lebar = ['Alamat Lengkap'];
     @if ($a->catatan_peserta)
     <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-sky-50 via-white to-white ring-1 ring-sky-200/70 p-5 sm:p-6">
         <span class="absolute left-0 top-5 bottom-5 w-1 rounded-r-full bg-gradient-to-b from-sky-400 to-cyan-500"></span>
-        <h2 class="text-[15px] font-bold text-slate-800">Catatan dari Pendaftar</h2>
+        <h2 class="text-[15px] font-bold text-slate-800">{{ __('Catatan dari Pendaftar') }}</h2>
         <p dir="auto" class="mt-3 whitespace-pre-line text-[15px] leading-relaxed text-slate-700 bg-white rounded-2xl ring-1 ring-sky-100 px-4 py-3">{{ $a->catatan_peserta }}</p>
     </div>
     @endif
@@ -146,27 +149,27 @@ $lebar = ['Alamat Lengkap'];
     @if ($a->status === 'menunggu')
     <div class="grid md:grid-cols-2 gap-6">
         <form method="POST" action="{{ route('admin.data-admin.terima', $a) }}" class="{{ $kartu }} p-5 sm:p-6 flex flex-col"
-            @submit="konfirmasi" data-konfirmasi="Terima {{ $a->nama_lengkap }} sebagai admin? Akun admin dibuat (bisa membuka seluruh panel admin) dan chat WhatsApp dikirim.">
+            @submit="konfirmasi" data-konfirmasi="{{ __('Terima :nama sebagai admin? Akun admin dibuat (bisa membuka seluruh panel admin) dan chat WhatsApp dikirim.', ['nama' => $a->nama_lengkap]) }}">
             @csrf
-            <h2 class="text-[15px] font-bold text-emerald-700">Terima sebagai Admin</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Akun login (role admin) dibuat, lalu info dikirim lewat WhatsApp.</p>
-            <textarea name="catatan_admin" rows="3" dir="auto" placeholder="Catatan untuk calon admin (opsional)"
+            <h2 class="text-[15px] font-bold text-emerald-700">{{ __('Terima sebagai Admin') }}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">{{ __('Akun login (role admin) dibuat, lalu info dikirim lewat WhatsApp.') }}</p>
+            <textarea name="catatan_admin" rows="3" dir="auto" placeholder="{{ __('Catatan untuk calon admin (opsional)') }}"
                 class="mt-4 w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/15">{{ old('catatan_admin') }}</textarea>
             <button class="mt-4 self-end inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-500 text-white text-sm font-bold hover:bg-emerald-600 shadow-lg shadow-emerald-500/25 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                Terima &amp; Kirim Chat
+                {{ __('Terima & Kirim Chat') }}
             </button>
         </form>
 
         <form method="POST" action="{{ route('admin.data-admin.tolak', $a) }}" class="{{ $kartu }} p-5 sm:p-6 flex flex-col">
             @csrf
-            <h2 class="text-[15px] font-bold text-rose-600">Tolak Pendaftaran</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Alasan wajib diisi dan akan dikirim lewat WhatsApp.</p>
-            <textarea name="catatan_admin" rows="3" dir="auto" required placeholder="Tulis alasan penolakan..."
+            <h2 class="text-[15px] font-bold text-rose-600">{{ __('Tolak Pendaftaran') }}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">{{ __('Alasan wajib diisi dan akan dikirim lewat WhatsApp.') }}</p>
+            <textarea name="catatan_admin" rows="3" dir="auto" required placeholder="{{ __('Tulis alasan penolakan...') }}"
                 class="mt-4 w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4 py-3 text-sm focus:bg-white focus:outline-none focus:border-rose-300 focus:ring-4 focus:ring-rose-400/15"></textarea>
             <button class="mt-4 self-end inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-rose-600 text-white text-sm font-bold hover:bg-rose-700 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                Tolak &amp; Kirim Chat
+                {{ __('Tolak & Kirim Chat') }}
             </button>
         </form>
     </div>
@@ -175,12 +178,12 @@ $lebar = ['Alamat Lengkap'];
     {{-- Hapus --}}
     <div class="flex justify-end">
         <form method="POST" action="{{ route('admin.data-admin.destroy', $a) }}"
-            @submit="konfirmasi" data-konfirmasi="Hapus data admin ini? Pas foto dan akun login-nya ikut terhapus.">
+            @submit="konfirmasi" data-konfirmasi="{{ __('Hapus data admin ini? Pas foto dan akun login-nya ikut terhapus.') }}">
             @csrf
             @method('DELETE')
             <button class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                Hapus data
+                {{ __('Hapus data') }}
             </button>
         </form>
     </div>

@@ -261,6 +261,12 @@ class AdminDataAsatidController extends Controller
     }
 
     /** Hapus data asatid beserta pas foto dan akun login-nya (hanya akun ber-role asatid). */
+    /** Reset password akun login asatid (lupa password). Aturan & pesannya di App\Support\ResetPasswordAkun. */
+    public function resetPassword(Request $request, PendaftaranAsatid $asatid, WhatsAppService $wa)
+    {
+        return \App\Support\ResetPasswordAkun::jalankan($request, $asatid, $wa);
+    }
+
     public function destroy(PendaftaranAsatid $asatid)
     {
         $nama = $asatid->nama_lengkap;

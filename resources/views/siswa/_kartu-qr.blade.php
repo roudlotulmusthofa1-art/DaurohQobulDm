@@ -8,7 +8,7 @@
 @php
 use App\Models\PendaftaranSiswa;
 $diterima = $siswa->status === PendaftaranSiswa::DITERIMA;
-$infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->nama : null, $siswa->kamarMaster?->nama ? 'Kamar ' . $siswa->kamarMaster->nama : null])->filter()->implode(' · ');
+$infoQr = collect([$siswa->kelasMaster?->nama ? __('Kelas :nama', ['nama' => $siswa->kelasMaster->nama]) : null, $siswa->kamarMaster?->nama ? __('Kamar :nama', ['nama' => $siswa->kamarMaster->nama]) : null])->filter()->implode(' · ');
 @endphp
 
 @if ($siswa->kode_qr && $siswa->status !== PendaftaranSiswa::DITOLAK)
@@ -34,7 +34,7 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
 
 <div id="kartu-qr">
     {{-- ===== Tombol melayang "QR Saya" ===== --}}
-    <button type="button" @click="bukaPanel" title="Tampilkan kartu QR"
+    <button type="button" @click="bukaPanel" title="{{ __('Tampilkan kartu QR') }}"
         class="fixed bottom-5 right-5 z-40 inline-flex items-center gap-2.5 pl-2.5 pr-4 py-2.5 rounded-2xl bg-[#0b332c] text-white ring-1 ring-white/10 shadow-[0_14px_32px_-10px_rgba(11,51,44,0.7)] hover:bg-[#135347] hover:-translate-y-0.5 active:scale-95 transition">
         <span class="relative w-10 h-10 rounded-xl bg-white text-[#0b332c] flex items-center justify-center">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h.75v.75h-.75v-.75zM13.5 19.5h.75v.75h-.75v-.75zM19.5 13.5h.75v.75h-.75v-.75zM19.5 19.5h.75v.75h-.75v-.75zM16.5 16.5h.75v.75h-.75v-.75z"/></svg>
@@ -43,8 +43,8 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
             @endif
         </span>
         <span class="text-left leading-tight">
-            <span class="block text-sm font-bold">QR Saya</span>
-            <span class="block text-[10px] text-white/60">{{ $diterima ? 'Untuk absensi' : 'Belum aktif' }}</span>
+            <span class="block text-sm font-bold">{{ __('QR Saya') }}</span>
+            <span class="block text-[10px] text-white/60">{{ $diterima ? __('Untuk absensi') : __('Belum aktif') }}</span>
         </span>
     </button>
     {{-- ===== Panel kartu QR (buka-tutup) ===== --}}
@@ -57,7 +57,7 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
     {{-- Pegangan (HP) + tombol tutup --}}
     <div class="relative flex items-center justify-center pt-3 sm:pt-4 min-h-[2.75rem]">
         <span class="w-12 h-1.5 rounded-full bg-slate-200 sm:hidden"></span>
-        <button type="button" @click="tutupPanel" title="Tutup"
+        <button type="button" @click="tutupPanel" title="{{ __('Tutup') }}"
             class="absolute right-3 top-2.5 w-9 h-9 rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-700 flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
@@ -65,27 +65,27 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
 
     <div class="relative p-5 pt-2 pb-7 sm:p-7 sm:pt-2 flex flex-col sm:flex-row items-center gap-6">
         {{-- QR: ketuk untuk layar penuh --}}
-        <button type="button" @click="bukaLayarPenuh" title="Tampilkan layar penuh"
+        <button type="button" @click="bukaLayarPenuh" title="{{ __('Tampilkan layar penuh') }}"
             class="group relative shrink-0 rounded-3xl bg-white p-3 ring-1 ring-slate-200 shadow-lg shadow-emerald-900/10 hover:ring-emerald-300 transition">
             <span class="absolute inset-0 rounded-3xl ring-2 ring-emerald-400/0 group-hover:ring-emerald-400/60 transition"></span>
             <div v-pre data-qr-kecil class="w-40 h-40 sm:w-44 sm:h-44 [&_svg]:w-full [&_svg]:h-full {{ $diterima ? '' : 'opacity-40' }}">{!! $siswa->qr_svg !!}</div>
-            <span class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#0b332c] px-3 py-1 text-[10px] font-semibold text-white shadow">Ketuk untuk memperbesar</span>
+            <span class="absolute -bottom-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-[#0b332c] px-3 py-1 text-[10px] font-semibold text-white shadow">{{ __('Ketuk untuk memperbesar') }}</span>
         </button>
 
         <div class="flex-1 min-w-0 text-center sm:text-left">
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">Kartu QR Digital</p>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">{{ __('Kartu QR Digital') }}</p>
             <h3 class="mt-1 text-xl sm:text-2xl font-extrabold text-slate-800 leading-tight">{{ $siswa->nama_lengkap }}</h3>
             <p class="mt-1 text-sm text-slate-500">
-                No. {{ $siswa->nomor_pendaftaran }}@if ($infoQr) · {{ $infoQr }}@endif
+                {{ __('No.') }} {{ $siswa->nomor_pendaftaran }}@if ($infoQr) · {{ $infoQr }}@endif
             </p>
 
             @if ($diterima)
             <p class="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-50 ring-1 ring-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Aktif · tunjukkan ke asatid saat absensi
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> {{ __('Aktif · tunjukkan ke asatid saat absensi') }}
             </p>
             @else
             <p class="mt-3 inline-flex items-center gap-2 rounded-full bg-amber-50 ring-1 ring-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
-                <span class="w-2 h-2 rounded-full bg-amber-400"></span> Bisa dipakai absensi setelah Anda diterima
+                <span class="w-2 h-2 rounded-full bg-amber-400"></span> {{ __('Bisa dipakai absensi setelah Anda diterima') }}
             </p>
             @endif
 
@@ -93,17 +93,17 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
                 <button type="button" @click="bukaLayarPenuh"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
-                    Layar Penuh
+                    {{ __('Layar Penuh') }}
                 </button>
                 <button type="button" @click="unduhKartu" :disabled="mengunduh"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
-                    <span v-text="mengunduh ? 'Menyiapkan…' : 'Unduh Kartu'"></span>
+                    <span v-text="mengunduh ? @js(__('Menyiapkan…')) : @js(__('Unduh Kartu'))"></span>
                 </button>
                 <button type="button" @click="salinKode"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25"/></svg>
-                    <span v-text="tersalin ? 'Tersalin!' : 'Salin Kode'"></span>
+                    <span v-text="tersalin ? @js(__('Tersalin!')) : @js(__('Salin Kode'))"></span>
                 </button>
             </div>
         </div>
@@ -115,13 +115,13 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
     <dialog ref="layarPenuh" @close="saatTutup" @click="tutupLayarPenuh"
         class="m-0 p-0 w-screen h-screen max-w-none max-h-none bg-white backdrop:bg-white">
         <div class="w-full h-full flex flex-col items-center justify-center gap-5 p-6 text-center select-none">
-            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Kartu QR · Dauroh Qobul</p>
+            <p class="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">{{ __('Kartu QR · Dauroh Qobul') }}</p>
             <div v-pre class="w-[min(82vw,62vh)] aspect-square [&_svg]:w-full [&_svg]:h-full">{!! $siswa->qr_svg !!}</div>
             <div>
                 <p class="text-2xl font-extrabold text-slate-800">{{ $siswa->nama_lengkap }}</p>
-                <p class="mt-1 text-sm text-slate-500">No. {{ $siswa->nomor_pendaftaran }}@if ($infoQr) · {{ $infoQr }}@endif</p>
+                <p class="mt-1 text-sm text-slate-500">{{ __('No.') }} {{ $siswa->nomor_pendaftaran }}@if ($infoQr) · {{ $infoQr }}@endif</p>
             </div>
-            <p class="text-xs text-slate-400">Naikkan kecerahan layar agar mudah dipindai · ketuk di mana saja untuk menutup</p>
+            <p class="text-xs text-slate-400">{{ __('Naikkan kecerahan layar agar mudah dipindai · ketuk di mana saja untuk menutup') }}</p>
         </div>
     </dialog>
 </div>
@@ -172,7 +172,7 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
                         this.tersalin = true;
                         setTimeout(() => (this.tersalin = false), 2000);
                     } catch (e) {
-                        prompt('Salin kode ini:', DATA.kode);
+                        prompt(@js(__('Salin kode ini:')), DATA.kode);
                     }
                 },
                 // Buat gambar kartu (PNG 1080×1350) dari QR di halaman, lalu unduh
@@ -192,7 +192,7 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
 
                         x.textAlign = 'center';
                         x.fillStyle = '#fcd34d'; x.font = '600 34px system-ui, sans-serif';
-                        x.fillText('KARTU QR · DAUROH QOBUL', 540, 120);
+                        x.fillText(@js(__('KARTU QR · DAUROH QOBUL')), 540, 120);
 
                         x.fillStyle = '#ffffff';
                         x.beginPath();
@@ -204,17 +204,17 @@ $infoQr = collect([$siswa->kelasMaster?->nama ? 'Kelas ' . $siswa->kelasMaster->
                         x.font = '800 60px system-ui, sans-serif';
                         x.fillText(DATA.nama.length > 28 ? DATA.nama.slice(0, 27) + '…' : DATA.nama, 540, 1040);
                         x.fillStyle = 'rgba(255,255,255,0.75)'; x.font = '500 38px system-ui, sans-serif';
-                        x.fillText('No. ' + DATA.nomor, 540, 1105);
+                        x.fillText(@js(__('No.')) + ' ' + DATA.nomor, 540, 1105);
                         if (DATA.info) x.fillText(DATA.info, 540, 1160);
                         x.fillStyle = 'rgba(255,255,255,0.45)'; x.font = '400 28px system-ui, sans-serif';
-                        x.fillText(DATA.diterima ? 'Tunjukkan kartu ini saat absensi' : 'Berlaku untuk absensi setelah diterima', 540, 1260);
+                        x.fillText(DATA.diterima ? @js(__('Tunjukkan kartu ini saat absensi')) : @js(__('Berlaku untuk absensi setelah diterima')), 540, 1260);
 
                         const tautan = document.createElement('a');
                         tautan.download = 'kartu-qr-' + DATA.nomor + '.png';
                         tautan.href = c.toDataURL('image/png');
                         tautan.click();
                     } catch (e) {
-                        alert('Kartu gagal dibuat. Coba lagi atau gunakan tombol Layar Penuh lalu screenshot.');
+                        alert(@js(__('Kartu gagal dibuat. Coba lagi atau gunakan tombol Layar Penuh lalu screenshot.')));
                     } finally {
                         this.mengunduh = false;
                     }

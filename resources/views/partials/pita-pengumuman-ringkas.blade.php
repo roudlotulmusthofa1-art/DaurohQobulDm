@@ -18,7 +18,7 @@
 
         {{-- Judul + tanggal --}}
         <span class="min-w-0 flex-1 leading-tight">
-            <span class="block font-bold truncate" v-text="pita.judul || 'Judul pengumuman'"></span>
+            <span class="block font-bold truncate" v-text="pita.judul || @js(__('Judul pengumuman'))"></span>
             <span class="block text-[11px] opacity-80 truncate" v-text="pita.rentang"></span>
         </span>
 
@@ -26,7 +26,7 @@
         <span v-if="pita.hitung_mundur" class="shrink-0 flex flex-col items-end leading-tight">
             <span class="hidden sm:block text-[10px] opacity-75" v-text="labelSisaPita(pita)"></span>
             <span class="rounded-full px-2 py-0.5 font-mono font-bold tabular-nums text-[11px]" :class="gayaPita(pita).kotak"
-                v-text="(sisaPita(pita).hari > 0 ? sisaPita(pita).hari + ' hari ' : '') + sisaPita(pita).jam"></span>
+                v-text="(sisaPita(pita).hari > 0 ? sisaPita(pita).hari + ' ' + @js(__('hari')) + ' ' : '') + sisaPita(pita).jam"></span>
         </span>
 
         {{-- Tombol --}}
@@ -37,10 +37,10 @@
         </a>
 
         {{-- Pindah (lebih dari satu) + tutup --}}
-        <button v-if="banyakPita > 1" type="button" @click="pitaBerikut" class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100" title="Pengumuman berikutnya" aria-label="Pengumuman berikutnya">
+        <button v-if="banyakPita > 1" type="button" @click="pitaBerikut" class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100" title="{{ __('Pengumuman berikutnya') }}" aria-label="{{ __('Pengumuman berikutnya') }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"></path></svg>
         </button>
-        <button v-if="bisaTutup" type="button" @click="tutupPita" class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100" title="Tutup pengumuman" aria-label="Tutup pengumuman">
+        <button v-if="bisaTutup" type="button" @click="tutupPita" class="shrink-0 w-7 h-7 rounded-full flex items-center justify-center opacity-80 hover:opacity-100" title="{{ __('Tutup pengumuman') }}" aria-label="{{ __('Tutup pengumuman') }}">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
         </button>
     </div>

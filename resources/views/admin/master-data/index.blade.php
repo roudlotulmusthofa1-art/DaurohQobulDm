@@ -17,13 +17,13 @@
                         <x-master-data.icon name="database" size="24" class="text-[#4ade80]" />
                     </span>
                     <div class="min-w-0">
-                        <h1 class="text-xl font-bold">Master Data</h1>
-                        <p class="text-sm text-white/60">Kelola data referensi dan kategori sistem</p>
+                        <h1 class="text-xl font-bold">{{ __('Master Data') }}</h1>
+                        <p class="text-sm text-white/60">{{ __('Kelola data referensi dan kategori sistem') }}</p>
                     </div>
                     {{-- jumlah semua data di semua menu --}}
                     <div class="ml-auto hidden text-right sm:block">
                         <p class="text-2xl font-bold" v-text="totalData()"></p>
-                        <p class="text-xs text-white/50">total data</p>
+                        <p class="text-xs text-white/50">{{ __('total data') }}</p>
                     </div>
                 </div>
             </div>
@@ -86,13 +86,13 @@
                                 <thead>
                                     <tr class="border-b border-gray-100 text-left text-[13px] font-medium text-gray-500">
                                         <th class="w-10 px-4 py-3"></th>
-                                        <th class="w-20 px-3 py-3">Urutan</th>
+                                        <th class="w-20 px-3 py-3">{{ __('Urutan') }}</th>
                                         @foreach ($t['columns'] as $col)
                                             <th class="px-3 py-3 {{ $col['type'] === 'count' ? 'text-center' : '' }}">
                                                 {{ $col['label'] }}</th>
                                         @endforeach
-                                        <th class="w-20 px-3 py-3 text-center">Status</th>
-                                        <th class="w-24 px-3 py-3 text-center">Aksi</th>
+                                        <th class="w-20 px-3 py-3 text-center">{{ __('Status') }}</th>
+                                        <th class="w-24 px-3 py-3 text-center">{{ __('Aksi') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -102,7 +102,7 @@
                                             class="px-4 py-14 text-center text-gray-500">
                                             <x-master-data.icon name="inbox" size="32"
                                                 class="mx-auto mb-2 text-gray-300" />
-                                            Belum ada data {{ strtolower($t['singular']) }}.
+                                            {{ __('Belum ada data :nama.', ['nama' => strtolower($t['singular'])]) }}
                                         </td>
                                     </tr>
 
@@ -116,7 +116,7 @@
                                         <td class="px-4 py-4">
                                             <button type="button"
                                                 class="cursor-grab text-gray-400 hover:text-gray-600 active:cursor-grabbing"
-                                                title="Seret untuk mengubah urutan" @mousedown="drag.armedId = row.id"
+                                                title="{{ __('Seret untuk mengubah urutan') }}" @mousedown="drag.armedId = row.id"
                                                 @mouseup="drag.armedId = null">
                                                 <x-master-data.icon name="grip" />
                                             </button>
@@ -130,8 +130,8 @@
                                         <td class="px-3 py-4 text-center">
                                             <button type="button" class="rounded p-1 transition hover:bg-gray-100"
                                                 :class="row.is_active ? 'text-[#22c55e]' : 'text-gray-400'"
-                                                :title="row.is_active ? 'Aktif — klik untuk nonaktifkan' :
-                                                    'Nonaktif — klik untuk aktifkan'"
+                                                :title="row.is_active ? @js(__('Aktif — klik untuk nonaktifkan')) :
+                                                    @js(__('Nonaktif — klik untuk aktifkan'))"
                                                 @click="toggle(row)">
                                                 <span v-if="row.is_active"><x-master-data.icon name="eye" /></span>
                                                 <span v-else><x-master-data.icon name="eye-off" /></span>
@@ -141,12 +141,12 @@
                                             <div class="flex items-center justify-center gap-1">
                                                 <button type="button"
                                                     class="rounded p-1 text-blue-600 transition hover:bg-blue-50"
-                                                    title="Edit" @click="openModal(row)">
+                                                    title="{{ __('Edit') }}" @click="openModal(row)">
                                                     <x-master-data.icon name="pencil" />
                                                 </button>
                                                 <button type="button"
                                                     class="rounded p-1 text-red-600 transition hover:bg-red-50"
-                                                    title="Hapus" @click="askDelete(row)">
+                                                    title="{{ __('Hapus') }}" @click="askDelete(row)">
                                                     <x-master-data.icon name="trash" />
                                                 </button>
                                             </div>
@@ -168,7 +168,7 @@
                     :class="activeKey === 'kamar' && modal.item ? 'max-w-2xl' : 'max-w-lg'" @submit.prevent="save">
                     <div class="flex items-center justify-between border-b border-gray-100 px-6 py-4">
                         <h3 class="text-base font-semibold text-[#0f1f1a]"
-                            v-text="(modal.item ? 'Edit ' : 'Tambah ') + TABS[activeKey].singular"></h3>
+                            v-text="(modal.item ? @js(__('Edit')) + ' ' : @js(__('Tambah')) + ' ') + TABS[activeKey].singular"></h3>
                         <button type="button" class="rounded p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600"
                             @click="modal.open = false">
                             <x-master-data.icon name="x" size="18" />
@@ -194,28 +194,28 @@
                                         <x-master-data.icon name="bed" size="18" />
                                     </span>
                                     <div>
-                                        <p class="text-sm font-semibold text-[#0f1f1a]">Denah Kamar</p>
-                                        <p class="text-xs text-gray-500">Klik kasur untuk menempatkan santri. Perubahan denah langsung tersimpan.</p>
+                                        <p class="text-sm font-semibold text-[#0f1f1a]">{{ __('Denah Kamar') }}</p>
+                                        <p class="text-xs text-gray-500">{{ __('Klik kasur untuk menempatkan santri. Perubahan denah langsung tersimpan.') }}</p>
                                     </div>
                                 </div>
                                 <span v-if="denah.data && denah.data.kamar.kapasitas"
                                     class="shrink-0 rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-purple-700 ring-1 ring-purple-200"
-                                    v-text="kasurTerisi() + ' / ' + denah.data.kamar.kapasitas + ' terisi'"></span>
+                                    v-text="kasurTerisi() + ' / ' + denah.data.kamar.kapasitas + ' ' + @js(__('terisi'))"></span>
                             </div>
 
-                            <p v-if="denah.loading" class="py-6 text-center text-sm text-gray-500">Memuat denah…</p>
+                            <p v-if="denah.loading" class="py-6 text-center text-sm text-gray-500">{{ __('Memuat denah…') }}</p>
                             <p v-else-if="denah.error && !denah.data" class="py-6 text-center text-sm text-red-600" v-text="denah.error"></p>
 
                             <template v-else-if="denah.data">
                                 <p v-if="!denah.data.kamar.kapasitas" class="rounded-xl bg-white p-4 text-center text-sm text-gray-500">
-                                    Isi <b>Kapasitas (jumlah kasur)</b> di atas lalu klik Simpan, kemudian buka lagi untuk melihat denah.
+                                    {{ __('Isi') }} <b>{{ __('Kapasitas (jumlah kasur)') }}</b> {{ __('di atas lalu klik Simpan, kemudian buka lagi untuk melihat denah.') }}
                                 </p>
 
                                 <template v-else>
                                     {{-- Kasur-kasur. Jumlah kolom = "Kasur per baris" --}}
                                     <div class="grid gap-2" :style="{ gridTemplateColumns: 'repeat(' + kolomDenah() + ', minmax(0, 1fr))' }">
                                         <button v-for="n in daftarKasur()" :key="n" type="button" @click="pilihKasur(n)"
-                                            :title="penghuniKasur(n) ? 'Kasur ' + n + ': ' + penghuniKasur(n).nama : 'Kasur ' + n + ': kosong'"
+                                            :title="penghuniKasur(n) ? @js(__('Kasur')) + ' ' + n + ': ' + penghuniKasur(n).nama : @js(__('Kasur')) + ' ' + n + ': ' + @js(__('kosong'))"
                                             class="relative flex flex-col items-center rounded-xl border-2 px-1.5 pb-2 pt-1.5 text-center transition hover:-translate-y-0.5"
                                             :class="[
                                                 penghuniKasur(n) ? 'border-purple-200 bg-white shadow-sm' : 'border-dashed border-gray-300 bg-white/60 hover:border-purple-300',
@@ -236,58 +236,58 @@
                                             </span>
                                             <span class="mt-1 w-full truncate text-[11px] font-medium"
                                                 :class="penghuniKasur(n) ? 'text-gray-800' : 'text-gray-400'"
-                                                v-text="penghuniKasur(n) ? penghuniKasur(n).nama : 'Kosong'"></span>
+                                                v-text="penghuniKasur(n) ? penghuniKasur(n).nama : @js(__('Kosong'))"></span>
                                         </button>
                                     </div>
 
                                     {{-- pintu kamar --}}
                                     <div class="mt-2 flex justify-center">
-                                        <span class="rounded-b-lg border-x-2 border-b-2 border-amber-300 bg-amber-50 px-6 py-0.5 text-[10px] font-medium text-amber-700">Pintu</span>
+                                        <span class="rounded-b-lg border-x-2 border-b-2 border-amber-300 bg-amber-50 px-6 py-0.5 text-[10px] font-medium text-amber-700">{{ __('Pintu') }}</span>
                                     </div>
 
                                     {{-- Panel kasur yang sedang dipilih --}}
                                     <div v-if="denah.pilih" class="mt-3 rounded-xl bg-white p-3 ring-1 ring-purple-100">
-                                        <p class="mb-2 text-sm font-semibold text-[#0f1f1a]" v-text="'Kasur ' + denah.pilih"></p>
+                                        <p class="mb-2 text-sm font-semibold text-[#0f1f1a]" v-text="@js(__('Kasur')) + ' ' + denah.pilih"></p>
 
                                         {{-- Kasur terisi --}}
                                         <div v-if="penghuniKasur(denah.pilih)" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                                             <p class="text-sm text-gray-700">
-                                                Ditempati <b v-text="penghuniKasur(denah.pilih).nama"></b>
+                                                {{ __('Ditempati') }} <b v-text="penghuniKasur(denah.pilih).nama"></b>
                                                 <span class="text-xs text-gray-400" v-text="'(' + penghuniKasur(denah.pilih).nomor + ')'"></span>
                                             </p>
                                             <div class="flex gap-2">
                                                 <button type="button" :disabled="denah.busy" @click="kosongkanKasur(penghuniKasur(denah.pilih), false)"
                                                     class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
-                                                    Kosongkan kasur</button>
+                                                    {{ __('Kosongkan kasur') }}</button>
                                                 <button type="button" :disabled="denah.busy" @click="kosongkanKasur(penghuniKasur(denah.pilih), true)"
                                                     class="rounded-lg bg-red-50 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-100 disabled:opacity-60">
-                                                    Keluarkan dari kamar</button>
+                                                    {{ __('Keluarkan dari kamar') }}</button>
                                             </div>
                                         </div>
 
                                         {{-- Kasur kosong: pilih santri --}}
                                         <div v-else class="flex flex-col gap-2 sm:flex-row">
                                             <select v-model="denah.santriId" class="min-w-0 flex-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
-                                                <option value="">— Pilih santri —</option>
-                                                <optgroup v-if="santriTanpaKasur().length" label="Penghuni kamar ini (belum dapat kasur)">
+                                                <option value="">{{ __('— Pilih santri —') }}</option>
+                                                <optgroup v-if="santriTanpaKasur().length" label="{{ __('Penghuni kamar ini (belum dapat kasur)') }}">
                                                     <option v-for="s in santriTanpaKasur()" :key="'p' + s.id" :value="s.id" v-text="s.nama"></option>
                                                 </optgroup>
-                                                <optgroup v-if="denah.data.tanpa_kamar.length" label="Santri yang belum punya kamar">
+                                                <optgroup v-if="denah.data.tanpa_kamar.length" label="{{ __('Santri yang belum punya kamar') }}">
                                                     <option v-for="s in denah.data.tanpa_kamar" :key="'t' + s.id" :value="s.id" v-text="s.nama"></option>
                                                 </optgroup>
                                             </select>
                                             <button type="button" :disabled="denah.busy || !denah.santriId" @click="tempatkanSantri"
                                                 class="shrink-0 rounded-lg bg-purple-600 px-4 py-2 text-sm font-semibold text-white hover:bg-purple-700 disabled:opacity-60"
-                                                v-text="denah.busy ? 'Menyimpan…' : 'Tempatkan'"></button>
+                                                v-text="denah.busy ? @js(__('Menyimpan…')) : @js(__('Tempatkan'))"></button>
                                         </div>
                                         <p v-if="!penghuniKasur(denah.pilih) && !santriTanpaKasur().length && !denah.data.tanpa_kamar.length"
-                                            class="mt-2 text-xs text-gray-500">Tidak ada santri yang bisa ditempatkan (semua sudah punya kamar & kasur).</p>
+                                            class="mt-2 text-xs text-gray-500">{{ __('Tidak ada santri yang bisa ditempatkan (semua sudah punya kamar & kasur).') }}</p>
                                         <p v-if="denah.error" class="mt-2 text-xs text-red-600" v-text="denah.error"></p>
                                     </div>
 
                                     {{-- Penghuni yang belum dapat kasur --}}
                                     <div v-if="santriTanpaKasur().length" class="mt-3">
-                                        <p class="mb-1.5 text-xs font-medium text-amber-700">Penghuni yang belum dapat kasur:</p>
+                                        <p class="mb-1.5 text-xs font-medium text-amber-700">{{ __('Penghuni yang belum dapat kasur:') }}</p>
                                         <div class="flex flex-wrap gap-1.5">
                                             <span v-for="s in santriTanpaKasur()" :key="'c' + s.id"
                                                 class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 ring-1 ring-amber-200" v-text="s.nama"></span>
@@ -303,9 +303,8 @@
                         <label
                             class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-200 px-4 py-3">
                             <span>
-                                <span class="block text-sm font-medium text-gray-700">Aktif</span>
-                                <span class="block text-xs text-gray-500">Data nonaktif tidak muncul di pilihan form
-                                    lain.</span>
+                                <span class="block text-sm font-medium text-gray-700">{{ __('Aktif') }}</span>
+                                <span class="block text-xs text-gray-500">{{ __('Data nonaktif tidak muncul di pilihan form lain.') }}</span>
                             </span>
                             <span class="relative inline-flex">
                                 <input v-model="modal.form.is_active" type="checkbox" class="peer sr-only">
@@ -320,11 +319,11 @@
                         <button type="button"
                             class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                             @click="modal.open = false">
-                            Batal
+                            {{ __('Batal') }}
                         </button>
                         <button type="submit" :disabled="modal.saving"
                             class="rounded-xl bg-[#0b332c] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0f4a3f] disabled:cursor-not-allowed disabled:opacity-60"
-                            v-text="modal.saving ? 'Menyimpan…' : 'Simpan'"></button>
+                            v-text="modal.saving ? @js(__('Menyimpan…')) : @js(__('Simpan'))"></button>
                     </div>
                 </form>
             </div>
@@ -338,16 +337,16 @@
                         <x-master-data.icon name="alert" size="22" />
                     </div>
                     <h3 class="text-center text-base font-semibold text-[#0f1f1a]"
-                        v-text="'Hapus ' + TABS[activeKey].singular.toLowerCase() + '?'"></h3>
+                        v-text="@js(__('Hapus :nama?')).replace(':nama', TABS[activeKey].singular.toLowerCase())"></h3>
                     <p class="mt-1 text-center text-sm text-gray-500"
-                        v-text="confirm.row ? '“' + confirm.row.nama + '” akan dihapus permanen.' : ''"></p>
+                        v-text="confirm.row ? '“' + confirm.row.nama + '” ' + @js(__('akan dihapus permanen.')) : ''"></p>
                     <div class="mt-6 grid grid-cols-2 gap-2">
                         <button type="button"
                             class="rounded-xl border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
-                            @click="confirm.open = false">Batal</button>
+                            @click="confirm.open = false">{{ __('Batal') }}</button>
                         <button type="button" :disabled="confirm.busy"
                             class="rounded-xl bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
-                            @click="doDelete" v-text="confirm.busy ? 'Menghapus…' : 'Hapus'"></button>
+                            @click="doDelete" v-text="confirm.busy ? @js(__('Menghapus…')) : @js(__('Hapus'))"></button>
                     </div>
                 </div>
             </div>
@@ -399,8 +398,8 @@
             const isJson = (res.headers.get('content-type') || '').includes('application/json');
             const data = isJson ? await res.json().catch(() => ({})) : {};
             if (!res.ok || !isJson) {
-                const message = res.status === 419 ? 'Sesi habis, silakan muat ulang halaman.' : (data.message ||
-                    'Terjadi kesalahan. Coba lagi.');
+                const message = res.status === 419 ? @js(__('Sesi habis, silakan muat ulang halaman.')) : (data.message ||
+                    @js(__('Terjadi kesalahan. Coba lagi.')));
                 throw Object.assign(new Error(message), {
                     status: res.status,
                     data

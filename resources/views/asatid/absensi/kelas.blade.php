@@ -7,7 +7,7 @@
 --}}
 @extends('layouts.asatid')
 
-@section('judul', 'Absensi Kelas')
+@section('judul', __('Absensi Kelas'))
 
 @push('styles')
 <style>
@@ -29,16 +29,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @endphp
 
 <div id="absen-kelas" v-cloak>
-@verbatim
     <!-- ================= TAHAP 1: ATUR ================= -->
     <div v-if="tahap === 'atur'" class="space-y-5">
         <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-sky-500 via-blue-600 to-indigo-700 text-white p-6 sm:p-8">
             <div class="pointer-events-none absolute inset-0 opacity-50" style="background-image: radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1px); background-size: 18px 18px;"></div>
             <div class="pointer-events-none absolute -bottom-24 -right-10 w-72 h-72 rounded-full bg-cyan-300/30 blur-3xl"></div>
             <div class="relative">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-100/80">Langkah 1 dari 2</p>
-                <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">Atur absensi kelas</h2>
-                <p class="mt-1.5 text-sm text-white/75">Pilih kelas, pelajaran, tanggal, dan jam ke. Setelah itu absen peserta satu per satu.</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-100/80">{{ __('Langkah 1 dari 2') }}</p>
+                <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Atur absensi kelas') }}</h2>
+                <p class="mt-1.5 text-sm text-white/75">{{ __('Pilih kelas, pelajaran, tanggal, dan jam ke. Setelah itu absen peserta satu per satu.') }}</p>
             </div>
         </section>
 
@@ -46,7 +45,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <section :class="kartu" class="p-5 sm:p-6">
             <h3 class="flex items-center gap-2 font-bold text-slate-800">
                 <span class="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center text-xs font-extrabold">1</span>
-                Pilih kelas
+                {{ __('Pilih kelas') }}
             </h3>
             <div v-if="kelasList.length" class="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 <button v-for="k in kelasList" :key="k.id" type="button" @click="form.kelas_id = k.id"
@@ -56,17 +55,17 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
                     </span>
                     <span class="block font-bold text-slate-800 pr-6" v-text="k.nama"></span>
-                    <span class="mt-1 block text-xs text-slate-500" v-text="(k.santri_count || 0) + ' peserta'"></span>
+                    <span class="mt-1 block text-xs text-slate-500" v-text="@js(__(':jumlah peserta')).replace(':jumlah', k.santri_count || 0)"></span>
                 </button>
             </div>
-            <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">Belum ada kelas aktif. Minta admin mengisinya di Master Data &rsaquo; Kelas.</p>
+            <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada kelas aktif. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Kelas.') }}</p>
         </section>
 
         <!-- Pelajaran -->
         <section :class="kartu" class="p-5 sm:p-6">
             <h3 class="flex items-center gap-2 font-bold text-slate-800">
                 <span class="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center text-xs font-extrabold">2</span>
-                Pilih pelajaran
+                {{ __('Pilih pelajaran') }}
             </h3>
             <div v-if="pelajaranList.length" class="mt-4 flex flex-wrap gap-2">
                 <button v-for="p in pelajaranList" :key="p.id" type="button" @click="form.bidang_ilmu_id = p.id"
@@ -76,7 +75,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <span v-text="p.nama"></span>
                 </button>
             </div>
-            <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">Belum ada pelajaran. Minta admin mengisinya di Master Data &rsaquo; Bidang Ilmu.</p>
+            <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada pelajaran. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Bidang Ilmu.') }}</p>
         </section>
 
         <!-- Tanggal & jam ke -->
@@ -84,17 +83,17 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div>
                 <h3 class="flex items-center gap-2 font-bold text-slate-800">
                     <span class="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center text-xs font-extrabold">3</span>
-                    Tanggal
+                    {{ __('Tanggal') }}
                 </h3>
                 <input type="date" v-model="form.tanggal"
                     class="mt-4 w-full rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-4 py-3 text-sm font-semibold text-slate-800 focus:ring-2 focus:ring-sky-500 outline-none">
                 <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
                     <div class="rounded-2xl bg-sky-50 ring-1 ring-sky-100 px-3 py-2.5">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-600">Masehi</span>
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-600">{{ __('Masehi') }}</span>
                         <span class="mt-0.5 block font-semibold text-slate-700" v-text="masehi(form.tanggal)"></span>
                     </div>
                     <div class="rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 px-3 py-2.5">
-                        <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">Hijriyah</span>
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-emerald-600">{{ __('Hijriyah') }}</span>
                         <span class="mt-0.5 block font-semibold text-slate-700" v-text="hijriyah(form.tanggal)"></span>
                     </div>
                 </div>
@@ -102,7 +101,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div>
                 <h3 class="flex items-center gap-2 font-bold text-slate-800">
                     <span class="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center text-xs font-extrabold">4</span>
-                    Jam ke / waktu pelajaran
+                    {{ __('Jam ke / waktu pelajaran') }}
                 </h3>
                 <div v-if="jamList.length" class="mt-4 grid grid-cols-2 gap-2">
                     <button v-for="j in jamList" :key="j.id" type="button" @click="form.waktu_pelajaran_id = j.id"
@@ -112,7 +111,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <span class="block text-[11px] text-slate-500" v-text="jamRentang(j)"></span>
                     </button>
                 </div>
-                <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">Belum ada waktu pelajaran. Minta admin mengisinya di Master Data &rsaquo; Waktu Pelajaran.</p>
+                <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada waktu pelajaran. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Waktu Pelajaran.') }}</p>
             </div>
         </section>
 
@@ -123,7 +122,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 class="w-full flex items-center justify-center gap-2 py-4 rounded-2xl text-base font-extrabold transition-all"
                 :class="siapMulai ? 'bg-[#0b332c] text-white hover:bg-[#135347] shadow-[0_16px_32px_-12px_rgba(11,51,44,0.6)]' : 'bg-slate-200 text-slate-400 cursor-not-allowed'">
                 <svg v-if="memuat" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-                <span v-text="memuat ? 'Memuat peserta…' : (siapMulai ? 'Mulai Absen' : 'Lengkapi pilihan di atas')"></span>
+                <span v-text="memuat ? @js(__('Memuat peserta…')) : (siapMulai ? @js(__('Mulai Absen')) : @js(__('Lengkapi pilihan di atas')))"></span>
                 <svg v-if="!memuat && siapMulai" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"/></svg>
             </button>
         </div>
@@ -134,7 +133,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <!-- Info & progres -->
         <div :class="kartu" class="p-4">
             <div class="flex items-center gap-3">
-                <button type="button" @click="tahap = 'atur'" title="Ubah pilihan"
+                <button type="button" @click="tahap = 'atur'" title="{{ __('Ubah pilihan') }}"
                     class="w-9 h-9 shrink-0 rounded-xl bg-[#f5f9f7] ring-1 ring-slate-200/70 flex items-center justify-center text-slate-500 hover:text-sky-600">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
                 </button>
@@ -147,7 +146,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="mt-3 h-2 rounded-full bg-slate-100 overflow-hidden">
                 <div class="h-full rounded-full bg-gradient-to-r from-sky-400 to-blue-600 transition-all duration-500" :style="{ width: persenTerisi + '%' }"></div>
             </div>
-            <p v-if="sudahAda" class="mt-2 text-[11px] text-amber-700">Absensi ini sudah pernah diisi. Keterangan lama ditampilkan, Anda bisa mengubahnya.</p>
+            <p v-if="sudahAda" class="mt-2 text-[11px] text-amber-700">{{ __('Absensi ini sudah pernah diisi. Keterangan lama ditampilkan, Anda bisa mengubahnya.') }}</p>
         </div>
 
         <!-- Kartu peserta -->
@@ -159,10 +158,10 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <span v-if="sekarang.status" class="absolute top-3 left-3 text-[11px] font-bold rounded-full px-2.5 py-1 bg-white/90"
                             :class="gaya(sekarang.status).teks" v-text="label(sekarang.status)"></span>
                         <!-- Detail lengkap peserta (hanya lihat), dibuka di tab baru supaya absensi tidak hilang -->
-                        <a :href="sekarang.detail" target="_blank" rel="noopener" title="Lihat detail lengkap peserta"
+                        <a :href="sekarang.detail" target="_blank" rel="noopener" title="{{ __('Lihat detail lengkap peserta') }}"
                             class="absolute top-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-white/15 hover:bg-white/25 ring-1 ring-white/30 backdrop-blur px-3 py-1.5 text-[11px] font-bold text-white transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            Detail
+                            {{ __('Detail') }}
                         </a>
                     </div>
                     <div class="relative px-5 pb-5 -mt-12 text-center">
@@ -177,7 +176,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                                 </span>
                                 <span class="min-w-0">
-                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Alamat</span>
+                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Alamat') }}</span>
                                     <span class="block text-[13px] font-medium text-slate-700 leading-snug break-words" dir="auto" v-text="sekarang.alamat || '-'"></span>
                                 </span>
                             </div>
@@ -186,15 +185,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z"/></svg>
                                 </span>
                                 <span class="min-w-0">
-                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">Pondok terakhir</span>
+                                    <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ __('Pondok terakhir') }}</span>
                                     <span class="block text-[13px] font-medium text-slate-700 leading-snug break-words" dir="auto" v-text="sekarang.pondok || '-'"></span>
                                 </span>
                             </div>
                         </div>
 
                         <label class="mt-5 block text-left">
-                            <span class="text-xs font-semibold text-slate-500">Catatan mudarris <span class="font-normal text-slate-400">(opsional, isi sebelum memilih keterangan)</span></span>
-                            <textarea v-model="sekarang.catatan" rows="2" maxlength="500" placeholder="cth. Belum hafal muqaddimah"
+                            <span class="text-xs font-semibold text-slate-500">{{ __('Catatan mudarris') }} <span class="font-normal text-slate-400">{{ __('(opsional, isi sebelum memilih keterangan)') }}</span></span>
+                            <textarea v-model="sekarang.catatan" rows="2" maxlength="500" placeholder="{{ __('cth. Belum hafal muqaddimah') }}"
                                 class="mt-1.5 w-full rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-4 py-3 text-sm text-slate-700 focus:ring-2 focus:ring-sky-500 outline-none resize-none"></textarea>
                         </label>
 
@@ -207,7 +206,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 <span v-text="s.label"></span>
                             </button>
                         </div>
-                        <p class="mt-3 hidden sm:block text-[11px] text-slate-400">Tombol cepat keyboard: H, T, S, I, A · panah kiri/kanan untuk pindah peserta</p>
+                        <p class="mt-3 hidden sm:block text-[11px] text-slate-400">{{ __('Tombol cepat keyboard: H, T, S, I, A · panah kiri/kanan untuk pindah peserta') }}</p>
                     </div>
                 </div>
             </transition>
@@ -216,11 +215,11 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <!-- Navigasi -->
         <div class="flex items-center gap-2">
             <button type="button" @click="ke(idx - 1)" :disabled="idx === 0"
-                class="flex-1 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 disabled:opacity-40 hover:bg-slate-50">&larr; Sebelumnya</button>
+                class="flex-1 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 disabled:opacity-40 hover:bg-slate-50">&larr; {{ __('Sebelumnya') }}</button>
             <button type="button" @click="tahap = 'ringkas'"
-                class="flex-1 py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">Ringkasan</button>
+                class="flex-1 py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Ringkasan') }}</button>
             <button type="button" @click="lanjut" :disabled="idx === peserta.length - 1"
-                class="flex-1 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 disabled:opacity-40 hover:bg-slate-50">Lewati &rarr;</button>
+                class="flex-1 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 disabled:opacity-40 hover:bg-slate-50">{{ __('Lewati') }} &rarr;</button>
         </div>
 
         <!-- Deretan peserta -->
@@ -240,7 +239,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6">
             <div class="pointer-events-none absolute -top-20 -right-10 w-64 h-64 rounded-full bg-emerald-400/25 blur-3xl"></div>
             <div class="relative">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Langkah 2 dari 2 · Ringkasan</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Langkah 2 dari 2 · Ringkasan') }}</p>
                 <h2 class="mt-1 text-xl sm:text-2xl font-extrabold" v-text="judulSesi"></h2>
                 <p class="mt-1 text-sm text-white/70" v-text="masehi(form.tanggal) + ' · ' + hijriyah(form.tanggal)"></p>
                 <div class="mt-5 grid grid-cols-3 sm:grid-cols-6 gap-2">
@@ -250,7 +249,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     </div>
                     <div class="rounded-2xl px-3 py-2.5 text-center ring-1" :class="belum ? 'bg-amber-400/20 ring-amber-300/40' : 'bg-white/10 ring-white/15'">
                         <span class="block text-2xl font-extrabold" v-text="belum"></span>
-                        <span class="block text-[11px] text-white/70">Belum</span>
+                        <span class="block text-[11px] text-white/70">{{ __('Belum') }}</span>
                     </div>
                 </div>
             </div>
@@ -263,7 +262,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <span v-else class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>
-                        <span class="block text-xs truncate" :class="p.catatan ? 'text-slate-500' : 'text-slate-300'" v-text="p.catatan ? '“' + p.catatan + '”' : 'Tanpa catatan'"></span>
+                        <span class="block text-xs truncate" :class="p.catatan ? 'text-slate-500' : 'text-slate-300'" v-text="p.catatan ? '“' + p.catatan + '”' : @js(__('Tanpa catatan'))"></span>
                     </span>
                 </button>
                 <div class="flex gap-1.5">
@@ -278,16 +277,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
         <div class="fixed bottom-0 inset-x-0 z-30 bg-white/85 backdrop-blur-xl border-t border-slate-200/70">
             <div class="max-w-3xl mx-auto px-4 py-3 flex items-center gap-3">
-                <button type="button" @click="tahap = 'absen'" class="px-4 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Kembali</button>
+                <button type="button" @click="tahap = 'absen'" class="px-4 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Kembali') }}</button>
                 <button type="button" @click="simpan" :disabled="menyimpan"
                     class="flex-1 flex items-center justify-center gap-2 py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-extrabold hover:bg-[#135347] shadow-[0_12px_28px_-12px_rgba(11,51,44,0.6)] disabled:opacity-60">
                     <svg v-if="menyimpan" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-                    <span v-text="menyimpan ? 'Menyimpan…' : (belum ? 'Simpan (' + belum + ' belum diisi)' : 'Simpan Absensi')"></span>
+                    <span v-text="menyimpan ? @js(__('Menyimpan…')) : (belum ? @js(__('Simpan (:jumlah belum diisi)')).replace(':jumlah', belum) : @js(__('Simpan Absensi')))"></span>
                 </button>
             </div>
         </div>
     </div>
-@endverbatim
 </div>
 @endsection
 
@@ -298,11 +296,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Warna tiap keterangan (class Tailwind ditulis lengkap supaya ikut ter-build)
     const STATUS = [
-        { kunci: 'hadir',     label: 'Hadir',       pendek: 'H', aktif: 'bg-emerald-500 text-white ring-emerald-500 shadow-[0_10px_24px_-10px_rgba(16,185,129,0.8)]', lembut: 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100', bulat: 'bg-emerald-500 text-white', teks: 'text-emerald-700', cincin: 'ring-emerald-500', titik: 'bg-emerald-500' },
-        { kunci: 'terlambat', label: 'Terlambat',   pendek: 'T', aktif: 'bg-amber-500 text-white ring-amber-500 shadow-[0_10px_24px_-10px_rgba(245,158,11,0.8)]',   lembut: 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100',       bulat: 'bg-amber-500 text-white',   teks: 'text-amber-700',   cincin: 'ring-amber-500',   titik: 'bg-amber-500' },
-        { kunci: 'sakit',     label: 'Sakit',       pendek: 'S', aktif: 'bg-sky-500 text-white ring-sky-500 shadow-[0_10px_24px_-10px_rgba(14,165,233,0.8)]',       lembut: 'bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100',               bulat: 'bg-sky-500 text-white',     teks: 'text-sky-700',     cincin: 'ring-sky-500',     titik: 'bg-sky-500' },
-        { kunci: 'izin',      label: 'Izin',        pendek: 'I', aktif: 'bg-violet-500 text-white ring-violet-500 shadow-[0_10px_24px_-10px_rgba(139,92,246,0.8)]', lembut: 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100',   bulat: 'bg-violet-500 text-white',  teks: 'text-violet-700',  cincin: 'ring-violet-500',  titik: 'bg-violet-500' },
-        { kunci: 'alfa',      label: 'Tidak Hadir', pendek: 'A', aktif: 'bg-rose-500 text-white ring-rose-500 shadow-[0_10px_24px_-10px_rgba(244,63,94,0.8)]',     lembut: 'bg-rose-50 text-rose-700 ring-rose-200 hover:bg-rose-100',           bulat: 'bg-rose-500 text-white',    teks: 'text-rose-700',    cincin: 'ring-rose-500',    titik: 'bg-rose-500' },
+        { kunci: 'hadir',     label: @js(__('Hadir')),       pendek: 'H', aktif: 'bg-emerald-500 text-white ring-emerald-500 shadow-[0_10px_24px_-10px_rgba(16,185,129,0.8)]', lembut: 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100', bulat: 'bg-emerald-500 text-white', teks: 'text-emerald-700', cincin: 'ring-emerald-500', titik: 'bg-emerald-500' },
+        { kunci: 'terlambat', label: @js(__('Terlambat')),   pendek: 'T', aktif: 'bg-amber-500 text-white ring-amber-500 shadow-[0_10px_24px_-10px_rgba(245,158,11,0.8)]',   lembut: 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100',       bulat: 'bg-amber-500 text-white',   teks: 'text-amber-700',   cincin: 'ring-amber-500',   titik: 'bg-amber-500' },
+        { kunci: 'sakit',     label: @js(__('Sakit')),       pendek: 'S', aktif: 'bg-sky-500 text-white ring-sky-500 shadow-[0_10px_24px_-10px_rgba(14,165,233,0.8)]',       lembut: 'bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100',               bulat: 'bg-sky-500 text-white',     teks: 'text-sky-700',     cincin: 'ring-sky-500',     titik: 'bg-sky-500' },
+        { kunci: 'izin',      label: @js(__('Izin')),        pendek: 'I', aktif: 'bg-violet-500 text-white ring-violet-500 shadow-[0_10px_24px_-10px_rgba(139,92,246,0.8)]', lembut: 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100',   bulat: 'bg-violet-500 text-white',  teks: 'text-violet-700',  cincin: 'ring-violet-500',  titik: 'bg-violet-500' },
+        { kunci: 'alfa',      label: @js(__('Tidak Hadir')), pendek: 'A', aktif: 'bg-rose-500 text-white ring-rose-500 shadow-[0_10px_24px_-10px_rgba(244,63,94,0.8)]',     lembut: 'bg-rose-50 text-rose-700 ring-rose-200 hover:bg-rose-100',           bulat: 'bg-rose-500 text-white',    teks: 'text-rose-700',    cincin: 'ring-rose-500',    titik: 'bg-rose-500' },
     ];
     const TOMBOL = { h: 'hadir', t: 'terlambat', s: 'sakit', i: 'izin', a: 'alfa' };
     // Warna titik pelajaran (dari pilihan warna Bidang Ilmu di Master Data)
@@ -365,7 +363,7 @@ document.addEventListener('DOMContentLoaded', () => {
         methods: {
             masehi: (iso) => (iso ? FMT_M.format(keTanggal(iso)) : '-'),
             hijriyah: (iso) => (iso ? FMT_H.format(keTanggal(iso)) : '-'),
-            jamRentang: (j) => (j.jam_mulai ? `${j.jam_mulai}${j.jam_selesai ? ' – ' + j.jam_selesai : ''}` : 'Jam belum diatur'),
+            jamRentang: (j) => (j.jam_mulai ? `${j.jam_mulai}${j.jam_selesai ? ' – ' + j.jam_selesai : ''}` : @js(__('Jam belum diatur'))),
             warnaHex: (w) => WARNA[w] || '#cbd5e1',
             inisial: (n) => (n || '?').trim().charAt(0).toUpperCase(),
             gaya: (k) => STATUS.find((s) => s.kunci === k) || {},
@@ -380,8 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     Object.entries(this.form).forEach(([k, v]) => url.searchParams.set(k, v));
                     const res = await fetch(url, { headers: { Accept: 'application/json' } });
                     const json = await res.json();
-                    if (!res.ok) throw new Error(json.message || 'Gagal memuat peserta.');
-                    if (!json.peserta.length) throw new Error('Belum ada peserta di kelas ini. Minta admin menempatkan peserta ke kelas tersebut.');
+                    if (!res.ok) throw new Error(json.message || @js(__('Gagal memuat peserta.')));
+                    if (!json.peserta.length) throw new Error(@js(__('Belum ada peserta di kelas ini. Minta admin menempatkan peserta ke kelas tersebut.')));
 
                     this.peserta = json.peserta.map((p) => ({ ...p, catatan: p.catatan || '' }));
                     this.sudahAda = json.sudah_ada;
@@ -423,7 +421,7 @@ document.addEventListener('DOMContentLoaded', () => {
             async simpan() {
                 this.galat = '';
                 if (this.belum) {
-                    this.galat = `Masih ada ${this.belum} peserta yang belum diberi keterangan.`;
+                    this.galat = @js(__('Masih ada :jumlah peserta yang belum diberi keterangan.')).replace(':jumlah', this.belum);
                     const i = this.peserta.findIndex((p) => !p.status);
                     this.idx = i; this.tahap = 'absen';
                     return;
@@ -436,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ ...this.form, data: this.peserta.map((p) => ({ id: p.id, status: p.status, catatan: p.catatan })) }),
                     });
                     const json = await res.json();
-                    if (!res.ok) throw new Error(json.message || 'Gagal menyimpan absensi.');
+                    if (!res.ok) throw new Error(json.message || @js(__('Gagal menyimpan absensi.')));
                     window.location = json.redirect;
                 } catch (e) {
                     this.galat = e.message;

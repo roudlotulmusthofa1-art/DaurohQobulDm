@@ -5,7 +5,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Edit Asatid')
+@section('title', __('Edit Asatid'))
 
 @section('content')
 @php
@@ -21,12 +21,12 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center group-hover:-translate-x-0.5 transition-transform">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
         </span>
-        Kembali
+        {{ __('Kembali') }}
     </a>
 
     @if ($errors->any())
     <div class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">
-        <p class="font-semibold">Periksa lagi isian yang ditandai merah:</p>
+        <p class="font-semibold">{{ __('Periksa lagi isian yang ditandai merah:') }}</p>
         <ul class="mt-1 list-disc pl-5">
             @foreach ($errors->all() as $pesan)
             <li>{{ $pesan }}</li>
@@ -43,25 +43,25 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
         {{-- ===== Judul + pas foto ===== --}}
         <div class="{{ $kartu }} p-5 sm:p-6 flex flex-col sm:flex-row gap-5 items-start">
             <div class="shrink-0">
-                <img data-perbesar="Pas foto {{ $a->nama_lengkap }}" v-if="pratinjauFoto" :src="pratinjauFoto" alt="Pas foto" class="w-28 h-36 object-cover rounded-2xl ring-1 ring-slate-200">
+                <img data-perbesar="{{ __('Pas foto :nama', ['nama' => $a->nama_lengkap]) }}" v-if="pratinjauFoto" :src="pratinjauFoto" alt="{{ __('Pas foto') }}" class="w-28 h-36 object-cover rounded-2xl ring-1 ring-slate-200">
                 <div v-else class="w-28 h-36 rounded-2xl bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-4xl font-extrabold text-[#0b332c]">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</div>
                 <label class="mt-2 block text-center text-xs font-semibold text-emerald-700 hover:underline cursor-pointer">
-                    Ganti foto
+                    {{ __('Ganti foto') }}
                     <input type="file" name="berkas_foto" accept="image/*" class="hidden" @change="pilihFoto">
                 </label>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">Edit Data Asatid</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">{{ __('Edit Data Asatid') }}</p>
                 <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-800 break-words">{{ $a->nama_lengkap }}</h1>
-                <p class="mt-1 text-sm text-slate-500"># {{ $a->nomor_pendaftaran }} · {{ $a->label_status }}</p>
+                <p class="mt-1 text-sm text-slate-500"># {{ $a->nomor_pendaftaran }} · {{ __($a->label_status) }}</p>
                 <p v-if="namaFoto" class="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
-                    Foto baru: <b v-text="namaFoto"></b>
+                    {{ __('Foto baru:') }} <b v-text="namaFoto"></b>
                 </p>
                 <p class="mt-3 text-xs text-slate-400">
                     @if ($a->user_id)
-                    Akun login sudah aktif: perubahan nama, email, dan password langsung berlaku untuk login asatid ini.
+                    {{ __('Akun login sudah aktif: perubahan nama, email, dan password langsung berlaku untuk login asatid ini.') }}
                     @else
-                    Akun login belum dibuat (dibuat saat pendaftar diterima).
+                    {{ __('Akun login belum dibuat (dibuat saat pendaftar diterima).') }}
                     @endif
                 </p>
             </div>
@@ -69,31 +69,31 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
 
         {{-- ===== Data diri ===== --}}
         <section class="{{ $kartu }} p-5 sm:p-6">
-            <h2 class="text-[15px] font-bold text-slate-800 mb-4">Data Diri</h2>
+            <h2 class="text-[15px] font-bold text-slate-800 mb-4">{{ __('Data Diri') }}</h2>
             <div class="grid md:grid-cols-2 gap-4">
                 <label class="block">
-                    <span class="{{ $label }}">Nama Lengkap (Indonesia)</span>
+                    <span class="{{ $label }}">{{ __('Nama Lengkap (Indonesia)') }}</span>
                     <input type="text" name="nama_lengkap" value="{{ old('nama_lengkap', $a->nama_lengkap) }}" required maxlength="150" class="{{ $isian }} {{ $salah('nama_lengkap') }}">
                 </label>
                 <label class="block">
-                    <span class="{{ $label }}">Nama Lengkap (Arab)</span>
+                    <span class="{{ $label }}">{{ __('Nama Lengkap (Arab)') }}</span>
                     <input type="text" name="nama_lengkap_arab" value="{{ old('nama_lengkap_arab', $a->nama_lengkap_arab) }}" maxlength="150" dir="rtl" class="{{ $isian }} text-lg {{ $salah('nama_lengkap_arab') }}">
                 </label>
                 <label class="block">
-                    <span class="{{ $label }}">Tempat Lahir <span class="font-normal text-slate-400">(huruf Arab)</span></span>
+                    <span class="{{ $label }}">{{ __('Tempat Lahir') }} <span class="font-normal text-slate-400">{{ __('(huruf Arab)') }}</span></span>
                     <input type="text" name="tempat_lahir" value="{{ old('tempat_lahir', $a->tempat_lahir) }}" maxlength="100" dir="rtl" class="{{ $isian }} text-lg {{ $salah('tempat_lahir') }}">
                 </label>
                 <label class="block">
-                    <span class="{{ $label }}">Tanggal Lahir</span>
+                    <span class="{{ $label }}">{{ __('Tanggal Lahir') }}</span>
                     <input type="date" name="tanggal_lahir" value="{{ old('tanggal_lahir', optional($a->tanggal_lahir)->format('Y-m-d')) }}" class="{{ $isian }} {{ $salah('tanggal_lahir') }}">
                 </label>
                 <label class="block">
-                    <span class="{{ $label }}">No. WhatsApp</span>
+                    <span class="{{ $label }}">{{ __('No. WhatsApp') }}</span>
                     <input type="text" name="no_hp" value="{{ old('no_hp', $a->no_hp) }}" required maxlength="20" placeholder="+6281234567890" dir="ltr" class="{{ $isian }} {{ $salah('no_hp') }}">
                 </label>
                 <div class="hidden md:block"></div>
                 <label class="block md:col-span-2">
-                    <span class="{{ $label }}">Alamat Lengkap <span class="font-normal text-slate-400">(huruf Arab)</span></span>
+                    <span class="{{ $label }}">{{ __('Alamat Lengkap') }} <span class="font-normal text-slate-400">{{ __('(huruf Arab)') }}</span></span>
                     <textarea name="alamat" rows="3" maxlength="500" dir="rtl" class="{{ $isian }} text-lg {{ $salah('alamat') }}">{{ old('alamat', $a->alamat) }}</textarea>
                 </label>
             </div>
@@ -102,14 +102,14 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
         <div class="grid xl:grid-cols-2 gap-6 items-start">
             {{-- ===== Riwayat ===== --}}
             <section class="{{ $kartu }} p-5 sm:p-6">
-                <h2 class="text-[15px] font-bold text-slate-800 mb-4">Riwayat di Darul Musthofa</h2>
+                <h2 class="text-[15px] font-bold text-slate-800 mb-4">{{ __('Riwayat di Darul Musthofa') }}</h2>
                 <div class="grid sm:grid-cols-2 gap-4">
                     <label class="block">
-                        <span class="{{ $label }}">Lama Belajar</span>
-                        <input type="text" name="lama_belajar" value="{{ old('lama_belajar', $a->lama_belajar) }}" maxlength="100" placeholder="mis. 5 tahun" class="{{ $isian }} {{ $salah('lama_belajar') }}">
+                        <span class="{{ $label }}">{{ __('Lama Belajar') }}</span>
+                        <input type="text" name="lama_belajar" value="{{ old('lama_belajar', $a->lama_belajar) }}" maxlength="100" placeholder="{{ __('mis. 5 tahun') }}" class="{{ $isian }} {{ $salah('lama_belajar') }}">
                     </label>
                     <label class="block">
-                        <span class="{{ $label }}">Tahun Selesai</span>
+                        <span class="{{ $label }}">{{ __('Tahun Selesai') }}</span>
                         <input type="text" name="tahun_selesai" value="{{ old('tahun_selesai', $a->tahun_selesai) }}" inputmode="numeric" maxlength="4" placeholder="2020" class="{{ $isian }} {{ $salah('tahun_selesai') }}">
                     </label>
                 </div>
@@ -117,22 +117,22 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
 
             {{-- ===== Akun login ===== --}}
             <section class="{{ $kartu }} p-5 sm:p-6">
-                <h2 class="text-[15px] font-bold text-slate-800 mb-4">Akun Login</h2>
+                <h2 class="text-[15px] font-bold text-slate-800 mb-4">{{ __('Akun Login') }}</h2>
                 <div class="space-y-4">
                     <label class="block">
-                        <span class="{{ $label }}">Email</span>
+                        <span class="{{ $label }}">{{ __('Email') }}</span>
                         <input type="email" name="email" value="{{ old('email', $a->email) }}" required maxlength="255" class="{{ $isian }} {{ $salah('email') }}">
                     </label>
                     <label class="block">
-                        <span class="{{ $label }}">Password Baru <span class="font-normal text-slate-400">(kosongkan bila tidak diganti)</span></span>
+                        <span class="{{ $label }}">{{ __('Password Baru') }} <span class="font-normal text-slate-400">{{ __('(kosongkan bila tidak diganti)') }}</span></span>
                         <span class="relative block">
                             <input :type="lihatPassword ? 'text' : 'password'" name="password_baru" v-model="passwordBaru" minlength="8" maxlength="100" autocomplete="new-password"
-                                placeholder="Minimal 8 karakter" class="{{ $isian }} pr-20 {{ $salah('password_baru') }}">
+                                placeholder="{{ __('Minimal 8 karakter') }}" class="{{ $isian }} pr-20 {{ $salah('password_baru') }}">
                             <button type="button" @click="lihatPassword = !lihatPassword"
                                 class="absolute right-2 top-1/2 -translate-y-1/2 mt-0.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100"
-                                v-text="lihatPassword ? 'Sembunyi' : 'Lihat'"></button>
+                                v-text="lihatPassword ? @js(__('Sembunyi')) : @js(__('Lihat'))"></button>
                         </span>
-                        <span v-if="passwordBaru && passwordBaru.length < 8" class="mt-1 block text-xs text-amber-600">Kurang <span v-text="8 - passwordBaru.length"></span> karakter lagi.</span>
+                        <span v-if="passwordBaru && passwordBaru.length < 8" class="mt-1 block text-xs text-amber-600">{{ __('Kurang') }} <span v-text="8 - passwordBaru.length"></span> {{ __('karakter lagi.') }}</span>
                     </label>
                 </div>
             </section>
@@ -140,19 +140,19 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
 
         {{-- ===== Catatan admin ===== --}}
         <section class="{{ $kartu }} p-5 sm:p-6">
-            <h2 class="text-[15px] font-bold text-slate-800">Catatan Admin</h2>
-            <p class="text-xs text-slate-400 mt-0.5">Tampil di notifikasi dasbor asatid.</p>
-            <textarea name="catatan_admin" rows="3" maxlength="1000" dir="auto" placeholder="Opsional" class="{{ $isian }}">{{ old('catatan_admin', $a->catatan_admin) }}</textarea>
+            <h2 class="text-[15px] font-bold text-slate-800">{{ __('Catatan Admin') }}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">{{ __('Tampil di notifikasi dasbor asatid.') }}</p>
+            <textarea name="catatan_admin" rows="3" maxlength="1000" dir="auto" placeholder="{{ __('Opsional') }}" class="{{ $isian }}">{{ old('catatan_admin', $a->catatan_admin) }}</textarea>
         </section>
 
         {{-- ===== Tombol ===== --}}
         <div class="sticky bottom-4 z-10 flex flex-wrap items-center gap-3 p-3 rounded-2xl bg-white/90 backdrop-blur ring-1 ring-slate-200 shadow-lg">
-            <span v-if="diubah" class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold">Ada perubahan belum disimpan</span>
+            <span v-if="diubah" class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold">{{ __('Ada perubahan belum disimpan') }}</span>
             <span class="flex-1"></span>
-            <a href="{{ route('admin.asatid.show', $a) }}" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Batal</a>
+            <a href="{{ route('admin.asatid.show', $a) }}" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">{{ __('Batal') }}</a>
             <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 shadow-lg shadow-emerald-600/20">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                Simpan Perubahan
+                {{ __('Simpan Perubahan') }}
             </button>
         </div>
     </form>

@@ -1,7 +1,7 @@
 {{--
     Admin > Sistem > Pengaturan (kerangka halaman)
     Menu kiri dari PengaturanController::TAB. Isi tiap tab ada di file tab-{nama}.blade.php di folder ini:
-      tab-umum, tab-profil, tab-notifikasi, tab-pesan, tab-database, tab-sesi
+      tab-umum, tab-profil, tab-notifikasi, tab-pesan, tab-database, tab-sesi, tab-bahasa
     Menambah tab baru: tambah di PengaturanController::TAB + buat file tab-{nama}.blade.php.
 
     Vue: seluruh halaman satu aplikasi Vue (#halaman-pengaturan, skrip di bawah).
@@ -10,7 +10,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Pengaturan')
+@section('title', __('Pengaturan'))
 
 @section('content')
 @php
@@ -28,8 +28,8 @@ $ukuran = fn ($b) => $b >= 1073741824 ? number_format($b / 1073741824, 1, ',', '
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -bottom-24 -right-10 w-72 h-72 rounded-full bg-amber-300/20 blur-3xl"></div>
         <div class="relative">
-            <h1 class="text-2xl font-extrabold tracking-tight">Pengaturan</h1>
-            <p class="mt-1 text-sm text-white/80">Konfigurasi aplikasi dan preferensi</p>
+            <h1 class="text-2xl font-extrabold tracking-tight">{{ __('Pengaturan') }}</h1>
+            <p class="mt-1 text-sm text-white/80">{{ __('Konfigurasi aplikasi dan preferensi') }}</p>
         </div>
     </section>
 
@@ -46,7 +46,7 @@ $ukuran = fn ($b) => $b >= 1073741824 ? number_format($b / 1073741824, 1, ',', '
     @endif
     @if ($errors->any())
     <div class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">
-        <p class="font-semibold">Periksa kembali isian Anda:</p>
+        <p class="font-semibold">{{ __('Periksa kembali isian Anda:') }}</p>
         <ul class="mt-1 list-disc pl-5">@foreach ($errors->all() as $e)<li>{{ $e }}</li>@endforeach</ul>
     </div>
     @endif
@@ -58,7 +58,7 @@ $ukuran = fn ($b) => $b >= 1073741824 ? number_format($b / 1073741824, 1, ',', '
             <a href="{{ route('admin.pengaturan.index', ['tab' => $kode]) }}"
                 class="shrink-0 flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-sm font-semibold transition-colors {{ $tab === $kode ? 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100' : 'text-slate-600 hover:bg-slate-50' }}">
                 <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $t['ikon'] }}"/></svg>
-                {{ $t['label'] }}
+                {{ __($t['label']) }}
             </a>
             @endforeach
         </nav>

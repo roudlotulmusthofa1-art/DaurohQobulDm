@@ -18,6 +18,8 @@ Route::prefix('asatid')->name('asatid.')->group(function () {
 Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->group(function () {
     Route::get('/beranda', [AsatidDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profil', [AsatidDashboardController::class, 'profil'])->name('profil');
+    Route::get('/ganti-password', [AsatidDashboardController::class, 'gantiPassword'])->name('ganti-password');
+    Route::post('/ganti-password', [AsatidDashboardController::class, 'simpanGantiPassword'])->middleware('throttle:10,1')->name('ganti-password.simpan');
     Route::get('/jadwal', [AsatidDashboardController::class, 'jadwal'])->name('jadwal');
     Route::get('/penilaian', [AsatidDashboardController::class, 'penilaian'])->name('penilaian');
     Route::get('/pesan', [AsatidDashboardController::class, 'pesan'])->name('pesan'); // Pesan dari Admin

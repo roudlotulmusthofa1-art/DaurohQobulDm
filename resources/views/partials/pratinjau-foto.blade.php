@@ -20,15 +20,15 @@
         <div class="flex items-center gap-2 px-3 sm:px-5 py-3 text-white" @click.self="tutup">
             <p class="flex-1 min-w-0 truncate text-sm font-semibold" v-text="sekarang.judul"></p>
             <span v-if="daftar.length > 1" class="text-xs text-white/60 tabular-nums" v-text="(indeks + 1) + ' / ' + daftar.length"></span>
-            <button type="button" @click="ubahSkala(-0.5)" :disabled="skala <= 1" title="Perkecil"
+            <button type="button" @click="ubahSkala(-0.5)" :disabled="skala <= 1" title="{{ __('Perkecil') }}"
                 class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-lg font-bold">−</button>
-            <button type="button" @click="aturUlang" title="Ukuran awal"
+            <button type="button" @click="aturUlang" title="{{ __('Ukuran awal') }}"
                 class="h-9 px-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold tabular-nums" v-text="Math.round(skala * 100) + '%'"></button>
-            <button type="button" @click="ubahSkala(0.5)" :disabled="skala >= 5" title="Perbesar"
+            <button type="button" @click="ubahSkala(0.5)" :disabled="skala >= 5" title="{{ __('Perbesar') }}"
                 class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 disabled:opacity-30 text-lg font-bold">+</button>
-            <a :href="sekarang.src" target="_blank" rel="noopener" title="Buka foto asli di tab baru"
-                class="hidden sm:inline-flex h-9 px-3 items-center rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold">Buka asli</a>
-            <button type="button" @click="tutup" title="Tutup (Esc)" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-lg">✕</button>
+            <a :href="sekarang.src" target="_blank" rel="noopener" title="{{ __('Buka foto asli di tab baru') }}"
+                class="hidden sm:inline-flex h-9 px-3 items-center rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold">{{ __('Buka asli') }}</a>
+            <button type="button" @click="tutup" title="{{ __('Tutup (Esc)') }}" class="w-9 h-9 rounded-xl bg-white/10 hover:bg-white/20 text-lg">✕</button>
         </div>
 
         {{-- Foto --}}
@@ -40,12 +40,12 @@
                 @click="skala === 1 && ubahSkala(1.5)"
                 @pointerdown="mulaiGeser" @pointermove="saatGeser" @pointerup="selesaiGeser" @pointercancel="selesaiGeser">
 
-            <button v-if="daftar.length > 1" type="button" @click="pindah(-1)" title="Sebelumnya (←)"
+            <button v-if="daftar.length > 1" type="button" @click="pindah(-1)" title="{{ __('Sebelumnya (←)') }}"
                 class="absolute left-2 sm:left-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white text-2xl">‹</button>
-            <button v-if="daftar.length > 1" type="button" @click="pindah(1)" title="Berikutnya (→)"
+            <button v-if="daftar.length > 1" type="button" @click="pindah(1)" title="{{ __('Berikutnya (→)') }}"
                 class="absolute right-2 sm:right-5 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/10 hover:bg-white/25 text-white text-2xl">›</button>
         </div>
-        <p class="py-2 text-center text-[11px] text-white/40">Klik foto / roda mouse / tombol + untuk memperbesar · geser saat diperbesar · Esc untuk menutup</p>
+        <p class="py-2 text-center text-[11px] text-white/40">{{ __('Klik foto / roda mouse / tombol + untuk memperbesar · geser saat diperbesar · Esc untuk menutup') }}</p>
     </div>
     </dialog>
 </div>
@@ -75,9 +75,9 @@
                     document.querySelectorAll('img[data-perbesar]').forEach((el) => {
                         if (!el.currentSrc || sudah.has(el.currentSrc) || !el.offsetParent) return;
                         sudah.add(el.currentSrc);
-                        semua.push({ src: el.currentSrc, judul: el.dataset.perbesar || el.alt || 'Foto' });
+                        semua.push({ src: el.currentSrc, judul: el.dataset.perbesar || el.alt || @js(__('Foto')) });
                     });
-                    if (!sudah.has(img.currentSrc)) semua.push({ src: img.currentSrc, judul: img.dataset.perbesar || img.alt || 'Foto' });
+                    if (!sudah.has(img.currentSrc)) semua.push({ src: img.currentSrc, judul: img.dataset.perbesar || img.alt || @js(__('Foto')) });
 
                     this.daftar = semua;
                     this.indeks = Math.max(0, semua.findIndex((f) => f.src === img.currentSrc));

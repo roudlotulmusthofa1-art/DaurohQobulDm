@@ -7,7 +7,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Pita Pengumuman')
+@section('title', __('Pita Pengumuman'))
 
 @section('content')
 @php
@@ -21,18 +21,18 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     {{-- ===== Judul + tombol ===== --}}
     <div class="flex flex-wrap items-end gap-3">
         <div class="flex-1 min-w-[220px]">
-            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Pita Pengumuman</h1>
-            <p class="mt-1 text-sm text-slate-500">Kabar singkat yang tampil dan hilang sendiri sesuai jadwal. Pilih tempatnya: landing page, dasbor asatid, atau dasbor peserta.</p>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">{{ __('Pita Pengumuman') }}</h1>
+            <p class="mt-1 text-sm text-slate-500">{{ __('Kabar singkat yang tampil dan hilang sendiri sesuai jadwal. Pilih tempatnya: landing page, dasbor asatid, atau dasbor peserta.') }}</p>
         </div>
         <a href="{{ route('landing') }}" target="_blank" rel="noopener"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
-            Lihat landing page
+            {{ __('Lihat landing page') }}
         </a>
         <button type="button" @click="bukaTambah"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            Tambah Pengumuman
+            {{ __('Tambah Pengumuman') }}
         </button>
     </div>
 
@@ -48,17 +48,17 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     <section class="{{ $kartu }} p-5 sm:p-6">
         <div class="flex flex-wrap items-start justify-between gap-3">
             <div>
-                <h2 class="font-bold text-slate-800">Tampilan pita</h2>
-                <p class="text-sm text-slate-500">Letak dan ukuran pita di <b>landing page</b> (semua pengumuman landing). Di dasbor asatid &amp; peserta, pita selalu tampil di atas isi halaman.</p>
+                <h2 class="font-bold text-slate-800">{{ __('Tampilan pita') }}</h2>
+                <p class="text-sm text-slate-500">{{ __('Letak dan ukuran pita di') }} <b>{{ __('landing page') }}</b> {{ __('(semua pengumuman landing). Di dasbor asatid & peserta, pita selalu tampil di atas isi halaman.') }}</p>
             </div>
             <button type="button" @click="simpanTampilan" :disabled="sibuk || !tampilanBerubah"
-                class="px-4 py-2 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] disabled:opacity-40" v-text="tampilanBerubah ? 'Simpan tampilan' : 'Tersimpan'"></button>
+                class="px-4 py-2 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] disabled:opacity-40" v-text="tampilanBerubah ? @js(__('Simpan tampilan')) : @js(__('Tersimpan'))"></button>
         </div>
 
         <div class="mt-4 grid lg:grid-cols-2 gap-5">
             <div class="space-y-4">
                 <div>
-                    <span class="{{ $label }}">Letak</span>
+                    <span class="{{ $label }}">{{ __('Letak') }}</span>
                     <div class="grid grid-cols-2 gap-2">
                         <button v-for="(nama, kunci) in pilihanPosisi" :key="kunci" type="button" @click="tampilan.posisi = kunci"
                             class="rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 transition-colors"
@@ -66,7 +66,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     </div>
                 </div>
                 <div>
-                    <span class="{{ $label }}">Ukuran</span>
+                    <span class="{{ $label }}">{{ __('Ukuran') }}</span>
                     <div class="grid grid-cols-2 gap-2">
                         <button v-for="(nama, kunci) in pilihanUkuran" :key="kunci" type="button" @click="tampilan.ukuran = kunci"
                             class="rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 transition-colors"
@@ -76,7 +76,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
             </div>
             {{-- Contoh letak & ukuran (pakai pengumuman pertama, atau contoh) --}}
             <div>
-                <span class="{{ $label }}">Contoh</span>
+                <span class="{{ $label }}">{{ __('Contoh') }}</span>
                 <div v-for="pita in [pitaContoh]" :key="'contoh'">
                     @include('admin._pita-pratinjau')
                 </div>
@@ -87,8 +87,8 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     {{-- ===== Daftar ===== --}}
     <section class="{{ $kartu }} overflow-hidden">
         <div class="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
-            <h2 class="font-bold text-slate-800">Daftar pengumuman</h2>
-            <p class="text-xs text-slate-400">Urutan atas = tampil lebih dulu</p>
+            <h2 class="font-bold text-slate-800">{{ __('Daftar pengumuman') }}</h2>
+            <p class="text-xs text-slate-400">{{ __('Urutan atas = tampil lebih dulu') }}</p>
         </div>
         {{-- Saring per tempat tampil --}}
         <div class="px-4 sm:px-6 pt-3 pb-1 flex gap-2 overflow-x-auto">
@@ -104,18 +104,18 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
             <span class="mx-auto w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.34 15.84c-.688-.06-1.386-.09-2.09-.09H7.5a4.5 4.5 0 110-9h.75c.704 0 1.402-.03 2.09-.09m0 9.18c.253.962.584 1.892.985 2.783.247.55.06 1.21-.463 1.511l-.657.38c-.551.318-1.26.117-1.527-.461a20.845 20.845 0 01-1.44-4.282m3.102.069a18.03 18.03 0 01-.59-4.59c0-1.586.205-3.124.59-4.59m0 9.18a23.848 23.848 0 018.835 2.535M10.34 6.66a23.847 23.847 0 008.835-2.535m0 0A23.74 23.74 0 0018.795 3m.38 1.125a23.91 23.91 0 011.014 5.395m-1.014 8.855c-.118.38-.245.754-.38 1.125m.38-1.125a23.91 23.91 0 001.014-5.395m0-3.46c.495.413.811 1.035.811 1.73 0 .695-.316 1.317-.811 1.73m0-3.46a24.347 24.347 0 010 3.46"/></svg>
             </span>
-            <p class="mt-3 font-semibold text-slate-700">Belum ada pengumuman</p>
-            <p class="mt-1 text-sm text-slate-500" v-text="saring === 'semua' ? 'Klik &quot;Tambah Pengumuman&quot; untuk membuat kabar pertama.' : 'Belum ada pengumuman untuk ' + tujuan[saring] + '.'"></p>
+            <p class="mt-3 font-semibold text-slate-700">{{ __('Belum ada pengumuman') }}</p>
+            <p class="mt-1 text-sm text-slate-500" v-text="saring === 'semua' ? @js(__('Klik "Tambah Pengumuman" untuk membuat kabar pertama.')) : @js(__('Belum ada pengumuman untuk :tujuan.')).replace(':tujuan', tujuan[saring])"></p>
         </div>
 
         <ul v-else class="divide-y divide-slate-100">
             <li v-for="(p, i) in daftarTampil" :key="p.id" class="px-4 sm:px-6 py-4 flex flex-col lg:flex-row lg:items-center gap-3" :class="p.is_active ? '' : 'bg-slate-50/70'">
                 {{-- Naik / turun --}}
                 <div class="hidden lg:flex flex-col gap-1 shrink-0">
-                    <button type="button" @click="geser(i, -1)" :disabled="i === 0 || sibuk" title="Naikkan" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
+                    <button type="button" @click="geser(i, -1)" :disabled="i === 0 || sibuk" title="{{ __('Naikkan') }}" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5"/></svg>
                     </button>
-                    <button type="button" @click="geser(i, 1)" :disabled="i === daftarTampil.length - 1 || sibuk" title="Turunkan" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
+                    <button type="button" @click="geser(i, 1)" :disabled="i === daftarTampil.length - 1 || sibuk" title="{{ __('Turunkan') }}" class="w-7 h-7 rounded-lg ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50 disabled:opacity-30 flex items-center justify-center">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
                     </button>
                 </div>
@@ -138,9 +138,9 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 <span v-text="p.rentang"></span>
                             </span>
-                            <span v-if="p.tampil_sejak_lokal" class="inline-flex items-center gap-1" v-text="'Tampil sejak ' + formatLokal(p.tampil_sejak_lokal)"></span>
-                            <span v-if="p.tombol_teks" class="inline-flex items-center gap-1 text-emerald-700" v-text="'Tombol: ' + p.tombol_teks"></span>
-                            <span v-if="p.hitung_mundur" class="text-slate-400">Hitung mundur</span>
+                            <span v-if="p.tampil_sejak_lokal" class="inline-flex items-center gap-1" v-text="@js(__('Tampil sejak')) + ' ' + formatLokal(p.tampil_sejak_lokal)"></span>
+                            <span v-if="p.tombol_teks" class="inline-flex items-center gap-1 text-emerald-700" v-text="@js(__('Tombol:')) + ' ' + p.tombol_teks"></span>
+                            <span v-if="p.hitung_mundur" class="text-slate-400">{{ __('Hitung mundur') }}</span>
                         </p>
                     </div>
                 </div>
@@ -148,15 +148,15 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 {{-- Aksi --}}
                 <div class="flex items-center gap-2 shrink-0 lg:pl-3">
                     <div class="flex lg:hidden gap-1 mr-auto">
-                        <button type="button" @click="geser(i, -1)" :disabled="i === 0 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">Naik</button>
-                        <button type="button" @click="geser(i, 1)" :disabled="i === daftarTampil.length - 1 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">Turun</button>
+                        <button type="button" @click="geser(i, -1)" :disabled="i === 0 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">{{ __('Naik') }}</button>
+                        <button type="button" @click="geser(i, 1)" :disabled="i === daftarTampil.length - 1 || sibuk" class="px-2.5 py-1.5 rounded-lg ring-1 ring-slate-200 text-xs text-slate-600 disabled:opacity-30">{{ __('Turun') }}</button>
                     </div>
-                    <button type="button" @click="hidupMati(p)" :disabled="sibuk" :title="p.is_active ? 'Matikan' : 'Hidupkan'"
+                    <button type="button" @click="hidupMati(p)" :disabled="sibuk" :title="p.is_active ? @js(__('Matikan')) : @js(__('Hidupkan'))"
                         class="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50" :class="p.is_active ? 'bg-emerald-500' : 'bg-slate-300'">
                         <span class="absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform" :class="p.is_active ? 'translate-x-5' : ''"></span>
                     </button>
-                    <button type="button" @click="bukaUbah(p)" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ubah</button>
-                    <button type="button" @click="hapus(p)" :disabled="sibuk" class="px-3 py-1.5 rounded-xl ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">Hapus</button>
+                    <button type="button" @click="bukaUbah(p)" class="px-3 py-1.5 rounded-xl ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">{{ __('Ubah') }}</button>
+                    <button type="button" @click="hapus(p)" :disabled="sibuk" class="px-3 py-1.5 rounded-xl ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">{{ __('Hapus') }}</button>
                 </div>
             </li>
         </ul>
@@ -166,8 +166,8 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
     <div v-if="form" class="fixed inset-0 z-[80] flex items-end sm:items-center justify-center bg-slate-900/50 p-0 sm:p-4" @click.self="tutupForm">
         <div class="w-full sm:max-w-3xl max-h-[94vh] overflow-y-auto bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl">
             <div class="sticky top-0 z-10 bg-white px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-                <h3 class="font-extrabold text-slate-800" v-text="form.id ? 'Ubah Pengumuman' : 'Tambah Pengumuman'"></h3>
-                <button type="button" @click="tutupForm" class="w-9 h-9 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center" aria-label="Tutup">
+                <h3 class="font-extrabold text-slate-800" v-text="form.id ? @js(__('Ubah Pengumuman')) : @js(__('Tambah Pengumuman'))"></h3>
+                <button type="button" @click="tutupForm" class="w-9 h-9 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center" aria-label="{{ __('Tutup') }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
@@ -175,8 +175,8 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
             {{-- Pratinjau langsung --}}
             <div class="px-5 sm:px-6 pt-5">
                 <p class="text-xs font-semibold text-slate-500 mb-2">
-                    <span v-text="'Pratinjau di ' + tujuan[form.tujuan]"></span>
-                    <span v-if="form.tujuan === 'landing'" class="font-normal text-slate-400" v-text="' (' + pilihanPosisi[tampilan.posisi] + ', ' + (tampilan.ukuran === 'ringkas' ? 'ringkas' : 'penuh') + ')'"></span>
+                    <span v-text="@js(__('Pratinjau di')) + ' ' + tujuan[form.tujuan]"></span>
+                    <span v-if="form.tujuan === 'landing'" class="font-normal text-slate-400" v-text="' (' + pilihanPosisi[tampilan.posisi] + ', ' + (tampilan.ukuran === 'ringkas' ? @js(__('ringkas')) : @js(__('penuh'))) + ')'"></span>
                 </p>
                 <div v-if="form.tujuan === 'landing'">@include('admin._pita-pratinjau')</div>
                 {{-- Pratinjau di dasbor asatid / peserta: pita di atas isi halaman, di bawah header --}}
@@ -201,7 +201,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
 
                 {{-- Tempat tampil --}}
                 <div>
-                    <span class="{{ $label }}">Tampil di <span class="text-rose-500">*</span></span>
+                    <span class="{{ $label }}">{{ __('Tampil di') }} <span class="text-rose-500">*</span></span>
                     <div class="grid grid-cols-3 gap-2">
                         <button v-for="(nama, kunci) in tujuan" :key="kunci" type="button" @click="pilihTujuan(kunci)"
                             class="rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 transition-colors"
@@ -211,13 +211,13 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
 
                 {{-- Jenis: 3 bawaan + jenis tambahan buatan admin --}}
                 <div>
-                    <span class="{{ $label }}">Jenis pengumuman</span>
+                    <span class="{{ $label }}">{{ __('Jenis pengumuman') }}</span>
                     <div class="flex flex-wrap gap-2">
                         <span v-for="(nama, kunci) in jenis" :key="kunci" class="relative inline-flex">
                             <button type="button" @click="pilihJenis(kunci)"
                                 class="rounded-xl px-4 py-2.5 text-sm font-semibold ring-1 transition-colors"
                                 :class="[form.jenis === kunci ? 'bg-emerald-50 ring-emerald-500 text-emerald-800' : 'ring-slate-200 text-slate-600 hover:bg-slate-50', jenisBawaan.includes(kunci) ? '' : 'pr-8']" v-text="nama"></button>
-                            <button v-if="!jenisBawaan.includes(kunci)" type="button" @click="hapusJenis(kunci)" :title="'Hapus jenis ' + nama"
+                            <button v-if="!jenisBawaan.includes(kunci)" type="button" @click="hapusJenis(kunci)" :title="@js(__('Hapus jenis')) + ' ' + nama"
                                 class="absolute right-1.5 top-1/2 -translate-y-1/2 w-5 h-5 rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
@@ -226,58 +226,58 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                         <button v-if="!jenisBaru.buka" type="button" @click="bukaJenisBaru"
                             class="inline-flex items-center gap-1.5 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-emerald-700 ring-1 ring-dashed ring-emerald-300 border border-dashed border-emerald-300 hover:bg-emerald-50">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"></path></svg>
-                            Jenis baru
+                            {{ __('Jenis baru') }}
                         </button>
                         <span v-else class="inline-flex items-center gap-1.5">
-                            <input v-model="jenisBaru.nama" ref="isianJenisBaru" type="text" maxlength="20" placeholder="cth. Ujian, Libur"
+                            <input v-model="jenisBaru.nama" ref="isianJenisBaru" type="text" maxlength="20" placeholder="{{ __('cth. Ujian, Libur') }}"
                                 @keydown.enter.prevent="tambahJenis" @keydown.esc.prevent="jenisBaru.buka = false"
                                 class="w-40 rounded-xl border border-emerald-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
                             <button type="button" @click="tambahJenis" :disabled="sibuk || !jenisBaru.nama.trim()"
-                                class="rounded-xl bg-[#0f6b5c] px-3 py-2 text-sm font-bold text-white disabled:opacity-50">Tambah</button>
-                            <button type="button" @click="jenisBaru.buka = false" class="rounded-xl px-2.5 py-2 text-sm text-slate-500 hover:bg-slate-100">Batal</button>
+                                class="rounded-xl bg-[#0f6b5c] px-3 py-2 text-sm font-bold text-white disabled:opacity-50">{{ __('Tambah') }}</button>
+                            <button type="button" @click="jenisBaru.buka = false" class="rounded-xl px-2.5 py-2 text-sm text-slate-500 hover:bg-slate-100">{{ __('Batal') }}</button>
                         </span>
                     </div>
                 </div>
 
                 <div class="grid sm:grid-cols-2 gap-4">
                     <label class="sm:col-span-2">
-                        <span class="{{ $label }}">Judul <span class="text-rose-500">*</span></span>
-                        <input v-model="form.judul" type="text" maxlength="150" required class="{{ $isian }}" placeholder="cth. Pendaftaran Dauroh Gelombang 1 dibuka">
+                        <span class="{{ $label }}">{{ __('Judul') }} <span class="text-rose-500">*</span></span>
+                        <input v-model="form.judul" type="text" maxlength="150" required class="{{ $isian }}" placeholder="{{ __('cth. Pendaftaran Dauroh Gelombang 1 dibuka') }}">
                     </label>
                     <label class="sm:col-span-2">
-                        <span class="{{ $label }}">Keterangan singkat <span class="font-normal text-slate-400">(boleh kosong)</span></span>
-                        <input v-model="form.keterangan" type="text" maxlength="255" class="{{ $isian }}" placeholder="cth. Kuota terbatas, segera daftar">
+                        <span class="{{ $label }}">{{ __('Keterangan singkat') }} <span class="font-normal text-slate-400">{{ __('(boleh kosong)') }}</span></span>
+                        <input v-model="form.keterangan" type="text" maxlength="255" class="{{ $isian }}" placeholder="{{ __('cth. Kuota terbatas, segera daftar') }}">
                     </label>
                     <label>
-                        <span class="{{ $label }}">Mulai (WIB) <span class="text-rose-500">*</span></span>
+                        <span class="{{ $label }}">{{ __('Mulai (WIB)') }} <span class="text-rose-500">*</span></span>
                         <input v-model="form.mulai_lokal" type="datetime-local" required class="{{ $isian }}">
                     </label>
                     <label>
-                        <span class="{{ $label }}">Selesai (WIB) <span class="text-rose-500">*</span></span>
+                        <span class="{{ $label }}">{{ __('Selesai (WIB)') }} <span class="text-rose-500">*</span></span>
                         <input v-model="form.selesai_lokal" type="datetime-local" required class="{{ $isian }}">
                     </label>
                     <label class="sm:col-span-2">
-                        <span class="{{ $label }}">Tampilkan lebih awal sejak <span class="font-normal text-slate-400">(boleh kosong)</span></span>
+                        <span class="{{ $label }}">{{ __('Tampilkan lebih awal sejak') }} <span class="font-normal text-slate-400">{{ __('(boleh kosong)') }}</span></span>
                         <input v-model="form.tampil_sejak_lokal" type="datetime-local" class="{{ $isian }}">
-                        <span class="block mt-1 text-xs text-slate-400">Kalau diisi, pita sudah tampil sebelum mulai dengan tulisan "Dimulai dalam ...". Kalau kosong, pita tampil tepat saat mulai.</span>
+                        <span class="block mt-1 text-xs text-slate-400">{{ __('Kalau diisi, pita sudah tampil sebelum mulai dengan tulisan "Dimulai dalam ...". Kalau kosong, pita tampil tepat saat mulai.') }}</span>
                     </label>
                 </div>
 
                 {{-- Tombol --}}
                 <div class="rounded-2xl ring-1 ring-slate-200 p-4 space-y-3">
                     <div class="flex items-center justify-between gap-3">
-                        <span class="text-sm font-semibold text-slate-700">Tombol di pita <span class="font-normal text-slate-400">(boleh kosong)</span></span>
-                        <button type="button" @click="isiTombolDaftar" class="text-xs font-semibold text-emerald-700 hover:underline">Pakai "Daftar sekarang"</button>
+                        <span class="text-sm font-semibold text-slate-700">{{ __('Tombol di pita') }} <span class="font-normal text-slate-400">{{ __('(boleh kosong)') }}</span></span>
+                        <button type="button" @click="isiTombolDaftar" class="text-xs font-semibold text-emerald-700 hover:underline">{{ __('Pakai "Daftar sekarang"') }}</button>
                     </div>
                     <div class="grid sm:grid-cols-2 gap-3">
-                        <input v-model="form.tombol_teks" type="text" maxlength="40" class="{{ $isian }}" placeholder="Tulisan tombol, cth. Daftar sekarang">
-                        <input v-model="form.tombol_url" type="text" maxlength="255" class="{{ $isian }}" placeholder="Alamat, cth. /psb/daftar">
+                        <input v-model="form.tombol_teks" type="text" maxlength="40" class="{{ $isian }}" placeholder="{{ __('Tulisan tombol, cth. Daftar sekarang') }}">
+                        <input v-model="form.tombol_url" type="text" maxlength="255" class="{{ $isian }}" placeholder="{{ __('Alamat, cth. /psb/daftar') }}">
                     </div>
                 </div>
 
                 {{-- Warna --}}
                 <div>
-                    <span class="{{ $label }}">Warna pita</span>
+                    <span class="{{ $label }}">{{ __('Warna pita') }}</span>
                     <div class="flex flex-wrap gap-2">
                         <button v-for="w in warnaBawaan" :key="w" type="button" @click="form.warna = w"
                             class="inline-flex items-center gap-2 rounded-xl pl-1.5 pr-3 py-1.5 text-sm ring-1 transition-colors"
@@ -289,8 +289,8 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                         <label class="inline-flex items-center gap-2 rounded-xl pl-1.5 pr-3 py-1.5 text-sm ring-1 cursor-pointer transition-colors"
                             :class="form.warna === 'sendiri' ? 'ring-2 ring-emerald-500 bg-emerald-50/50 font-semibold text-slate-800' : 'ring-slate-200 text-slate-600 hover:bg-slate-50'"
                             @click="form.warna = 'sendiri'">
-                            <input v-model="form.warna_hex" type="color" class="w-6 h-6 rounded-lg border-0 p-0 bg-transparent cursor-pointer" title="Pilih warna">
-                            <span>Warna sendiri</span>
+                            <input v-model="form.warna_hex" type="color" class="w-6 h-6 rounded-lg border-0 p-0 bg-transparent cursor-pointer" title="{{ __('Pilih warna') }}">
+                            <span>{{ __('Warna sendiri') }}</span>
                             <span v-if="form.warna === 'sendiri'" class="font-mono text-xs text-slate-400" v-text="form.warna_hex"></span>
                         </label>
                     </div>
@@ -300,23 +300,23 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 <div class="grid sm:grid-cols-2 gap-3">
                     <label class="flex items-center justify-between gap-3 rounded-2xl ring-1 ring-slate-200 px-4 py-3 cursor-pointer">
                         <span>
-                            <span class="block text-sm font-semibold text-slate-700">Hitung mundur</span>
-                            <span class="block text-xs text-slate-400">Tampilkan sisa hari, jam, menit, detik</span>
+                            <span class="block text-sm font-semibold text-slate-700">{{ __('Hitung mundur') }}</span>
+                            <span class="block text-xs text-slate-400">{{ __('Tampilkan sisa hari, jam, menit, detik') }}</span>
                         </span>
                         <input v-model="form.hitung_mundur" type="checkbox" class="w-5 h-5 rounded accent-emerald-600">
                     </label>
                     <label class="flex items-center justify-between gap-3 rounded-2xl ring-1 ring-slate-200 px-4 py-3 cursor-pointer">
                         <span>
-                            <span class="block text-sm font-semibold text-slate-700">Aktif</span>
-                            <span class="block text-xs text-slate-400">Matikan untuk menyimpan tanpa menampilkan</span>
+                            <span class="block text-sm font-semibold text-slate-700">{{ __('Aktif') }}</span>
+                            <span class="block text-xs text-slate-400">{{ __('Matikan untuk menyimpan tanpa menampilkan') }}</span>
                         </span>
                         <input v-model="form.is_active" type="checkbox" class="w-5 h-5 rounded accent-emerald-600">
                     </label>
                 </div>
 
                 <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" @click="tutupForm" class="px-4 py-2.5 rounded-2xl ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Batal</button>
-                    <button type="submit" :disabled="sibuk" class="px-5 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] disabled:opacity-60" v-text="sibuk ? 'Menyimpan...' : 'Simpan'"></button>
+                    <button type="button" @click="tutupForm" class="px-4 py-2.5 rounded-2xl ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Batal') }}</button>
+                    <button type="submit" :disabled="sibuk" class="px-5 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] disabled:opacity-60" v-text="sibuk ? @js(__('Menyimpan...')) : @js(__('Simpan'))"></button>
                 </div>
             </form>
         </div>
@@ -370,7 +370,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     return this.saring === 'semua' ? this.daftar : this.daftar.filter((p) => p.tujuan === this.saring);
                 },
                 tabTujuan() {
-                    return [{ kunci: 'semua', nama: 'Semua', jumlah: this.daftar.length }].concat(
+                    return [{ kunci: 'semua', nama: @js(__('Semua')), jumlah: this.daftar.length }].concat(
                         Object.entries(this.tujuan).map(([kunci, nama]) => ({ kunci, nama, jumlah: this.daftar.filter((p) => p.tujuan === kunci).length })));
                 },
                 warnaBawaan() {
@@ -384,15 +384,15 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     const p = this.daftar.find((x) => x.tujuan === 'landing');
                     if (p) return p;
                     const nanti = new Date(Date.now() + 3 * 86400000).toISOString();
-                    return { jenis: 'pendaftaran', label: 'Pendaftaran', judul: 'Pendaftaran Dauroh Gelombang 1 dibuka', keterangan: '', warna: 'hijau',
-                        hitung_mundur: true, tombol_teks: 'Daftar sekarang', tombol_url: '#', mulai: new Date().toISOString(), selesai: nanti, rentang: '10 Nov 2026, 08.00 – 20 Nov 2026, 23.59 WIB' };
+                    return { jenis: 'pendaftaran', label: @js(__('Pendaftaran')), judul: @js(__('Pendaftaran Dauroh Gelombang 1 dibuka')), keterangan: '', warna: 'hijau',
+                        hitung_mundur: true, tombol_teks: @js(__('Daftar sekarang')), tombol_url: '#', mulai: new Date().toISOString(), selesai: nanti, rentang: '10 Nov 2026, 08.00 – 20 Nov 2026, 23.59 WIB' };
                 },
                 // Pratinjau dari isian form
                 pita() {
                     const f = this.form || {};
                     return {
                         ...f,
-                        label: this.jenis[f.jenis] || f.jenis || 'Info',
+                        label: this.jenis[f.jenis] || f.jenis || @js(__('Info')),
                         mulai: keIso(f.mulai_lokal),
                         selesai: keIso(f.selesai_lokal),
                         rentang: this.rentangLokal(f.mulai_lokal, f.selesai_lokal),
@@ -401,10 +401,10 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                 ringkasan() {
                     const hitung = (s) => this.daftar.filter((p) => s.includes(p.status)).length;
                     return [
-                        { label: 'Tampil sekarang', nilai: hitung(['berlangsung', 'akan']), warna: 'text-emerald-600' },
-                        { label: 'Terjadwal', nilai: hitung(['menunggu']), warna: 'text-sky-600' },
-                        { label: 'Selesai', nilai: hitung(['selesai']), warna: 'text-slate-400' },
-                        { label: 'Dimatikan', nilai: hitung(['nonaktif']), warna: 'text-slate-400' },
+                        { label: @js(__('Tampil sekarang')), nilai: hitung(['berlangsung', 'akan']), warna: 'text-emerald-600' },
+                        { label: @js(__('Terjadwal')), nilai: hitung(['menunggu']), warna: 'text-sky-600' },
+                        { label: @js(__('Selesai')), nilai: hitung(['selesai']), warna: 'text-slate-400' },
+                        { label: @js(__('Dimatikan')), nilai: hitung(['nonaktif']), warna: 'text-slate-400' },
                     ];
                 },
             },
@@ -414,16 +414,16 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     return v ? fmt.format(new Date(keIso(v))) : '';
                 },
                 rentangLokal(m, s) {
-                    if (!m || !s) return 'Isi tanggal mulai & selesai';
+                    if (!m || !s) return @js(__('Isi tanggal mulai & selesai'));
                     return this.formatLokal(m) + ' – ' + this.formatLokal(s) + ' WIB';
                 },
                 infoStatus(p) {
                     return {
-                        berlangsung: { teks: 'Sedang tampil', kelas: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
-                        akan: { teks: 'Tampil · belum mulai', kelas: 'bg-amber-50 text-amber-700 ring-amber-200' },
-                        menunggu: { teks: 'Terjadwal', kelas: 'bg-sky-50 text-sky-700 ring-sky-200' },
-                        selesai: { teks: 'Selesai', kelas: 'bg-slate-100 text-slate-500 ring-slate-200' },
-                        nonaktif: { teks: 'Dimatikan', kelas: 'bg-slate-100 text-slate-500 ring-slate-200' },
+                        berlangsung: { teks: @js(__('Sedang tampil')), kelas: 'bg-emerald-50 text-emerald-700 ring-emerald-200' },
+                        akan: { teks: @js(__('Tampil · belum mulai')), kelas: 'bg-amber-50 text-amber-700 ring-amber-200' },
+                        menunggu: { teks: @js(__('Terjadwal')), kelas: 'bg-sky-50 text-sky-700 ring-sky-200' },
+                        selesai: { teks: @js(__('Selesai')), kelas: 'bg-slate-100 text-slate-500 ring-slate-200' },
+                        nonaktif: { teks: @js(__('Dimatikan')), kelas: 'bg-slate-100 text-slate-500 ring-slate-200' },
                     }[p.status];
                 },
                 tampilkanToast(teks, galat = false) {
@@ -442,7 +442,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                         });
                         const data = await res.json().catch(() => ({}));
                         if (!res.ok) {
-                            const pesan = data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Gagal menyimpan. Coba lagi.');
+                            const pesan = data.errors ? Object.values(data.errors)[0][0] : (data.message || @js(__('Gagal menyimpan. Coba lagi.')));
                             throw new Error(pesan);
                         }
                         this.daftar = data.daftar;
@@ -513,7 +513,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                             body: JSON.stringify({ nama }),
                         });
                         const data = await res.json().catch(() => ({}));
-                        if (!res.ok) throw new Error(data.errors ? Object.values(data.errors)[0][0] : (data.message || 'Gagal menyimpan.'));
+                        if (!res.ok) throw new Error(data.errors ? Object.values(data.errors)[0][0] : (data.message || @js(__('Gagal menyimpan.'))));
                         this.jenis = data.jenis;
                         this.tampilkanToast(data.pesan);
                         return data;
@@ -534,7 +534,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     }
                 },
                 async hapusJenis(nama) {
-                    if (!confirm('Hapus jenis "' + nama + '" dari pilihan?')) return;
+                    if (!confirm(@js(__('Hapus jenis ":nama" dari pilihan?')).replace(':nama', nama))) return;
                     if (await this.kirimJenis('/jenis/hapus', nama) && this.form.jenis === nama) {
                         this.form.jenis = 'info';
                     }
@@ -560,7 +560,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     this.kirim('PATCH', URL_DASAR + '/' + p.id + '/toggle');
                 },
                 hapus(p) {
-                    if (!confirm('Hapus pengumuman "' + p.judul + '"?')) return;
+                    if (!confirm(@js(__('Hapus pengumuman ":judul"?')).replace(':judul', p.judul))) return;
                     this.kirim('DELETE', URL_DASAR + '/' + p.id);
                 },
                 geser(i, arah) {

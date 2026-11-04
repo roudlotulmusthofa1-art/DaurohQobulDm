@@ -16,6 +16,9 @@ class AppServiceProvider extends ServiceProvider
     {
         // Koneksi "pusat" = database utama (daftar sesi, login, akun bersama). Lihat App\Support\SesiAplikasi
         \App\Support\SesiAplikasi::daftarkanKoneksiPusat();
+
+        // Terjemahan Arab dari Sistem > Pengaturan > Bahasa (database) menimpa lang/ar.json
+        $this->app->extend('translation.loader', fn ($loader) => new \App\Support\PemuatTerjemahan($loader));
     }
 
     /**
@@ -61,7 +64,7 @@ class AppServiceProvider extends ServiceProvider
                 ->all();
 
             // ===== Breadcrumb (Beranda > Halaman), dibuat otomatis dari menu di atas =====
-            $breadcrumbs = [['label' => 'Beranda', 'url' => route('admin.dashboard')]];
+            $breadcrumbs = [['label' => __('Beranda'), 'url' => route('admin.dashboard')]];
 
             // Cari submenu yang sedang aktif
             $aktif = collect($menuItemsForVue)->pluck('submenu')->filter()->flatten(1)->firstWhere('active', true);
@@ -71,9 +74,9 @@ class AppServiceProvider extends ServiceProvider
 
                 // Kalau bukan halaman daftarnya (mis. detail/edit), tambahkan satu langkah lagi
                 $aksi = [
-                    'show' => 'Detail',
-                    'edit' => 'Edit',
-                    'create' => 'Tambah',
+                    'show' => __('Detail'),
+                    'edit' => __('Edit'),
+                    'create' => __('Tambah'),
                 ][str(request()->route()?->getName())->afterLast('.')->toString()] ?? null;
 
                 if ($aksi) {

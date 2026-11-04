@@ -32,7 +32,7 @@
         },
         // Tanya "yakin?" sebelum form dikirim. Pesannya di atribut data-konfirmasi.
         konfirmasi(e) {
-            if (!confirm(e.currentTarget.dataset.konfirmasi || 'Yakin?')) e.preventDefault();
+            if (!confirm(e.currentTarget.dataset.konfirmasi || @js(__('Yakin?')))) e.preventDefault();
         },
         kirimForm(e) {
             e.target.form.requestSubmit();

@@ -1,11 +1,11 @@
 {{-- Profil siswa: daftar persyaratan (hanya dilihat). Disisipkan lewat partials/detail-santri; centangnya diisi admin. --}}
 <section class="{{ $kartu }} p-5 sm:p-6 xl:col-span-2">
     <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
-        {!! $judulKartu('Persyaratan', 'badge', 'emerald', 'Diperiksa oleh admin. Hubungi admin bila ada yang belum terpenuhi.') !!}
+        {!! $judulKartu(__('Persyaratan'), 'badge', 'emerald', __('Diperiksa oleh admin. Hubungi admin bila ada yang belum terpenuhi.')) !!}
         <span @class(['text-xs font-semibold px-3 py-1 rounded-full ring-1',
             'bg-emerald-50 text-emerald-700 ring-emerald-100' => $p->syarat_terpenuhi === $totalSyarat,
             'bg-amber-50 text-amber-700 ring-amber-100' => $p->syarat_terpenuhi !== $totalSyarat])>
-            {{ $p->syarat_terpenuhi }}/{{ $totalSyarat }} terpenuhi
+            {{ $p->syarat_terpenuhi }}/{{ $totalSyarat }} {{ __('terpenuhi') }}
         </span>
     </div>
 
@@ -20,8 +20,8 @@
             <span class="w-6 h-6 shrink-0 rounded-full bg-slate-200 text-slate-500 flex items-center justify-center">{!! $svg('clock', 'w-3.5 h-3.5') !!}</span>
             @endif
             <span class="min-w-0">
-                <span class="block text-sm font-semibold text-slate-700">{{ $nama }}</span>
-                <span @class(['block text-xs', 'text-emerald-700' => $p->$kolom, 'text-slate-400' => ! $p->$kolom])>{{ $p->$kolom ? 'Sudah terpenuhi' : 'Belum terpenuhi' }}</span>
+                <span class="block text-sm font-semibold text-slate-700">{{ __($nama) }}</span>
+                <span @class(['block text-xs', 'text-emerald-700' => $p->$kolom, 'text-slate-400' => ! $p->$kolom])>{{ $p->$kolom ? __('Sudah terpenuhi') : __('Belum terpenuhi') }}</span>
             </span>
         </div>
         @endforeach

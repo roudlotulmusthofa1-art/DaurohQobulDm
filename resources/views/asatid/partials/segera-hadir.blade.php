@@ -12,7 +12,7 @@
             <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikon }}"/></svg>
         </span>
         <span class="mt-6 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 rounded-full px-3 py-1">
-            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> Segera hadir
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> {{ __('Segera hadir') }}
         </span>
         <h2 class="mt-3 text-xl sm:text-2xl font-extrabold text-slate-800">{{ $judul }}</h2>
         <p class="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">{{ $teks }}</p>
@@ -33,7 +33,7 @@
         <a href="{{ route('asatid.dashboard') }}"
             class="mt-8 inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-semibold hover:bg-[#135347] transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-            Kembali ke beranda
+            {{ __('Kembali ke beranda') }}
         </a>
     </div>
 </div>

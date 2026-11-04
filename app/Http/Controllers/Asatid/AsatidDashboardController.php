@@ -36,6 +36,19 @@ class AsatidDashboardController extends Controller
         return $this->tampil('asatid.profil');
     }
 
+    /** Menu "Ganti Password": asatid mengganti password sendiri (butuh password lama) */
+    public function gantiPassword()
+    {
+        return $this->tampil('asatid.ganti-password');
+    }
+
+    public function simpanGantiPassword(Request $request)
+    {
+        \App\Support\GantiPasswordSendiri::simpan($request, PendaftaranAsatid::where('user_id', Auth::id())->first());
+
+        return redirect()->route('asatid.ganti-password')->with('password_diganti', true);
+    }
+
     /** Daftar peserta (santri yang sudah diterima), bisa dicari & disaring per kelas */
     public function peserta(Request $request)
     {

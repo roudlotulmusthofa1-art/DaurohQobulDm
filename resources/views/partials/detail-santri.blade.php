@@ -13,59 +13,59 @@
 // Kode singkat (K, L, M, o) diubah jadi tulisan lewat konstanta di model.
 $seksi = [
 'Data Pribadi' => [
-'Nama Lengkap (Indonesia)' => $p->nama_lengkap,
-'Nama Lengkap (Arab)' => $p->nama_lengkap_arab,
-'Tempat Lahir' => $p->tempat_lahir,
+__('Nama Lengkap (Indonesia)') => $p->nama_lengkap,
+__('Nama Lengkap (Arab)') => $p->nama_lengkap_arab,
+__('Tempat Lahir') => $p->tempat_lahir,
 'Tanggal Lahir' => optional($p->tanggal_lahir)->translatedFormat('d F Y'),
-'Status Pernikahan' => $p::STATUS_PERNIKAHAN[$p->status_pernikahan] ?? null,
-'No. WhatsApp' => $p->no_hp,
-'Email' => $p->email,
+__('Status Pernikahan') => isset($p::STATUS_PERNIKAHAN[$p->status_pernikahan]) ? __($p::STATUS_PERNIKAHAN[$p->status_pernikahan]) : null,
+__('No. WhatsApp') => $p->no_hp,
+__('Email') => $p->email,
 ],
 'Alamat' => [
-'Provinsi' => $p->provinsi,
-'Kota/Kabupaten' => $p->kota,
-'Kecamatan' => $p->kecamatan,
-'Kelurahan/Desa' => $p->kelurahan,
-'Alamat Lengkap' => $p->alamat,
+__('Provinsi') => $p->provinsi,
+__('Kota/Kabupaten') => $p->kota,
+__('Kecamatan') => $p->kecamatan,
+__('Kelurahan/Desa') => $p->kelurahan,
+__('Alamat Lengkap') => $p->alamat,
 ],
 'Wali & Muarrif' => [
-'Nama Wali' => $p->nama_wali,
-'Pekerjaan Wali' => $p->pekerjaan_wali,
-'Hubungan dengan Wali' => $p->hubungan_wali,
-'No. WhatsApp Wali' => $p->no_hp_wali,
-'Nama Muarrif' => $p->nama_muarrif,
-'No. WhatsApp Muarrif' => $p->no_hp_muarrif,
-'Kontak Darurat (Nama)' => $p->nama_butuh,
-'Kontak Darurat (WhatsApp)' => $p->no_hp_nya,
+__('Nama Wali') => $p->nama_wali,
+__('Pekerjaan Wali') => $p->pekerjaan_wali,
+__('Hubungan dengan Wali') => $p->hubungan_wali,
+__('No. WhatsApp Wali') => $p->no_hp_wali,
+__('Nama Muarrif') => $p->nama_muarrif,
+__('No. WhatsApp Muarrif') => $p->no_hp_muarrif,
+__('Kontak Darurat (Nama)') => $p->nama_butuh,
+__('Kontak Darurat (WhatsApp)') => $p->no_hp_nya,
 ],
 'Pendidikan Formal' => [
-'Pendidikan Terakhir' => $p::PENDIDIKAN_TERAKHIR[$p->pendidikan_terakhir] ?? null,
-'Nama Sekolah / Lembaga' => $p->nama_sekolah,
-'Daerah Lembaga' => $p->nama_daerah,
+__('Pendidikan Terakhir') => isset($p::PENDIDIKAN_TERAKHIR[$p->pendidikan_terakhir]) ? __($p::PENDIDIKAN_TERAKHIR[$p->pendidikan_terakhir]) : null,
+__('Nama Sekolah / Lembaga') => $p->nama_sekolah,
+__('Daerah Lembaga') => $p->nama_daerah,
 ],
 'Data Tambahan' => [
-'Marhalah yang Diinginkan' => $p->marhalah,
-'Lama Belajar yang Diinginkan' => $p->lama_belajar,
-'Kesehatan' => $p->kesehatan,
-'Status Ekonomi' => $p->status_ekonomi,
-'Persentase Muslim di Daerah' => $p->persentasimuslim !== null ? ((float) $p->persentasimuslim) . '%' : null,
-'Alumni di Daerah' => $p->alumni,
-'Tujuan Belajar' => $p->tujuan,
-'Rencana Setelah Lulus' => $p->rencana,
-'Pernah Mengikuti Dauroh Qobul' => $p::PERNAH_DAUROH[$p->pernah_dauroh] ?? null,
+__('Marhalah yang Diinginkan') => $p->marhalah,
+__('Lama Belajar yang Diinginkan') => $p->lama_belajar,
+__('Kesehatan') => $p->kesehatan,
+__('Status Ekonomi') => $p->status_ekonomi,
+__('Persentase Muslim di Daerah') => $p->persentasimuslim !== null ? ((float) $p->persentasimuslim) . '%' : null,
+__('Alumni di Daerah') => $p->alumni,
+__('Tujuan Belajar') => $p->tujuan,
+__('Rencana Setelah Lulus') => $p->rencana,
+__('Pernah Mengikuti Dauroh Qobul') => isset($p::PERNAH_DAUROH[$p->pernah_dauroh]) ? __($p::PERNAH_DAUROH[$p->pernah_dauroh]) : null,
 ],
 ];
 
 // Mode rahasia (dasbor asatid): email tidak ditampilkan
 $rahasia = $rahasia ?? false;
 if ($rahasia) {
-    unset($seksi['Data Pribadi']['Email']);
+    unset($seksi['Data Pribadi'][__('Email')]);
 }
 
 // Label yang isinya panjang -> ditampilkan bertumpuk & memakai lebar penuh
-$lebar = ['Alamat Lengkap', 'Tujuan Belajar', 'Rencana Setelah Lulus'];
+$lebar = [__('Alamat Lengkap'), __('Tujuan Belajar'), __('Rencana Setelah Lulus')];
 // Label yang isinya nomor WhatsApp -> diberi ikon yang bisa diklik
-$labelWa = ['No. WhatsApp', 'No. WhatsApp Wali', 'No. WhatsApp Muarrif', 'Kontak Darurat (WhatsApp)'];
+$labelWa = [__('No. WhatsApp'), __('No. WhatsApp Wali'), __('No. WhatsApp Muarrif'), __('Kontak Darurat (WhatsApp)')];
 // Bagian yang kartunya selebar halaman (isinya banyak)
 $seksiPenuh = ['Wali & Muarrif', 'Data Tambahan'];
 
@@ -124,11 +124,11 @@ $nada = [
 'sky' => 'bg-sky-50 text-sky-600 ring-sky-100',
 ];
 $gayaSeksi = [
-'Data Pribadi' => ['user', 'emerald', 'Identitas diri santri'],
-'Alamat' => ['pin', 'teal', 'Domisili sesuai data pendaftaran'],
-'Wali & Muarrif' => ['users', 'amber', 'Kontak keluarga & pemberi rekomendasi'],
-'Pendidikan Formal' => ['cap', 'sky', 'Jenjang pendidikan terakhir'],
-'Data Tambahan' => ['sparkles', 'lime', 'Minat, kondisi & rencana belajar'],
+'Data Pribadi' => ['user', 'emerald', __('Identitas diri santri')],
+'Alamat' => ['pin', 'teal', __('Domisili sesuai data pendaftaran')],
+'Wali & Muarrif' => ['users', 'amber', __('Kontak keluarga & pemberi rekomendasi')],
+'Pendidikan Formal' => ['cap', 'sky', __('Jenjang pendidikan terakhir')],
+'Data Tambahan' => ['sparkles', 'lime', __('Minat, kondisi & rencana belajar')],
 ];
 
 // Judul kartu: ikon berwarna + judul + keterangan kecil
@@ -157,7 +157,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="shrink-0 self-center xl:self-start">
                 <div class="relative">
                     @if ($p->foto_url)
-                    <img data-perbesar src="{{ $p->foto_url }}" alt="Foto {{ $p->nama_lengkap }}"
+                    <img data-perbesar src="{{ $p->foto_url }}" alt="{{ __('Foto :nama', ['nama' => $p->nama_lengkap]) }}"
                         class="w-40 h-48 sm:w-48 sm:h-56 object-cover rounded-3xl ring-4 ring-white/10 shadow-2xl shadow-black/30">
                     @else
                     <div class="w-40 h-48 sm:w-48 sm:h-56 rounded-3xl ring-4 ring-white/10 bg-gradient-to-br from-emerald-300 to-lime-200 flex items-center justify-center text-6xl font-extrabold text-[#0b332c] shadow-2xl shadow-black/30"
@@ -172,7 +172,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             @endif
                             <span class="relative inline-flex w-2 h-2 rounded-full {{ $titikStatus }}"></span>
                         </span>
-                        {{ $p->label_status }}
+                        {{ __($p->label_status) }}
                     </span>
                 </div>
             </div>
@@ -182,7 +182,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 {{-- flex-wrap: bila sempit, tombol turun ke baris baru (nama tidak dipersempit) --}}
                 <div class="flex flex-wrap-reverse items-start justify-between gap-3">
                     <div class="min-w-[min(100%,16rem)] flex-1" v-pre>
-                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ $judul ?? ($admin ? 'Detail Santri' : 'Profil Saya') }}</p>
+                        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ $judul ?? ($admin ? __('Detail Santri') : __('Profil Saya')) }}</p>
                         <h1 class="mt-1 text-2xl sm:text-[34px] leading-tight font-extrabold tracking-tight break-words">{{ $p->nama_lengkap }}</h1>
                         @if ($p->nama_lengkap_arab)
                         <p class="mt-1 text-2xl text-emerald-100/90" dir="rtl">{{ $p->nama_lengkap_arab }}</p>
@@ -192,7 +192,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 # {{ $p->nomor_pendaftaran }}
                             </span>
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-white/5 px-3 py-1 text-white/60">
-                                {!! $svg('clock', 'w-3.5 h-3.5') !!} mendaftar {{ $p->created_at->diffForHumans() }}
+                                {!! $svg('clock', 'w-3.5 h-3.5') !!} {{ __('mendaftar :waktu', ['waktu' => $p->created_at->diffForHumans()]) }}
                             </span>
                         </div>
                     </div>
@@ -200,19 +200,19 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     {{-- Status + tombol edit --}}
                     <div class="flex items-center gap-2 shrink-0">
                         <span class="hidden sm:inline-flex text-xs font-semibold px-3 py-1.5 rounded-full ring-1 {{ $warnaStatus }}"
-                            v-pre>{{ $p->label_status }}</span>
+                            v-pre>{{ __($p->label_status) }}</span>
                         @if ($admin && $p->user_id && \App\Support\MasukSebagai::bolehDipakai(auth()->user()))
                         {{-- Super Admin: buka dasbor siswa ini (mode lihat) --}}
-                        <form method="POST" action="{{ route('admin.masuk-sebagai', $p->user_id) }}" @submit="konfirmasi" data-konfirmasi="Buka dasbor siswa {{ $p->nama_lengkap }}? (mode lihat, perubahan tidak disimpan)">
+                        <form method="POST" action="{{ route('admin.masuk-sebagai', $p->user_id) }}" @submit="konfirmasi" data-konfirmasi="{{ __('Buka dasbor siswa :nama? (mode lihat, perubahan tidak disimpan)', ['nama' => $p->nama_lengkap]) }}">
                             @csrf
-                            <button title="Lihat dasbor siswa (mode lihat)" aria-label="Lihat dasbor siswa"
+                            <button title="{{ __('Lihat dasbor siswa (mode lihat)') }}" aria-label="{{ __('Lihat dasbor siswa') }}"
                                 class="w-10 h-10 rounded-2xl bg-amber-300/90 text-[#3b2a00] hover:bg-amber-200 flex items-center justify-center transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                             </button>
                         </form>
                         @endif
                         @if ($admin)
-                        <a href="{{ route('admin.pendaftaran.edit', $p) }}" title="Edit Data" aria-label="Edit data"
+                        <a href="{{ route('admin.pendaftaran.edit', $p) }}" title="{{ __('Edit Data') }}" aria-label="{{ __('Edit data') }}"
                             class="w-10 h-10 rounded-2xl bg-white/10 ring-1 ring-white/15 text-white hover:bg-white hover:text-[#0b332c] flex items-center justify-center transition-colors">
                             {!! $svg('pencil', 'w-4 h-4') !!}
                         </a>
@@ -225,7 +225,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-emerald-400/15 text-emerald-300 flex items-center justify-center">{!! $svg('phone', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-white/40">WhatsApp</p>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">{{ __('WhatsApp') }}</p>
                             @if ($p->no_hp)
                             <a href="{{ $p::linkWa($p->no_hp) }}" target="_blank" rel="noopener"
                                 class="font-medium text-white hover:text-emerald-300 transition-colors" dir="ltr">{{ $p->no_hp }}</a>
@@ -236,15 +236,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-cyan-400/15 text-cyan-300 flex items-center justify-center">{!! $svg('cap', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-white/40">Kelas</p>
-                            <p class="font-medium truncate">{{ $p->kelasMaster?->nama ?? 'Belum dipilih' }}</p>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">{{ __('Kelas') }}</p>
+                            <p class="font-medium truncate">{{ $p->kelasMaster?->nama ?? __('Belum dipilih') }}</p>
                         </div>
                     </div>
                     @else
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-cyan-400/15 text-cyan-300 flex items-center justify-center">{!! $svg('mail', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-white/40">Email</p>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">{{ __('Email') }}</p>
                             <p class="font-medium truncate">{{ $p->email ?: '-' }}</p>
                         </div>
                     </div>
@@ -252,14 +252,14 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-amber-300/15 text-amber-200 flex items-center justify-center">{!! $svg('pin', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-white/40">Domisili</p>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">{{ __('Domisili') }}</p>
                             <p class="font-medium truncate">{{ $lokasi ?: '-' }}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3 min-w-0 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 px-3 py-2.5">
                         <span class="w-8 h-8 shrink-0 rounded-xl bg-lime-300/15 text-lime-200 flex items-center justify-center">{!! $svg('cap', 'w-4 h-4') !!}</span>
                         <div class="min-w-0">
-                            <p class="text-[10px] uppercase tracking-wider text-white/40">Sekolah / Lembaga</p>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">{{ __('Sekolah / Lembaga') }}</p>
                             <p class="font-medium truncate">{{ $p->nama_sekolah ?: '-' }}</p>
                         </div>
                     </div>
@@ -267,7 +267,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
                 @if ($p->catatan_admin && ! $rahasia)
                 <div class="mt-3 flex gap-2.5 text-sm rounded-2xl bg-amber-300/10 ring-1 ring-amber-300/25 px-3.5 py-2.5 text-amber-50" v-pre>
-                    <span class="font-semibold text-amber-200 shrink-0">Catatan:</span>
+                    <span class="font-semibold text-amber-200 shrink-0">{{ __('Catatan:') }}</span>
                     <span class="whitespace-pre-line">{{ $p->catatan_admin }}</span>
                 </div>
                 @endif
@@ -275,13 +275,13 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @if ($admin && $p->status === 'menunggu')
                 <div class="mt-5 flex flex-wrap gap-2.5">
                     <button type="submit" form="form-syarat" formaction="{{ route('admin.pendaftaran.terima', $p) }}"
-                        @click="konfirmasi" data-konfirmasi="Terima pendaftar ini? Persyaratan dan catatan di bawah ikut terkirim ke WhatsApp peserta."
+                        @click="konfirmasi" data-konfirmasi="{{ __('Terima pendaftar ini? Persyaratan dan catatan di bawah ikut terkirim ke WhatsApp peserta.') }}"
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-emerald-400 text-[#0b332c] text-sm font-bold hover:bg-emerald-300 shadow-lg shadow-emerald-500/20 transition-colors">
-                        {!! $svg('check', 'w-4 h-4') !!} Terima &amp; Kirim Chat
+                        {!! $svg('check', 'w-4 h-4') !!} {{ __('Terima & Kirim Chat') }}
                     </button>
                     <button type="button" @click="tolakBuka = true"
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/5 ring-1 ring-rose-300/40 text-rose-100 text-sm font-semibold hover:bg-rose-500 hover:ring-rose-500 hover:text-white transition-colors">
-                        {!! $svg('x', 'w-4 h-4') !!} Tolak
+                        {!! $svg('x', 'w-4 h-4') !!} {{ __('Tolak') }}
                     </button>
                 </div>
                 @endif
@@ -291,12 +291,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <form method="POST" action="{{ route('admin.pendaftaran.kirim-ulang-chat', $p) }}" class="mt-5 flex flex-wrap items-center gap-3">
                     @csrf
                     <button type="submit" @click="konfirmasi"
-                        data-konfirmasi="Kirim ulang chat konfirmasi {{ $p->status === 'diterima' ? 'PENERIMAAN' : 'PENOLAKAN' }} ke WhatsApp peserta ({{ $p->no_hp }})?"
+                        data-konfirmasi="{{ __('Kirim ulang chat konfirmasi :jenis ke WhatsApp peserta (:nomor)?', ['jenis' => $p->status === 'diterima' ? __('PENERIMAAN') : __('PENOLAKAN'), 'nomor' => $p->no_hp]) }}"
                         class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-white/10 ring-1 ring-white/25 text-white text-sm font-semibold hover:bg-emerald-400 hover:text-[#0b332c] hover:ring-emerald-400 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                        Kirim Ulang Chat Konfirmasi
+                        {{ __('Kirim Ulang Chat Konfirmasi') }}
                     </button>
-                    <span class="text-xs text-white/50">Otomatis lewat Fonnte. Pakai bila chat {{ $p->status === 'diterima' ? 'penerimaan' : 'penolakan' }} sebelumnya gagal terkirim.</span>
+                    <span class="text-xs text-white/50">{{ __('Otomatis lewat Fonnte. Pakai bila chat :jenis sebelumnya gagal terkirim.', ['jenis' => $p->status === 'diterima' ? __('penerimaan') : __('penolakan')]) }}</span>
                 </form>
 
                 {{-- Cadangan: kirim sendiri dari WhatsApp admin (pesan sudah terisi, tinggal tekan Kirim) — tidak bergantung Fonnte --}}
@@ -304,14 +304,14 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 @php
                 $chatKonfirmasi = $p->chatKonfirmasi();
                 $tujuanManual = array_filter([
-                    'Peserta' => [$p->nama_lengkap, $p->no_hp],
-                    'Wali' => [$p->nama_wali, $p->no_hp_wali],
-                    'Muarrif' => [$p->nama_muarrif, $p->no_hp_muarrif],
+                    __('Peserta') => [$p->nama_lengkap, $p->no_hp],
+                    __('Wali') => [$p->nama_wali, $p->no_hp_wali],
+                    __('Muarrif') => [$p->nama_muarrif, $p->no_hp_muarrif],
                 ], fn ($t) => filled($t[1]));
                 @endphp
                 @if ($chatKonfirmasi && $tujuanManual)
                 <div class="mt-4 rounded-2xl bg-white/[0.06] ring-1 ring-white/10 p-3.5">
-                    <p class="text-xs font-semibold text-white/70">Kirim lewat WhatsApp saya — pilih tujuan:</p>
+                    <p class="text-xs font-semibold text-white/70">{{ __('Kirim lewat WhatsApp saya — pilih tujuan:') }}</p>
                     <div class="mt-2.5 flex flex-wrap gap-2">
                     @foreach ($tujuanManual as $untuk => [$namaTujuan, $nomor])
                     <a href="https://wa.me/{{ \App\Services\WhatsAppService::nomorWa($nomor) }}?text={{ rawurlencode($chatKonfirmasi['pesan']) }}" target="_blank" rel="noopener"
@@ -323,7 +323,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     </a>
                     @endforeach
                     </div>
-                    <p class="mt-2 text-[11px] text-white/45">Membuka WhatsApp Anda dengan pesan siap kirim, tinggal tekan Kirim.</p>
+                    <p class="mt-2 text-[11px] text-white/45">{{ __('Membuka WhatsApp Anda dengan pesan siap kirim, tinggal tekan Kirim.') }}</p>
                 </div>
                 @endif
                 @endif
@@ -336,41 +336,38 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
                         </span>
                         <div class="min-w-0 flex-1" v-pre>
-                            <p class="text-[10px] uppercase tracking-wider text-white/40">Akun login peserta</p>
+                            <p class="text-[10px] uppercase tracking-wider text-white/40">{{ __('Akun login peserta') }}</p>
                             <p class="text-sm font-medium truncate">{{ $p->email }}</p>
                             <p class="text-[11px] text-white/45">
-                                @if ($p->status === 'diterima') Bisa masuk dasbor siswa. Password tersimpan terenkripsi (tidak bisa dilihat), jadi bila lupa: reset.
-                                @else Belum bisa masuk dasbor siswa — baru bisa setelah dinyatakan DITERIMA.
+                                @if ($p->status === 'diterima') {{ __('Bisa masuk dasbor siswa. Password tersimpan terenkripsi (tidak bisa dilihat). Bila lupa: ketik password baru di bawah.') }}
+                                @else {{ __('Belum bisa masuk dasbor siswa — baru bisa setelah dinyatakan DITERIMA.') }}
                                 @endif
                             </p>
                         </div>
-                        @if ($p->status === 'diterima')
-                        <form method="POST" action="{{ route('admin.pendaftaran.reset-password', $p) }}">
-                            @csrf
-                            <button type="submit" @click="konfirmasi"
-                                data-konfirmasi="Buat password BARU untuk {{ $p->nama_lengkap }}? Password lama tidak bisa dipakai lagi. Password baru dikirim ke WhatsApp peserta."
-                                class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-sky-400 text-[#06283a] text-sm font-bold hover:bg-sky-300 transition-colors">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-                                Reset Password
-                            </button>
-                        </form>
-                        @endif
                     </div>
+
+                    {{-- Reset Password: admin mengetik password baru sendiri (partials/form-password-baru) --}}
+                    @if ($p->status === 'diterima')
+                    @include('partials.form-password-baru', [
+                        'aksi' => route('admin.pendaftaran.reset-password', $p),
+                        'konfirmasi' => __('Simpan password BARU untuk :nama? Password lama tidak bisa dipakai lagi. Password baru dikirim ke WhatsApp peserta.', ['nama' => $p->nama_lengkap]),
+                    ])
+                    @endif
 
                     {{-- Password baru: tampil SEKALI setelah reset (tidak disimpan dalam bentuk bisa dibaca) --}}
                     @if ($baruReset = session('password_baru'))
                     <div class="mt-3 rounded-2xl bg-amber-300/10 ring-1 ring-amber-300/30 p-3.5" v-pre>
-                        <p class="text-xs font-semibold text-amber-100">Password baru (hanya tampil sekali, segera kirim ke peserta):</p>
+                        <p class="text-xs font-semibold text-amber-100">{{ __('Password baru sudah disimpan (hanya tampil sekali, segera kirim ke peserta):') }}</p>
                         <div class="mt-2 flex flex-wrap items-center gap-2">
                             <code class="rounded-xl bg-black/30 px-3 py-1.5 font-mono text-lg font-bold tracking-wider text-white select-all">{{ $baruReset['password'] }}</code>
                             <button type="button" data-teks="{{ $baruReset['password'] }}"
-                                onclick="navigator.clipboard.writeText(this.dataset.teks).then(() => { this.textContent = 'Tersalin ✓'; })"
-                                class="px-3 py-1.5 rounded-xl bg-white/10 ring-1 ring-white/20 text-xs font-semibold hover:bg-white/20">Salin</button>
+                                onclick="navigator.clipboard.writeText(this.dataset.teks).then(() => { this.textContent = @js(__('Tersalin ✓')); })"
+                                class="px-3 py-1.5 rounded-xl bg-white/10 ring-1 ring-white/20 text-xs font-semibold hover:bg-white/20">{{ __('Salin') }}</button>
                         </div>
                         @php
                         $tujuanReset = array_filter([
-                            'Peserta' => [$p->nama_lengkap, $p->no_hp],
-                            'Wali' => [$p->nama_wali, $p->no_hp_wali],
+                            __('Peserta') => [$p->nama_lengkap, $p->no_hp],
+                            __('Wali') => [$p->nama_wali, $p->no_hp_wali],
                         ], fn ($t) => filled($t[1]));
                         @endphp
                         @if ($tujuanReset)
@@ -379,7 +376,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <a href="https://wa.me/{{ \App\Services\WhatsAppService::nomorWa($nomor) }}?text={{ rawurlencode($baruReset['pesan']) }}" target="_blank" rel="noopener"
                                 title="{{ $namaTujuan }} · {{ $nomor }}"
                                 class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-[#25D366] text-[#073b1d] text-sm font-bold hover:bg-[#3ae07a] transition-colors">
-                                Kirim lewat WhatsApp saya: {{ $untuk }}
+                                {{ __('Kirim lewat WhatsApp saya: :tujuan', ['tujuan' => $untuk]) }}
                             </a>
                             @endforeach
                         </div>
@@ -396,7 +393,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <div class="inline-block p-3 bg-white rounded-3xl shadow-xl shadow-black/20 [&_svg]:block [&_svg]:w-32 [&_svg]:h-32 sm:[&_svg]:w-36 sm:[&_svg]:h-36">
                     {!! $p->qr_svg !!}
                 </div>
-                <p class="text-[11px] text-white/50 mt-2 tracking-wide" v-pre>Kode: <span class="font-semibold text-white/80">{{ $p->kode_qr }}</span></p>
+                <p class="text-[11px] text-white/50 mt-2 tracking-wide" v-pre>{{ __('Kode:') }} <span class="font-semibold text-white/80">{{ $p->kode_qr }}</span></p>
             </div>
             @endif
         </div>
@@ -404,7 +401,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         {{-- Baris statistik --}}
         <div class="relative grid grid-cols-3 border-t border-white/10 bg-black/10 divide-x divide-white/10">
             <div class="px-4 sm:px-6 py-4">
-                <p class="text-[11px] uppercase tracking-wider text-white/45">Syarat Terpenuhi</p>
+                <p class="text-[11px] uppercase tracking-wider text-white/45">{{ __('Syarat Terpenuhi') }}</p>
                 <p class="mt-1 text-xl sm:text-2xl font-extrabold">{{ $p->syarat_terpenuhi }}<span class="text-sm font-medium text-white/40">/{{ $totalSyarat }}</span></p>
                 <div class="mt-2.5 h-1.5 rounded-full bg-white/10 overflow-hidden">
                     <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-lime-300" style="width: {{ $persenSyarat }}%"></div>
@@ -413,14 +410,14 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="px-4 sm:px-6 py-4 flex items-center gap-3">
                 <span class="hidden sm:flex w-11 h-11 shrink-0 rounded-2xl bg-amber-300/15 text-amber-200 items-center justify-center">{!! $svg('home') !!}</span>
                 <div>
-                    <p class="text-[11px] uppercase tracking-wider text-white/45">Riwayat Pondok</p>
+                    <p class="text-[11px] uppercase tracking-wider text-white/45">{{ __('Riwayat Pondok') }}</p>
                     <p class="mt-1 text-xl sm:text-2xl font-extrabold">{{ count($pondok) }}</p>
                 </div>
             </div>
             <div class="px-4 sm:px-6 py-4 flex items-center gap-3">
                 <span class="hidden sm:flex w-11 h-11 shrink-0 rounded-2xl bg-cyan-300/15 text-cyan-200 items-center justify-center">{!! $svg('book') !!}</span>
                 <div>
-                    <p class="text-[11px] uppercase tracking-wider text-white/45">Kitab Dipelajari</p>
+                    <p class="text-[11px] uppercase tracking-wider text-white/45">{{ __('Kitab Dipelajari') }}</p>
                     <p class="mt-1 text-xl sm:text-2xl font-extrabold">{{ count($kitab) }}</p>
                 </div>
             </div>
@@ -435,12 +432,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 style="background: conic-gradient(#10b981 {{ $persenSyarat * 3.6 }}deg, #e7efeb 0deg);">
                 <div class="absolute inset-[7px] rounded-full bg-white flex flex-col items-center justify-center">
                     <span class="text-lg font-extrabold text-slate-800 leading-none">{{ $persenSyarat }}%</span>
-                    <span class="text-[9px] text-slate-400 mt-0.5">syarat</span>
+                    <span class="text-[9px] text-slate-400 mt-0.5">{{ __('syarat') }}</span>
                 </div>
             </div>
             <div class="min-w-0">
-                <p class="text-xs font-medium text-slate-400">Status Pendaftaran</p>
-                <p class="mt-0.5 text-lg font-bold text-slate-800">{{ $p->label_status }}</p>
+                <p class="text-xs font-medium text-slate-400">{{ __('Status Pendaftaran') }}</p>
+                <p class="mt-0.5 text-lg font-bold text-slate-800">{{ __($p->label_status) }}</p>
                 <p class="mt-1 inline-flex items-center gap-1 text-[11px] text-slate-400">
                     {!! $svg('calendar', 'w-3.5 h-3.5') !!} {{ $p->created_at->translatedFormat('d M Y, H:i') }}
                 </p>
@@ -454,8 +451,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">{!! $svg('cap') !!}</span>
                 
             </div>
-            <p class="relative mt-4 text-xs font-medium text-white/70">Kelas Ditempatkan</p>
-            <p class="relative text-lg font-bold">{{ $p->kelasMaster?->nama ?? 'Belum dipilih' }}</p>
+            <p class="relative mt-4 text-xs font-medium text-white/70">{{ __('Kelas Ditempatkan') }}</p>
+            <p class="relative text-lg font-bold">{{ $p->kelasMaster?->nama ?? __('Belum dipilih') }}</p>
 
         </div>
 
@@ -466,9 +463,9 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">{!! $svg('home') !!}</span>
 
             </div>
-            <p class="relative mt-4 text-xs font-medium text-white/75">Kamar Ditempatkan</p>
-            <p class="relative text-lg font-bold" dir="auto">{{ $p->kamarMaster?->nama ?? 'Belum dipilih' }}</p>
-            <p class="relative mt-1 text-[11px] text-white/70">Kasur: {{ $p->nomor_kasur ? 'No. ' . $p->nomor_kasur : 'Belum dipilih' }}</p>
+            <p class="relative mt-4 text-xs font-medium text-white/75">{{ __('Kamar Ditempatkan') }}</p>
+            <p class="relative text-lg font-bold" dir="auto">{{ $p->kamarMaster?->nama ?? __('Belum dipilih') }}</p>
+            <p class="relative mt-1 text-[11px] text-white/70">{{ __('Kasur:') }} {{ $p->nomor_kasur ? __('No.') . ' ' . $p->nomor_kasur : __('Belum dipilih') }}</p>
         </div>
     </div>
 
@@ -481,8 +478,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 8.25h9m-9 3H12m-9.75 1.51c0 1.6 1.123 2.994 2.707 3.227 1.129.166 2.27.293 3.423.379.35.026.67.21.865.501L12 21l2.755-4.133a1.14 1.14 0 01.865-.501 48.172 48.172 0 003.423-.379c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
             </span>
             <div>
-                <h2 class="text-[15px] font-bold text-slate-800 leading-tight">Catatan dari Peserta</h2>
-                <p class="text-xs text-slate-400 mt-0.5">Ditulis peserta saat mendaftar</p>
+                <h2 class="text-[15px] font-bold text-slate-800 leading-tight">{{ __('Catatan dari Peserta') }}</h2>
+                <p class="text-xs text-slate-400 mt-0.5">{{ __('Ditulis peserta saat mendaftar') }}</p>
             </div>
         </div>
         <p dir="auto" class="whitespace-pre-line text-[15px] leading-relaxed text-slate-700 bg-white rounded-2xl ring-1 ring-sky-100 px-4 py-3">{{ $p->catatan_peserta }}</p>
@@ -500,8 +497,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         @if ($judul === 'Pendidikan Formal')
         <section class="{{ $kartu }} p-5 sm:p-6 xl:col-span-2">
             <div class="flex items-center justify-between gap-3 mb-5">
-                {!! $judulKartu('Riwayat Pondok Pesantren', 'home', 'amber', 'Pondok yang pernah ditempati') !!}
-                <span class="text-xs font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-3 py-1">{{ count($pondok) }} pondok</span>
+                {!! $judulKartu(__('Riwayat Pondok Pesantren'), 'home', 'amber', __('Pondok yang pernah ditempati')) !!}
+                <span class="text-xs font-semibold text-amber-700 bg-amber-50 ring-1 ring-amber-100 rounded-full px-3 py-1">{{ count($pondok) }} {{ __('pondok') }}</span>
             </div>
             <div class="grid md:grid-cols-2 gap-4">
                 @forelse ($pondok as $i => $r)
@@ -513,32 +510,32 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     </div>
                     <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                         <div>
-                            <dt class="text-[11px] uppercase tracking-wider text-slate-400">Nama Pengasuh</dt>
+                            <dt class="text-[11px] uppercase tracking-wider text-slate-400">{{ __('Nama Pengasuh') }}</dt>
                             <dd class="mt-0.5 font-semibold text-slate-700" dir="auto">{{ $r['nama_pengasuh'] ?? '-' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[11px] uppercase tracking-wider text-slate-400">Daerah / Kota</dt>
+                            <dt class="text-[11px] uppercase tracking-wider text-slate-400">{{ __('Daerah / Kota') }}</dt>
                             <dd class="mt-0.5 font-semibold text-slate-700" dir="auto">{{ $r['nama_daerah'] ?? '-' }}</dd>
                         </div>
                         <div class="col-span-2">
-                            <dt class="text-[11px] uppercase tracking-wider text-slate-400">Lama Belajar</dt>
+                            <dt class="text-[11px] uppercase tracking-wider text-slate-400">{{ __('Lama Belajar') }}</dt>
                             <dd class="mt-1">
                                 <span class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-700 bg-amber-100/70 rounded-full px-2.5 py-1">
-                                    {!! $svg('clock', 'w-3.5 h-3.5') !!} {{ $r['tahun_belajar'] ?? '-' }} tahun
+                                    {!! $svg('clock', 'w-3.5 h-3.5') !!} {{ $r['tahun_belajar'] ?? '-' }} {{ __('tahun') }}
                                 </span>
                             </dd>
                         </div>
                     </dl>
                 </div>
                 @empty
-                <div class="md:col-span-2 rounded-2xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">Tidak ada riwayat pondok.</div>
+                <div class="md:col-span-2 rounded-2xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">{{ __('Tidak ada riwayat pondok.') }}</div>
                 @endforelse
             </div>
         </section>
         @endif
 
         <section @class([$kartu, 'p-5 sm:p-6', 'xl:col-span-2' => $penuh])>
-            <div class="mb-5">{!! $judulKartu($judul, $namaIkon, $warna, $ket) !!}</div>
+            <div class="mb-5">{!! $judulKartu(__($judul), $namaIkon, $warna, $ket) !!}</div>
             <dl @class(['grid gap-2.5 text-sm', 'md:grid-cols-2' => $penuh])>
                 @foreach ($baris as $label => $nilai)
                 @if (in_array($label, $lebar))
@@ -556,7 +553,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <span class="inline-flex items-center gap-2">
                             <span dir="ltr">{{ $nilai }}</span>
                             <a href="{{ $p::linkWa($nilai) }}" target="_blank" rel="noopener"
-                                title="Chat lewat WhatsApp" aria-label="Chat {{ $nilai }} lewat WhatsApp"
+                                title="{{ __('Chat lewat WhatsApp') }}" aria-label="{{ __('Chat :nomor lewat WhatsApp', ['nomor' => $nilai]) }}"
                                 class="inline-flex items-center justify-center w-7 h-7 rounded-full bg-emerald-500 text-white shadow-sm shadow-emerald-500/30 hover:bg-emerald-600 hover:scale-105 transition">
                                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                                     <path
@@ -578,18 +575,18 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         @if ($judul === 'Pendidikan Formal')
         <section class="{{ $kartu }} p-5 sm:p-6">
             <div class="flex items-center justify-between gap-3 mb-5">
-                {!! $judulKartu('Kitab yang Pernah Dipelajari', 'book', 'cyan', 'Riwayat kajian kitab') !!}
-                <span class="text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-100 rounded-full px-3 py-1">{{ count($kitab) }} kitab</span>
+                {!! $judulKartu(__('Kitab yang Pernah Dipelajari'), 'book', 'cyan', __('Riwayat kajian kitab')) !!}
+                <span class="text-xs font-semibold text-cyan-700 bg-cyan-50 ring-1 ring-cyan-100 rounded-full px-3 py-1">{{ count($kitab) }} {{ __('kitab') }}</span>
             </div>
             @if (count($kitab))
             <div class="overflow-x-auto rounded-2xl ring-1 ring-slate-100">
                 <table class="w-full text-sm">
                     <thead class="text-left text-[11px] uppercase tracking-wider text-[#0b332c]/50 bg-[#f1f7f4]">
                         <tr>
-                            <th class="py-3 px-4 w-12 font-semibold">No</th>
-                            <th class="py-3 px-4 font-semibold">Nama Kitab</th>
-                            <th class="py-3 px-4 font-semibold">Fan</th>
-                            <th class="py-3 px-4 font-semibold">Diujikan</th>
+                            <th class="py-3 px-4 w-12 font-semibold">{{ __('No') }}</th>
+                            <th class="py-3 px-4 font-semibold">{{ __('Nama Kitab') }}</th>
+                            <th class="py-3 px-4 font-semibold">{{ __('Fan') }}</th>
+                            <th class="py-3 px-4 font-semibold">{{ __('Diujikan') }}</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
@@ -613,7 +610,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 </table>
             </div>
             @else
-            <div class="rounded-2xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">Tidak ada riwayat kitab.</div>
+            <div class="rounded-2xl border border-dashed border-slate-200 py-8 text-center text-sm text-slate-400">{{ __('Tidak ada riwayat kitab.') }}</div>
             @endif
         </section>
         @endif
@@ -622,7 +619,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         {{-- Berkas (disembunyikan dalam mode rahasia) --}}
         @unless ($rahasia)
         <section class="{{ $kartu }} p-5 sm:p-6 xl:col-span-2">
-            <div class="mb-5">{!! $judulKartu('Berkas', 'file', 'teal', 'Dokumen yang diunggah pendaftar') !!}</div>
+            <div class="mb-5">{!! $judulKartu(__('Berkas'), 'file', 'teal', __('Dokumen yang diunggah pendaftar')) !!}</div>
             <div class="grid sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 text-sm">
                 @foreach ($p::BERKAS as $kolom => $nama)
                 @if ($p->$kolom)
@@ -630,8 +627,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     class="group flex items-center gap-3 rounded-2xl bg-white ring-1 ring-teal-100 px-3.5 py-3 hover:ring-teal-300 hover:shadow-md hover:shadow-teal-900/5 hover:-translate-y-0.5 transition">
                     <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-teal-400 to-emerald-500 text-white flex items-center justify-center shadow-sm">{!! $svg('file', 'w-5 h-5') !!}</span>
                     <span class="min-w-0 flex-1">
-                        <span class="block font-semibold text-slate-800 truncate">{{ $nama }}</span>
-                        <span class="block text-xs text-teal-600">Buka berkas</span>
+                        <span class="block font-semibold text-slate-800 truncate">{{ __($nama) }}</span>
+                        <span class="block text-xs text-teal-600">{{ __('Buka berkas') }}</span>
                     </span>
                     <span class="text-slate-300 group-hover:text-teal-600 transition-colors">{!! $svg('open', 'w-4 h-4') !!}</span>
                 </a>
@@ -639,8 +636,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <div class="flex items-center gap-3 rounded-2xl border border-dashed border-slate-200 bg-slate-50/50 px-3.5 py-3">
                     <span class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-300 flex items-center justify-center">{!! $svg('file', 'w-5 h-5') !!}</span>
                     <span class="min-w-0">
-                        <span class="block font-medium text-slate-500 truncate">{{ $nama }}</span>
-                        <span class="block text-xs text-slate-400">Belum diunggah</span>
+                        <span class="block font-medium text-slate-500 truncate">{{ __($nama) }}</span>
+                        <span class="block text-xs text-slate-400">{{ __('Belum diunggah') }}</span>
                     </span>
                 </div>
                 @endif

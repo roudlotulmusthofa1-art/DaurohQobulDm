@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Pengaturan;
 use App\Models\Sesi;
+use App\Models\Terjemahan;
 use App\Support\CadanganDatabase;
 use App\Support\NotifikasiAdmin;
 use App\Support\PengelolaSesi;
 use App\Support\PesanWa;
 use App\Support\SesiAplikasi;
+use App\Support\TeksTampilan;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +39,7 @@ class PengaturanController extends Controller
         'pesan' => ['label' => 'Pesan', 'ikon' => 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z'],
         'database' => ['label' => 'Database', 'ikon' => 'M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375m16.5 0v3.75m-16.5-3.75v3.75m16.5 0v3.75C20.25 16.153 16.556 18 12 18s-8.25-1.847-8.25-4.125v-3.75m16.5 0c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125'],
         'sesi' => ['label' => 'Sesi', 'ikon' => 'M6.429 9.75L2.25 12l4.179 2.25m0-4.5l5.571 3 5.571-3m-11.142 0L2.25 7.5 12 2.25l9.75 5.25-4.179 2.25m0 0L21.75 12l-4.179 2.25m0 0l4.179 2.25L12 21.75 2.25 16.5l4.179-2.25m11.142 0l-5.571 3-5.571-3'],
+        'bahasa' => ['label' => 'Bahasa', 'ikon' => 'M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802'],
     ];
 
     public function index(Request $request): View
@@ -70,6 +73,8 @@ class PengaturanController extends Controller
             $data['sesiList'] = Sesi::orderByDesc('is_active')->orderByDesc('id')->get();
             $data['sesiAktif'] = SesiAplikasi::aktif();
             $data['ringkasSesi'] = $data['sesiList']->mapWithKeys(fn (Sesi $s) => [$s->id => $this->ringkasSesi($s)]);
+        } elseif ($tab === 'bahasa') {
+            $data += $this->dataBahasa($request);
         }
 
         return view('admin.pengaturan.index', $data);
@@ -524,6 +529,54 @@ class PengaturanController extends Controller
             'password_konfirmasi.current_password' => 'Password konfirmasi salah.',
             'yakin.accepted' => 'Centang pernyataan bahwa Anda yakin.',
         ];
+    }
+
+    /* ---------------- Bahasa: terjemahan Arab buatan admin ---------------- */
+
+    /** Data tab Bahasa: daftar halaman, halaman terpilih, dan tulisan-tulisannya beserta terjemahan sekarang. */
+    private function dataBahasa(Request $request): array
+    {
+        // Halaman yang belum punya tulisan __('...') tidak ditampilkan di pilihan
+        $halamanList = array_filter(TeksTampilan::semua(), fn ($h) => count($h['teks']) > 0) ?: TeksTampilan::semua();
+        $kode = array_key_exists((string) $request->query('halaman'), $halamanList)
+            ? $request->query('halaman')
+            : (collect($halamanList)->search(fn ($h) => count($h['teks']) > 0) ?: array_key_first($halamanList));
+
+        $dariAdmin = Terjemahan::semua();
+
+        $baris = collect($halamanList[$kode]['teks'])->map(fn ($file, $teks) => [
+            'teks' => $teks,
+            'arab' => $dariAdmin[$teks] ?? '',
+            'file' => $file,
+        ])->values();
+
+        return [
+            'halamanList' => $halamanList,
+            'halamanKode' => $kode,
+            'barisBahasa' => $baris,
+            'jumlahTerjemah' => $baris->where('arab', '!=', '')->count(),
+        ];
+    }
+
+    public function simpanBahasa(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'halaman' => ['required', 'string', Rule::in(array_keys(TeksTampilan::HALAMAN))],
+            'teks' => ['array'],
+            'teks.*' => ['required', 'string', 'max:2000'],
+            'arab' => ['array'],
+            'arab.*' => ['nullable', 'string', 'max:2000'],
+        ], [
+            'arab.*.max' => 'Terjemahan terlalu panjang (maks. 2000 huruf).',
+        ]);
+
+        foreach ($data['teks'] ?? [] as $i => $teks) {
+            Terjemahan::simpanSatu($teks, $data['arab'][$i] ?? null);
+        }
+        Terjemahan::lupakanCache();
+
+        return redirect()->route('admin.pengaturan.index', ['tab' => 'bahasa', 'halaman' => $data['halaman']])
+            ->with('success', 'Terjemahan disimpan.');
     }
 
     private function keTab(string $tab, ?string $sukses = null, ?string $gagal = null): RedirectResponse

@@ -1,7 +1,7 @@
 {{-- Akun Asatid > Absensi > hasil satu absensi --}}
 @extends('layouts.asatid')
 
-@section('judul', 'Hasil Absensi')
+@section('judul', __('Hasil Absensi'))
 
 @section('content')
 @php
@@ -34,18 +34,18 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
         <div class="pointer-events-none absolute inset-0 opacity-50" style="background-image: radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="relative flex flex-col sm:flex-row sm:items-center gap-6">
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">{{ $kegiatan ? 'Absensi Kegiatan' : 'Absensi Kelas' }}</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-white/70">{{ $kegiatan ? __('Absensi Kegiatan') : __('Absensi Kelas') }}</p>
                 <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ $absensi->judul }}</h2>
                 <p class="mt-1 text-sm text-white/75">
                     {{ $absensi->tanggal->locale('id')->translatedFormat('l, d F Y') }} · {{ $absensi->tanggal_hijriyah }}
                 </p>
                 <p class="mt-3 inline-flex flex-wrap gap-2 text-xs font-semibold">
                     @if ($kegiatan)
-                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">Mulai {{ substr($absensi->jam_mulai, 0, 5) }}</span>
-                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">Terlambat {{ substr($absensi->batas_terlambat, 0, 5) }}</span>
-                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">Alfa {{ substr($absensi->batas_alfa, 0, 5) }}</span>
+                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ __('Mulai') }} {{ substr($absensi->jam_mulai, 0, 5) }}</span>
+                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ __('Terlambat') }} {{ substr($absensi->batas_terlambat, 0, 5) }}</span>
+                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ __('Alfa') }} {{ substr($absensi->batas_alfa, 0, 5) }}</span>
                     @else
-                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">Jam ke: {{ $absensi->waktuPelajaran?->nama ?? '-' }}</span>
+                        <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ __('Jam ke:') }} {{ $absensi->waktuPelajaran?->nama ?? '-' }}</span>
                     @endif
                 </p>
             </div>
@@ -58,7 +58,7 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
                 </svg>
                 <div class="absolute inset-0 flex flex-col items-center justify-center">
                     <span class="text-3xl font-extrabold">{{ $persenHadir }}%</span>
-                    <span class="text-[10px] text-white/70">kehadiran</span>
+                    <span class="text-[10px] text-white/70">{{ __('kehadiran') }}</span>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
     <div class="grid grid-cols-3 sm:grid-cols-5 gap-2.5">
         @foreach (Absensi::STATUS as $k => [$label])
         <div class="{{ $kartu }} p-3.5">
-            <span class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500"><span class="w-2 h-2 rounded-full {{ $gaya[$k][1] }}"></span>{{ $kegiatan || $k !== 'alfa' ? $label : 'Tidak Hadir' }}</span>
+            <span class="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500"><span class="w-2 h-2 rounded-full {{ $gaya[$k][1] }}"></span>{{ $kegiatan || $k !== 'alfa' ? __(Absensi::STATUS[$k][0]) : __('Tidak Hadir') }}</span>
             <span class="mt-1 block text-2xl font-extrabold text-slate-800">{{ $hitung[$k] }}</span>
         </div>
         @endforeach
@@ -75,7 +75,7 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
 
     <section class="{{ $kartu }} overflow-hidden">
         <div class="px-5 py-4 flex items-center justify-between border-b border-slate-100">
-            <h3 class="font-bold text-slate-800">Daftar peserta <span class="text-slate-400 font-semibold">({{ $detail->count() }})</span></h3>
+            <h3 class="font-bold text-slate-800">{{ __('Daftar peserta') }} <span class="text-slate-400 font-semibold">({{ $detail->count() }})</span></h3>
         </div>
         <div class="divide-y divide-slate-100">
             @forelse ($detail as $d)
@@ -86,7 +86,7 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
                     <span class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($d->siswa?->nama_lengkap ?? '?', 0, 1)) }}</span>
                 @endif
                 <div class="flex-1 min-w-0">
-                    <p class="text-sm font-semibold text-slate-800 truncate">{{ $d->siswa?->nama_lengkap ?? 'Peserta dihapus' }}</p>
+                    <p class="text-sm font-semibold text-slate-800 truncate">{{ $d->siswa?->nama_lengkap ?? __('Peserta dihapus') }}</p>
                     @if ($d->catatan)
                         <p class="text-xs text-slate-500">“{{ $d->catatan }}”</p>
                     @else
@@ -94,25 +94,25 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
                     @endif
                 </div>
                 <span class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1 {{ $gaya[$d->status][0] ?? '' }}">
-                    {{ $kegiatan || $d->status !== 'alfa' ? (Absensi::STATUS[$d->status][0] ?? $d->status) : 'Tidak Hadir' }}
+                    {{ $kegiatan || $d->status !== 'alfa' ? __(Absensi::STATUS[$d->status][0] ?? $d->status) : __('Tidak Hadir') }}
                 </span>
             </div>
             @empty
-            <p class="px-5 py-10 text-center text-sm text-slate-400">Belum ada peserta tercatat.</p>
+            <p class="px-5 py-10 text-center text-sm text-slate-400">{{ __('Belum ada peserta tercatat.') }}</p>
             @endforelse
         </div>
     </section>
 
     <div class="flex flex-col sm:flex-row gap-2">
         {{-- Kembali ke halaman sebelumnya; halaman pencatatan/pengisian absensi dilewati (otomatis melempar ke rekap ini) --}}
-        <a href="{{ route('asatid.absensi') }}" @click="kembali" data-lewati="/absensi/kegiatan/,/absensi/kelas" class="flex-1 text-center py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">Kembali</a>
+        <a href="{{ route('asatid.absensi') }}" @click="kembali" data-lewati="/absensi/kegiatan/,/absensi/kelas" class="flex-1 text-center py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Kembali') }}</a>
         @unless ($kegiatan)
         <a href="{{ route('asatid.absensi.kelas', ['kelas_id' => $absensi->kelas_id, 'bidang_ilmu_id' => $absensi->bidang_ilmu_id, 'waktu_pelajaran_id' => $absensi->waktu_pelajaran_id, 'tanggal' => $absensi->tanggal->toDateString()]) }}"
-            class="flex-1 text-center py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">Ubah Absensi</a>
+            class="flex-1 text-center py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">{{ __('Ubah Absensi') }}</a>
         @endunless
-        <form method="POST" action="{{ route('asatid.absensi.destroy', $absensi) }}" @submit="konfirmasi" data-konfirmasi="Hapus absensi ini? Data kehadirannya ikut terhapus." class="sm:w-auto">
+        <form method="POST" action="{{ route('asatid.absensi.destroy', $absensi) }}" @submit="konfirmasi" data-konfirmasi="{{ __('Hapus absensi ini? Data kehadirannya ikut terhapus.') }}" class="sm:w-auto">
             @csrf @method('DELETE')
-            <button class="w-full px-5 py-3 rounded-2xl bg-white ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">Hapus</button>
+            <button class="w-full px-5 py-3 rounded-2xl bg-white ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">{{ __('Hapus') }}</button>
         </form>
     </div>
 </div>

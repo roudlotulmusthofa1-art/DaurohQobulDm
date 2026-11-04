@@ -6,7 +6,7 @@
 --}}
 @extends('layouts.asatid')
 
-@section('judul', 'Absensi ' . ($absensi->kegiatan?->nama ?? 'Kegiatan'))
+@section('judul', __('Absensi') . ' ' . ($absensi->kegiatan?->nama ?? __('Kegiatan')))
 
 @push('styles')
 <style>
@@ -24,7 +24,7 @@
 @php
 $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
 $info = [
-    'nama' => $absensi->kegiatan?->nama ?? 'Kegiatan',
+    'nama' => $absensi->kegiatan?->nama ?? __('Kegiatan'),
     'tanggal' => $absensi->tanggal->locale('id')->translatedFormat('l, d F Y'),
     'hijriyah' => $absensi->tanggal_hijriyah,
     'jam_mulai' => substr((string) $absensi->jam_mulai, 0, 5),
@@ -35,27 +35,26 @@ $info = [
 @endphp
 
 <div id="absen-kegiatan" v-cloak class="space-y-5">
-@verbatim
     <!-- ===== Kepala: kegiatan, jam, status sekarang ===== -->
     <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-emerald-500 via-teal-600 to-[#0b332c] text-white p-5 sm:p-7">
         <div class="pointer-events-none absolute inset-0 opacity-50" style="background-image: radial-gradient(rgba(255,255,255,0.09) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -top-24 -right-10 w-72 h-72 rounded-full bg-lime-300/25 blur-3xl"></div>
         <div class="relative flex flex-col sm:flex-row sm:items-end gap-5">
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">Absensi kegiatan berjalan</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">{{ __('Absensi kegiatan berjalan') }}</p>
                 <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight truncate" v-text="info.nama"></h2>
                 <p class="mt-1 text-sm text-white/75" v-text="info.tanggal + ' · ' + info.hijriyah"></p>
                 <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
-                    <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">Mulai <b v-text="info.jam_mulai"></b></span>
-                    <span class="rounded-full bg-amber-300/20 ring-1 ring-amber-200/30 px-3 py-1.5 text-amber-50">Terlambat <b v-text="info.batas_terlambat"></b></span>
-                    <span class="rounded-full bg-rose-300/20 ring-1 ring-rose-200/30 px-3 py-1.5 text-rose-50">Alfa <b v-text="info.batas_alfa"></b></span>
+                    <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ __('Mulai') }} <b v-text="info.jam_mulai"></b></span>
+                    <span class="rounded-full bg-amber-300/20 ring-1 ring-amber-200/30 px-3 py-1.5 text-amber-50">{{ __('Terlambat') }} <b v-text="info.batas_terlambat"></b></span>
+                    <span class="rounded-full bg-rose-300/20 ring-1 ring-rose-200/30 px-3 py-1.5 text-rose-50">{{ __('Alfa') }} <b v-text="info.batas_alfa"></b></span>
                 </div>
             </div>
             <div class="shrink-0 rounded-3xl bg-white/10 ring-1 ring-white/15 backdrop-blur px-5 py-4 text-center">
                 <span class="block text-3xl font-extrabold tabular-nums tracking-tight" v-text="jam"></span>
                 <span class="mt-1 inline-flex items-center gap-1.5 text-[11px] font-bold rounded-full px-2.5 py-1 bg-white" :class="gaya(statusSekarang).teks">
                     <span class="w-1.5 h-1.5 rounded-full" :class="gaya(statusSekarang).titik"></span>
-                    <span v-text="'Datang sekarang: ' + gaya(statusSekarang).label"></span>
+                    <span v-text="@js(__('Datang sekarang:')) + ' ' + gaya(statusSekarang).label"></span>
                 </span>
             </div>
         </div>
@@ -65,7 +64,7 @@ $info = [
     <div class="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
         <div :class="kartu" class="p-3 text-center">
             <span class="block text-2xl font-extrabold text-slate-800" v-text="tercatat + '/' + peserta.length"></span>
-            <span class="block text-[11px] text-slate-500">Tercatat</span>
+            <span class="block text-[11px] text-slate-500">{{ __('Tercatat') }}</span>
         </div>
         <div v-for="s in status" :key="s.kunci" :class="kartu" class="p-3 text-center">
             <span class="block text-2xl font-extrabold" :class="s.teks" v-text="hitung[s.kunci]"></span>
@@ -76,9 +75,9 @@ $info = [
     <!-- ===== Tab ===== -->
     <div class="p-1.5 rounded-2xl bg-white ring-1 ring-slate-200/70 grid grid-cols-2 gap-1.5">
         <button type="button" @click="gantiTab('qr')" class="py-2.5 rounded-xl text-sm font-bold transition-all"
-            :class="tab === 'qr' ? 'bg-[#0b332c] text-white shadow' : 'text-slate-500 hover:bg-slate-50'">Pindai QR</button>
+            :class="tab === 'qr' ? 'bg-[#0b332c] text-white shadow' : 'text-slate-500 hover:bg-slate-50'">{{ __('Pindai QR') }}</button>
         <button type="button" @click="gantiTab('manual')" class="py-2.5 rounded-xl text-sm font-bold transition-all"
-            :class="tab === 'manual' ? 'bg-[#0b332c] text-white shadow' : 'text-slate-500 hover:bg-slate-50'">Cari Nama</button>
+            :class="tab === 'manual' ? 'bg-[#0b332c] text-white shadow' : 'text-slate-500 hover:bg-slate-50'">{{ __('Cari Nama') }}</button>
     </div>
 
     <!-- ===== Tab Pindai QR ===== -->
@@ -97,12 +96,12 @@ $info = [
                     <span class="w-16 h-16 rounded-3xl bg-white/10 ring-1 ring-white/15 flex items-center justify-center">
                         <svg class="w-8 h-8 text-emerald-300" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0z"/></svg>
                     </span>
-                    <p class="mt-3 font-bold">Kamera belum menyala</p>
-                    <p class="mt-1 text-xs text-white/60 max-w-xs" v-text="galatKamera || 'Arahkan kamera ke kartu QR peserta. Status otomatis sesuai jam datang.'"></p>
+                    <p class="mt-3 font-bold">{{ __('Kamera belum menyala') }}</p>
+                    <p class="mt-1 text-xs text-white/60 max-w-xs" v-text="galatKamera || @js(__('Arahkan kamera ke kartu QR peserta. Status otomatis sesuai jam datang.'))"></p>
                     <button type="button" @click="nyalakan" :disabled="memuatKamera"
                         class="mt-4 inline-flex items-center gap-2 px-5 py-3 rounded-2xl bg-emerald-400 text-[#071f1a] text-sm font-extrabold hover:bg-emerald-300 disabled:opacity-60">
                         <svg v-if="memuatKamera" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" class="opacity-25"/><path d="M4 12a8 8 0 018-8" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
-                        <span v-text="memuatKamera ? 'Menyalakan…' : 'Nyalakan Kamera'"></span>
+                        <span v-text="memuatKamera ? @js(__('Menyalakan…')) : @js(__('Nyalakan Kamera'))"></span>
                     </button>
                 </div>
 
@@ -112,7 +111,7 @@ $info = [
                     <span v-else class="w-14 h-14 shrink-0 rounded-2xl bg-slate-100 text-slate-500 text-xl font-extrabold flex items-center justify-center" v-text="inisial(hasil.siswa.nama)"></span>
                     <div class="flex-1 min-w-0">
                         <p class="font-extrabold text-slate-800 truncate" v-text="hasil.siswa.nama"></p>
-                        <p class="text-xs text-slate-500 truncate" v-text="hasil.ulang ? 'Sudah tercatat sebelumnya' : 'Tercatat pukul ' + hasil.siswa.waktu"></p>
+                        <p class="text-xs text-slate-500 truncate" v-text="hasil.ulang ? @js(__('Sudah tercatat sebelumnya')) : @js(__('Tercatat pukul')) + ' ' + hasil.siswa.waktu"></p>
                     </div>
                     <span class="shrink-0 px-3 py-2 rounded-xl text-sm font-extrabold" :class="gaya(hasil.siswa.status).aktif" v-text="gaya(hasil.siswa.status).label"></span>
                 </div>
@@ -122,17 +121,17 @@ $info = [
             <div class="mt-4 flex flex-col sm:flex-row gap-2">
                 <form @submit.prevent="kirimKode" class="flex-1 flex items-center gap-2 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 pl-4 pr-1.5 py-1.5">
                     <svg class="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 8.25V6a2.25 2.25 0 00-2.25-2.25H6A2.25 2.25 0 003.75 6v8.25A2.25 2.25 0 006 16.5h2.25m8.25-8.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-7.5A2.25 2.25 0 018.25 18v-1.5m8.25-8.25h-6a2.25 2.25 0 00-2.25 2.25v6"/></svg>
-                    <input v-model="kodeManual" type="text" placeholder="Ketik kode / nomor pendaftaran, atau pakai alat scanner"
+                    <input v-model="kodeManual" type="text" placeholder="{{ __('Ketik kode / nomor pendaftaran, atau pakai alat scanner') }}"
                         class="flex-1 min-w-0 bg-transparent border-0 p-0 text-sm outline-none focus:ring-0">
-                    <button type="submit" class="shrink-0 px-3.5 py-2 rounded-xl bg-[#0b332c] text-white text-xs font-bold">Catat</button>
+                    <button type="submit" class="shrink-0 px-3.5 py-2 rounded-xl bg-[#0b332c] text-white text-xs font-bold">{{ __('Catat') }}</button>
                 </form>
-                <button v-if="kameraNyala" type="button" @click="matikan" class="px-4 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">Matikan kamera</button>
+                <button v-if="kameraNyala" type="button" @click="matikan" class="px-4 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Matikan kamera') }}</button>
             </div>
         </section>
 
         <!-- Baru tercatat -->
         <section :class="kartu" class="lg:col-span-2 p-4 sm:p-5">
-            <h3 class="font-bold text-slate-800">Baru tercatat</h3>
+            <h3 class="font-bold text-slate-800">{{ __('Baru tercatat') }}</h3>
             <div v-if="terakhir.length" class="mt-3 space-y-2">
                 <div v-for="p in terakhir" :key="p.id" class="flex items-center gap-3 p-2.5 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100">
                     <img :data-perbesar="p.nama" v-if="p.foto" :src="p.foto" alt="" class="w-10 h-10 rounded-xl object-cover">
@@ -144,7 +143,7 @@ $info = [
                     <span class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1" :class="gaya(p.status).lembut" v-text="gaya(p.status).label"></span>
                 </div>
             </div>
-            <p v-else class="mt-6 mb-4 text-center text-sm text-slate-400">Belum ada peserta yang tercatat.</p>
+            <p v-else class="mt-6 mb-4 text-center text-sm text-slate-400">{{ __('Belum ada peserta yang tercatat.') }}</p>
         </section>
     </div>
 
@@ -153,10 +152,10 @@ $info = [
         <div class="flex flex-col sm:flex-row gap-2">
             <label class="flex-1 flex items-center gap-2 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 px-4 py-3 focus-within:ring-2 focus-within:ring-emerald-500">
                 <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-                <input v-model="cari" type="search" placeholder="Cari nama atau nomor peserta…" class="flex-1 min-w-0 bg-transparent border-0 p-0 text-sm outline-none focus:ring-0">
+                <input v-model="cari" type="search" placeholder="{{ __('Cari nama atau nomor peserta…') }}" class="flex-1 min-w-0 bg-transparent border-0 p-0 text-sm outline-none focus:ring-0">
             </label>
             <div class="flex gap-1.5">
-                <button v-for="f in [['belum','Belum'],['sudah','Sudah'],['semua','Semua']]" :key="f[0]" type="button" @click="saring = f[0]"
+                <button v-for="f in [['belum',@js(__('Belum'))],['sudah',@js(__('Sudah'))],['semua',@js(__('Semua'))]]" :key="f[0]" type="button" @click="saring = f[0]"
                     class="px-4 py-2.5 rounded-2xl text-sm font-semibold ring-1 transition-all"
                     :class="saring === f[0] ? 'bg-[#0b332c] text-white ring-[#0b332c]' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'" v-text="f[1]"></button>
             </div>
@@ -172,30 +171,29 @@ $info = [
                         <span class="block text-[11px] text-slate-400 truncate" v-text="[p.nomor, p.kelas].filter(Boolean).join(' · ')"></span>
                     </span>
                     <span v-if="p.status" class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1" :class="gaya(p.status).lembut" v-text="gaya(p.status).label + (p.waktu ? ' · ' + p.waktu : '')"></span>
-                    <span v-else class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-slate-50 text-slate-400 ring-1 ring-slate-200">Belum</span>
+                    <span v-else class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-slate-50 text-slate-400 ring-1 ring-slate-200">{{ __('Belum') }}</span>
                 </button>
                 <div v-if="buka === p.id" class="anim-muncul mt-3 grid grid-cols-5 gap-1.5">
                     <button v-for="s in status" :key="s.kunci" type="button" @click="kirim({ siswa_id: p.id, status: s.kunci })" :disabled="mengirim"
                         class="relative py-3 rounded-2xl text-xs font-bold ring-1 transition-all active:scale-95"
                         :class="p.status === s.kunci ? s.aktif : s.lembut">
-                        <span v-if="s.kunci === statusSekarang && !p.status" class="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-extrabold uppercase tracking-wider bg-[#0b332c] text-white rounded-full px-1.5 py-0.5">Saran</span>
+                        <span v-if="s.kunci === statusSekarang && !p.status" class="absolute -top-2 left-1/2 -translate-x-1/2 text-[9px] font-extrabold uppercase tracking-wider bg-[#0b332c] text-white rounded-full px-1.5 py-0.5">{{ __('Saran') }}</span>
                         <span v-text="s.label"></span>
                     </button>
                 </div>
             </div>
-            <p v-if="!daftar.length" class="py-10 text-center text-sm text-slate-400" v-text="saring === 'belum' && !cari ? 'Semua peserta sudah tercatat.' : 'Peserta tidak ditemukan.'"></p>
-            <p v-if="lebih" class="pt-3 text-center text-xs text-slate-400" v-text="'Menampilkan 60 dari ' + jumlahSaring + ' peserta. Ketik nama untuk mempersempit.'"></p>
+            <p v-if="!daftar.length" class="py-10 text-center text-sm text-slate-400" v-text="saring === 'belum' && !cari ? @js(__('Semua peserta sudah tercatat.')) : @js(__('Peserta tidak ditemukan.'))"></p>
+            <p v-if="lebih" class="pt-3 text-center text-xs text-slate-400" v-text="@js(__('Menampilkan 60 dari :jumlah peserta. Ketik nama untuk mempersempit.')).replace(':jumlah', jumlahSaring)"></p>
         </div>
     </section>
-@endverbatim
 
     {{-- ===== Tutup absensi ===== --}}
     <form method="POST" action="{{ route('asatid.absensi.kegiatan.selesai', $absensi) }}"
         @submit="konfirmasiTutup"
         class="{{ $kartu }} p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3">
         @csrf
-        <p class="flex-1 text-sm text-slate-500">Sudah selesai? Tutup absensi. Peserta yang belum tercatat (<b class="text-slate-800" v-text="belum"></b>) otomatis ditandai <b class="text-rose-600">Alfa</b>.</p>
-        <button type="submit" class="px-5 py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-extrabold hover:bg-[#135347] shadow-[0_12px_28px_-12px_rgba(11,51,44,0.6)]">Tutup &amp; Simpan</button>
+        <p class="flex-1 text-sm text-slate-500">{{ __('Sudah selesai? Tutup absensi. Peserta yang belum tercatat') }} (<b class="text-slate-800" v-text="belum"></b>) {{ __('otomatis ditandai') }} <b class="text-rose-600">{{ __('Alfa') }}</b>.</p>
+        <button type="submit" class="px-5 py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-extrabold hover:bg-[#135347] shadow-[0_12px_28px_-12px_rgba(11,51,44,0.6)]">{{ __('Tutup & Simpan') }}</button>
     </form>
 </div>
 @endsection
@@ -206,11 +204,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const { createApp } = window.Vue;
 
     const STATUS = [
-        { kunci: 'hadir',     label: 'Hadir',     aktif: 'bg-emerald-500 text-white ring-emerald-500', lembut: 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100', teks: 'text-emerald-600', titik: 'bg-emerald-500' },
-        { kunci: 'terlambat', label: 'Terlambat', aktif: 'bg-amber-500 text-white ring-amber-500',     lembut: 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100',       teks: 'text-amber-600',   titik: 'bg-amber-500' },
-        { kunci: 'sakit',     label: 'Sakit',     aktif: 'bg-sky-500 text-white ring-sky-500',         lembut: 'bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100',               teks: 'text-sky-600',     titik: 'bg-sky-500' },
-        { kunci: 'izin',      label: 'Izin',      aktif: 'bg-violet-500 text-white ring-violet-500',   lembut: 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100',   teks: 'text-violet-600',  titik: 'bg-violet-500' },
-        { kunci: 'alfa',      label: 'Alfa',      aktif: 'bg-rose-500 text-white ring-rose-500',       lembut: 'bg-rose-50 text-rose-700 ring-rose-200 hover:bg-rose-100',           teks: 'text-rose-600',    titik: 'bg-rose-500' },
+        { kunci: 'hadir',     label: @js(__('Hadir')),     aktif: 'bg-emerald-500 text-white ring-emerald-500', lembut: 'bg-emerald-50 text-emerald-700 ring-emerald-200 hover:bg-emerald-100', teks: 'text-emerald-600', titik: 'bg-emerald-500' },
+        { kunci: 'terlambat', label: @js(__('Terlambat')), aktif: 'bg-amber-500 text-white ring-amber-500',     lembut: 'bg-amber-50 text-amber-700 ring-amber-200 hover:bg-amber-100',       teks: 'text-amber-600',   titik: 'bg-amber-500' },
+        { kunci: 'sakit',     label: @js(__('Sakit')),     aktif: 'bg-sky-500 text-white ring-sky-500',         lembut: 'bg-sky-50 text-sky-700 ring-sky-200 hover:bg-sky-100',               teks: 'text-sky-600',     titik: 'bg-sky-500' },
+        { kunci: 'izin',      label: @js(__('Izin')),      aktif: 'bg-violet-500 text-white ring-violet-500',   lembut: 'bg-violet-50 text-violet-700 ring-violet-200 hover:bg-violet-100',   teks: 'text-violet-600',  titik: 'bg-violet-500' },
+        { kunci: 'alfa',      label: @js(__('Alfa')),      aktif: 'bg-rose-500 text-white ring-rose-500',       lembut: 'bg-rose-50 text-rose-700 ring-rose-200 hover:bg-rose-100',           teks: 'text-rose-600',    titik: 'bg-rose-500' },
     ];
     const dua = (n) => String(n).padStart(2, '0');
     const jamSekarang = () => { const d = new Date(); return `${dua(d.getHours())}:${dua(d.getMinutes())}`; };
@@ -284,8 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             konfirmasiTutup(e) {
                 const tanya = this.belum
-                    ? `${this.belum} peserta yang belum tercatat akan ditandai Alfa. Tutup absensi sekarang?`
-                    : 'Tutup absensi sekarang?';
+                    ? @js(__(':jumlah peserta yang belum tercatat akan ditandai Alfa. Tutup absensi sekarang?')).replace(':jumlah', this.belum)
+                    : @js(__('Tutup absensi sekarang?'));
                 if (!confirm(tanya)) e.preventDefault();
                 else this.matikan();
             },
@@ -306,7 +304,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ ...isi, jam: jamSekarang() }),
                     });
                     const json = await res.json();
-                    if (!res.ok) throw new Error(json.message || 'Gagal mencatat.');
+                    if (!res.ok) throw new Error(json.message || @js(__('Gagal mencatat.')));
 
                     const s = json.siswa;
                     const p = this.peserta.find((x) => x.id === s.id);
@@ -343,7 +341,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.galatKamera = '';
                 this.memuatKamera = true;
                 try {
-                    if (!window.isSecureContext) throw new Error('Kamera hanya bisa dipakai di alamat https://.');
+                    if (!window.isSecureContext) throw new Error(@js(__('Kamera hanya bisa dipakai di alamat https://.')));
                     const { Html5Qrcode, Html5QrcodeSupportedFormats } = await window.muatPemindaiQr();
                     this._pemindai ??= new Html5Qrcode('pembaca', { formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE], verbose: false });
                     await this._pemindai.start(
@@ -356,8 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     const pesan = String(e?.message || e);
                     this.galatKamera = /Permission|NotAllowed/i.test(pesan)
-                        ? 'Izin kamera ditolak. Izinkan kamera di pengaturan browser, lalu coba lagi.'
-                        : (/NotFound|Requested device/i.test(pesan) ? 'Kamera tidak ditemukan di perangkat ini.' : pesan);
+                        ? @js(__('Izin kamera ditolak. Izinkan kamera di pengaturan browser, lalu coba lagi.'))
+                        : (/NotFound|Requested device/i.test(pesan) ? @js(__('Kamera tidak ditemukan di perangkat ini.')) : pesan);
                 } finally {
                     this.memuatKamera = false;
                 }

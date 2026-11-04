@@ -12,7 +12,7 @@
 
                 <!-- LOGO -->
                 <a href="{{ route('landing') }}" class="flex items-center shrink-0">
-                    <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo" class="h-12 w-20">
+                    <img src="{{ asset('images/Logo dar4.png') }}" alt="{{ __('Logo') }}" class="h-12 w-20">
                 </a>
 
 
@@ -24,7 +24,7 @@
                     <!-- Beranda -->
                     <a href="{{ route('landing') }}"
                         class="text-lg font-medium text-slate-700 hover:text-teal-700 transition-colors">
-                        Beranda
+                        {{ __('Beranda') }}
                     </a>
 
 
@@ -32,45 +32,45 @@
                     @foreach ([
                     'profil' => [
                     [
-                    'title' => 'Tentang Kami',
+                    'title' => __('Tentang Kami'),
                     'url' => '#tentang',
                     ],
                     [
-                    'title' => 'Visi & Misi',
+                    'title' => __('Visi & Misi'),
                     'url' => '#tentang',
                     ],
                     [
-                    'title' => 'Kurikulum',
+                    'title' => __('Kurikulum'),
                     'url' => '/kurikulum',
                     ],
                     ],
 
                     'informasi' => [
                     [
-                    'title' => 'Berita & Artikel',
+                    'title' => __('Berita & Artikel'),
                     'url' => '/berita',
                     ],
                     [
-                    'title' => 'Galeri Foto',
+                    'title' => __('Galeri Foto'),
                     'url' => '/galeri',
                     ],
                     [
-                    'title' => 'Pembukaan Dauroh',
+                    'title' => __('Pembukaan Dauroh'),
                     'url' => '/pembukaandauroh',
                     ],
                     ],
 
                     'bantuan' => [
                     [
-                    'title' => 'Program Dauroh',
+                    'title' => __('Program Dauroh'),
                     'url' => '#program-dauroh',
                     ],
                     [
-                    'title' => 'Persiapan Dauroh',
+                    'title' => __('Persiapan Dauroh'),
                     'url' => '#persiapan-dauroh',
                     ],
                     [
-                    'title' => 'Hubungi Kami',
+                    'title' => __('Hubungi Kami'),
                     'url' => '#kontak',
                     ],
                     ],
@@ -80,7 +80,7 @@
                         <button type="button" @click="toggleMenu('{{ $menu }}')"
                             class="flex items-center gap-1 text-lg font-medium text-slate-700 hover:text-teal-700 transition-colors">
 
-                            {{ ucfirst($menu) }}
+                            {{ __(ucfirst($menu)) }}
 
                             <svg class="w-4 h-4 transition-transform" :class="{
                                         'rotate-180': openMenu === '{{ $menu }}'
@@ -119,12 +119,12 @@
 
                     <a href="{{ route('login') }}"
                         class="px-5 py-2.5 rounded-lg border border-teal-700 text-teal-700 text-sm font-semibold hover:bg-teal-50 transition-colors">
-                        Masuk
+                        {{ __('Masuk') }}
                     </a>
 
                     <a href="/psb/daftar"
                         class="px-5 py-2.5 rounded-lg bg-teal-700 text-white text-sm font-semibold hover:bg-teal-800 transition-colors shadow-sm">
-                        Daftar Sekarang
+                        {{ __('Daftar Sekarang') }}
                     </a>
 
                 </div>
@@ -179,11 +179,11 @@
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-200">
 
                 <h2 class="text-lg font-semibold text-slate-800">
-                    Menu Navigasi
+                    {{ __('Menu Navigasi') }}
                 </h2>
 
                 <button type="button" @click="mobileOpen = false" class="w-9 h-9 flex items-center justify-center rounded-full
-                       text-slate-600 hover:bg-slate-100 transition" aria-label="Tutup menu">
+                       text-slate-600 hover:bg-slate-100 transition" aria-label="{{ __('Tutup menu') }}">
 
                     <i data-lucide="x" class="w-5 h-5"></i>
 
@@ -205,7 +205,7 @@
                     <i data-lucide="house" class="w-5 h-5 text-teal-600"></i>
 
                     <span class="text-[15px] font-medium">
-                        Beranda
+                        {{ __('Beranda') }}
                     </span>
 
                 </a>
@@ -219,7 +219,7 @@
                                text-slate-700 hover:bg-slate-50 transition">
                         <div class="flex items-center gap-4">
                             <i data-lucide="info" class="w-5 h-5 text-teal-600"></i>
-                            <span class="text-sm font-medium">Profil</span>
+                            <span class="text-sm font-medium">{{ __('Profil') }}</span>
                         </div>
                         <i data-lucide="chevron-right" class="w-5 h-5 transition-transform duration-200" :class="{
                                 'rotate-90': openMenu === 'profil'
@@ -228,13 +228,11 @@
                     <div v-show="openMenu === 'profil'" v-cloak
                         class="ml-12 mr-2 mb-2 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden">
                         <a href="#tentang" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Tentang
-                            Kami</a>
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Tentang Kami') }}</a>
                         <a href="#tentang" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Visi
-                            & Misi</a>
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Visi & Misi') }}</a>
                         <a href="#kurikulum" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Kurikulum</a>
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Kurikulum') }}</a>
                     </div>
                 </div>
 
@@ -246,7 +244,7 @@
                                text-slate-700 hover:bg-slate-50 transition">
                         <div class="flex items-center gap-4">
                             <i data-lucide="newspaper" class="w-5 h-5 text-teal-600"></i>
-                            <span class="text-sm font-medium">Informasi</span>
+                            <span class="text-sm font-medium">{{ __('Informasi') }}</span>
                         </div>
                         <i data-lucide="chevron-right" class="w-5 h-5 transition-transform duration-200" :class="{
                                 'rotate-90': openMenu === 'informasi'
@@ -255,14 +253,11 @@
                     <div v-show="openMenu === 'informasi'" v-cloak
                         class="ml-12 mr-2 mb-2 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden">
                         <a href="#tentang" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Berita
-                            & Artikel</a>
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Berita & Artikel') }}</a>
                         <a href="#tentang" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Galeri
-                            Foto</a>
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Galeri Foto') }}</a>
                         <a href="#kurikulum" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Pembukaan
-                            Dauroh</a>
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Pembukaan Dauroh') }}</a>
                     </div>
                 </div>
 
@@ -274,7 +269,7 @@
                                text-slate-700 hover:bg-slate-50 transition">
                         <div class="flex items-center gap-4">
                             <i data-lucide="circle-help" class="w-5 h-5 text-teal-600"></i>
-                            <span class="text-sm font-medium">Bantuan</span>
+                            <span class="text-sm font-medium">{{ __('Bantuan') }}</span>
                         </div>
                         <i data-lucide="chevron-right" class="w-5 h-5 transition-transform duration-200" :class="{
                                 'rotate-90': openMenu === 'bantuan'
@@ -284,15 +279,14 @@
                         class="ml-12 mr-2 mb-2 rounded-xl bg-slate-50 border border-slate-100 overflow-hidden transition">
                         <a href="#program-dauroh" @click="mobileOpen = false"
                             class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">
-                            Program Daurohh
+                            {{ __('Program Daurohh') }}
                         </a>
                         <a href="#persiapan-dauroh" @click="mobileOpen = false"
                             class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">
-                            Persiapan Dauroh
+                            {{ __('Persiapan Dauroh') }}
                         </a>
                         <a href="#kontak" @click="mobileOpen = false"
-                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">Pembukaan
-                            Hubungi Kami
+                            class="block px-4 py-3 text-sm text text-slate-600 hover:bg-teal-100 hover:text-teal-800">{{ __('Pembukaan Hubungi Kami') }}
                         </a>
                     </div>
                 </div>
@@ -303,11 +297,11 @@
                     <a href="{{ route('login') }}" @click="mobilOpen = false"
                         class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-teal-100 hover:text-teal-700 transition">
                         <i data-lucide="log-in" class="w-4 h-4"></i>
-                        Masuk</a>
+                        {{ __('Masuk') }}</a>
                     <a href="/psb/daftar" @click="mobilOpen = false"
                         class="flex items-center justify-center gap-3 w-full px-4 py-3 rounded-xl border border-slate-300 text-slate-700 text-sm font-medium hover:bg-teal-100 hover:text-teal-700 transition">
                         <i data-lucide="user-plus" class="w-4 h-4"></i>
-                        Daftar Sekarang</a>
+                        {{ __('Daftar Sekarang') }}</a>
                 </div>
             </div>
         </div>

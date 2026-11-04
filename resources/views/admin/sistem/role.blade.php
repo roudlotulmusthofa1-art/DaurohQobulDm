@@ -6,7 +6,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Role & Permission')
+@section('title', __('Role & Permission'))
 
 @section('content')
 @php
@@ -30,14 +30,14 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
         <div class="relative flex flex-col sm:flex-row sm:items-end gap-4">
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">Sistem</p>
-                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">Role & Permission</h1>
-                <p class="mt-1.5 text-sm text-white/70 max-w-2xl">Buat role pengurus (mis. Bendahara, Sekretaris) lalu centang menu admin yang boleh dibuka. Berikan role ke akun admin lewat menu <b>Daftar User</b>.</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Sistem') }}</p>
+                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Role & Permission') }}</h1>
+                <p class="mt-1.5 text-sm text-white/70 max-w-2xl">{{ __('Buat role pengurus (mis. Bendahara, Sekretaris) lalu centang menu admin yang boleh dibuka. Berikan role ke akun admin lewat menu') }} <b>{{ __('Daftar User') }}</b>.</p>
             </div>
             <button type="button" @click="tambahRole"
                 class="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-[#0b332c] text-sm font-bold hover:bg-emerald-100 transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-                Tambah Role
+                {{ __('Tambah Role') }}
             </button>
         </div>
     </div>
@@ -45,7 +45,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     <div class="grid lg:grid-cols-[minmax(0,320px)_minmax(0,1fr)] gap-6 items-start">
         {{-- ===== Daftar role ===== --}}
         <div class="{{ $kartu }} p-3 space-y-1.5">
-            <p class="px-2 pt-1 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">Daftar Role</p>
+            <p class="px-2 pt-1 pb-2 text-xs font-semibold uppercase tracking-wider text-slate-400">{{ __('Daftar Role') }}</p>
             <button v-for="r in roles" :key="r.id" type="button" @click="pilih(r)"
                 class="w-full flex items-center gap-3 p-3 rounded-2xl text-left transition-colors"
                 :class="terpilih?.id === r.id ? 'bg-[#0b332c]/[0.06] ring-1 ring-[#0b332c]/15' : 'hover:bg-slate-50'">
@@ -53,15 +53,15 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                 <span class="flex-1 min-w-0">
                     <span class="flex items-center gap-1.5">
                         <span class="font-semibold text-slate-800 truncate" v-text="r.nama"></span>
-                        <span v-if="r.bawaan" class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold">bawaan</span>
+                        <span v-if="r.bawaan" class="text-[10px] px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-500 font-semibold">{{ __('bawaan') }}</span>
                     </span>
                     <span class="block text-xs text-slate-500" v-text="ringkasIzin(r)"></span>
                 </span>
-                <span class="text-xs font-semibold text-slate-500 tabular-nums" :title="r.jumlah + ' akun'" v-text="r.jumlah"></span>
+                <span class="text-xs font-semibold text-slate-500 tabular-nums" :title="r.jumlah + ' ' + @js(__('akun'))" v-text="r.jumlah"></span>
             </button>
             <div v-if="terpilih && !terpilih.id" class="w-full flex items-center gap-3 p-3 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200">
                 <span class="w-10 h-10 rounded-xl flex items-center justify-center font-bold ring-1 shrink-0" :class="gaya(form.warna).lencana" v-text="(form.nama || '?').charAt(0).toUpperCase()"></span>
-                <span class="font-semibold text-emerald-800 truncate" v-text="form.nama || 'Role baru'"></span>
+                <span class="font-semibold text-emerald-800 truncate" v-text="form.nama || @js(__('Role baru'))"></span>
             </div>
         </div>
 
@@ -74,28 +74,28 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
             <div class="flex flex-wrap items-start gap-3">
                 <div class="flex-1 min-w-0">
-                    <h2 class="text-lg font-bold text-slate-800" v-text="terpilih.id ? 'Ubah Role' : 'Role Baru'"></h2>
-                    <p class="text-sm text-slate-500" v-text="terpilih.id ? terpilih.jumlah + ' akun memakai role ini' : 'Isi nama lalu centang menu yang boleh dibuka.'"></p>
+                    <h2 class="text-lg font-bold text-slate-800" v-text="terpilih.id ? @js(__('Ubah Role')) : @js(__('Role Baru'))"></h2>
+                    <p class="text-sm text-slate-500" v-text="terpilih.id ? terpilih.jumlah + ' ' + @js(__('akun memakai role ini')) : @js(__('Isi nama lalu centang menu yang boleh dibuka.'))"></p>
                 </div>
-                <span v-if="diubah" class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold">Belum disimpan</span>
+                <span v-if="diubah" class="text-xs px-2.5 py-1 rounded-full bg-amber-50 text-amber-700 ring-1 ring-amber-200 font-semibold">{{ __('Belum disimpan') }}</span>
             </div>
 
             <div class="grid sm:grid-cols-2 gap-4">
                 <label class="block">
-                    <span class="text-sm font-semibold text-slate-700">Nama role</span>
-                    <input type="text" name="nama" v-model="form.nama" required maxlength="80" placeholder="mis. Bendahara"
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Nama role') }}</span>
+                    <input type="text" name="nama" v-model="form.nama" required maxlength="80" placeholder="{{ __('mis. Bendahara') }}"
                         class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500">
                 </label>
                 <div>
-                    <span class="text-sm font-semibold text-slate-700">Warna lencana</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Warna lencana') }}</span>
                     <div class="mt-2 flex flex-wrap gap-2">
                         <button v-for="w in daftarWarna" :key="w" type="button" @click="form.warna = w; diubah = true" :title="w"
                             class="w-8 h-8 rounded-full ring-2 ring-offset-2 transition" :class="[gaya(w).titik, form.warna === w ? 'ring-slate-700' : 'ring-transparent']"></button>
                     </div>
                 </div>
                 <label class="block sm:col-span-2">
-                    <span class="text-sm font-semibold text-slate-700">Keterangan <span class="font-normal text-slate-400">(opsional)</span></span>
-                    <input type="text" name="keterangan" v-model="form.keterangan" maxlength="255" placeholder="Tugas singkat role ini"
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Keterangan') }} <span class="font-normal text-slate-400">{{ __('(opsional)') }}</span></span>
+                    <input type="text" name="keterangan" v-model="form.keterangan" maxlength="255" placeholder="{{ __('Tugas singkat role ini') }}"
                         class="mt-1.5 w-full rounded-xl border border-slate-200 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500">
                 </label>
             </div>
@@ -103,19 +103,19 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             {{-- Izin menu --}}
             <div>
                 <div class="flex flex-wrap items-center gap-2 mb-3">
-                    <h3 class="font-bold text-slate-800 flex-1">Permission (menu yang boleh dibuka)</h3>
+                    <h3 class="font-bold text-slate-800 flex-1">{{ __('Permission (menu yang boleh dibuka)') }}</h3>
                     <template v-if="bisaAturIzin">
-                        <span class="text-xs text-slate-500" v-text="form.izin.length + ' dari ' + totalIzin + ' menu'"></span>
-                        <button type="button" @click="aturSemua(true)" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Pilih semua</button>
-                        <button type="button" @click="aturSemua(false)" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">Kosongkan</button>
+                        <span class="text-xs text-slate-500" v-text="form.izin.length + ' ' + @js(__('dari')) + ' ' + totalIzin + ' ' + @js(__('menu'))"></span>
+                        <button type="button" @click="aturSemua(true)" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">{{ __('Pilih semua') }}</button>
+                        <button type="button" @click="aturSemua(false)" class="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700">{{ __('Kosongkan') }}</button>
                     </template>
                 </div>
 
                 {{-- Role bawaan: izinnya tetap --}}
                 <div v-if="!bisaAturIzin" class="p-4 rounded-2xl bg-slate-50 ring-1 ring-slate-200 text-sm text-slate-600">
-                    <template v-if="terpilih.kunci === 'admin'">Super Admin selalu bisa membuka <b>semua menu</b>, termasuk halaman Role & Permission ini.</template>
-                    <template v-else-if="terpilih.kunci === 'asatid'">Akun asatid membuka <b>dasbor asatid</b> (jadwal, absensi, peserta, penilaian), bukan panel admin.</template>
-                    <template v-else>Akun peserta membuka <b>dasbor siswa</b> (profil, kelulusan, pesan), bukan panel admin.</template>
+                    <template v-if="terpilih.kunci === 'admin'">{{ __('Super Admin selalu bisa membuka') }} <b>{{ __('semua menu') }}</b>{{ __(', termasuk halaman Role & Permission ini.') }}</template>
+                    <template v-else-if="terpilih.kunci === 'asatid'">{{ __('Akun asatid membuka') }} <b>{{ __('dasbor asatid') }}</b> {{ __('(jadwal, absensi, peserta, penilaian), bukan panel admin.') }}</template>
+                    <template v-else>{{ __('Akun peserta membuka') }} <b>{{ __('dasbor siswa') }}</b> {{ __('(profil, kelulusan, pesan), bukan panel admin.') }}</template>
                 </div>
 
                 <div v-else class="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -132,21 +132,21 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         </label>
                     </div>
                 </div>
-                <p v-if="bisaAturIzin && !form.izin.length" class="mt-3 text-xs text-amber-700">Belum ada menu dicentang: akun dengan role ini hanya bisa membuka Dashboard.</p>
+                <p v-if="bisaAturIzin && !form.izin.length" class="mt-3 text-xs text-amber-700">{{ __('Belum ada menu dicentang: akun dengan role ini hanya bisa membuka Dashboard.') }}</p>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
                 <button type="submit" :disabled="terpilih.id && !diubah"
                     class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] disabled:opacity-40 disabled:cursor-not-allowed">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-                    <span v-text="terpilih.id ? 'Simpan Perubahan' : 'Tambah Role'"></span>
+                    <span v-text="terpilih.id ? @js(__('Simpan Perubahan')) : @js(__('Tambah Role'))"></span>
                 </button>
-                <button type="button" v-if="diubah || !terpilih.id" @click="batal" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+                <button type="button" v-if="diubah || !terpilih.id" @click="batal" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">{{ __('Batal') }}</button>
                 <span class="flex-1"></span>
                 <button v-if="terpilih.id && !terpilih.bawaan" type="button" @click="hapus"
                     class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-semibold text-rose-600 hover:bg-rose-50">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                    Hapus Role
+                    {{ __('Hapus Role') }}
                 </button>
             </div>
         </form>
@@ -208,12 +208,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     return URL_ROLE + '/' + id;
                 },
                 ringkasIzin(r) {
-                    if (r.kunci === 'admin') return 'Semua menu';
-                    if (r.bawaan) return r.kunci === 'asatid' ? 'Dasbor asatid' : 'Dasbor siswa';
-                    return r.izin.length ? r.izin.length + ' menu admin' : 'Hanya dashboard';
+                    if (r.kunci === 'admin') return @js(__('Semua menu'));
+                    if (r.bawaan) return r.kunci === 'asatid' ? @js(__('Dasbor asatid')) : @js(__('Dasbor siswa'));
+                    return r.izin.length ? r.izin.length + ' ' + @js(__('menu admin')) : @js(__('Hanya dashboard'));
                 },
                 bolehPindah() {
-                    return !this.diubah || confirm('Perubahan belum disimpan. Tinggalkan?');
+                    return !this.diubah || confirm(@js(__('Perubahan belum disimpan. Tinggalkan?')));
                 },
                 pilih(r) {
                     if (this.terpilih?.id === r.id || !this.bolehPindah()) return;
@@ -237,7 +237,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     this.pilih(r);
                 },
                 hapus() {
-                    if (!confirm('Hapus role ' + this.terpilih.nama + '?')) return;
+                    if (!confirm(@js(__('Hapus role :nama?')).replace(':nama', this.terpilih.nama))) return;
                     this.diubah = false;
                     this.$refs.formHapus.submit();
                 },

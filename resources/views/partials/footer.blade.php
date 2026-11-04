@@ -5,17 +5,15 @@
             <div>
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-[#f5faf5] py-2 px-1 rounded-xl" >
-                        <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo Ribath" class="h-11 w-16">
+                        <img src="{{ asset('images/Logo dar4.png') }}" alt="{{ __('Logo Ribath') }}" class="h-11 w-16">
                     </div>
                     <div>
-                        <p class="text-white font-bold leading-tight">Dauro Qobul Darul Musthofa</p>
-                        <p class="text-xs text-slate-400">Program Penerimaan Santri Baru</p>
+                        <p class="text-white font-bold leading-tight">{{ __('Dauro Qobul Darul Musthofa') }}</p>
+                        <p class="text-xs text-slate-400">{{ __('Program Penerimaan Santri Baru') }}</p>
                     </div>
                 </div>
                 <p class="text-sm text-slate-400 leading-relaxed max-w-xs">
-                    Darul Musthofa Tarim Menetapkan Bahwa Setiap PELAJAR ASIA TENGGARA Yang Ingin Melanjutkan Studi Di Darul Musthofa Wajib
-                    Mengikuti Program Dauroh Persiapan Dan Ujian Penerimaan (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma'had
-                    Yang Telah Ditunjuk Di Indonesia.
+                    {{ __('Darul Musthofa Tarim Menetapkan Bahwa Setiap PELAJAR ASIA TENGGARA Yang Ingin Melanjutkan Studi Di Darul Musthofa Wajib Mengikuti Program Dauroh Persiapan Dan Ujian Penerimaan (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma\'had Yang Telah Ditunjuk Di Indonesia.') }}
                 </p>
                 <div class="flex gap-3 mt-5">
                     <a href="#" aria-label="WhatsApp" class="w-9 h-9 rounded-full bg-teal-700 flex items-center justify-center hover:opacity-90">
@@ -31,20 +29,20 @@
             </div>
 
             <div>
-                <p class="text-white font-bold mb-4">Menu Cepat</p>
+                <p class="text-white font-bold mb-4">{{ __('Menu Cepat') }}</p>
                 <ul class="space-y-3 text-sm">
-                    <li><a href="/psb/daftar" class="hover:text-teal-400 transition-colors">Pendaftaran Santri</a></li>
-                    <li><a href="#" class="hover:text-teal-400 transition-colors">Berita & Artikel</a></li>
-                    <li><a href="#" class="hover:text-teal-400 transition-colors">Galeri Foto</a></li>
+                    <li><a href="/psb/daftar" class="hover:text-teal-400 transition-colors">{{ __('Pendaftaran Santri') }}</a></li>
+                    <li><a href="#" class="hover:text-teal-400 transition-colors">{{ __('Berita & Artikel') }}</a></li>
+                    <li><a href="#" class="hover:text-teal-400 transition-colors">{{ __('Galeri Foto') }}</a></li>
                 </ul>
             </div>
 
             <div>
-                <p class="text-white font-bold mb-4">Hubungi Kami</p>
+                <p class="text-white font-bold mb-4">{{ __('Hubungi Kami') }}</p>
                 <ul class="space-y-3 text-sm">
-                    <li class="flex items-center gap-2"><span>📍</span> Solo, Jawa Tengah</li>
+                    <li class="flex items-center gap-2"><span>📍</span> {{ __('Solo, Jawa Tengah') }}</li>
                     <li class="flex items-center gap-2"><span>✉️</span> {{ $kontak['email'] ?? 'info@ribathriyadh.com' }}</li>
-                    <li class="flex items-center gap-2"><span>📱</span> WhatsApp: {{ $kontak['whatsapp'] ?? '+62 877-8397-5110' }}</li>
+                    <li class="flex items-center gap-2"><span>📱</span> {{ __('WhatsApp:') }} {{ $kontak['whatsapp'] ?? '+62 877-8397-5110' }}</li>
                 </ul>
             </div>
         </div>
@@ -53,13 +51,12 @@
             <p class="text-2xl md:text-3xl text-amber-400 leading-loose" dir="rtl" style="font-family: 'Amiri', serif;">
                 مَنْ سَلَكَ طَرِيقًا يَلْتَمِسُ فِيهِ عِلْمًا، سَهَّلَ اللَّهُ لَهُ بِهِ طَرِيقًا إِلَى الْجَنَّةِ
             </p>
-            <p class="mt-4 text-slate-200 italic">“Barang siapa menempuh suatu jalan untuk mencari ilmu, Allah akan memudahkan baginya dengan ilmu tersebut jalan menuju
-            surga.”</p>
-            <p class="mt-2 text-sm text-slate-500">— HR Imam Muslim —</p>
+            <p class="mt-4 text-slate-200 italic">“{{ __('Barang siapa menempuh suatu jalan untuk mencari ilmu, Allah akan memudahkan baginya dengan ilmu tersebut jalan menuju surga.') }}”</p>
+            <p class="mt-2 text-sm text-slate-500">— {{ __('HR Imam Muslim') }} —</p>
         </div>
 
         <div class="mt-10 pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-            <p>&copy; {{ date('Y') }} Dauroh Qobul Darul Musthofa Tarim. Didirikan sejak 2014.</p>
+            <p>&copy; {{ date('Y') }} {{ __('Dauroh Qobul Darul Musthofa Tarim. Didirikan sejak 2014.') }}</p>
         </div>
     </div>
 </footer>

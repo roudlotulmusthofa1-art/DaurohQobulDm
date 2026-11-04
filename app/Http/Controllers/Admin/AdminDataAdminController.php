@@ -107,6 +107,12 @@ class AdminDataAdminController extends Controller
     }
 
     /** Hapus data admin beserta pas foto dan akun login-nya. Akun sendiri tidak bisa dihapus. */
+    /** Reset password akun login admin (khusus Super Admin). Aturan & pesannya di App\Support\ResetPasswordAkun. */
+    public function resetPassword(Request $request, PendaftaranAdmin $dataAdmin, WhatsAppService $wa)
+    {
+        return \App\Support\ResetPasswordAkun::jalankan($request, $dataAdmin, $wa);
+    }
+
     public function destroy(PendaftaranAdmin $dataAdmin)
     {
         if ($dataAdmin->user_id && (int) $dataAdmin->user_id === (int) Auth::id()) {

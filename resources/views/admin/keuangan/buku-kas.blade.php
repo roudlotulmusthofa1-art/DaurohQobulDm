@@ -7,7 +7,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', 'Buku Kas')
+@section('title', __('Buku Kas'))
 
 @section('content')
 @php
@@ -28,18 +28,18 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
     {{-- ===== Judul + tombol ===== --}}
     <div class="flex flex-wrap items-end gap-3">
         <div class="flex-1 min-w-[220px]">
-            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">Buku Kas</h1>
-            <p class="mt-1 text-sm text-slate-500">Catat semua pemasukan dan pengeluaran kas harian pesantren.</p>
+            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">{{ __('Buku Kas') }}</h1>
+            <p class="mt-1 text-sm text-slate-500">{{ __('Catat semua pemasukan dan pengeluaran kas harian pesantren.') }}</p>
         </div>
         <button type="button" @click="bukaKategori"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.47 6.47 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.28z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-            Kelola Kategori
+            {{ __('Kelola Kategori') }}
         </button>
         <button type="button" @click="bukaTambah"
             class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
-            Tambah Transaksi
+            {{ __('Tambah Transaksi') }}
         </button>
     </div>
 
@@ -50,26 +50,26 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a2.25 2.25 0 00-2.25-2.25H15a3 3 0 11-6 0H5.25A2.25 2.25 0 003 12m18 0v6a2.25 2.25 0 01-2.25 2.25H5.25A2.25 2.25 0 013 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 9m18 0V6a2.25 2.25 0 00-2.25-2.25H5.25A2.25 2.25 0 003 6v3"/></svg>
             </span>
             <div class="flex-1 min-w-0">
-                <p class="text-sm text-slate-500">Saldo Saat Ini</p>
+                <p class="text-sm text-slate-500">{{ __('Saldo Saat Ini') }}</p>
                 <p class="mt-0.5 text-3xl font-extrabold tracking-tight" :class="saldo < 0 ? 'text-rose-600' : 'text-slate-800'" v-text="rupiah(saldo)"></p>
 
                 <div class="mt-4 pt-4 border-t border-slate-100 grid sm:grid-cols-3 gap-4">
                     <div>
                         <p class="flex items-center gap-1.5 text-xs text-slate-500">
                             <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75l3 3m0 0l3-3m-3 3v-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Masuk · <span v-text="labelPeriode"></span>
+                            {{ __('Masuk') }} · <span v-text="labelPeriode"></span>
                         </p>
                         <p class="mt-1 font-bold text-slate-800" v-text="rupiah(periode.masuk)"></p>
                     </div>
                     <div>
                         <p class="flex items-center gap-1.5 text-xs text-slate-500">
                             <svg class="w-3.5 h-3.5 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 11.25l-3-3m0 0l-3 3m3-3v7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            Keluar · <span v-text="labelPeriode"></span>
+                            {{ __('Keluar') }} · <span v-text="labelPeriode"></span>
                         </p>
                         <p class="mt-1 font-bold text-slate-800" v-text="rupiah(periode.keluar)"></p>
                     </div>
                     <div>
-                        <p class="text-xs text-slate-500">Net · <span v-text="labelPeriode"></span></p>
+                        <p class="text-xs text-slate-500">{{ __('Net') }} · <span v-text="labelPeriode"></span></p>
                         <p class="mt-1 font-bold" :class="net < 0 ? 'text-rose-600' : 'text-emerald-700'" v-text="(net < 0 ? '-' : '+') + rupiah(Math.abs(net))"></p>
                     </div>
                 </div>
@@ -87,31 +87,31 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
             <span class="flex-1"></span>
             <a href="{{ route('admin.buku-kas.index') }}" class="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-800">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                Reset
+                {{ __('Reset') }}
             </a>
         </div>
         <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <label class="block">
-                <span class="text-xs font-medium text-slate-500">Dari Tanggal</span>
+                <span class="text-xs font-medium text-slate-500">{{ __('Dari Tanggal') }}</span>
                 <input type="date" name="start_date" v-model="filter.start_date" @change="terapkanFilter" class="mt-1 {{ $isian }}">
             </label>
             <label class="block">
-                <span class="text-xs font-medium text-slate-500">Sampai Tanggal</span>
+                <span class="text-xs font-medium text-slate-500">{{ __('Sampai Tanggal') }}</span>
                 <input type="date" name="end_date" v-model="filter.end_date" @change="terapkanFilter" class="mt-1 {{ $isian }}">
             </label>
             <label class="block">
-                <span class="text-xs font-medium text-slate-500">Tipe</span>
+                <span class="text-xs font-medium text-slate-500">{{ __('Tipe') }}</span>
                 <select name="tipe" v-model="filter.tipe" @change="filter.kategori = ''; terapkanFilter()" class="mt-1 {{ $isian }}">
-                    <option value="">Semua</option>
-                    <option value="masuk">Masuk</option>
-                    <option value="keluar">Keluar</option>
+                    <option value="">{{ __('Semua') }}</option>
+                    <option value="masuk">{{ __('Masuk') }}</option>
+                    <option value="keluar">{{ __('Keluar') }}</option>
                 </select>
             </label>
             <label class="block">
-                <span class="text-xs font-medium text-slate-500">Kategori</span>
+                <span class="text-xs font-medium text-slate-500">{{ __('Kategori') }}</span>
                 <select name="kategori" v-model="filter.kategori" @change="terapkanFilter" class="mt-1 {{ $isian }}">
-                    <option value="">Semua</option>
-                    <option v-for="k in kategoriUntuk(filter.tipe)" :key="k.id" :value="String(k.id)" v-text="k.nama + (filter.tipe ? '' : ' (' + k.tipe + ')')"></option>
+                    <option value="">{{ __('Semua') }}</option>
+                    <option v-for="k in kategoriUntuk(filter.tipe)" :key="k.id" :value="String(k.id)" v-text="k.nama + (filter.tipe ? '' : ' (' + (k.tipe === 'masuk' ? @js(__('Masuk')) : @js(__('Keluar'))) + ')')"></option>
                 </select>
             </label>
         </div>
@@ -123,13 +123,13 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
             <table class="w-full text-sm">
                 <thead class="bg-slate-50/80 text-left text-xs font-semibold text-slate-500">
                     <tr>
-                        <th class="px-5 py-3.5">Tanggal</th>
-                        <th class="px-4 py-3.5">Kategori</th>
-                        <th class="px-4 py-3.5">Deskripsi</th>
-                        <th class="px-4 py-3.5 whitespace-nowrap hidden 2xl:table-cell">Sumber / Penerima</th>
-                        <th class="px-4 py-3.5">Tipe</th>
-                        <th class="px-4 py-3.5 text-right">Jumlah</th>
-                        <th class="px-4 py-3.5 text-center">Bukti</th>
+                        <th class="px-5 py-3.5">{{ __('Tanggal') }}</th>
+                        <th class="px-4 py-3.5">{{ __('Kategori') }}</th>
+                        <th class="px-4 py-3.5">{{ __('Deskripsi') }}</th>
+                        <th class="px-4 py-3.5 whitespace-nowrap hidden 2xl:table-cell">{{ __('Sumber / Penerima') }}</th>
+                        <th class="px-4 py-3.5">{{ __('Tipe') }}</th>
+                        <th class="px-4 py-3.5 text-right">{{ __('Jumlah') }}</th>
+                        <th class="px-4 py-3.5 text-center">{{ __('Bukti') }}</th>
                         <th class="px-3 py-3.5"></th>
                     </tr>
                 </thead>
@@ -143,20 +143,20 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                         <td class="px-4 py-4 text-slate-700 max-w-[300px]">
                             <p class="truncate" :title="t.deskripsi" v-text="t.deskripsi"></p>
                             {{-- Layar kecil: sumber/penerima ditampilkan di bawah deskripsi --}}
-                            <p v-if="t.pihak" class="2xl:hidden truncate text-xs text-slate-400" v-text="(t.tipe === 'masuk' ? 'dari ' : 'kepada ') + t.pihak"></p>
+                            <p v-if="t.pihak" class="2xl:hidden truncate text-xs text-slate-400" v-text="(t.tipe === 'masuk' ? @js(__('dari')) : @js(__('kepada'))) + ' ' + t.pihak"></p>
                         </td>
                         <td class="px-4 py-4 text-slate-600 max-w-[180px] hidden 2xl:table-cell"><p class="truncate" :title="t.pihak" v-text="t.pihak || '–'"></p></td>
                         <td class="px-4 py-4">
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold ring-1"
                                 :class="t.tipe === 'masuk' ? 'bg-emerald-50 text-emerald-700 ring-emerald-100' : 'bg-rose-50 text-rose-600 ring-rose-100'">
                                 <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                                <span v-text="t.tipe === 'masuk' ? 'Masuk' : 'Keluar'"></span>
+                                <span v-text="t.tipe === 'masuk' ? @js(__('Masuk')) : @js(__('Keluar'))"></span>
                             </span>
                         </td>
                         <td class="px-4 py-4 text-right font-bold whitespace-nowrap tabular-nums" :class="t.tipe === 'masuk' ? 'text-emerald-700' : 'text-rose-600'"
                             v-text="(t.tipe === 'masuk' ? '+' : '−') + rupiah(t.jumlah)"></td>
                         <td class="px-4 py-4 text-center">
-                            <a v-if="t.bukti" :href="t.bukti" target="_blank" rel="noopener" title="Lihat bukti"
+                            <a v-if="t.bukti" :href="t.bukti" target="_blank" rel="noopener" title="{{ __('Lihat bukti') }}"
                                 class="inline-flex w-8 h-8 items-center justify-center rounded-lg text-emerald-700 hover:bg-emerald-50">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
                             </a>
@@ -164,19 +164,19 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                         </td>
                         <td class="px-3 py-4">
                             <button type="button" @click.stop="bukaMenu(t, $event)"
-                                class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" title="Aksi">
+                                class="w-8 h-8 inline-flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100" title="{{ __('Aksi') }}">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
                             </button>
                             {{-- Menu melayang (fixed) supaya tidak terpotong tepi tabel --}}
                             <div v-if="menuBuka?.id === t.id" @click.stop :style="{ left: menuBuka.x + 'px', top: menuBuka.y + 'px' }"
                                 class="fixed z-50 w-36 rounded-2xl bg-white ring-1 ring-slate-200 shadow-lg p-1.5">
-                                <button type="button" @click="bukaUbah(t)" class="w-full text-left px-3 py-2 rounded-xl text-sm text-slate-700 hover:bg-slate-50">Ubah</button>
-                                <button type="button" @click="hapusTransaksi(t)" class="w-full text-left px-3 py-2 rounded-xl text-sm text-rose-600 hover:bg-rose-50">Hapus</button>
+                                <button type="button" @click="bukaUbah(t)" class="w-full text-left px-3 py-2 rounded-xl text-sm text-slate-700 hover:bg-slate-50">{{ __('Ubah') }}</button>
+                                <button type="button" @click="hapusTransaksi(t)" class="w-full text-left px-3 py-2 rounded-xl text-sm text-rose-600 hover:bg-rose-50">{{ __('Hapus') }}</button>
                             </div>
                         </td>
                     </tr>
                     <tr v-if="!baris.length">
-                        <td colspan="8" class="px-5 py-14 text-center text-slate-400">Belum ada transaksi pada periode ini.</td>
+                        <td colspan="8" class="px-5 py-14 text-center text-slate-400">{{ __('Belum ada transaksi pada periode ini.') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -196,7 +196,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
             <input v-for="(v, k) in filterAwal" :key="k" type="hidden" :name="'_filter[' + k + ']'" :value="v">
 
             <div class="flex items-center gap-3">
-                <h2 class="flex-1 text-lg font-bold text-slate-800" v-text="form.id ? 'Ubah Transaksi' : 'Tambah Transaksi'"></h2>
+                <h2 class="flex-1 text-lg font-bold text-slate-800" v-text="form.id ? @js(__('Ubah Transaksi')) : @js(__('Tambah Transaksi'))"></h2>
                 <button type="button" @click="tutupDialog" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">✕</button>
             </div>
 
@@ -204,18 +204,18 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
             {{-- Masuk / Keluar --}}
             <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100">
                 <button type="button" @click="gantiTipe('masuk')" class="py-2 rounded-xl text-sm font-bold transition"
-                    :class="form.tipe === 'masuk' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'">Pemasukan</button>
+                    :class="form.tipe === 'masuk' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'">{{ __('Pemasukan') }}</button>
                 <button type="button" @click="gantiTipe('keluar')" class="py-2 rounded-xl text-sm font-bold transition"
-                    :class="form.tipe === 'keluar' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'">Pengeluaran</button>
+                    :class="form.tipe === 'keluar' ? 'bg-white text-rose-600 shadow-sm' : 'text-slate-500'">{{ __('Pengeluaran') }}</button>
             </div>
 
             <div class="grid sm:grid-cols-2 gap-3">
                 <label class="block">
-                    <span class="text-sm font-semibold text-slate-700">Tanggal</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Tanggal') }}</span>
                     <input type="date" name="tanggal" v-model="form.tanggal" required class="mt-1 {{ $isian }}">
                 </label>
                 <label class="block">
-                    <span class="text-sm font-semibold text-slate-700">Jumlah</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Jumlah') }}</span>
                     <span class="relative block mt-1">
                         <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">Rp</span>
                         <input type="text" inputmode="numeric" name="jumlah" :value="form.jumlah" @input="ketikJumlah" required placeholder="0"
@@ -223,45 +223,45 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                     </span>
                 </label>
                 <label class="block">
-                    <span class="text-sm font-semibold text-slate-700">Kategori</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Kategori') }}</span>
                     <select name="kas_kategori_id" v-model="form.kas_kategori_id" class="mt-1 {{ $isian }}">
-                        <option value="">— Tanpa kategori —</option>
+                        <option value="">{{ __('— Tanpa kategori —') }}</option>
                         <option v-for="k in kategoriUntuk(form.tipe)" :key="k.id" :value="String(k.id)" v-text="k.nama"></option>
                     </select>
                 </label>
                 <label class="block">
-                    <span class="text-sm font-semibold text-slate-700" v-text="form.tipe === 'masuk' ? 'Sumber (dari siapa)' : 'Penerima (kepada siapa)'"></span>
-                    <input type="text" name="pihak" v-model="form.pihak" maxlength="150" :placeholder="form.tipe === 'masuk' ? 'mis. Wali santri Ahmad' : 'mis. Toko Kitab Darul Kutub'" class="mt-1 {{ $isian }}">
+                    <span class="text-sm font-semibold text-slate-700" v-text="form.tipe === 'masuk' ? @js(__('Sumber (dari siapa)')) : @js(__('Penerima (kepada siapa)'))"></span>
+                    <input type="text" name="pihak" v-model="form.pihak" maxlength="150" :placeholder="form.tipe === 'masuk' ? @js(__('mis. Wali santri Ahmad')) : @js(__('mis. Toko Kitab Darul Kutub'))" class="mt-1 {{ $isian }}">
                 </label>
                 <label class="block sm:col-span-2">
-                    <span class="text-sm font-semibold text-slate-700">Deskripsi</span>
-                    <textarea name="deskripsi" v-model="form.deskripsi" required maxlength="255" rows="2" placeholder="mis. SPP Bulanan — Ahmad (Okt 2026)" class="mt-1 {{ $isian }}"></textarea>
+                    <span class="text-sm font-semibold text-slate-700">{{ __('Deskripsi') }}</span>
+                    <textarea name="deskripsi" v-model="form.deskripsi" required maxlength="255" rows="2" placeholder="{{ __('mis. SPP Bulanan — Ahmad (Okt 2026)') }}" class="mt-1 {{ $isian }}"></textarea>
                 </label>
             </div>
 
             {{-- Bukti --}}
             <div>
-                <span class="text-sm font-semibold text-slate-700">Bukti <span class="font-normal text-slate-400">(foto nota / PDF, opsional, maks 4 MB)</span></span>
+                <span class="text-sm font-semibold text-slate-700">{{ __('Bukti') }} <span class="font-normal text-slate-400">{{ __('(foto nota / PDF, opsional, maks 4 MB)') }}</span></span>
                 <div class="mt-1 flex items-center gap-3 p-3 rounded-2xl border border-dashed border-slate-300">
-                    <img data-perbesar="Bukti transaksi" v-if="pratinjauBukti" :src="pratinjauBukti" alt="" class="w-14 h-14 rounded-xl object-cover ring-1 ring-slate-200">
+                    <img data-perbesar="{{ __('Bukti transaksi') }}" v-if="pratinjauBukti" :src="pratinjauBukti" alt="" class="w-14 h-14 rounded-xl object-cover ring-1 ring-slate-200">
                     <span v-else class="w-14 h-14 rounded-xl bg-slate-50 ring-1 ring-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-400" v-text="namaBukti ? 'PDF' : '—'"></span>
                     <div class="flex-1 min-w-0 text-sm">
-                        <p class="truncate text-slate-700" v-text="namaBukti || (form.bukti && !form.hapus_bukti ? 'Bukti tersimpan' : 'Belum ada file')"></p>
-                        <a v-if="form.bukti && !namaBukti && !form.hapus_bukti" :href="form.bukti" target="_blank" rel="noopener" class="text-xs font-semibold text-emerald-700 hover:underline">Lihat bukti</a>
+                        <p class="truncate text-slate-700" v-text="namaBukti || (form.bukti && !form.hapus_bukti ? @js(__('Bukti tersimpan')) : @js(__('Belum ada file')))"></p>
+                        <a v-if="form.bukti && !namaBukti && !form.hapus_bukti" :href="form.bukti" target="_blank" rel="noopener" class="text-xs font-semibold text-emerald-700 hover:underline">{{ __('Lihat bukti') }}</a>
                     </div>
                     <label class="shrink-0 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-semibold text-slate-700 cursor-pointer">
-                        Pilih file
+                        {{ __('Pilih file') }}
                         <input ref="inputBukti" type="file" name="bukti" accept="image/*,application/pdf" class="hidden" @change="pilihBukti">
                     </label>
                 </div>
                 <label v-if="form.id && form.bukti && !namaBukti" class="mt-2 inline-flex items-center gap-2 text-xs text-rose-600 cursor-pointer">
-                    <input type="checkbox" name="hapus_bukti" value="1" v-model="form.hapus_bukti" class="accent-rose-600"> Hapus bukti tersimpan
+                    <input type="checkbox" name="hapus_bukti" value="1" v-model="form.hapus_bukti" class="accent-rose-600"> {{ __('Hapus bukti tersimpan') }}
                 </label>
             </div>
 
             <div class="flex justify-end gap-2 pt-2">
-                <button type="button" @click="tutupDialog" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
-                <button type="submit" class="px-5 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d]" v-text="form.id ? 'Simpan Perubahan' : 'Simpan Transaksi'"></button>
+                <button type="button" @click="tutupDialog" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">{{ __('Batal') }}</button>
+                <button type="submit" class="px-5 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d]" v-text="form.id ? @js(__('Simpan Perubahan')) : @js(__('Simpan Transaksi'))"></button>
             </div>
         </form>
     </dialog>
@@ -270,7 +270,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
     <dialog ref="dialogKategori" @click.self="tutupDialog" class="m-auto w-[min(640px,calc(100%-2rem))] rounded-3xl p-0 backdrop:bg-black/40">
         <div class="p-6 space-y-5">
             <div class="flex items-center gap-3">
-                <h2 class="flex-1 text-lg font-bold text-slate-800">Kelola Kategori</h2>
+                <h2 class="flex-1 text-lg font-bold text-slate-800">{{ __('Kelola Kategori') }}</h2>
                 <button type="button" @click="tutupDialog" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">✕</button>
             </div>
 
@@ -282,33 +282,33 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                 <input type="hidden" name="form_id" value="kategori">
                 <input v-for="(v, k) in filterAwal" :key="k" type="hidden" :name="'_filter[' + k + ']'" :value="v">
                 <label class="flex-1 min-w-[180px]">
-                    <span class="text-xs font-semibold text-slate-600" v-text="formKategori.id ? 'Ubah nama kategori' : 'Kategori baru'"></span>
-                    <input ref="namaKategori" type="text" name="nama" v-model="formKategori.nama" required maxlength="60" placeholder="mis. Listrik & Air" class="mt-1 {{ $isian }}">
+                    <span class="text-xs font-semibold text-slate-600" v-text="formKategori.id ? @js(__('Ubah nama kategori')) : @js(__('Kategori baru'))"></span>
+                    <input ref="namaKategori" type="text" name="nama" v-model="formKategori.nama" required maxlength="60" placeholder="{{ __('mis. Listrik & Air') }}" class="mt-1 {{ $isian }}">
                 </label>
                 <label>
-                    <span class="text-xs font-semibold text-slate-600">Tipe</span>
+                    <span class="text-xs font-semibold text-slate-600">{{ __('Tipe') }}</span>
                     <select name="tipe" v-model="formKategori.tipe" class="mt-1 {{ $isian }}">
-                        <option value="masuk">Masuk</option>
-                        <option value="keluar">Keluar</option>
+                        <option value="masuk">{{ __('Masuk') }}</option>
+                        <option value="keluar">{{ __('Keluar') }}</option>
                     </select>
                 </label>
-                <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d]" v-text="formKategori.id ? 'Simpan' : 'Tambah'"></button>
-                <button v-if="formKategori.id" type="button" @click="formKategori = { id: null, nama: '', tipe: formKategori.tipe }" class="px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-200">Batal</button>
+                <button type="submit" class="px-4 py-2.5 rounded-xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d]" v-text="formKategori.id ? @js(__('Simpan')) : @js(__('Tambah'))"></button>
+                <button v-if="formKategori.id" type="button" @click="formKategori = { id: null, nama: '', tipe: formKategori.tipe }" class="px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-200">{{ __('Batal') }}</button>
             </form>
 
             <div class="grid sm:grid-cols-2 gap-4">
                 <div v-for="tp in ['masuk', 'keluar']" :key="tp">
-                    <p class="mb-2 text-xs font-bold uppercase tracking-wider" :class="tp === 'masuk' ? 'text-emerald-700' : 'text-rose-600'" v-text="tp === 'masuk' ? 'Pemasukan' : 'Pengeluaran'"></p>
+                    <p class="mb-2 text-xs font-bold uppercase tracking-wider" :class="tp === 'masuk' ? 'text-emerald-700' : 'text-rose-600'" v-text="tp === 'masuk' ? @js(__('Pemasukan')) : @js(__('Pengeluaran'))"></p>
                     <ul class="space-y-1.5">
                         <li v-for="k in kategoriUntuk(tp)" :key="k.id" class="flex items-center gap-2 px-3 py-2 rounded-xl ring-1 ring-slate-200"
                             :class="formKategori.id === k.id ? 'bg-emerald-50 ring-emerald-300' : ''">
                             <span class="flex-1 min-w-0 truncate text-sm text-slate-700" v-text="k.nama"></span>
-                            <span class="text-[11px] text-slate-400 tabular-nums" :title="k.jumlah + ' transaksi'" v-text="k.jumlah"></span>
-                            <button type="button" @click="ubahKategori(k)" class="text-xs font-semibold text-slate-600 hover:text-emerald-700">Ubah</button>
-                            <button type="button" @click="hapusKategori(k)" :disabled="k.jumlah > 0" :title="k.jumlah > 0 ? 'Masih dipakai transaksi' : 'Hapus'"
-                                class="text-xs font-semibold text-rose-600 hover:text-rose-700 disabled:text-slate-300 disabled:cursor-not-allowed">Hapus</button>
+                            <span class="text-[11px] text-slate-400 tabular-nums" :title="k.jumlah + ' ' + @js(__('transaksi'))" v-text="k.jumlah"></span>
+                            <button type="button" @click="ubahKategori(k)" class="text-xs font-semibold text-slate-600 hover:text-emerald-700">{{ __('Ubah') }}</button>
+                            <button type="button" @click="hapusKategori(k)" :disabled="k.jumlah > 0" :title="k.jumlah > 0 ? @js(__('Masih dipakai transaksi')) : @js(__('Hapus'))"
+                                class="text-xs font-semibold text-rose-600 hover:text-rose-700 disabled:text-slate-300 disabled:cursor-not-allowed">{{ __('Hapus') }}</button>
                         </li>
-                        <li v-if="!kategoriUntuk(tp).length" class="text-sm text-slate-400">Belum ada kategori.</li>
+                        <li v-if="!kategoriUntuk(tp).length" class="text-sm text-slate-400">{{ __('Belum ada kategori.') }}</li>
                     </ul>
                 </div>
             </div>
@@ -374,10 +374,10 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                     const awalLalu = new Date(kini.getFullYear(), kini.getMonth() - 1, 1, 12);
                     const akhirLalu = new Date(kini.getFullYear(), kini.getMonth(), 0, 12);
                     return [
-                        { label: '7 Hari', mulai: mundur(6), sampai: this.hariIni },
-                        { label: '30 Hari', mulai: mundur(29), sampai: this.hariIni },
-                        { label: 'Bulan ' + BULAN.format(awalBulan), mulai: keTeks(awalBulan), sampai: this.hariIni },
-                        { label: 'Bulan ' + BULAN.format(awalLalu), mulai: keTeks(awalLalu), sampai: keTeks(akhirLalu) },
+                        { label: @js(__('7 Hari')), mulai: mundur(6), sampai: this.hariIni },
+                        { label: @js(__('30 Hari')), mulai: mundur(29), sampai: this.hariIni },
+                        { label: @js(__('Bulan')) + ' ' + BULAN.format(awalBulan), mulai: keTeks(awalBulan), sampai: this.hariIni },
+                        { label: @js(__('Bulan')) + ' ' + BULAN.format(awalLalu), mulai: keTeks(awalLalu), sampai: keTeks(akhirLalu) },
                     ];
                 },
             },
@@ -442,7 +442,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                 },
                 hapusTransaksi(t) {
                     this.menuBuka = null;
-                    if (!confirm('Hapus transaksi "' + t.deskripsi + '"?')) return;
+                    if (!confirm(@js(__('Hapus transaksi ":deskripsi"?')).replace(':deskripsi', t.deskripsi))) return;
                     this.aksiHapus = this.URL + '/' + t.id;
                     this.$nextTick(() => this.$refs.formHapus.submit());
                 },
@@ -458,7 +458,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                     this.$nextTick(() => this.$refs.namaKategori.focus());
                 },
                 hapusKategori(k) {
-                    if (!confirm('Hapus kategori ' + k.nama + '?')) return;
+                    if (!confirm(@js(__('Hapus kategori :nama?')).replace(':nama', k.nama))) return;
                     this.aksiHapus = this.URL + '/kategori/' + k.id;
                     this.$nextTick(() => this.$refs.formHapus.submit());
                 },

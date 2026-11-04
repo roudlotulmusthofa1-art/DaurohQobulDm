@@ -14,8 +14,8 @@ $galatTc = $errors->getBag('tambahCepat');
         @csrf
         <div class="flex items-start gap-3">
             <div class="flex-1">
-                <h2 class="text-lg font-bold text-slate-800">Tambah Cepat {{ $jenis }}</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Langsung diterima &amp; akun login aktif. Data lain bisa dilengkapi nanti lewat tombol Edit.</p>
+                <h2 class="text-lg font-bold text-slate-800">{{ __('Tambah Cepat :jenis', ['jenis' => __($jenis)]) }}</h2>
+                <p class="text-xs text-slate-500 mt-0.5">{{ __('Langsung diterima & akun login aktif. Data lain bisa dilengkapi nanti lewat tombol Edit.') }}</p>
             </div>
             <button type="button" @click="tutupTambahCepat" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
@@ -29,41 +29,41 @@ $galatTc = $errors->getBag('tambahCepat');
         @endif
 
         <label class="block">
-            <span class="text-sm font-semibold text-slate-700">Nama Lengkap</span>
-            <input ref="tcNama" type="text" name="nama_lengkap" v-model="tc.nama_lengkap" required maxlength="150" placeholder="mis. Ustadz Ahmad Fauzi" class="{{ $isianTc }}">
+            <span class="text-sm font-semibold text-slate-700">{{ __('Nama Lengkap') }}</span>
+            <input ref="tcNama" type="text" name="nama_lengkap" v-model="tc.nama_lengkap" required maxlength="150" placeholder="{{ __('mis. Ustadz Ahmad Fauzi') }}" class="{{ $isianTc }}">
         </label>
         <label class="block">
-            <span class="text-sm font-semibold text-slate-700">No. WhatsApp</span>
+            <span class="text-sm font-semibold text-slate-700">{{ __('No. WhatsApp') }}</span>
             <input type="tel" name="no_hp" v-model="tc.no_hp" required maxlength="20" placeholder="081234567890" class="{{ $isianTc }}">
         </label>
         <label class="block">
-            <span class="text-sm font-semibold text-slate-700">Email (untuk login)</span>
+            <span class="text-sm font-semibold text-slate-700">{{ __('Email (untuk login)') }}</span>
             <input type="email" name="email" v-model="tc.email" required maxlength="255" placeholder="nama@email.com" class="{{ $isianTc }}">
         </label>
         <label class="block">
-            <span class="text-sm font-semibold text-slate-700">Password</span>
+            <span class="text-sm font-semibold text-slate-700">{{ __('Password') }}</span>
             <span class="relative block">
                 <input :type="tcLihat ? 'text' : 'password'" name="password" v-model="tc.password" required minlength="8" maxlength="100" autocomplete="new-password"
-                    placeholder="Minimal 8 karakter" class="{{ $isianTc }} pr-36">
+                    placeholder="{{ __('Minimal 8 karakter') }}" class="{{ $isianTc }} pr-36">
                 <span class="absolute right-2 top-1/2 -translate-y-1/2 mt-0.5 flex gap-1">
-                    <button type="button" @click="tcLihat = !tcLihat" class="px-2 py-1 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100" v-text="tcLihat ? 'Sembunyi' : 'Lihat'"></button>
-                    <button type="button" @click="buatPasswordAcak" class="px-2 py-1 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50">Acak</button>
+                    <button type="button" @click="tcLihat = !tcLihat" class="px-2 py-1 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100" v-text="tcLihat ? @js(__('Sembunyi')) : @js(__('Lihat'))"></button>
+                    <button type="button" @click="buatPasswordAcak" class="px-2 py-1 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50">{{ __('Acak') }}</button>
                 </span>
             </span>
-            <span v-if="tc.password && tc.password.length < 8" class="mt-1 block text-xs text-amber-600">Kurang <span v-text="8 - tc.password.length"></span> karakter lagi.</span>
-            <span class="mt-1 block text-xs text-slate-400">Catat password ini lalu berikan kepada yang bersangkutan.</span>
+            <span v-if="tc.password && tc.password.length < 8" class="mt-1 block text-xs text-amber-600">{{ __('Kurang') }} <span v-text="8 - tc.password.length"></span> {{ __('karakter lagi.') }}</span>
+            <span class="mt-1 block text-xs text-slate-400">{{ __('Catat password ini lalu berikan kepada yang bersangkutan.') }}</span>
         </label>
         <label class="flex items-start gap-2.5 p-3 rounded-2xl bg-slate-50 ring-1 ring-slate-200 cursor-pointer">
             <input type="checkbox" name="kirim_wa" value="1" v-model="tc.kirim_wa" class="mt-0.5 accent-emerald-600">
-            <span class="text-sm text-slate-700">Kirim pesan "diterima" lewat WhatsApp
-                <span class="block text-xs text-slate-400">Isi pesan mengikuti Pengaturan › Pesan (password tidak ikut dikirim).</span>
+            <span class="text-sm text-slate-700">{{ __('Kirim pesan "diterima" lewat WhatsApp') }}
+                <span class="block text-xs text-slate-400">{{ __('Isi pesan mengikuti Pengaturan › Pesan (password tidak ikut dikirim).') }}</span>
             </span>
         </label>
 
         <div class="flex justify-end gap-2 pt-1">
-            <button type="button" @click="tutupTambahCepat" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+            <button type="button" @click="tutupTambahCepat" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">{{ __('Batal') }}</button>
             <button type="submit" :disabled="tcMengirim" class="px-5 py-2.5 rounded-2xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 disabled:opacity-50"
-                v-text="tcMengirim ? 'Menyimpan…' : 'Simpan & Aktifkan'"></button>
+                v-text="tcMengirim ? @js(__('Menyimpan…')) : @js(__('Simpan & Aktifkan'))"></button>
         </div>
     </form>
 </dialog>

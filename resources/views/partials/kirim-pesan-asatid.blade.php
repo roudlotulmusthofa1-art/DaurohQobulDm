@@ -22,8 +22,8 @@ $isianPesan = 'mt-1 w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
             </span>
             <div class="flex-1">
-                <h2 class="text-lg font-bold text-slate-800">Kirim Pesan ke Asatid</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Pesan tampil di dasbor asatid › <b>Pesan dari Admin</b> dan di lonceng notifikasinya.</p>
+                <h2 class="text-lg font-bold text-slate-800">{{ __('Kirim Pesan ke Asatid') }}</h2>
+                <p class="text-xs text-slate-500 mt-0.5">{{ __('Pesan tampil di dasbor asatid ›') }} <b>{{ __('Pesan dari Admin') }}</b> {{ __('dan di lonceng notifikasinya.') }}</p>
             </div>
             <button type="button" @click="tutupKirimPesan" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">✕</button>
         </div>
@@ -40,17 +40,17 @@ $isianPesan = 'mt-1 w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4
         <div class="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-slate-100">
             <button type="button" @click="pesan.tujuan = 'semua'" class="py-2 rounded-xl text-sm font-bold transition"
                 :class="pesan.tujuan === 'semua' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'"
-                v-text="'Semua asatid (' + penerimaPesan.length + ')'"></button>
+                v-text="@js(__('Semua asatid')) + ' (' + penerimaPesan.length + ')'"></button>
             <button type="button" @click="pesan.tujuan = 'pilih'" class="py-2 rounded-xl text-sm font-bold transition"
-                :class="pesan.tujuan === 'pilih' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'">Pilih asatid</button>
+                :class="pesan.tujuan === 'pilih' ? 'bg-white text-emerald-700 shadow-sm' : 'text-slate-500'">{{ __('Pilih asatid') }}</button>
         </div>
 
         <div v-if="pesan.tujuan === 'pilih'" class="rounded-2xl ring-1 ring-slate-200 overflow-hidden">
             <div class="flex items-center gap-2 p-2 border-b border-slate-100 bg-slate-50">
-                <input type="search" v-model.trim="pesan.cari" placeholder="Cari nama asatid…"
+                <input type="search" v-model.trim="pesan.cari" placeholder="{{ __('Cari nama asatid…') }}"
                     class="flex-1 min-w-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm focus:outline-none focus:border-emerald-400">
-                <button type="button" @click="pilihSemuaTampil" class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50">Pilih semua</button>
-                <button type="button" @click="pesan.dipilih = []" class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100">Kosongkan</button>
+                <button type="button" @click="pilihSemuaTampil" class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-emerald-700 hover:bg-emerald-50">{{ __('Pilih semua') }}</button>
+                <button type="button" @click="pesan.dipilih = []" class="shrink-0 px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-500 hover:bg-slate-100">{{ __('Kosongkan') }}</button>
             </div>
             <div class="max-h-56 overflow-y-auto divide-y divide-slate-100">
                 <label v-for="a in penerimaTampil" :key="a.user_id" class="flex items-center gap-3 px-3 py-2 cursor-pointer hover:bg-emerald-50/50"
@@ -63,30 +63,30 @@ $isianPesan = 'mt-1 w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4
                         <span class="block text-[11px] text-slate-400" v-text="a.nomor"></span>
                     </span>
                 </label>
-                <p v-if="!penerimaTampil.length" class="px-3 py-6 text-center text-sm text-slate-400">Tidak ada asatid yang cocok.</p>
+                <p v-if="!penerimaTampil.length" class="px-3 py-6 text-center text-sm text-slate-400">{{ __('Tidak ada asatid yang cocok.') }}</p>
             </div>
             <p class="px-3 py-2 text-xs bg-slate-50 border-t border-slate-100" :class="pesan.dipilih.length ? 'text-emerald-700 font-semibold' : 'text-slate-400'"
-                v-text="pesan.dipilih.length ? pesan.dipilih.length + ' asatid dipilih' : 'Belum ada yang dipilih'"></p>
+                v-text="pesan.dipilih.length ? @js(__(':jumlah asatid dipilih')).replace(':jumlah', pesan.dipilih.length) : @js(__('Belum ada yang dipilih'))"></p>
         </div>
 
         <label class="block">
-            <span class="text-sm font-semibold text-slate-700">Judul <span class="font-normal text-slate-400">(opsional)</span></span>
-            <input type="text" name="judul" v-model="pesan.judul" maxlength="150" placeholder="mis. Rapat asatid hari Kamis" class="{{ $isianPesan }}">
+            <span class="text-sm font-semibold text-slate-700">{{ __('Judul') }} <span class="font-normal text-slate-400">{{ __('(opsional)') }}</span></span>
+            <input type="text" name="judul" v-model="pesan.judul" maxlength="150" placeholder="{{ __('mis. Rapat asatid hari Kamis') }}" class="{{ $isianPesan }}">
         </label>
         <label class="block">
             <span class="flex items-center justify-between text-sm font-semibold text-slate-700">
-                Isi Pesan
+                {{ __('Isi Pesan') }}
                 <span class="text-xs font-normal" :class="pesan.isi.length > 3000 ? 'text-rose-600' : 'text-slate-400'" v-text="pesan.isi.length + '/3000'"></span>
             </span>
             <textarea ref="isiPesan" name="isi" v-model="pesan.isi" rows="5" required maxlength="3000" dir="auto"
-                placeholder="Tulis pesan untuk asatid…" class="{{ $isianPesan }}"></textarea>
+                placeholder="{{ __('Tulis pesan untuk asatid…') }}" class="{{ $isianPesan }}"></textarea>
         </label>
 
         <div class="flex justify-end gap-2 pt-1">
-            <button type="button" @click="tutupKirimPesan" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">Batal</button>
+            <button type="button" @click="tutupKirimPesan" class="px-4 py-2.5 rounded-2xl text-sm font-semibold text-slate-600 hover:bg-slate-100">{{ __('Batal') }}</button>
             <button type="submit" :disabled="!bisaKirimPesan || pesanMengirim"
                 class="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-sky-600 text-white text-sm font-bold hover:bg-sky-700 disabled:opacity-40 disabled:cursor-not-allowed"
-                v-text="pesanMengirim ? 'Mengirim…' : 'Kirim ke ' + jumlahPenerimaPesan + ' asatid'"></button>
+                v-text="pesanMengirim ? @js(__('Mengirim…')) : @js(__('Kirim ke :jumlah asatid')).replace(':jumlah', jumlahPenerimaPesan)"></button>
         </div>
     </form>
 </dialog>

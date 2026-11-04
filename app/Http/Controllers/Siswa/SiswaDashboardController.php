@@ -34,6 +34,19 @@ class SiswaDashboardController extends Controller
         return $this->tampil('siswa.profil');
     }
 
+    /** Menu "Ganti Password": peserta mengganti password sendiri (butuh password lama) */
+    public function gantiPassword(): View
+    {
+        return $this->tampil('siswa.ganti-password');
+    }
+
+    public function simpanGantiPassword(Request $request): RedirectResponse
+    {
+        \App\Support\GantiPasswordSendiri::simpan($request, $this->siswa());
+
+        return redirect()->route('siswa.ganti-password')->with('password_diganti', true);
+    }
+
     public function kelulusan(): View
     {
         // Kelulusan AKHIR dauroh; hasil baru terlihat setelah admin menekan "Umumkan"

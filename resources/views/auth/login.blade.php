@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masuk · Dauroh Qobul</title>
+    <title>{{ __('Masuk · Dauroh Qobul') }}</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
@@ -54,20 +54,20 @@
                 <!-- Logo + nama -->
                 <a href="/" class="inline-flex items-center gap-3 self-start group">
                     <span class="w-11 h-11 rounded-full bg-[#eff5f0] ring-4 ring-white/10 flex items-center justify-center overflow-hidden shadow-lg">
-                        <img src="{{ asset('images/Logo dar4.png') }}" alt="Logo" class="w-full h-full object-contain">
+                        <img src="{{ asset('images/Logo dar4.png') }}" alt="{{ __('Logo') }}" class="w-full h-full object-contain">
                     </span>
-                    <span class="font-bold text-lg tracking-tight group-hover:text-white/80 transition-colors">Dauroh Qobul</span>
+                    <span class="font-bold text-lg tracking-tight group-hover:text-white/80 transition-colors">{{ __('Dauroh Qobul') }}</span>
                 </a>
 
                 <!-- Sambutan -->
                 <div class="mt-10 lg:mt-auto lg:mb-auto max-w-md">
-                    <p class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-amber-200/90">Darul Musthofa Tarim</p>
+                    <p class="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-amber-200/90">{{ __('Darul Musthofa Tarim') }}</p>
                     <h2 class="mt-3 text-3xl sm:text-4xl lg:text-5xl font-extrabold leading-tight tracking-tight">
-                        Selamat Datang
-                        <span class="block text-emerald-300">di Dauroh Qobul</span>
+                        {{ __('Selamat Datang') }}
+                        <span class="block text-emerald-300">{{ __('di Dauroh Qobul') }}</span>
                     </h2>
                     <p class="mt-4 text-sm sm:text-base text-white/70 leading-relaxed hidden sm:block">
-                        Masuk untuk mengelola data , atau melihat informasi akun Anda.
+                        {{ __('Masuk untuk mengelola data , atau melihat informasi akun Anda.') }}
                     </p>
 
                     <ul class="mt-8 space-y-3 text-sm text-white/80 hidden lg:block">
@@ -75,18 +75,18 @@
                             <span class="w-8 h-8 rounded-xl bg-white/10 ring-1 ring-white/15 flex items-center justify-center text-emerald-300">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
                             </span>
-                            Akun aman, khusus Admin, Asatid &amp; Peserta terdaftar
+                            {{ __('Akun aman, khusus Admin, Asatid & Peserta terdaftar') }}
                         </li>
                         <li class="flex items-center gap-3">
                             <span class="w-8 h-8 rounded-xl bg-white/10 ring-1 ring-white/15 flex items-center justify-center text-amber-200">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106a1.125 1.125 0 00-1.173.417l-.97 1.293a1.125 1.125 0 01-1.21.38 12.035 12.035 0 01-7.143-7.143 1.125 1.125 0 01.38-1.21l1.293-.97a1.125 1.125 0 00.417-1.173L6.963 3.102A1.125 1.125 0 005.872 2.25H4.5A2.25 2.25 0 002.25 4.5v2.25z"/></svg>
                             </span>
-                            Info akun siswa dikirim lewat Nomer WhatsApp terdaftar.
+                            {{ __('Info akun siswa dikirim lewat Nomer WhatsApp terdaftar.') }}
                         </li>
                     </ul>
                 </div>
 
-                <p class="hidden lg:block text-xs text-white/40">&copy; {{ date('Y') }} Dauroh Qobul · Darul Musthofa Tarim</p>
+                <p class="hidden lg:block text-xs text-white/40">&copy; {{ date('Y') }} {{ __('Dauroh Qobul · Darul Musthofa Tarim') }}</p>
             </div>
         </div>
 
@@ -99,8 +99,8 @@
                         <span class="inline-flex w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white items-center justify-center shadow-lg shadow-emerald-500/25">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
                         </span>
-                        <h1 class="mt-4 text-2xl sm:text-[28px] font-extrabold text-slate-800 tracking-tight">Masuk ke Akun</h1>
-                        <p class="mt-1 text-sm text-slate-500">Silakan masukkan email dan password Anda.</p>
+                        <h1 class="mt-4 text-2xl sm:text-[28px] font-extrabold text-slate-800 tracking-tight">{{ __('Masuk ke Akun') }}</h1>
+                        <p class="mt-1 text-sm text-slate-500">{{ __('Silakan masukkan email dan password Anda.') }}</p>
                     </div>
 
                     {{-- Notifikasi error umum (misal email/password salah) --}}
@@ -121,7 +121,7 @@
                         @csrf
                         <!-- Email -->
                         <div class="mb-5">
-                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-1.5">Email</label>
+                            <label for="email" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ __('Email') }}</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0l-9.75 6.5-9.75-6.5"/></svg>
@@ -136,7 +136,7 @@
 
                         <!-- Password -->
                         <div class="mb-3">
-                            <label for="password" class="block text-sm font-semibold text-slate-700 mb-1.5">Password</label>
+                            <label for="password" class="block text-sm font-semibold text-slate-700 mb-1.5">{{ __('Password') }}</label>
                             <div class="relative">
                                 <span class="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z"/></svg>
@@ -144,9 +144,9 @@
                                 <input id="password" :type="showPassword ? 'text' : 'password'" name="password" required
                                     v-model="form.password" autocomplete="current-password"
                                     class="w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl py-3 pl-11 pr-12 text-slate-800 placeholder:text-slate-400 outline-none transition focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/15"
-                                    placeholder="Masukkan password">
+                                    placeholder="{{ __('Masukkan password') }}">
                                 <button type="button" @click="showPassword = !showPassword"
-                                    :title="showPassword ? 'Sembunyikan password' : 'Tampilkan password'"
+                                    :title="showPassword ? @js(__('Sembunyikan password')) : @js(__('Tampilkan password'))"
                                     class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-[#0b332c] hover:bg-slate-100 transition-colors">
                                     <!-- Password tertutup -->
                                     <svg v-show="!showPassword" class="w-5 h-5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
@@ -169,7 +169,7 @@
                         <!-- Forgot password -->
                         <div class="text-right mb-6">
                             <a href="#" class="text-xs font-medium text-slate-400 hover:text-emerald-700 transition-colors">
-                                Lupa password?
+                                {{ __('Lupa password?') }}
                             </a>
                         </div>
 
@@ -193,16 +193,14 @@
                             </svg>
 
                             <!-- Tulisan -->
-                            <span>
-                                @{{ loading ? 'Proses...' : 'Masuk' }}
-                            </span>
+                            <span v-text="loading ? @js(__('Proses...')) : @js(__('Masuk'))"></span>
                         </button>
                     </form>
 
                     <!-- Pemisah -->
                     <div class="my-7 flex items-center gap-3 text-xs text-slate-400">
                         <span class="flex-1 h-px bg-slate-100"></span>
-                        Belum punya akun?
+                        {{ __('Belum punya akun?') }}
                         <span class="flex-1 h-px bg-slate-100"></span>
                     </div>
 
@@ -210,7 +208,7 @@
                     <a href="{{ route('psb.daftar') }}"
                         class="w-full inline-flex items-center justify-center gap-2 py-3 rounded-2xl ring-1 ring-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.374 21c-2.331 0-4.512-.645-6.374-1.766z"/></svg>
-                        Daftar di sini
+                        {{ __('Daftar di sini') }}
                     </a>
                 </div>
 
@@ -218,12 +216,12 @@
                 <div class="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-sm text-slate-500">
                     <a href="/" class="inline-flex items-center gap-1.5 font-medium text-[#0b332c] hover:text-emerald-700 transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-                        Kembali ke Beranda
+                        {{ __('Kembali ke Beranda') }}
                     </a>
                     <span class="hidden sm:inline text-slate-300">|</span>
                     <span>
-                        Ada masalah? Hubungi
-                        <a href="/.#kontak" class="text-amber-600 font-semibold hover:underline">kami</a>
+                        {{ __('Ada masalah? Hubungi') }}
+                        <a href="/.#kontak" class="text-amber-600 font-semibold hover:underline">{{ __('kami') }}</a>
                     </span>
                 </div>
             </div>
@@ -248,10 +246,10 @@
                 onSubmit(e) {
                     this.clientErrors = {};
                     if (!this.form.email) {
-                        this.clientErrors.email = 'Email wajib diisi.';
+                        this.clientErrors.email = @js(__('Email wajib diisi.'));
                     }
                     if (!this.form.password) {
-                        this.clientErrors.password = 'Password wajib diisi.';
+                        this.clientErrors.password = @js(__('Password wajib diisi.'));
                     }
                     if (Object.keys(this.clientErrors).length > 0) {
                         e.preventDefault();

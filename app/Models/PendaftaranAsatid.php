@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\ResetPasswordAkun;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +14,8 @@ use Illuminate\Support\Str;
  */
 class PendaftaranAsatid extends Model
 {
+    use ResetPasswordAkun; // resetPassword(): tombol Reset Password di halaman detail
+
     /** Dipakai bersama semua sesi -> selalu di database utama */
     protected $connection = 'pusat';
 

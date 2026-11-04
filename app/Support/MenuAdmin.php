@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
  * - middleware CekIzinAdmin                 -> halaman yang tidak diizinkan tidak bisa dibuka
  *
  * Kunci izin = nama route submenu, mis. "admin.santri.index".
+ * Label dibungkus __('...') supaya bisa diterjemahkan di Sistem > Pengaturan > Bahasa.
  */
 class MenuAdmin
 {
@@ -26,76 +27,76 @@ class MenuAdmin
     public static function semua(): array
     {
         return [
-            ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => 'DASHBOARD', 'icon' => 'home'],
+            ['route' => 'admin.dashboard', 'active' => 'admin.dashboard', 'label' => __('DASHBOARD'), 'icon' => 'home'],
 
             [
-                'label' => 'MANAJEMEN DATA',
+                'label' => __('MANAJEMEN DATA'),
                 'icon'  => 'graduation-cap',
                 'submenu' => [
-                    ['route' => 'admin.santri.index', 'active' => 'admin.santri.*', 'label' => 'Data Santri', 'icon' => 'user-round'],
-                    ['route' => 'admin.asatid.index',   'active' => 'admin.asatid.*',   'label' => 'Data Asatid', 'icon' => 'user-check'],
-                    ['route' => 'admin.data-admin.index', 'active' => 'admin.data-admin.*', 'label' => 'Data Admin', 'icon' => 'user-cog'],
+                    ['route' => 'admin.santri.index', 'active' => 'admin.santri.*', 'label' => __('Data Santri'), 'icon' => 'user-round'],
+                    ['route' => 'admin.asatid.index',   'active' => 'admin.asatid.*',   'label' => __('Data Asatid'), 'icon' => 'user-check'],
+                    ['route' => 'admin.data-admin.index', 'active' => 'admin.data-admin.*', 'label' => __('Data Admin'), 'icon' => 'user-cog'],
                 ],
             ],
 
             [
-                'label' => 'AKADEMIK',
+                'label' => __('AKADEMIK'),
                 'icon'  => 'book-open-check',
                 'submenu' => [
-                    ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => 'Tahun & Bulan Ajaran', 'icon' => 'calendar-range'],
-                    ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => 'Kurikulum & Kitab', 'icon' => 'book-open'],
-                    ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => 'Jadwal Mengajar', 'icon' => 'calendar-clock'],
-                    ['route' => 'admin.kelulusan.index',    'active' => 'admin.kelulusan.*',    'label' => 'Kelulusan', 'icon' => 'award'],
+                    ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => __('Tahun & Bulan Ajaran'), 'icon' => 'calendar-range'],
+                    ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => __('Kurikulum & Kitab'), 'icon' => 'book-open'],
+                    ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => __('Jadwal Mengajar'), 'icon' => 'calendar-clock'],
+                    ['route' => 'admin.kelulusan.index',    'active' => 'admin.kelulusan.*',    'label' => __('Kelulusan'), 'icon' => 'award'],
                 ],
             ],
 
             [
-                'label' => 'KEUANGAN',
+                'label' => __('KEUANGAN'),
                 'icon'  => 'wallet',
                 'submenu' => [
-                    ['route' => 'admin.biaya-pendidikan.index', 'active' => 'admin.biaya-pendidikan.*', 'label' => 'Biaya Pendidikan', 'icon' => 'receipt'],
-                    ['route' => 'admin.pembayaran.index',       'active' => 'admin.pembayaran.*',       'label' => 'Pembayaran Santri', 'icon' => 'credit-card'],
-                    ['route' => 'admin.buku-kas.index',        'active' => 'admin.buku-kas.*',        'label' => 'Buku Kas', 'icon' => 'book-open-text'],
+                    ['route' => 'admin.biaya-pendidikan.index', 'active' => 'admin.biaya-pendidikan.*', 'label' => __('Biaya Pendidikan'), 'icon' => 'receipt'],
+                    ['route' => 'admin.pembayaran.index',       'active' => 'admin.pembayaran.*',       'label' => __('Pembayaran Santri'), 'icon' => 'credit-card'],
+                    ['route' => 'admin.buku-kas.index',        'active' => 'admin.buku-kas.*',        'label' => __('Buku Kas'), 'icon' => 'book-open-text'],
                 ],
             ],
             [
-                'label' => 'LAPORAN',
+                'label' => __('LAPORAN'),
                 'icon'  => 'bell',
                 'submenu' => [
-                    ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => 'Laporan Akademik', 'icon' => 'chart-column'],
-                    ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => 'Laporan Keuangan', 'icon' => 'chart-pie'],
-                    ['route' => 'admin.laporan-absensi.index',   'active' => 'admin.laporan-absensi.*',   'label' => 'Laporan Absensi', 'icon' => 'clipboard-check'],
+                    ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => __('Laporan Akademik'), 'icon' => 'chart-column'],
+                    ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => __('Laporan Keuangan'), 'icon' => 'chart-pie'],
+                    ['route' => 'admin.laporan-absensi.index',   'active' => 'admin.laporan-absensi.*',   'label' => __('Laporan Absensi'), 'icon' => 'clipboard-check'],
                 ],
             ],
             [
-                'label' => 'PSB',
+                'label' => __('PSB'),
                 'icon'  => 'calendar',
                 'submenu' => [
                     // admin.pendaftaran.* ikut dihitung, supaya halaman detail/edit peserta juga masuk menu ini
-                    ['route' => 'admin.data-masuk.index',      'active' => ['admin.data-masuk.*', 'admin.pendaftaran.*'], 'label' => 'Data Masuk Peserta', 'icon' => 'user-plus'],
+                    ['route' => 'admin.data-masuk.index',      'active' => ['admin.data-masuk.*', 'admin.pendaftaran.*'], 'label' => __('Data Masuk Peserta'), 'icon' => 'user-plus'],
                     // Pesan dua arah dengan peserta (dasbor siswa)
-                    ['route' => 'admin.pesan-peserta.index',   'active' => 'admin.pesan-peserta.*', 'label' => 'Pesan Peserta', 'icon' => 'messages-square'],
+                    ['route' => 'admin.pesan-peserta.index',   'active' => 'admin.pesan-peserta.*', 'label' => __('Pesan Peserta'), 'icon' => 'messages-square'],
                 ],
             ],
             [
-                'label' => 'LANDING PAGE',
+                'label' => __('LANDING PAGE'),
                 'icon'  => 'globe',
                 'submenu' => [
-                    ['route' => 'admin.landing-pengumuman.index', 'active' => 'admin.landing-pengumuman.*', 'label' => 'Pita Pengumuman', 'icon' => 'megaphone'],
-                    ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => 'Hero & Statistik', 'icon' => 'layout-template'],
-                    ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => 'Fitur Unggulan', 'icon' => 'sparkles'],
-                    ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => 'Kurikulum Terintegrasi', 'icon' => 'layers'],
+                    ['route' => 'admin.landing-pengumuman.index', 'active' => 'admin.landing-pengumuman.*', 'label' => __('Pita Pengumuman'), 'icon' => 'megaphone'],
+                    ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => __('Hero & Statistik'), 'icon' => 'layout-template'],
+                    ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => __('Fitur Unggulan'), 'icon' => 'sparkles'],
+                    ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => __('Kurikulum Terintegrasi'), 'icon' => 'layers'],
                 ],
             ],
 
             [
-                'label' => 'SISTEM',
+                'label' => __('SISTEM'),
                 'icon'  => 'settings',
                 'submenu' => [
-                    ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => 'Role & Permission', 'icon' => 'shield-check'],
-                    ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => 'Daftar User', 'icon' => 'users'],
-                    ['route' => 'admin.master-data.index', 'active' => 'admin.master-data.*', 'label' => 'Master Data', 'icon' => 'database'],
-                    ['route' => 'admin.pengaturan.index', 'active' => 'admin.pengaturan.*', 'label' => 'Pengaturan', 'icon' => 'sliders-horizontal'],
+                    ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => __('Role & Permission'), 'icon' => 'shield-check'],
+                    ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => __('Daftar User'), 'icon' => 'users'],
+                    ['route' => 'admin.master-data.index', 'active' => 'admin.master-data.*', 'label' => __('Master Data'), 'icon' => 'database'],
+                    ['route' => 'admin.pengaturan.index', 'active' => 'admin.pengaturan.*', 'label' => __('Pengaturan'), 'icon' => 'sliders-horizontal'],
                 ],
             ],
         ];
@@ -103,7 +104,7 @@ class MenuAdmin
 
     /**
      * Daftar izin untuk halaman Role & Permission, dikelompokkan per menu:
-     * [['label' => 'MANAJEMEN DATA', 'izin' => [['kunci' => 'admin.santri.index', 'label' => 'Data Santri'], ...]], ...]
+     * [['label' => __('MANAJEMEN DATA'), 'izin' => [['kunci' => 'admin.santri.index', 'label' => __('Data Santri')], ...]], ...]
      */
     public static function daftarIzin(): array
     {
