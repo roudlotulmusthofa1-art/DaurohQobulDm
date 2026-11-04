@@ -1,14 +1,14 @@
 {{--
-    Font Arab untuk semua dasbor (admin, asatid, peserta): IBM Plex Sans Arabic — modern, jelas, banyak ketebalan.
-    Huruf latin tetap Plus Jakarta Sans; setiap huruf Arab (nama Arab, data Arab, terjemahan) otomatis memakai font ini.
+    Font Arab untuk semua dasbor (admin, asatid, peserta): Amiri — gaya Naskh seperti kitab cetak.
+    Font-nya didaftarkan di resources/css/app.css (nama "Amiri Kitab", ukuran & daftar huruf Arab diatur di sana).
+    Huruf latin tetap Plus Jakarta Sans; setiap huruf Arab (nama Arab, data Arab, terjemahan) otomatis memakai Amiri.
     Saat bahasa Arab: tata letak kanan ke kiri (dir="rtl" di <html>), lihat blok "TAMPILAN KANAN-KE-KIRI" di bawah.
 --}}
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    :root { --font-sans: 'Plus Jakarta Sans', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, sans-serif; }
+    :root { --font-sans: 'Plus Jakarta Sans', 'Amiri Kitab', ui-sans-serif, system-ui, sans-serif; }
     body, input, button, select, textarea { font-family: var(--font-sans); }
-    /* Teks Arab sedikit lebih lega supaya harakat tidak terpotong */
-    [dir="rtl"], [lang="ar"] { line-height: 1.7; }
+    /* Teks Arab lebih lega supaya harakat Amiri (tinggi) tidak terpotong */
+    [dir="rtl"], [lang="ar"] { line-height: 1.8; }
 
     /* ===== TAMPILAN KANAN-KE-KIRI (aktif hanya saat bahasa Arab) ===== */
 

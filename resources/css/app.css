@@ -20,11 +20,36 @@
     --color-ribath-green-light: #7ED957;
     --color-ribath-bg: #F3F6F3;
 
-    --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Plus Jakarta Sans', 'Amiri Kitab', ui-sans-serif, system-ui, sans-serif;
+}
+
+/*
+    Font Arab: Amiri (gaya Naskh seperti kitab cetak), file dari paket npm @fontsource/amiri.
+    - unicode-range: HANYA huruf Arab yang memakai Amiri; huruf Latin tetap Plus Jakarta Sans.
+    - size-adjust: Amiri diperbesar supaya sejajar dengan huruf Latin (huruf kitab aslinya tampak lebih kecil).
+      Ingin lebih besar/kecil? Ubah angka 125% di kedua blok di bawah (mis. 115% atau 135%), lalu npm run build.
+*/
+@font-face {
+    font-family: 'Amiri Kitab';
+    src: url('../../node_modules/@fontsource/amiri/files/amiri-arabic-400-normal.woff2') format('woff2');
+    font-weight: 100 500;
+    font-style: normal;
+    font-display: swap;
+    size-adjust: 125%;
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-089F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E;
+}
+@font-face {
+    font-family: 'Amiri Kitab';
+    src: url('../../node_modules/@fontsource/amiri/files/amiri-arabic-700-normal.woff2') format('woff2');
+    font-weight: 600 900;
+    font-style: normal;
+    font-display: swap;
+    size-adjust: 125%;
+    unicode-range: U+0600-06FF, U+0750-077F, U+0870-089F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF, U+200C-200E;
 }
 
 html {
-    font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', 'Amiri Kitab', ui-sans-serif, system-ui, sans-serif;
 }
 
 [v-cloak] {

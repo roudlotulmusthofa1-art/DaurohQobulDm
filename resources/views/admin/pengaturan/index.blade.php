@@ -24,7 +24,7 @@ $ukuran = fn ($b) => $b >= 1073741824 ? number_format($b / 1073741824, 1, ',', '
 
 <div id="halaman-pengaturan" class="max-w-6xl mx-auto space-y-6">
     {{-- ===== Judul ===== --}}
-    <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-teal-600 via-[#0f6b5c] to-[#0b332c] text-white p-6 sm:p-7">
+    <section class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-7">
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -bottom-24 -right-10 w-72 h-72 rounded-full bg-amber-300/20 blur-3xl"></div>
         <div class="relative">

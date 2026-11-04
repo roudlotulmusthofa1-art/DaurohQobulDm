@@ -36,6 +36,7 @@ $dataJadwal = $jadwal->map(fn ($j) => [
     'kelas' => $j->kelas?->nama,
     'kitab' => $j->kitab?->nama,
     'ustadz' => $namaUstadz[$j->user_id] ?? null,
+    'ustadz_arab' => $arabUstadz[$j->user_id] ?? null, // nama Arab ustadz (tampil di bawah nama Indonesia)
     'inisial' => $inisial($namaUstadz[$j->user_id] ?? ''),
     'warna' => ($indeksKelas[$j->kelas_id] ?? 0) % 6, // indeks warna kelas
 ])->values();
@@ -58,28 +59,23 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
     @else
 
     {{-- ===== Judul & tombol ===== --}}
-    <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-emerald-50 via-white to-amber-50 ring-1 ring-emerald-200 p-5 sm:p-6">
-        <div class="flex flex-col xl:flex-row xl:items-center gap-4">
-            <div class="flex-1">
-                <h1 class="text-2xl font-extrabold text-[#0b332c]">{{ __('Jadwal Mengajar') }}</h1>
-                <p class="mt-0.5 text-sm font-semibold text-emerald-700">{{ __('Bulan ke-:urutan', ['urutan' => $bulan->urutan]) }} · {{ $bulan->nama }} · {{ __('TA') }} {{ $bulan->tahunAjaran?->nama }}</p>
-            </div>
-            <div class="flex flex-wrap gap-2">
-                <button type="button" @click="bukaDialog('dialog-salin')" class="inline-flex items-center gap-2 rounded-xl bg-violet-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-violet-600 shadow-lg shadow-violet-500/25">
+    <x-header-admin :label="__('Akademik')" :judul="__('Jadwal Mengajar')"
+        :keterangan="__('Bulan ke-:urutan', ['urutan' => $bulan->urutan]) . ' · ' . $bulan->nama . ' · ' . __('TA') . ' ' . $bulan->tahunAjaran?->nama">
+        <x-slot:aksi>
+                <button type="button" @click="bukaDialog('dialog-salin')" class="inline-flex items-center gap-2 rounded-2xl bg-sky-400 px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-sky-300 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/></svg>
                     {{ __('Salin Jadwal') }}
                 </button>
-                <button type="button" @click="bukaDialog('dialog-ganti')" class="inline-flex items-center gap-2 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-bold text-white hover:bg-amber-600 shadow-lg shadow-amber-500/25">
+                <button type="button" @click="bukaDialog('dialog-ganti')" class="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#3b2a00] hover:bg-amber-200 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
                     {{ __('Ganti Ustadz') }}
                 </button>
-                <button type="button" @click="bukaTambah()" class="inline-flex items-center gap-2 rounded-xl bg-[#0b332c] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#135347] shadow-lg shadow-[#0b332c]/25">
+                <button type="button" @click="bukaTambah()" class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-emerald-100 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                     {{ __('Tambah Jadwal') }}
                 </button>
-            </div>
-        </div>
-    </section>
+        </x-slot:aksi>
+    </x-header-admin>
 
     {{-- ===== Periode ===== --}}
     <section class="{{ $kartu }} p-5">
@@ -212,6 +208,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 <span class="w-10 h-10 rounded-2xl flex items-center justify-center text-sm font-extrabold text-white" :class="g.latar" v-text="g.singkat"></span>
                 <div class="min-w-0 flex-1">
                     <h3 class="font-bold text-slate-800 truncate" v-text="g.judul"></h3>
+                    <p v-if="g.judulArab" dir="rtl" lang="ar" class="text-sm text-slate-500 truncate" v-text="g.judulArab"></p>
                     <p class="text-xs text-slate-400" v-text="g.daftar.length + ' ' + @js(__('jam / minggu'))"></p>
                 </div>
             </div>
@@ -253,7 +250,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             <label class="col-span-2"><span class="{{ $label }}">{{ __('Ustadz') }} <span class="font-normal text-slate-400">{{ __('(akun asatid yang diterima)') }}</span></span>
                 <select name="user_id" v-model="form.user_id" class="{{ $input }}">
                     <option value="">{{ __('— Belum ditentukan —') }}</option>
-                    @foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}</option>@endforeach
+                    @foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}{{ $u->arab ? ' — ' . $u->arab : '' }}</option>@endforeach
                 </select>
                 @if ($ustadzList->isEmpty())<span class="mt-1 block text-[11px] text-amber-700">{{ __('Belum ada asatid yang diterima di Manajemen Data › Data Asatid.') }}</span>@endif
             </label>
@@ -309,11 +306,11 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
         @php $ustadzBerjadwal = $jadwal->pluck('user_id')->filter()->unique(); @endphp
         <label class="block"><span class="{{ $label }}">{{ __('Ustadz lama') }}</span>
             <select name="dari" required class="{{ $input }}">
-                @forelse ($ustadzList->whereIn('id', $ustadzBerjadwal) as $u)<option value="{{ $u->id }}">{{ $u->nama }} ({{ __(':jumlah jadwal', ['jumlah' => $jadwal->where('user_id', $u->id)->count()]) }})</option>
+                @forelse ($ustadzList->whereIn('id', $ustadzBerjadwal) as $u)<option value="{{ $u->id }}">{{ $u->nama }}{{ $u->arab ? ' — ' . $u->arab : '' }} ({{ __(':jumlah jadwal', ['jumlah' => $jadwal->where('user_id', $u->id)->count()]) }})</option>
                 @empty<option value="">{{ __('Belum ada ustadz yang dijadwalkan') }}</option>@endforelse
             </select></label>
         <label class="block"><span class="{{ $label }}">{{ __('Ustadz pengganti') }}</span>
-            <select name="ke" required class="{{ $input }}">@foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}</option>@endforeach</select></label>
+            <select name="ke" required class="{{ $input }}">@foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}{{ $u->arab ? ' — ' . $u->arab : '' }}</option>@endforeach</select></label>
         <div class="flex justify-end gap-2 pt-2">
             <button type="button" @click="tutupDialog" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Batal') }}</button>
             <button class="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-600">{{ __('Ganti') }}</button>
@@ -344,7 +341,8 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
         </div>
         <p v-if="lengkap" class="text-[10px] font-bold uppercase tracking-wider text-slate-400" v-text="namaHari + ' · ' + namaWaktu"></p>
         <p class="pr-10 text-sm font-bold leading-tight mb-2" :class="warna[1]" v-text="j.kitab || @js(__('Tanpa kitab'))"></p>
-        <p class="mt-0.5 text-sm leading-tight mb-1" :class="j.ustadz ? 'text-slate-600' : 'text-amber-600'" v-text="j.ustadz || @js(__('Ustadz belum ditentukan'))"></p>
+        <p class="mt-0.5 text-sm leading-tight" :class="[j.ustadz ? 'text-slate-600' : 'text-amber-600', j.ustadz_arab ? '' : 'mb-1']" v-text="j.ustadz || @js(__('Ustadz belum ditentukan'))"></p>
+        <p v-if="j.ustadz_arab" dir="rtl" lang="ar" class="text-[15px] leading-snug text-slate-600 mb-1" v-text="j.ustadz_arab"></p>
         <div class="mt-1 flex items-center justify-between gap-1">
             <span class="truncate text-[11px] font-semibold text-slate-700" v-text="j.kelas"></span>
             <span v-if="j.inisial" class="shrink-0 text-[9px] font-bold text-slate-400" v-text="j.inisial"></span>
@@ -401,7 +399,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                     const kata = this.cari.toLowerCase();
                     if (!kata) return this.jadwal;
                     return this.jadwal.filter((j) =>
-                        [j.kitab, j.ustadz, j.kelas, j.catatan, HARI[j.hari], WAKTU.find((w) => w.id === j.waktu)?.nama]
+                        [j.kitab, j.ustadz, j.ustadz_arab, j.kelas, j.catatan, HARI[j.hari], WAKTU.find((w) => w.id === j.waktu)?.nama]
                             .join(' ').toLowerCase().includes(kata));
                 },
                 // Jadwal yang sudah digeser dari posisi awalnya
@@ -434,6 +432,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                         const judul = perKelas ? (KELAS.find((k) => String(k.id) === kunci)?.nama ?? '-') : (daftar[0].ustadz ?? @js(__('Belum ada ustadz')));
                         return {
                             kunci, daftar, judul,
+                            judulArab: perKelas ? null : (daftar[0].ustadz_arab ?? null), // per ustadz: nama Arab di bawah nama
                             singkat: perKelas ? judul.slice(0, 2).toUpperCase() : (kunci !== '0' ? daftar[0].inisial : '?'),
                             latar: perKelas ? WARNA[daftar[0].warna][2] : (kunci !== '0' ? 'bg-[#0b332c]' : 'bg-slate-300'),
                         };

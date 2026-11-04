@@ -19,22 +19,21 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
 <div id="halaman-pita" class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-6 mb-10">
 
     {{-- ===== Judul + tombol ===== --}}
-    <div class="flex flex-wrap items-end gap-3">
-        <div class="flex-1 min-w-[220px]">
-            <h1 class="text-2xl font-extrabold tracking-tight text-slate-800">{{ __('Pita Pengumuman') }}</h1>
-            <p class="mt-1 text-sm text-slate-500">{{ __('Kabar singkat yang tampil dan hilang sendiri sesuai jadwal. Pilih tempatnya: landing page, dasbor asatid, atau dasbor peserta.') }}</p>
-        </div>
+    <x-header-admin :label="__('Landing Page')" :judul="__('Pita Pengumuman')"
+        :keterangan="__('Kabar singkat yang tampil dan hilang sendiri sesuai jadwal. Pilih tempatnya: landing page, dasbor asatid, atau dasbor peserta.')">
+        <x-slot:aksi>
         <a href="{{ route('landing') }}" target="_blank" rel="noopener"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 ring-1 ring-white/20 text-sm font-semibold hover:bg-white/20 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/></svg>
             {{ __('Lihat landing page') }}
         </a>
         <button type="button" @click="bukaTambah"
-            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b5a4d] shadow-sm">
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-[#0b332c] text-sm font-bold hover:bg-emerald-100 transition-colors">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
             {{ __('Tambah Pengumuman') }}
         </button>
-    </div>
+        </x-slot:aksi>
+    </x-header-admin>
 
     {{-- ===== Ringkasan ===== --}}
     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">

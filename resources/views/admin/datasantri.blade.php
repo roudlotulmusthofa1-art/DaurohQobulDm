@@ -13,70 +13,56 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 @section('content')
 <div id="data-santri-app">
 
-    {{-- ================= ALERT: SANTRI BELUM PUNYA SKEMA BIAYA ================= --}}
-    {{-- <div v-if="tanpaSkemaBiaya > 0"
-        class="flex items-start gap-3 bg-amber-50 border border-amber-300 text-amber-800 rounded-xl px-5 py-4 mb-6">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 mt-0.5 flex-shrink-0 text-amber-500" viewBox="0 0 24 24"
-            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-            <line x1="12" y1="9" x2="12" y2="13" />
-            <line x1="12" y1="17" x2="12.01" y2="17" />
-        </svg>
-        <div class="text-sm">
-            <p class="font-semibold">@{{ tanpaSkemaBiaya }} santri belum memiliki skema biaya</p>
-            <p class="text-amber-700">Buka detail santri lalu klik tab "Biaya" untuk mengatur tarif locked.</p>
-        </div>
-    </div> --}}
 
-    {{-- ================= HEADER: DATA SANTRI ================= --}}
-    <div
-        class="bg-linear-to-r from-[#07662ed0] to-[#1ef963cf] rounded-2xl px-6 py-5 mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mx-4 md:mx-10 lg:mx-20 mt-8">
-        <div>
-            <h1 class="text-white text-xl font-bold">{{ __('Data Santri') }}</h1>
-            <p class="text-teal-100 text-sm mt-0.5">{{ __('Total') }} @{{ totalSantri }} {{ __('Santri') }}</p>
-        </div>
-        <div class="flex flex-wrap items-center gap-2">
-            {{-- Cetak Kartu QR semua santri (tab baru, siap print A4) --}}
-            <a :href="urlKartuQr" target="_blank" rel="noopener" title="{{ __('Cetak kartu QR semua santri') }}"
-                class="inline-flex items-center gap-2 bg-white hover:bg-emerald-50 text-emerald-800 text-sm font-semibold px-4 py-2.5 rounded-lg transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></svg>
-                {{ __('Cetak Kartu QR') }}
-            </a>
+    {{-- ================= HEADER: DATA SANTRI =================
+         Gaya sama dengan header Data Asatid & Data Admin (kartu hijau tua + pola titik). --}}
+    <div class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-5 sm:p-7 mb-6 mx-4 md:mx-10 lg:mx-20 mt-8">
+        <div class="pointer-events-none absolute inset-0 opacity-60"
+            style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
+        <div class="pointer-events-none absolute -top-24 -right-16 w-72 h-72 rounded-full bg-emerald-400/25 blur-3xl"></div>
 
-            {{-- Kelola Massal: munculkan centang + panel pindah kelas/kamar --}}
-            <button type="button" @click="toggleMassal"
-                class="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition"
-                :class="kelolaMassal ? 'ring-2 ring-white ring-offset-2 ring-offset-purple-600' : ''">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4Z" />
-                </svg>
-                <span v-text="kelolaMassal ? @js(__('Selesai Kelola')) : @js(__('Kelola Massal'))"></span>
-            </button>
+        <div class="relative flex flex-col lg:flex-row lg:items-end gap-5">
+            <div class="flex-1 min-w-0">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Manajemen Data') }}</p>
+                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Data Santri') }}</h1>
+                <p class="mt-1.5 text-sm text-white/70">{{ __('Santri yang sudah diterima: atur kelas, kamar, dan cetak kartu QR.') }}</p>
+                <span class="mt-4 inline-flex items-center gap-2 rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-2 text-sm">
+                    <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"/></svg>
+                    {{ __('Total') }} <b class="font-extrabold">@{{ totalSantri }}</b> {{ __('Santri') }}
+                </span>
+            </div>
 
-            {{-- Mode Detail: formulir PSB lengkap di tab baru, lalu diterima lewat Data Masuk Peserta --}}
-            <a href="{{ route('psb.daftar') }}" target="_blank" rel="noopener"
-                title="{{ __('Buka formulir pendaftaran lengkap (tab baru). Setelah dikirim, terima lewat menu Data Masuk Peserta.') }}"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                {{ __('Tambah Santri (Mode Detail)') }}
-            </a>
+            <div class="flex flex-wrap gap-2">
+                {{-- Tambah Cepat: form singkat, langsung jadi santri --}}
+                <button type="button" @click="bukaTambahCepat"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white text-[#0b332c] text-sm font-bold hover:bg-emerald-100 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    {{ __('Tambah Cepat') }}
+                </button>
 
-            {{-- Tambah Cepat: form singkat, langsung jadi santri --}}
-            <a href="#" @click.prevent="bukaTambahCepat"
-                class="inline-flex items-center gap-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-medium px-4 py-2.5 rounded-lg transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="12" y1="5" x2="12" y2="19" />
-                    <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-                {{ __('Tambah Cepat') }}
-            </a>
+                {{-- Mode Detail: formulir PSB lengkap di tab baru, lalu diterima lewat Data Masuk Peserta --}}
+                <a href="{{ route('psb.daftar') }}" target="_blank" rel="noopener"
+                    title="{{ __('Buka formulir pendaftaran lengkap (tab baru). Setelah dikirim, terima lewat menu Data Masuk Peserta.') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-emerald-400 text-[#0b332c] text-sm font-bold hover:bg-emerald-300 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m3.75 9v6m3-3H9m1.5-12H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+                    {{ __('Tambah Santri (Mode Detail)') }}
+                </a>
+
+                {{-- Kelola Massal: munculkan centang + panel pindah kelas/kamar --}}
+                <button type="button" @click="toggleMassal"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-sky-400 text-[#0b332c] text-sm font-bold hover:bg-sky-300 transition-colors"
+                    :class="kelolaMassal ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0b332c]' : ''">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                    <span v-text="kelolaMassal ? @js(__('Selesai Kelola')) : @js(__('Kelola Massal'))"></span>
+                </button>
+
+                {{-- Cetak Kartu QR semua santri (tab baru, siap print A4) --}}
+                <a :href="urlKartuQr" target="_blank" rel="noopener" title="{{ __('Cetak kartu QR semua santri') }}"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white/10 ring-1 ring-white/20 text-sm font-semibold hover:bg-white/20 transition-colors">
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></svg>
+                    {{ __('Cetak Kartu QR') }}
+                </a>
+            </div>
         </div>
     </div>
 
@@ -420,7 +406,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                                 <div>
                                     <span class="block text-gray-700">@{{ santri.nama }}</span>
                                     <span v-if="santri.nama_arab" class="block text-sm text-gray-500" dir="rtl" lang="ar">@{{ santri.nama_arab }}</span>
-                                    
+
                                 </div>
                             </div>
                         </td>

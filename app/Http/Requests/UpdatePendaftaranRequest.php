@@ -74,8 +74,8 @@ class UpdatePendaftaranRequest extends FormRequest
             'status_ekonomi'   => 'required|string|max:255',
             'persentasimuslim' => 'required|numeric|min:0|max:100',
             'alumni'           => 'required|string|max:255',
-            'tujuan'           => 'required|string|max:2000',
-            'rencana'          => 'required|string|max:2000',
+            'tujuan'           => 'required|string|max:5000',
+            'rencana'          => 'required|string|max:5000',
             'pernah_dauroh'    => 'nullable|in:tidak,ya',
 
             // Berkas: boleh kosong (berarti tidak diganti)

@@ -7,26 +7,15 @@
         <div class="mx-4 md:mx-10 lg:mx-20 mt-8">
             {{-- ================= Header =================
                  Latar gradasi hijau gelap, sama seperti sidebar --}}
-            <div class="relative mb-5 overflow-hidden rounded-2xl bg-[linear-gradient(135deg,#0f4238_0%,#0b332c_60%,#0a2b25_100%)] px-6 py-5 text-white shadow-lg shadow-[#0b332c]/20">
-                {{-- hiasan lingkaran cahaya --}}
-                <span class="pointer-events-none absolute -right-10 -top-14 h-44 w-44 rounded-full bg-[#4ade80]/20 blur-3xl"></span>
-                <span class="pointer-events-none absolute -bottom-16 right-32 h-36 w-36 rounded-full bg-[#22d3ee]/10 blur-3xl"></span>
-
-                <div class="relative flex items-center gap-4">
-                    <span class="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 ring-1 ring-white/15">
-                        <x-master-data.icon name="database" size="24" class="text-[#4ade80]" />
-                    </span>
-                    <div class="min-w-0">
-                        <h1 class="text-xl font-bold">{{ __('Master Data') }}</h1>
-                        <p class="text-sm text-white/60">{{ __('Kelola data referensi dan kategori sistem') }}</p>
-                    </div>
+            <x-header-admin class="mb-5" :label="__('Sistem')" :judul="__('Master Data')" :keterangan="__('Kelola data referensi dan kategori sistem')">
+                <x-slot:aksi>
                     {{-- jumlah semua data di semua menu --}}
-                    <div class="ml-auto hidden text-right sm:block">
-                        <p class="text-2xl font-bold" v-text="totalData()"></p>
-                        <p class="text-xs text-white/50">{{ __('total data') }}</p>
+                    <div class="rounded-2xl bg-white/10 ring-1 ring-white/15 px-4 py-2 text-right">
+                        <p class="text-2xl font-extrabold leading-tight" v-text="totalData()"></p>
+                        <p class="text-xs text-white/60">{{ __('total data') }}</p>
                     </div>
-                </div>
-            </div>
+                </x-slot:aksi>
+            </x-header-admin>
 
             {{-- ================= Menu (tab) =================
                  Setiap menu punya warna sendiri lewat --aksen (diisi dari 'accent' di controller).

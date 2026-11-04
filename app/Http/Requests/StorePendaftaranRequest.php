@@ -272,13 +272,13 @@ class StorePendaftaranRequest extends FormRequest
             'tujuan' => [
                 'required',
                 'string',
-                'max:500',
+                'max:5000', // kolom TEXT (lihat migrasi 2026_11_12_100000)
             ],
 
             'rencana' => [
                 'required',
                 'string',
-                'max:500',
+                'max:5000', // kolom TEXT (lihat migrasi 2026_11_12_100000)
             ],
 
             'pernah_dauroh' => [
@@ -360,8 +360,12 @@ class StorePendaftaranRequest extends FormRequest
             'accepted'         => 'Anda harus menyetujui pernyataan kebenaran data.',
             'berkas_*.max'      => ':attribute maksimal 5 MB.',
             'berkas_*.uploaded' => ':attribute gagal diunggah. Pastikan ukurannya maksimal 5 MB lalu coba lagi.',
-            'no_hp_wali.regex' => 'Format nomor WhatsApp tidak valid (contoh: 081234567890).',
+            // Pesan nomor WhatsApp HARUS di atas '*.regex': Laravel memakai pesan pertama yang cocok,
+            // jadi tanpa ini nomor yang salah ditolak dengan pesan "harus huruf Arab".
             'no_hp.regex' => 'Format nomor WhatsApp tidak valid (contoh: +6281234567890).',
+            'no_hp_wali.regex' => 'Format nomor WhatsApp wali tidak valid (contoh: +6281234567890).',
+            'no_hp_muarrif.regex' => 'Format nomor WhatsApp muarrif tidak valid (contoh: +6281234567890).',
+            'no_hp_nya.regex' => 'Format nomor WhatsApp yang bisa dihubungi tidak valid (contoh: +6281234567890).',
 
             'riwayat_kitab.required' => 'Riwayat kitab wajib diisi.',
             'riwayat_kitab.min' => 'Minimal masukkan satu kitab.',

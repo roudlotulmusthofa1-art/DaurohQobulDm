@@ -251,7 +251,7 @@
                                         <label class="lbl">{{ __('No. WhatsApp Wali') }}
                                             <span class="text-rose-500">*</span>
                                         </label>
-                                        <input v-model="f.no_hp_wali" inputmode="tel" placeholder="081234567890" class="inp">
+                                        <input v-model="f.no_hp_wali" inputmode="tel" placeholder="+6281234567890" dir="ltr" class="inp">
                                         <p class="hint">{{ __('Info penerimaan akan dikirim ke nomor ini.') }}</p>
                                         <p class="err" v-if="e.no_hp_wali">@{{ e . no_hp_wali }}</p>
                                     </div>
@@ -274,7 +274,7 @@
                                         <label class="lbl">{{ __('No. WhatsApp Muarrif') }}
                                             <span class="text-rose-500">*</span>
                                         </label>
-                                        <input v-model="f.no_hp_muarrif" inputmode="tel" placeholder="081234567890"
+                                        <input v-model="f.no_hp_muarrif" inputmode="tel" placeholder="+6281234567890" dir="ltr"
                                             class="inp">
                                         <p class="err" v-if="e.no_hp_muarrif">@{{ e . no_hp_muarrif }}</p>
                                     </div>
@@ -297,7 +297,7 @@
                                         <label class="lbl">{{ __('No. WhatsApp Nya') }}
                                             <span class="text-rose-500">*</span>
                                         </label>
-                                        <input v-model="f.no_hp_nya" inputmode="tel" placeholder="081234567890" class="inp">
+                                        <input v-model="f.no_hp_nya" inputmode="tel" placeholder="+6281234567890" dir="ltr" class="inp">
                                         <p class="err" v-if="e.no_hp_nya">@{{ e . no_hp_nya }}</p>
                                     </div>
                                 </div>
@@ -596,7 +596,7 @@
                                     <label class="lbl">{{ __('Tujuan Anda Belajar Di Darul Musthofa') }}
                                         <span class="text-rose-500">*</span>
                                     </label>
-                                    <textarea v-model="f.tujuan" @input="validasiHurufArab(f.tujuan, 'tujuan')" class="inp h-28"
+                                    <textarea v-model="f.tujuan" @input="validasiHurufArab(f.tujuan, 'tujuan')" class="inp h-28" maxlength="5000"
                                         placeholder="{{ __('tulis dalam bahasa Arab atau Latin') }}" dir="auto"></textarea>
                                     <p class="err" v-if="e.tujuan">@{{ e . tujuan }}</p>
                                 </div>
@@ -604,7 +604,7 @@
                                     <label class="lbl">{{ __('Rencana Setelah Lulus Dari Darul Musthofa') }}
                                         <span class="text-rose-500">*</span>
                                     </label>
-                                    <textarea v-model="f.rencana" @input="validasiHurufArab(f.rencana, 'rencana')" class="inp h-28"
+                                    <textarea v-model="f.rencana" @input="validasiHurufArab(f.rencana, 'rencana')" class="inp h-28" maxlength="5000"
                                         placeholder="{{ __('tulis dalam bahasa Arab atau Latin') }}" dir="auto"></textarea>
                                     <p class="err" v-if="e.rencana">@{{ e . rencana }}</p>
                                 </div>
@@ -1240,7 +1240,7 @@
                                 f.no_hp_wali &&
                                 !/^(\+62|62)8\d{7,12}$/.test(f.no_hp_wali)
                             ) {
-                                e.no_hp_wali = @js(__('Format nomor WhatsApp tidak valid.'));
+                                e.no_hp_wali = @js(__('Format nomor WhatsApp tidak valid (contoh: +6281234567890).'));
                             }
 
                             // Validasi nomor WhatsApp muarrif.
@@ -1249,7 +1249,16 @@
                                 f.no_hp_muarrif &&
                                 !/^(\+62|62)8\d{7,12}$/.test(f.no_hp_muarrif)
                             ) {
-                                e.no_hp_muarrif = @js(__('Format nomor WhatsApp tidak valid.'));
+                                e.no_hp_muarrif = @js(__('Format nomor WhatsApp tidak valid (contoh: +6281234567890).'));
+                            }
+
+                            // Validasi nomor WhatsApp yang bisa dihubungi.
+                            if (
+                                i === 2 &&
+                                f.no_hp_nya &&
+                                !/^(\+62|62)8\d{7,12}$/.test(f.no_hp_nya)
+                            ) {
+                                e.no_hp_nya = @js(__('Format nomor WhatsApp tidak valid (contoh: +6281234567890).'));
                             }
 
                             // Validasi riwayat pondok pesantren pada langkah ke-4.

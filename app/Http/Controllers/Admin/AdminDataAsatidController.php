@@ -164,7 +164,10 @@ class AdminDataAsatidController extends Controller
             'berkas_foto'       => ['nullable', 'image', 'max:5120'],
             'catatan_admin'     => ['nullable', 'string', 'max:1000'],
         ], [
-            '*.regex'             => 'Kolom ini harus ditulis menggunakan huruf Arab.',
+            // Pesan per kolom (bukan '*.regex', supaya tidak menimpa pesan nomor WhatsApp)
+            'nama_lengkap_arab.regex' => 'Kolom ini harus ditulis menggunakan huruf Arab.',
+            'tempat_lahir.regex'  => 'Kolom ini harus ditulis menggunakan huruf Arab.',
+            'alamat.regex'        => 'Kolom ini harus ditulis menggunakan huruf Arab.',
             'no_hp.regex'         => 'Format nomor WhatsApp tidak valid (contoh: +6281234567890).',
             'email.unique'        => 'Email ini sudah dipakai akun lain.',
             'password_baru.min'   => 'Password baru minimal 8 karakter.',

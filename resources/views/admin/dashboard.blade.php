@@ -50,7 +50,7 @@ $statKartu = [
     @endforeach
 
     {{-- ===== Sapaan ===== --}}
-    <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-teal-600 via-[#0f6b5c] to-[#0b332c] text-white p-6 sm:p-8">
+    <section class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-8">
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
         <div class="pointer-events-none absolute -bottom-24 -right-10 w-72 h-72 rounded-full bg-amber-300/20 blur-3xl"></div>
         <div class="relative flex flex-col lg:flex-row lg:items-end gap-5">
@@ -228,6 +228,7 @@ $statKartu = [
                     <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-semibold text-slate-800">{{ $j->kitab?->nama ?? __('Tanpa kitab') }}</p>
                         <p class="truncate text-[11px] text-slate-500">{{ $namaUstadz[$j->user_id] ?? $j->ustadz?->name ?? __('Ustadz belum ditentukan') }}</p>
+                        @if (filled($arabUstadz[$j->user_id] ?? null))<p class="truncate text-sm text-slate-600" dir="rtl" lang="ar">{{ $arabUstadz[$j->user_id] }}</p>@endif
                     </div>
                     <span class="shrink-0 rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-100">{{ $j->kelas?->nama }}</span>
                 </div>

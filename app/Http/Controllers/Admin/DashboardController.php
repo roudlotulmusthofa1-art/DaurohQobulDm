@@ -87,6 +87,7 @@ class DashboardController extends Controller
                 ->sortBy(fn ($j) => [$j->waktu?->urutan ?? 99, $j->kelas?->urutan ?? 99])->values()
             : collect();
         $namaUstadz = PendaftaranAsatid::whereNotNull('user_id')->pluck('nama_lengkap', 'user_id');
+        $arabUstadz = PendaftaranAsatid::whereNotNull('user_id')->pluck('nama_lengkap_arab', 'user_id'); // nama Arab ustadz
 
         // ----- Kelas & kamar -----
         $diterima = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA);
@@ -115,6 +116,7 @@ class DashboardController extends Controller
             'bulan' => $bulan,
             'jadwalHariIni' => $jadwalHariIni,
             'namaUstadz' => $namaUstadz,
+            'arabUstadz' => $arabUstadz,
             'pendaftarBaru' => PendaftaranSiswa::latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status', 'berkas_foto', 'created_at']),
             'absensiTerbaru' => Absensi::with(['kelas', 'pelajaran', 'kegiatan', 'pengabsen:id,name'])->withCount('detail')->latest('tanggal')->latest('id')->take(5)->get(),
             'kelas' => $kelas,

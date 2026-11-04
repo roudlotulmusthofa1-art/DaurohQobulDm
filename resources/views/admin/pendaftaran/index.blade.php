@@ -4,12 +4,9 @@
 @section('content')
 <div id="halaman-data-masuk">
     <div class="space-y-5 mx-4 md:mx-10 lg:mx-20 mt-8">
-        <div class="rounded-2xl bg-teal-700 text-white p-5">
-            <h1 class="text-xl font-bold">
-                {{ ($statusTetap ?? null) === 'diterima' ? __('Data Terkonfirmasi Peserta') : __('Data Masuk Peserta') }}
-            </h1>
-            <p class="text-sm text-teal-100">{{ __('Verifikasi pendaftar baru, lalu terima atau tolak.') }}</p>
-        </div>
+        <x-header-admin :label="__('PSB')"
+            :judul="($statusTetap ?? null) === 'diterima' ? __('Data Terkonfirmasi Peserta') : __('Data Masuk Peserta')"
+            :keterangan="__('Verifikasi pendaftar baru, lalu terima atau tolak.')" />
 
         {{-- ===== Status pendaftaran: Aktif (formulir dibuka) / Nonaktif (ditutup) ===== --}}
         <div class="rounded-2xl ring-1 p-4 sm:p-5 flex flex-wrap items-center gap-4 transition-colors"

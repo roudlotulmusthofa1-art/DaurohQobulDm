@@ -44,6 +44,7 @@ class JadwalMengajarController extends Controller
 
         $ustadzList = $this->ustadzList();
         $namaUstadz = $ustadzList->pluck('nama', 'id');
+        $arabUstadz = $ustadzList->pluck('arab', 'id'); // nama Arab ustadz (tampil di bawah nama Indonesia)
 
         return view('admin.akademik.jadwal', [
             'tahunList' => $tahunList,
@@ -57,6 +58,7 @@ class JadwalMengajarController extends Controller
             'kitabBulanIni' => $bulan ? Kitab::untukBulan($bulan)->pluck('id') : collect(),
             'ustadzList' => $ustadzList,
             'namaUstadz' => $namaUstadz,
+            'arabUstadz' => $arabUstadz,
             'kelasFilter' => $kelasFilter,
             'tampilan' => $tampilan,
             'bulanLain' => $bulan ? BulanAjaran::with('tahunAjaran')->whereKeyNot($bulan->id)->withCount('jadwal')->having('jadwal_count', '>', 0)->get() : collect(),
@@ -197,13 +199,17 @@ class JadwalMengajarController extends Controller
 
     /* ---------------- Bantuan ---------------- */
 
-    /** Akun asatid yang sudah diterima: [id, nama] (nama dari data pendaftaran asatid bila ada) */
+    /** Akun asatid yang sudah diterima: [id, nama, arab] (nama Indonesia & Arab dari data pendaftaran asatid bila ada) */
     private function ustadzList()
     {
-        $nama = PendaftaranAsatid::whereNotNull('user_id')->pluck('nama_lengkap', 'user_id');
+        $data = PendaftaranAsatid::whereNotNull('user_id')->get(['user_id', 'nama_lengkap', 'nama_lengkap_arab'])->keyBy('user_id');
 
         return User::where('role', PendaftaranAsatid::ROLE)->orderBy('name')->get(['id', 'name'])
-            ->map(fn ($u) => (object) ['id' => $u->id, 'nama' => $nama[$u->id] ?? $u->name])
+            ->map(fn ($u) => (object) [
+                'id' => $u->id,
+                'nama' => $data[$u->id]->nama_lengkap ?? $u->name,
+                'arab' => $data[$u->id]->nama_lengkap_arab ?? null,
+            ])
             ->sortBy('nama')->values();
     }
 

@@ -167,6 +167,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
                     <p class="text-[11px] font-semibold text-emerald-700">{{ $j->waktu?->nama ?? __('Jam') }}{{ $j->waktu?->jam_mulai ? ' · ' . $j->waktu->jam_mulai : '' }}</p>
                     <p class="mt-1 font-bold text-slate-800 truncate">{{ $j->kitab?->nama ?? __('Kitab belum diatur') }}</p>
                     <p class="text-xs text-slate-500 truncate">{{ $j->kelas?->nama }} · {{ $namaUstadz[$j->user_id] ?? $j->ustadz?->name ?? __('Belum ada ustadz') }}</p>
+                    @if (filled($arabUstadz[$j->user_id] ?? null))<p class="text-[15px] text-slate-600 truncate" dir="rtl" lang="ar">{{ $arabUstadz[$j->user_id] }}</p>@endif
                 </div>
                 @empty
                 <p class="w-full rounded-2xl bg-white py-6 text-center text-sm text-slate-400 shadow-sm">{{ __('Tidak ada jadwal mengajar hari ini.') }}</p>

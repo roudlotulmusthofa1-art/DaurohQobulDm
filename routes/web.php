@@ -44,7 +44,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::post('data-admin/{dataAdmin}/terima', [AdminDataAdminController::class, 'terima'])->name('data-admin.terima');
     Route::post('data-admin/{dataAdmin}/tolak', [AdminDataAdminController::class, 'tolak'])->name('data-admin.tolak');
     Route::post('data-admin/{dataAdmin}/reset-password', [AdminDataAdminController::class, 'resetPassword'])->middleware('throttle:10,1')->name('data-admin.reset-password'); // khusus Super Admin
-    Route::resource('data-admin', AdminDataAdminController::class)->only(['index', 'show', 'destroy'])
+    Route::resource('data-admin', AdminDataAdminController::class)->only(['index', 'show', 'edit', 'update', 'destroy'])
         ->parameters(['data-admin' => 'dataAdmin']);
 
     // ===== Akademik =====

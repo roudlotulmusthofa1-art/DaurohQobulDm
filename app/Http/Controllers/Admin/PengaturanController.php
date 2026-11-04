@@ -50,14 +50,14 @@ class PengaturanController extends Controller
         if ($tab === 'umum') {
             $data['profil'] = Pengaturan::profilPesantren();
         } elseif ($tab === 'notifikasi') {
-            $data['notifikasi'] = collect(NotifikasiAdmin::JENIS)->map(fn ($j, $kunci) => $j + [
+            $data['notifikasi'] = collect(NotifikasiAdmin::JENIS)->map(fn($j, $kunci) => $j + [
                 'kunci' => $kunci,
                 'aktif' => NotifikasiAdmin::aktif($kunci),
                 'ikon_path' => NotifikasiAdmin::IKON[$j['ikon']],
                 'warna_kelas' => NotifikasiAdmin::WARNA[$j['warna']],
             ]);
         } elseif ($tab === 'pesan') {
-            $data['pesanList'] = collect(PesanWa::TEMPLATE)->map(fn ($t, $kunci) => $t + [
+            $data['pesanList'] = collect(PesanWa::TEMPLATE)->map(fn($t, $kunci) => $t + [
                 'kunci' => $kunci,
                 'teks' => PesanWa::teks($kunci),
                 'aktif' => PesanWa::aktif($kunci),
@@ -72,7 +72,7 @@ class PengaturanController extends Controller
         } elseif ($tab === 'sesi') {
             $data['sesiList'] = Sesi::orderByDesc('is_active')->orderByDesc('id')->get();
             $data['sesiAktif'] = SesiAplikasi::aktif();
-            $data['ringkasSesi'] = $data['sesiList']->mapWithKeys(fn (Sesi $s) => [$s->id => $this->ringkasSesi($s)]);
+            $data['ringkasSesi'] = $data['sesiList']->mapWithKeys(fn(Sesi $s) => [$s->id => $this->ringkasSesi($s)]);
         } elseif ($tab === 'bahasa') {
             $data += $this->dataBahasa($request);
         }
@@ -142,12 +142,12 @@ class PengaturanController extends Controller
 
         $user->name = $data['name'];
         $user->email = $data['email'];
-        if (! empty($data['password'])) {
+        if (!empty($data['password'])) {
             $user->password = $data['password']; // di-hash otomatis (cast "hashed")
         }
         $user->save(); // akun admin ikut diperbarui di semua sesi
 
-        return $this->keTab('profil', 'Profil disimpan.' . (! empty($data['password']) ? ' Password sudah diganti.' : ''));
+        return $this->keTab('profil', 'Profil disimpan.' . (!empty($data['password']) ? ' Password sudah diganti.' : ''));
     }
 
     /**
@@ -160,9 +160,9 @@ class PengaturanController extends Controller
             'foto' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:3072'],
         ], [
             'foto.required' => 'Pilih foto terlebih dahulu.',
-            'foto.image'    => 'File harus berupa gambar.',
-            'foto.mimes'    => 'Foto harus JPG, PNG, atau WEBP.',
-            'foto.max'      => 'Ukuran foto maksimal 3 MB.',
+            'foto.image' => 'File harus berupa gambar.',
+            'foto.mimes' => 'Foto harus JPG, PNG, atau WEBP.',
+            'foto.max' => 'Ukuran foto maksimal 3 MB.',
         ]);
 
         $user = $request->user();
@@ -197,7 +197,7 @@ class PengaturanController extends Controller
         $dipilih = (array) $request->input('notif', []);
 
         foreach (array_keys(NotifikasiAdmin::JENIS) as $kunci) {
-            Pengaturan::simpan('notif_' . $kunci, ! empty($dipilih[$kunci]) ? '1' : '0');
+            Pengaturan::simpan('notif_' . $kunci, !empty($dipilih[$kunci]) ? '1' : '0');
         }
 
         return $this->keTab('notifikasi', 'Pengaturan notifikasi berhasil disimpan.');
@@ -224,15 +224,15 @@ class PengaturanController extends Controller
             'aktif' => ['nullable', 'array'],
         ], ['teks.*.max' => 'Pesan maksimal 3000 karakter.']);
 
-        $rapi = fn ($s) => trim(str_replace("\r\n", "\n", (string) $s));
+        $rapi = fn($s) => trim(str_replace("\r\n", "\n", (string) $s));
         foreach ($kunciList as $kunci) {
-            if (! array_key_exists($kunci, $data['teks'])) {
+            if (!array_key_exists($kunci, $data['teks'])) {
                 continue;
             }
             $teks = $rapi($data['teks'][$kunci]);
             // Sama dengan bawaan / dikosongkan -> pakai bawaan (simpan kosong)
             Pengaturan::simpanPusat('pesan_wa_' . $kunci, $teks === '' || $teks === $rapi(PesanWa::TEMPLATE[$kunci]['bawaan']) ? null : $teks);
-            Pengaturan::simpanPusat('pesan_wa_' . $kunci . '_aktif', ! empty($data['aktif'][$kunci]) ? '1' : '0');
+            Pengaturan::simpanPusat('pesan_wa_' . $kunci . '_aktif', !empty($data['aktif'][$kunci]) ? '1' : '0');
         }
 
         return $this->keTab('pesan', 'Pesan WhatsApp disimpan. Berlaku untuk semua sesi.');
@@ -253,7 +253,7 @@ class PengaturanController extends Controller
         $ram = null;
         if (is_readable('/proc/meminfo')) {
             preg_match_all('/^(\w+):\s+(\d+) kB/m', (string) file_get_contents('/proc/meminfo'), $m);
-            $info = array_combine($m[1], array_map(fn ($v) => (int) $v * 1024, $m[2]));
+            $info = array_combine($m[1], array_map(fn($v) => (int) $v * 1024, $m[2]));
             if (isset($info['MemTotal'])) {
                 $tersedia = $info['MemAvailable'] ?? ($info['MemFree'] ?? 0);
                 $ram = ['total' => $info['MemTotal'], 'sisa' => $tersedia, 'terpakai' => $info['MemTotal'] - $tersedia];
@@ -273,7 +273,7 @@ class PengaturanController extends Controller
         };
         $semuaDb = 0;
         foreach (SesiAplikasi::semuaKoneksi() as $koneksi => $sesi) {
-            $semuaDb += (int) rescue(fn () => DB::connection('pusat')->selectOne(
+            $semuaDb += (int) rescue(fn() => DB::connection('pusat')->selectOne(
                 'SELECT COALESCE(SUM(data_length + index_length), 0) AS n FROM information_schema.tables WHERE table_schema = ?',
                 [config("database.connections.{$koneksi}.database")]
             )->n, 0, false);
@@ -294,13 +294,13 @@ class PengaturanController extends Controller
     private function infoDatabase(): array
     {
         $tabel = collect(Schema::getTables(DB::connection()->getDatabaseName()))
-            ->map(fn ($t) => ['nama' => $t['name'], 'ukuran' => (int) ($t['size'] ?? 0), 'baris' => DB::table($t['name'])->count()])
+            ->map(fn($t) => ['nama' => $t['name'], 'ukuran' => (int) ($t['size'] ?? 0), 'baris' => DB::table($t['name'])->count()])
             ->sortByDesc('baris')->values();
 
         return [
             'driver' => DB::connection()->getDriverName(),
             'nama' => DB::connection()->getDatabaseName(),
-            'versi' => rescue(fn () => DB::connection()->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION), '-', false),
+            'versi' => rescue(fn() => DB::connection()->getPdo()->getAttribute(\PDO::ATTR_SERVER_VERSION), '-', false),
             'tabel' => $tabel,
             'ukuran' => $tabel->sum('ukuran'),
             'baris' => $tabel->sum('baris'),
@@ -312,7 +312,7 @@ class PengaturanController extends Controller
     public function backup(): StreamedResponse|RedirectResponse
     {
         $sesi = SesiAplikasi::aktif();
-        if (! $sesi || ! in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
+        if (!$sesi || !in_array(DB::connection()->getDriverName(), ['mysql', 'mariadb'], true)) {
             return $this->keTab('database', null, 'Backup otomatis hanya tersedia untuk database MySQL/MariaDB.');
         }
 
@@ -359,11 +359,17 @@ class PengaturanController extends Controller
     {
         $request->validate([
             'sumber' => ['required', Rule::in(['upload', 'server'])],
-            'file' => ['required_if:sumber,upload', 'nullable', 'file', 'max:102400', function ($attr, $file, $gagal) {
-                if ($file && strtolower($file->getClientOriginalExtension()) !== 'sql') {
-                    $gagal('File harus berakhiran .sql');
+            'file' => [
+                'required_if:sumber,upload',
+                'nullable',
+                'file',
+                'max:102400',
+                function ($attr, $file, $gagal) {
+                    if ($file && strtolower($file->getClientOriginalExtension()) !== 'sql') {
+                        $gagal('File harus berakhiran .sql');
+                    }
                 }
-            }],
+            ],
             'nama' => ['required_if:sumber,server', 'nullable', 'string'],
             'password_konfirmasi' => ['required', 'current_password'],
             'yakin' => ['accepted'],
@@ -392,10 +398,10 @@ class PengaturanController extends Controller
             'ketik' => ['required', 'in:HAPUS'],
             'password_konfirmasi' => ['required', 'current_password'],
         ], $this->pesanKonfirmasi() + [
-            'kelompok.required' => 'Pilih minimal satu kelompok data.',
-            'ketik.in' => 'Ketik HAPUS (huruf besar) untuk konfirmasi.',
-            'ketik.required' => 'Ketik HAPUS untuk konfirmasi.',
-        ]);
+                'kelompok.required' => 'Pilih minimal satu kelompok data.',
+                'ketik.in' => 'Ketik HAPUS (huruf besar) untuk konfirmasi.',
+                'ketik.required' => 'Ketik HAPUS untuk konfirmasi.',
+            ]);
 
         $sesi = SesiAplikasi::aktif();
         try {
@@ -406,7 +412,7 @@ class PengaturanController extends Controller
             return $this->keTab('database', null, 'Hapus data gagal: ' . $e->getMessage());
         }
 
-        $label = collect($data['kelompok'])->map(fn ($k) => CadanganDatabase::KELOMPOK[$k]['label'])->implode(', ');
+        $label = collect($data['kelompok'])->map(fn($k) => CadanganDatabase::KELOMPOK[$k]['label'])->implode(', ');
 
         return $this->keTab('database', "Data {$label} di sesi {$sesi->nama} sudah dihapus. Backup sebelum dihapus: {$cadangan}");
     }
@@ -430,9 +436,9 @@ class PengaturanController extends Controller
         try {
             $sesi = PengelolaSesi::buat(
                 $data,
-                ! empty($data['salin_dari']) ? Sesi::find($data['salin_dari']) : null,
-                ! empty($data['salin_master']),
-                ! empty($data['salin_pengaturan']),
+                !empty($data['salin_dari']) ? Sesi::find($data['salin_dari']) : null,
+                !empty($data['salin_master']),
+                !empty($data['salin_pengaturan']),
             );
         } catch (Throwable $e) {
             report($e);
@@ -440,11 +446,11 @@ class PengaturanController extends Controller
             return $this->keTab('sesi', null, $e->getMessage());
         }
 
-        if (! empty($data['aktifkan'])) {
+        if (!empty($data['aktifkan'])) {
             $this->jadikanAktif($sesi);
         }
 
-        return $this->keTab('sesi', "Sesi {$sesi->nama} dibuat (database {$sesi->database})." . (! empty($data['aktifkan']) ? ' Sesi ini sekarang aktif.' : ''));
+        return $this->keTab('sesi', "Sesi {$sesi->nama} dibuat (database {$sesi->database})." . (!empty($data['aktifkan']) ? ' Sesi ini sekarang aktif.' : ''));
     }
 
     public function ubahSesi(Request $request, Sesi $sesi): RedirectResponse
@@ -513,7 +519,7 @@ class PengaturanController extends Controller
 
         $ukuranFile = 0;
         $folder = storage_path('app/public/' . $sesi->folder);
-        if (! $sesi->utama && is_dir($folder)) {
+        if (!$sesi->utama && is_dir($folder)) {
             foreach (File::allFiles($folder) as $f) {
                 $ukuranFile += $f->getSize();
             }
@@ -537,14 +543,14 @@ class PengaturanController extends Controller
     private function dataBahasa(Request $request): array
     {
         // Halaman yang belum punya tulisan __('...') tidak ditampilkan di pilihan
-        $halamanList = array_filter(TeksTampilan::semua(), fn ($h) => count($h['teks']) > 0) ?: TeksTampilan::semua();
+        $halamanList = array_filter(TeksTampilan::semua(), fn($h) => count($h['teks']) > 0) ?: TeksTampilan::semua();
         $kode = array_key_exists((string) $request->query('halaman'), $halamanList)
             ? $request->query('halaman')
-            : (collect($halamanList)->search(fn ($h) => count($h['teks']) > 0) ?: array_key_first($halamanList));
+            : (collect($halamanList)->search(fn($h) => count($h['teks']) > 0) ?: array_key_first($halamanList));
 
         $dariAdmin = Terjemahan::semua();
 
-        $baris = collect($halamanList[$kode]['teks'])->map(fn ($file, $teks) => [
+        $baris = collect($halamanList[$kode]['teks'])->map(fn($file, $teks) => [
             'teks' => $teks,
             'arab' => $dariAdmin[$teks] ?? '',
             'file' => $file,

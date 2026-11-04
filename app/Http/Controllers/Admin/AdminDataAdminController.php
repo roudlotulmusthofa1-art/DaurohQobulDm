@@ -107,6 +107,90 @@ class AdminDataAdminController extends Controller
     }
 
     /** Hapus data admin beserta pas foto dan akun login-nya. Akun sendiri tidak bisa dihapus. */
+    /**
+     * Edit data admin (khusus Super Admin, karena email & password akun admin ikut bisa diganti).
+     * Bila akun login sudah dibuat, nama/email/password akun ikut diperbarui dan disalin ke semua sesi.
+     */
+    public function edit(PendaftaranAdmin $dataAdmin)
+    {
+        abort_unless(\App\Support\MenuAdmin::izinAkun(Auth::user()) === null, 403, __('Edit data admin hanya bisa dilakukan Super Admin.'));
+
+        return view('admin.data-admin.edit', ['a' => $dataAdmin]);
+    }
+
+    public function update(Request $request, PendaftaranAdmin $dataAdmin)
+    {
+        abort_unless(\App\Support\MenuAdmin::izinAkun(Auth::user()) === null, 403, __('Edit data admin hanya bisa dilakukan Super Admin.'));
+
+        $a = $dataAdmin;
+        $polaArab = '/\A[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\s،؛؟.\x{0027}-]+\z/u';
+        // Alamat: huruf Arab + angka & tanda baca alamat (nomor rumah, RT/RW)
+        $polaAlamat = '/\A[\x{0600}-\x{06FF}\x{0750}-\x{077F}\x{08A0}-\x{08FF}\s،؛؟.\x{0027}0-9\/,()-]+\z/u';
+        $userId = $a->user_id;
+
+        $data = $request->validate([
+            'nama_lengkap'      => ['required', 'string', 'max:150'],
+            'nama_lengkap_arab' => ['nullable', 'string', 'max:150', "regex:$polaArab"],
+            'no_hp'             => ['required', 'string', 'regex:/^\+62[0-9]+$/', 'max:20'],
+            'alamat'            => ['nullable', 'string', 'max:500', "regex:$polaAlamat"],
+            'email'             => [
+                'required', 'email', 'max:255',
+                \Illuminate\Validation\Rule::unique('pusat.pendaftaran_admin', 'email')->ignore($a->id),
+                'unique:pusat.pendaftaran_asatid,email',
+                'unique:pendaftaran_siswas,email',
+                \Illuminate\Validation\Rule::unique('users', 'email')->ignore($userId),
+                \Illuminate\Validation\Rule::unique('pusat.users', 'email')->ignore($userId),
+            ],
+            'password_baru'     => ['nullable', 'string', 'min:8', 'max:100'],
+            'berkas_foto'       => ['nullable', 'image', 'max:5120'],
+            'catatan_admin'     => ['nullable', 'string', 'max:1000'],
+        ], [
+            // Pesan per kolom (bukan '*.regex', supaya tidak menimpa pesan nomor WhatsApp)
+            'nama_lengkap_arab.regex' => __('Kolom ini harus ditulis menggunakan huruf Arab.'),
+            'alamat.regex'      => __('Kolom ini harus ditulis menggunakan huruf Arab.'),
+            'no_hp.regex'       => __('Format nomor WhatsApp tidak valid (contoh: +6281234567890).'),
+            'email.unique'      => __('Email ini sudah dipakai akun lain.'),
+            'password_baru.min' => __('Password baru minimal 8 karakter.'),
+            'berkas_foto.max'   => __('Pas foto maksimal 5 MB.'),
+        ], [
+            'nama_lengkap' => __('Nama lengkap'), 'nama_lengkap_arab' => __('Nama Arab'), 'no_hp' => __('Nomor WhatsApp'),
+            'alamat' => __('Alamat'), 'berkas_foto' => __('Pas foto'),
+        ]);
+
+        $fotoLama = null;
+        if ($request->hasFile('berkas_foto')) {
+            $fotoLama = $a->berkas_foto;
+            $data['berkas_foto'] = $request->file('berkas_foto')->store("admin/{$a->nomor_pendaftaran}", 'bersama');
+        } else {
+            unset($data['berkas_foto']);
+        }
+
+        $passwordBaru = $data['password_baru'] ?? null;
+        unset($data['password_baru']);
+        if ($passwordBaru) {
+            $data['password'] = \Illuminate\Support\Facades\Hash::make($passwordBaru);
+        }
+
+        DB::connection('pusat')->transaction(function () use ($a, $data) {
+            $a->update($data);
+
+            // Akun login ikut diperbarui (disimpan lewat model -> disalin ke semua sesi)
+            if ($user = $a->akunLogin()) {
+                $user->forceFill(array_filter([
+                    'name'     => $a->nama_lengkap,
+                    'email'    => $a->email,
+                    'password' => $data['password'] ?? null, // sudah ter-hash
+                ]))->save();
+            }
+        });
+
+        if ($fotoLama) {
+            Storage::disk('bersama')->delete($fotoLama);
+        }
+
+        return redirect()->route('admin.data-admin.show', $a)->with('success', __('Data :nama berhasil diperbarui.', ['nama' => $a->nama_lengkap]));
+    }
+
     /** Reset password akun login admin (khusus Super Admin). Aturan & pesannya di App\Support\ResetPasswordAkun. */
     public function resetPassword(Request $request, PendaftaranAdmin $dataAdmin, WhatsAppService $wa)
     {
