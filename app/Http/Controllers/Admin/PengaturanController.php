@@ -549,10 +549,13 @@ class PengaturanController extends Controller
             : (collect($halamanList)->search(fn($h) => count($h['teks']) > 0) ?: array_key_first($halamanList));
 
         $dariAdmin = Terjemahan::semua();
+        // Usulan terjemahan (dipakai bila tombol "usulan" dinyalakan). File: lang/usulan-ar.json
+        $usulan = json_decode(@file_get_contents(lang_path('usulan-ar.json')) ?: '{}', true) ?: [];
 
         $baris = collect($halamanList[$kode]['teks'])->map(fn($file, $teks) => [
             'teks' => $teks,
             'arab' => $dariAdmin[$teks] ?? '',
+            'usulan' => $usulan[$teks] ?? '',
             'file' => $file,
         ])->values();
 

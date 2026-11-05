@@ -4,9 +4,14 @@ Pengaturan > Bahasa: terjemahan Arab buatan admin, dikelompokkan per halaman.
   Mengubah pengelompokan halaman: App\Support\TeksTampilan::HALAMAN.
 - Disimpan di tabel "terjemahan" (database utama, semua sesi). Kolom Arab kosong = tampil bahasa Indonesia.
 - Semua kolom Arab diisi admin sendiri (lang/ar.json tidak dipakai).
+- Tombol geser "usulan" per baris: hidup = kolom diisi usulan dari lang/usulan-ar.json (terkunci),
+  mati = kembali ke tulisan admin sendiri. Yang disimpan tetap isi kolom saat tombol Simpan ditekan.
 Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $label, $tombol, $ukuran) dari index.
 --}}
-@php $jumlahBaris = $barisBahasa->count(); @endphp
+@php
+    $jumlahBaris = $barisBahasa->count();
+    $adaUsulan = $barisBahasa->contains(fn ($b) => $b['usulan'] !== '');
+@endphp
 
 <h2 class="text-lg font-bold text-slate-800">Bahasa</h2>
 <p class="text-sm text-slate-500">Terjemahan Arab untuk setiap tulisan, per halaman. Tampil saat tombol bahasa diganti ke العربية. Kolom yang dibiarkan kosong tetap tampil dalam bahasa Indonesia.</p>
@@ -44,7 +49,18 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
     {{-- Judul kolom (layar lebar) --}}
     <div class="hidden md:grid grid-cols-2 gap-4 px-5 py-3 bg-[#f5f9f7] border-b border-slate-100 text-[11px] font-bold uppercase tracking-wider text-slate-500">
         <span>Bahasa Indonesia</span>
-        <span>Bahasa Arab (diisi sendiri)</span>
+        <span class="flex items-center justify-between gap-3">
+            {{ __('Bahasa Arab') }}
+            @if ($adaUsulan)
+            <span class="flex items-center gap-2 normal-case tracking-normal font-semibold">
+                {{ __('Pakai semua usulan') }}
+                <button type="button" role="switch" @click="gantiSemua" :aria-checked="semuaUsulan ? 'true' : 'false'"
+                    class="relative h-5 w-9 shrink-0 rounded-full transition-colors" :class="semuaUsulan ? 'bg-emerald-600' : 'bg-slate-300'">
+                    <span class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform" :class="semuaUsulan ? 'translate-x-4' : ''"></span>
+                </button>
+            </span>
+            @endif
+        </span>
     </div>
 
     <div class="divide-y divide-slate-100">
@@ -59,10 +75,21 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
                 <p class="mt-1 text-[11px] text-slate-400 break-all">{{ implode(' · ', $b['file']) }}</p>
                 <input type="hidden" name="teks[{{ $i }}]" value="{{ $b['teks'] }}">
             </div>
-            <div v-pre>
-                <textarea name="arab[{{ $i }}]" rows="1" dir="rtl" lang="ar" data-baris="{{ $i }}"
+            <div class="flex items-start gap-3">
+                @if ($b['usulan'] !== '')
+                {{-- Tombol geser: hidup = pakai usulan terjemahan, mati = tulisan sendiri --}}
+                <div class="flex flex-col items-center gap-0.5 pt-1.5">
+                    <button type="button" role="switch" @click="gantiUsulan({{ $i }})" :aria-checked="pakai[{{ $i }}] ? 'true' : 'false'"
+                        class="relative h-5 w-9 shrink-0 rounded-full transition-colors" :class="pakai[{{ $i }}] ? 'bg-emerald-600' : 'bg-slate-300'">
+                        <span class="absolute top-0.5 left-0.5 h-4 w-4 rounded-full bg-white shadow transition-transform" :class="pakai[{{ $i }}] ? 'translate-x-4' : ''"></span>
+                    </button>
+                    <span class="text-[10px] text-slate-400">{{ __('usulan') }}</span>
+                </div>
+                @endif
+                <textarea name="arab[{{ $i }}]" rows="1" dir="rtl" lang="ar" v-model="isi[{{ $i }}]" :readonly="pakai[{{ $i }}]"
                     placeholder="اكتب الترجمة هنا…"
-                    class="w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3.5 py-2 text-[15px] text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none resize-y">{{ old('arab.' . $i, $b['arab']) }}</textarea>
+                    class="w-full rounded-xl ring-1 ring-slate-200 border-0 px-3.5 py-2 text-[15px] focus:ring-2 focus:ring-emerald-500 outline-none resize-y"
+                    :class="pakai[{{ $i }}] ? 'bg-emerald-50 text-emerald-800' : 'bg-[#f8fbfa] text-slate-800'"></textarea>
             </div>
         </div>
         @endforeach
@@ -79,20 +106,48 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
 
 @push('scripts')
 <script>
-    // Bagian Vue tab Bahasa: pencarian tulisan (Indonesia atau Arab)
+    // Bagian Vue tab Bahasa: pencarian tulisan (Indonesia atau Arab) + tombol "usulan" per baris
     window.tabPengaturan = {
         data() {
+            const usulan = @json($barisBahasa->pluck('usulan'));
+            const isi = @json($barisBahasa->map(fn ($b, $i) => (string) old('arab.' . $i, $b['arab'])));
+            // Tombol tampil hidup bila yang tersimpan sama persis dengan usulan
+            const pakai = isi.map((t, i) => usulan[i] !== '' && t === usulan[i]);
             return {
                 cari: '',
                 teksIndonesia: @json($barisBahasa->pluck('teks')->map(fn ($t) => mb_strtolower($t))),
+                usulan,
+                isi,
+                pakai,
+                // Tulisan sendiri tiap baris, dikembalikan saat tombol usulan dimatikan
+                sendiri: isi.map((t, i) => pakai[i] ? '' : t),
             };
+        },
+        computed: {
+            // Tombol "Pakai semua usulan" hidup bila semua baris yang punya usulan sedang memakainya
+            semuaUsulan() {
+                return this.usulan.every((u, i) => u === '' || this.pakai[i]);
+            },
         },
         methods: {
             cocok(i) {
                 const kata = this.cari.trim().toLowerCase();
                 if (!kata) return true;
-                const arab = (document.querySelector('textarea[data-baris="' + i + '"]')?.value || '').toLowerCase();
-                return this.teksIndonesia[i].includes(kata) || arab.includes(kata);
+                return this.teksIndonesia[i].includes(kata) || (this.isi[i] || '').toLowerCase().includes(kata);
+            },
+            aturUsulan(i, hidup) {
+                if (this.usulan[i] === '' || this.pakai[i] === hidup) return;
+                if (hidup) this.sendiri[i] = this.isi[i];
+                this.isi[i] = hidup ? this.usulan[i] : this.sendiri[i];
+                this.pakai[i] = hidup;
+                this.formDiubah = true;
+            },
+            gantiUsulan(i) {
+                this.aturUsulan(i, !this.pakai[i]);
+            },
+            gantiSemua() {
+                const hidup = !this.semuaUsulan;
+                this.usulan.forEach((u, i) => this.aturUsulan(i, hidup));
             },
         },
     };
