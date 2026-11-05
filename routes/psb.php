@@ -41,8 +41,15 @@ Route::prefix('admin')->middleware(['auth', 'peran:admin'])->group(function () {
 // ===== ADMIN: Pesan Peserta (pesan dua arah dengan dasbor siswa) =====
 Route::prefix('admin/pesan-peserta')->name('admin.pesan-peserta.')->middleware(['auth', 'peran:admin'])
     ->controller(\App\Http\Controllers\Admin\PesanPesertaController::class)->group(function () {
-        Route::get('/', 'index')->name('index');
+        Route::get('/', 'index')->name('index');                          // ?asal=siswa|asatid|umum
         Route::post('/', 'kirim')->name('kirim');                         // pesan baru (satu / banyak peserta)
+        // Pesan dari asatid (dasbor asatid > Pesan untuk Admin)
+        Route::get('/asatid/{user}', 'showAsatid')->whereNumber('user')->name('asatid.show');
+        Route::post('/asatid/{user}/balas', 'balasAsatid')->whereNumber('user')->name('asatid.balas');
+        Route::delete('/asatid/pesan/{pesan}', 'hapusAsatid')->name('asatid.hapus');
+        // Pesan pengunjung umum (landing page > Hubungi Admin)
+        Route::post('/umum/{pesan}/baca', 'bacaUmum')->name('umum.baca');
+        Route::delete('/umum/{pesan}', 'hapusUmum')->name('umum.hapus');
         Route::get('/{peserta}', 'show')->name('show');                   // percakapan dengan satu peserta
         Route::post('/{peserta}/balas', 'balas')->name('balas');
         Route::delete('/pesan/{pesan}', 'hapus')->name('hapus');

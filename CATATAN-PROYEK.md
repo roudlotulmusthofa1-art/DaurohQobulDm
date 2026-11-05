@@ -126,6 +126,11 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Tempat:** grid, per kelas, per ustadz, pilihan ustadz, dan Jadwal Hari Ini di dasbor.
 - **Asal nama Arab:** isian *Nama Lengkap (Arab)* di Data Asatid.
 
+### Kotak Pesan admin: Siswa · Asatid · Umum
+- **Halaman admin:** menu **Kotak Pesan** (`admin/pesan-peserta?asal=siswa|asatid|umum`), lonceng admin ikut memberi tahu.
+- **Asatid → admin:** dasbor asatid › **Pesan untuk Admin** (`asatid/pesan-saya`). Disimpan di `pesan_asatid` (database utama) dengan kolom `dari` = `asatid`; balasan admin = `dari` `admin` dan muncul di "Pesan dari Admin".
+- **Pengunjung → admin:** tombol **Hubungi Admin** (hero landing) dan **Hubungi Admin langsung** (footer) membuka `partials/hubungi-admin`. Disimpan di tabel `pesan_umum` (database utama). Admin membalas lewat tautan WA/email.
+
 ---
 
 ## 4. Masalah yang sudah dibereskan

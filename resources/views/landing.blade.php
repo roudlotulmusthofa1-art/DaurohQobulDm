@@ -69,6 +69,12 @@
                     {{ __('Informasi Pondok') }}
                 </a>
 
+                {{-- Pop-up pesan ke admin: partials/hubungi-admin.blade.php --}}
+                <button type="button" onclick="bukaHubungiAdmin()"
+                    class="card w-full sm:w-auto px-7 py-3 rounded-lg border border-white/60 font-semibold hover:bg-white/20 transition-colors">
+                    {{ __('Hubungi Admin') }}
+                </button>
+
             </div>
 
             {{-- Statistik --}}

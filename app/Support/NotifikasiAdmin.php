@@ -53,6 +53,18 @@ class NotifikasiAdmin
             'ikon' => 'chat',
             'warna' => 'emerald',
         ],
+        'pesan_asatid' => [
+            'judul' => 'Pesan dari asatid',
+            'keterangan' => 'Asatid mengirim pesan lewat dasbor asatid yang belum dibaca admin.',
+            'ikon' => 'chat',
+            'warna' => 'violet',
+        ],
+        'pesan_umum' => [
+            'judul' => 'Pesan dari pengunjung',
+            'keterangan' => 'Pengunjung landing page mengirim pesan lewat tombol Hubungi Admin.',
+            'ikon' => 'chat',
+            'warna' => 'amber',
+        ],
         'syarat_belum_lengkap' => [
             'judul' => 'Persyaratan belum lengkap',
             'keterangan' => 'Santri sudah diterima, tapi ada persyaratan yang belum dicentang.',
@@ -186,6 +198,35 @@ class NotifikasiAdmin
                     $p->created_at, 'pesan_peserta:' . $p->id);
             }
             $items[] = static::lainnya('pesan_peserta', $n, $q, 'dan :n pesan peserta lainnya', Route::has('admin.pesan-peserta.index') ? route('admin.pesan-peserta.index') : null);
+        }
+
+        // Pesan dari asatid (dasbor asatid > Pesan untuk Admin) yang belum dibaca admin
+        if (static::aktif('pesan_asatid') && \Illuminate\Support\Facades\Schema::connection('pusat')->hasColumn('pesan_asatid', 'dari')) {
+            $q = \App\Models\PesanAsatid::dariAsatid()->belumDibaca();
+            $total += $n = (clone $q)->count();
+            $nama = PendaftaranAsatid::whereIn('user_id', (clone $q)->select('user_id'))->pluck('nama_lengkap', 'user_id');
+            foreach ((clone $q)->latest('id')->take(5)->get() as $p) {
+                $items[] = static::item('pesan_asatid',
+                    '<b>' . \App\Support\TeksAman::e($nama[$p->user_id] ?? 'Asatid') . '</b> mengirim pesan: ' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($p->judul ?: $p->isi, 40)),
+                    'Buka Kotak Pesan › Asatid',
+                    route('admin.pesan-peserta.asatid.show', $p->user_id),
+                    $p->created_at, 'pesan_asatid:' . $p->id);
+            }
+            $items[] = static::lainnya('pesan_asatid', $n, $q, 'dan :n pesan asatid lainnya', route('admin.pesan-peserta.index', ['asal' => 'asatid']));
+        }
+
+        // Pesan pengunjung landing page (Hubungi Admin) yang belum dibaca
+        if (static::aktif('pesan_umum') && \Illuminate\Support\Facades\Schema::connection('pusat')->hasTable('pesan_umum')) {
+            $q = \App\Models\PesanUmum::belumDibaca();
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->latest('id')->take(5)->get() as $p) {
+                $items[] = static::item('pesan_umum',
+                    '<b>' . \App\Support\TeksAman::e($p->nama) . '</b> (pengunjung) mengirim pesan: ' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($p->isi, 40)),
+                    'Buka Kotak Pesan › Umum',
+                    route('admin.pesan-peserta.index', ['asal' => 'umum']),
+                    $p->created_at, 'pesan_umum:' . $p->id);
+            }
+            $items[] = static::lainnya('pesan_umum', $n, $q, 'dan :n pesan pengunjung lainnya', route('admin.pesan-peserta.index', ['asal' => 'umum']));
         }
 
         // 3-5. Ringkasan per jenis (satu baris berisi jumlah)

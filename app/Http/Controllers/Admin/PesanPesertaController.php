@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
+use App\Models\PesanAsatid;
 use App\Models\PesanPeserta;
+use App\Models\PesanUmum;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,8 +15,10 @@ use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
- * Admin > PSB > Pesan Peserta
+ * Admin > PSB > Kotak Pesan (tab Siswa · Asatid · Umum)
  * - Kotak masuk: pesan dari peserta (menu "Pesan untuk Admin" di dasbor siswa)
+ * - Tab Asatid: pesan dari dasbor asatid > Pesan untuk Admin, percakapan + balas
+ * - Tab Umum: pesan pengunjung landing page (Hubungi Admin), tandai dibaca / hapus, balas lewat WA/email
  * - Kirim pesan khusus ke satu peserta atau banyak peserta sekaligus (muncul di "Pesan dari Admin")
  * - Percakapan per peserta + balas
  */
@@ -28,9 +33,34 @@ class PesanPesertaController extends Controller
         'semua' => 'Semua pendaftar',
     ];
 
+    /** Tab kotak pesan: asal pengirim */
+    public const ASAL = ['siswa' => 'Siswa', 'asatid' => 'Asatid', 'umum' => 'Umum'];
+
     public function index(Request $request): View
     {
         $saring = in_array($request->query('saring'), ['belum', 'semua'], true) ? $request->query('saring') : 'semua';
+        $asal = array_key_exists($request->query('asal'), self::ASAL) ? $request->query('asal') : 'siswa';
+
+        // Angka "belum dibaca" di tiap tab
+        $belumPerAsal = [
+            'siswa' => PesanPeserta::dariPeserta()->belumDibaca()->count(),
+            'asatid' => PesanAsatid::dariAsatid()->belumDibaca()->count(),
+            'umum' => PesanUmum::belumDibaca()->count(),
+        ];
+        $umum = ['asal' => $asal, 'asalList' => self::ASAL, 'belumPerAsal' => $belumPerAsal, 'saring' => $saring, 'jumlahBelum' => array_sum($belumPerAsal)];
+
+        if ($asal === 'asatid') {
+            return view('admin.pesan-peserta.index', $umum + $this->daftarAsatid($request, $saring));
+        }
+        if ($asal === 'umum') {
+            $pesanUmum = PesanUmum::query()
+                ->when($saring === 'belum', fn ($q) => $q->belumDibaca())
+                ->when($request->q, fn ($q, $kata) => $q->where(fn ($w) => $w->where('nama', 'like', "%{$kata}%")->orWhere('kontak', 'like', "%{$kata}%")->orWhere('isi', 'like', "%{$kata}%")))
+                ->orderByRaw('dibaca_at IS NULL DESC')->latest('id')
+                ->paginate(20)->withQueryString();
+
+            return view('admin.pesan-peserta.index', $umum + ['pesanUmum' => $pesanUmum]);
+        }
 
         // Satu baris per peserta: pesan terakhir + jumlah pesan peserta yang belum dibaca
         $ringkas = PesanPeserta::query()
@@ -44,12 +74,10 @@ class PesanPesertaController extends Controller
         $terakhir = PesanPeserta::whereIn('id', $ringkas->pluck('terakhir_id'))->get()->keyBy('id');
         $peserta = PendaftaranSiswa::whereIn('id', $ringkas->pluck('pendaftaran_siswa_id'))->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status', 'berkas_foto'])->keyBy('id');
 
-        return view('admin.pesan-peserta.index', [
+        return view('admin.pesan-peserta.index', $umum + [
             'ringkas' => $ringkas,
             'terakhir' => $terakhir,
             'peserta' => $peserta,
-            'saring' => $saring,
-            'jumlahBelum' => PesanPeserta::dariPeserta()->belumDibaca()->count(),
             'pilihanPeserta' => PendaftaranSiswa::orderBy('nama_lengkap')->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status']),
             'tujuanList' => self::TUJUAN,
             'jumlahTujuan' => PendaftaranSiswa::selectRaw('status, count(*) n')->groupBy('status')->pluck('n', 'status'),
@@ -143,5 +171,85 @@ class PesanPesertaController extends Controller
         $pesan->delete();
 
         return redirect()->route('admin.pesan-peserta.show', $peserta)->with('success', 'Pesan dihapus.');
+    }
+
+    // ===================== Tab Asatid =====================
+
+    /** Satu baris per asatid yang pernah mengirim pesan: pesan terakhir + jumlah belum dibaca */
+    private function daftarAsatid(Request $request, string $saring): array
+    {
+        $punyaPesan = PesanAsatid::dariAsatid()->select('user_id');
+
+        $ringkas = PesanAsatid::query()
+            ->selectRaw('user_id, MAX(id) AS terakhir_id, SUM(CASE WHEN dari = ? AND dibaca_at IS NULL THEN 1 ELSE 0 END) AS belum', [PesanAsatid::DARI_ASATID])
+            ->whereIn('user_id', $punyaPesan)
+            ->groupBy('user_id')
+            ->when($saring === 'belum', fn ($q) => $q->havingRaw('belum > 0'))
+            ->when($request->q, fn ($q, $kata) => $q->whereIn('user_id', PendaftaranAsatid::where('nama_lengkap', 'like', "%{$kata}%")->orWhere('nomor_pendaftaran', 'like', "%{$kata}%")->select('user_id')))
+            ->orderByRaw('belum > 0 DESC')->orderByDesc('terakhir_id')
+            ->paginate(20)->withQueryString();
+
+        return [
+            'ringkas' => $ringkas,
+            'terakhir' => PesanAsatid::whereIn('id', $ringkas->pluck('terakhir_id'))->get()->keyBy('id'),
+            'asatid' => PendaftaranAsatid::whereIn('user_id', $ringkas->pluck('user_id'))->get()->keyBy('user_id'),
+        ];
+    }
+
+    /** Percakapan dengan satu asatid. Pesan dari asatid ditandai sudah dibaca admin. */
+    public function showAsatid(int $user): View
+    {
+        $asatid = PendaftaranAsatid::where('user_id', $user)->firstOrFail();
+        PesanAsatid::where('user_id', $user)->dariAsatid()->belumDibaca()->update(['dibaca_at' => now()]);
+
+        return view('admin.pesan-peserta.show-asatid', [
+            'asatid' => $asatid,
+            'pesan' => PesanAsatid::where('user_id', $user)->with('pengirim:id,name')->orderBy('id')->get(),
+        ]);
+    }
+
+    /** Balasan admin: muncul di dasbor asatid > Pesan dari Admin dan di bawah pesan asatid (Pesan untuk Admin) */
+    public function balasAsatid(Request $request, int $user): RedirectResponse
+    {
+        $asatid = PendaftaranAsatid::where('user_id', $user)->firstOrFail();
+        $data = $request->validate([
+            'isi' => ['required', 'string', 'max:3000'],
+        ], ['isi.required' => 'Tulis balasan terlebih dahulu.']);
+
+        PesanAsatid::create([
+            'user_id' => $asatid->user_id,
+            'pengirim_id' => $request->user()->id,
+            'dari' => PesanAsatid::DARI_ADMIN,
+            'balasan_untuk_id' => PesanAsatid::where('user_id', $user)->dariAsatid()->latest('id')->value('id'),
+            'judul' => 'Balasan admin',
+            'isi' => $data['isi'],
+        ]);
+
+        return redirect()->route('admin.pesan-peserta.asatid.show', $user)->with('success', 'Balasan terkirim ke dasbor asatid.');
+    }
+
+    public function hapusAsatid(PesanAsatid $pesan): RedirectResponse
+    {
+        $user = $pesan->user_id;
+        $pesan->delete();
+
+        return redirect()->route('admin.pesan-peserta.asatid.show', $user)->with('success', 'Pesan dihapus.');
+    }
+
+    // ===================== Tab Umum =====================
+
+    /** Tandai pesan pengunjung sudah dibaca / belum dibaca (bolak-balik) */
+    public function bacaUmum(PesanUmum $pesan): RedirectResponse
+    {
+        $pesan->update(['dibaca_at' => $pesan->dibaca_at ? null : now()]);
+
+        return back()->with('success', $pesan->dibaca_at ? 'Pesan ditandai sudah dibaca.' : 'Pesan ditandai belum dibaca.');
+    }
+
+    public function hapusUmum(PesanUmum $pesan): RedirectResponse
+    {
+        $pesan->delete();
+
+        return back()->with('success', 'Pesan dihapus.');
     }
 }

@@ -35,6 +35,7 @@ $dataJadwal = $jadwal->map(fn ($j) => [
     'catatan' => $j->catatan,
     'kelas' => $j->kelas?->nama,
     'kitab' => $j->kitab?->nama,
+    'frekuensi' => $j->kitab?->frekuensi, // batas jadwal kitab ini per kelas dalam seminggu
     'ustadz' => $namaUstadz[$j->user_id] ?? null,
     'ustadz_arab' => $arabUstadz[$j->user_id] ?? null, // nama Arab ustadz (tampil di bawah nama Indonesia)
     'inisial' => $inisial($namaUstadz[$j->user_id] ?? ''),
@@ -140,8 +141,13 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
     @if ($tampilan === 'grid' && $waktuList->isNotEmpty())
     <p class="mb-5 hidden lg:flex items-center gap-2 px-1 text-xs text-slate-500">
         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/></svg>
-        <span>{{ __('Geser kartu ke hari/jam lain untuk memindahkan jadwal, lalu klik') }} <b>{{ __('Simpan') }}</b>. {{ __('Klik ikon pensil untuk mengubah isi jadwal.') }}</span>
+        <span>{{ __('Geser kartu ke hari/jam lain, lalu pilih') }} <b>{{ __('Pindah') }}</b> {{ __('atau') }} <b>{{ __('Salin') }}</b>. {{ __('Langsung tersimpan.') }} {{ __('Klik ikon pensil untuk mengubah isi jadwal.') }}</span>
     </p>
+    {{-- Pita merah: ada jadwal bentrok / melebihi frekuensi (kartunya bergaris merah) --}}
+    <div v-show="jumlahBentrok" style="display: none" class="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-rose-200">
+        <svg class="w-5 h-5 shrink-0 text-rose-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"/></svg>
+        <span><b v-text="jumlahBentrok + ' ' + @js(__('jadwal bermasalah'))"></b> · {{ __('bentrok atau melebihi frekuensi. Kartunya bergaris merah; arahkan kursor ke kartu untuk melihat sebabnya.') }}</span>
+    </div>
     {{-- ===== HP (di bawah lg): pilih hari, lalu daftar jam pelajaran hari itu ===== --}}
     <div class="lg:hidden space-y-3">
         <p class="px-1 text-xs text-slate-500">{{ __('Ketuk jadwal untuk mengubah, atau ketuk slot kosong untuk menambah.') }}</p>
@@ -195,11 +201,11 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                     {{-- Satu sel = satu slot (hari + jam). Kartu bisa dijatuhkan di sini. --}}
                     <td v-for="(namaHari, nomor) in hari" :key="nomor"
                         class="p-2 border-l border-slate-100 transition-colors" :class="{ 'bg-emerald-50': sorot === nomor + '-' + w.id }"
-                        @dragover.prevent="sorot = nomor + '-' + w.id" @dragleave="sorot = null" @drop.prevent="lepas(Number(nomor), w.id)">
+                        @dragover.prevent="sorot = nomor + '-' + w.id" @dragleave="sorot = null" @drop.prevent="lepas(Number(nomor), w.id, $event)">
                         {{-- Tinggi minimum 112px; tombol "+" mengisi sisa ruang (sel kosong = kotak penuh) --}}
                         <div class="flex min-h-28 flex-col gap-3">
                             <kartu-jadwal v-for="j in isiSlot(Number(nomor), w.id)" :key="j.id" :j="j"
-                                :bentrok="pesanBentrok[j.id]" :dipindah="sudahDipindah(j)"
+                                :bentrok="pesanBentrok[j.id]"
                                 @ubah="bukaUbah" @seret="seret = j" @selesai-seret="seret = null; sorot = null"></kartu-jadwal>
                             <button type="button" @click="bukaTambah(Number(nomor), w.id)"
                                 class="w-full flex-1 min-h-7 rounded-xl border border-dashed border-slate-200 text-[11px] text-slate-300 hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-600 transition-colors"
@@ -211,28 +217,26 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
         </table>
     </section>
 
-    {{-- Bar simpan: muncul setelah ada kartu yang digeser --}}
-    <form v-show="pindahan.length" style="display: none" method="POST" action="{{ route('admin.jadwal.pindah') }}"
-        @submit="adaPerubahan = false"
-        class="fixed bottom-24 lg:bottom-5 left-1/2 z-40 -translate-x-1/2 w-[min(640px,calc(100vw-2rem))] flex items-center gap-3 rounded-2xl bg-[#0b332c] px-4 py-3 text-white shadow-2xl shadow-[#0b332c]/40 ring-1 ring-white/10">
-        @csrf
-        <input type="hidden" name="bulan_ajaran_id" value="{{ $bulan->id }}">
-        <template v-for="(j, i) in pindahan" :key="j.id">
-            <input type="hidden" :name="'pindah[' + i + '][id]'" :value="j.id">
-            <input type="hidden" :name="'pindah[' + i + '][hari]'" :value="j.hari">
-            <input type="hidden" :name="'pindah[' + i + '][waktu_pelajaran_id]'" :value="j.waktu">
-        </template>
-        <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-400 text-[#0b332c] flex items-center justify-center">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
-        </span>
-        <div class="min-w-0 flex-1">
-            <p class="text-sm font-bold" v-text="pindahan.length + ' ' + @js(__('jadwal dipindah'))"></p>
-            <p class="text-[11px] text-white/70 truncate"
-                v-text="jumlahBentrok ? jumlahBentrok + ' ' + @js(__('kartu bentrok (bertanda merah). Geser lagi sampai tidak bentrok.')) : @js(__('Belum disimpan. Klik Simpan untuk menyimpan perubahan.'))"></p>
+    {{-- Menu kecil saat kartu dilepas di slot lain: Pindah / Salin (langsung tersimpan) / batal --}}
+    {{-- Dibungkus <template>: isinya tidak tampil sebelum Vue siap (jangan pakai style="display:none" + :style, keduanya bertabrakan) --}}
+    <template v-if="tawaran">
+    <div :style="{ left: tawaran.x + 'px', top: tawaran.y + 'px' }"
+        class="fixed z-50 w-56 -translate-x-1/2 rounded-2xl bg-white p-2 shadow-2xl shadow-[#0b332c]/30 ring-1 ring-slate-200">
+        <div class="flex items-start justify-between gap-2 px-2 pb-2 pt-1">
+            <p class="text-xs text-slate-500">
+                <b class="block text-slate-700" v-text="tawaran.j.kitab || @js(__('Tanpa kitab'))"></b>
+                <span v-text="'→ ' + hari[tawaran.hari] + ', ' + namaWaktu(tawaran.waktu)"></span>
+            </p>
+            <button type="button" @click="tawaran = null" title="{{ __('Batal') }}" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100">✕</button>
         </div>
-        <button type="button" @click="batalPindah" class="rounded-xl px-3 py-2 text-sm font-semibold text-white/80 ring-1 ring-white/20 hover:bg-white/10">{{ __('Batal') }}</button>
-        <button :disabled="jumlahBentrok > 0" class="rounded-xl bg-amber-400 px-4 py-2 text-sm font-bold text-[#0b332c] hover:bg-amber-300 disabled:opacity-40 disabled:cursor-not-allowed">{{ __('Simpan') }}</button>
-    </form>
+        <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" @click="kirimGeser('pindah')" :disabled="menyimpan"
+                class="rounded-xl bg-[#0b332c] px-3 py-2 text-sm font-bold text-white hover:bg-[#135347] disabled:opacity-50">{{ __('Pindah') }}</button>
+            <button type="button" @click="kirimGeser('salin')" :disabled="menyimpan"
+                class="rounded-xl bg-sky-400 px-3 py-2 text-sm font-bold text-[#0b332c] hover:bg-sky-300 disabled:opacity-50">{{ __('Salin') }}</button>
+        </div>
+    </div>
+    </template>
     @endif
 
     {{-- ===== Tampilan PER KELAS / PER USTADZ (digambar Vue dari data) ===== --}}
@@ -356,10 +360,10 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
 </div>
 
 {{-- ===== Template komponen <kartu-jadwal> (dibaca Vue, tidak tampil sendiri) =====
-     props: j (data jadwal), lengkap (tampilkan hari & jam), bentrok (pesan bentrok), dipindah (sudah digeser) --}}
+     props: j (data jadwal), lengkap (tampilkan hari & jam), bentrok (pesan bentrok / melebihi frekuensi) --}}
 <template id="tpl-kartu-jadwal">
     <div class="group relative rounded-xl px-2.5 py-2 ring-1 transition hover:shadow-md cursor-grab active:cursor-grabbing"
-        :class="[warna[0], { 'ring-2 ring-rose-500 animate-pulse': bentrok, 'outline outline-2 outline-dashed outline-amber-400': dipindah }]"
+        :class="[warna[0], { 'ring-2 ring-rose-500 animate-pulse': bentrok }]"
         :title="bentrok || ''" :draggable="!lengkap" @dragstart="$emit('seret')" @dragend="$emit('selesai-seret')">
         <div class="absolute right-1 top-1 flex gap-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
             <button type="button" title="{{ __('Ubah jadwal') }}" @click="$emit('ubah', j)"
@@ -383,6 +387,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             <span v-if="j.inisial" class="shrink-0 text-[9px] font-bold text-slate-400" v-text="j.inisial"></span>
         </div>
         <p v-if="j.catatan" class="mt-0.5 text-[10px] italic text-slate-500" v-text="j.catatan"></p>
+        <p v-if="bentrok" class="mt-1 text-[10px] font-semibold leading-tight text-rose-600" v-text="bentrok"></p>
     </div>
 </template>
 @endsection
@@ -400,6 +405,8 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
         const KELAS = @json($dataKelas);
         const KITAB = @json($dataKitab);
         const ALAMAT_HAPUS = @json(route('admin.jadwal.destroy', '__ID__'));
+        const ALAMAT_GESER = @json(route('admin.jadwal.geser', '__ID__')); // Pindah / Salin kartu (langsung tersimpan)
+        const CSRF = @json(csrf_token());
         // Warna kartu per kelas: [latar kartu, warna teks judul, warna lingkaran]
         const WARNA = [
             ['bg-sky-50 ring-sky-200', 'text-sky-800', 'bg-sky-500'],
@@ -416,8 +423,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 return {
                     hari: HARI,
                     waktu: WAKTU,
-                    // Setiap jadwal menyimpan posisi awalnya (asalHari/asalWaktu) untuk tahu mana yang digeser
-                    jadwal: @json($dataJadwal).map((j) => ({ ...j, asalHari: j.hari, asalWaktu: j.waktu })),
+                    jadwal: @json($dataJadwal),
                     tampilan: @json($tampilan),
                     kelasFilter: @json($kelasFilter),
                     cari: '',
@@ -425,7 +431,8 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                     hariDipilih: HARI[new Date().getDay() || 7] ? (new Date().getDay() || 7) : Number(Object.keys(HARI)[0]),
                     seret: null,        // kartu yang sedang digeser
                     sorot: null,        // slot "hari-jam" yang sedang dilewati kartu
-                    adaPerubahan: true, // false saat form Simpan dikirim (agar tidak ditanya "tinggalkan halaman?")
+                    tawaran: null,      // menu Pindah/Salin: { j, hari, waktu, x, y }
+                    menyimpan: false,   // sedang mengirim ke server
                     form: kosongkanForm(),
                     alamatUbah: @json(route('admin.jadwal.update', '__ID__')),
                 };
@@ -439,19 +446,23 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                         [j.kitab, j.ustadz, j.ustadz_arab, j.kelas, j.catatan, HARI[j.hari], WAKTU.find((w) => w.id === j.waktu)?.nama]
                             .join(' ').toLowerCase().includes(kata));
                 },
-                // Jadwal yang sudah digeser dari posisi awalnya
-                pindahan() {
-                    return this.jadwal.filter((j) => this.sudahDipindah(j));
-                },
-                // { idJadwal: 'pesan bentrok' } -> kelas atau ustadz yang sama di satu slot
+                // { idJadwal: 'pesan' } -> kelas/ustadz yang sama di satu slot, atau kitab melebihi frekuensi di satu kelas
                 pesanBentrok() {
                     const pesan = {};
                     const perSlot = {};
-                    this.jadwal.forEach((j) => (perSlot[j.hari + '-' + j.waktu] ??= []).push(j));
+                    const perKitab = {};
+                    this.jadwal.forEach((j) => {
+                        (perSlot[j.hari + '-' + j.waktu] ??= []).push(j);
+                        if (j.kitab_id) (perKitab[j.kelas_id + '-' + j.kitab_id] ??= []).push(j);
+                    });
                     Object.values(perSlot).forEach((isi) => isi.forEach((j) => {
                         if (isi.filter((x) => x.kelas_id === j.kelas_id).length > 1) pesan[j.id] = @js(__('Bentrok: kelas ini sudah ada pelajaran di jam ini'));
                         else if (j.user_id && isi.filter((x) => x.user_id === j.user_id).length > 1) pesan[j.id] = @js(__('Bentrok: ustadz ini mengajar dua kelas di jam ini'));
                     }));
+                    Object.values(perKitab).forEach((isi) => {
+                        const batas = isi[0].frekuensi;
+                        if (batas && isi.length > batas) isi.forEach((j) => pesan[j.id] ??= @js(__('Melebihi frekuensi kitab')) + ' (' + isi.length + '/' + batas + ')');
+                    });
                     return pesan;
                 },
                 jumlahBentrok() {
@@ -491,20 +502,75 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 warnaKartu(j) {
                     return WARNA[j.warna] ?? WARNA[0];
                 },
-                sudahDipindah(j) {
-                    return j.hari !== j.asalHari || j.waktu !== j.asalWaktu;
+                namaWaktu(id) {
+                    return WAKTU.find((w) => w.id === id)?.nama ?? '';
                 },
-                // Kartu dijatuhkan di slot baru: cukup ubah datanya, Vue menggambar ulang grid
-                lepas(hari, waktu) {
-                    if (this.seret) {
-                        this.seret.hari = hari;
-                        this.seret.waktu = waktu;
-                    }
+                // Kartu dijatuhkan di slot lain: tampilkan menu Pindah / Salin di dekat kursor
+                lepas(hari, waktu, e) {
+                    const j = this.seret;
                     this.seret = null;
                     this.sorot = null;
+                    if (!j || (j.hari === hari && j.waktu === waktu)) return;
+                    this.tawaran = {
+                        j, hari, waktu,
+                        x: Math.min(Math.max(e.clientX, 120), window.innerWidth - 120),
+                        y: Math.min(e.clientY + 8, window.innerHeight - 140),
+                    };
                 },
-                batalPindah() {
-                    this.jadwal.forEach((j) => { j.hari = j.asalHari; j.waktu = j.asalWaktu; });
+                // Periksa di layar sebelum dikirim: bentrok kelas, bentrok ustadz, frekuensi kitab. Hasil: pesan, atau null.
+                cekGeser(j, hari, waktu, mode) {
+                    const lain = this.jadwal.filter((x) => x.hari === hari && x.waktu === waktu && x.id !== j.id);
+                    const namaSlot = HARI[hari] + ', ' + this.namaWaktu(waktu);
+                    if (lain.some((x) => x.kelas_id === j.kelas_id)) {
+                        return @js(__('Bentrok: kelas')) + ' ' + j.kelas + ' ' + @js(__('sudah ada pelajaran di')) + ' ' + namaSlot + '.';
+                    }
+                    const sama = j.user_id && lain.find((x) => x.user_id === j.user_id);
+                    if (sama) {
+                        return @js(__('Bentrok:')) + ' ' + j.ustadz + ' ' + @js(__('sudah mengajar kelas')) + ' ' + sama.kelas + ' ' + @js(__('di')) + ' ' + namaSlot + '.';
+                    }
+                    if (mode === 'salin' && j.kitab_id && j.frekuensi) {
+                        const jumlah = this.jadwal.filter((x) => x.kelas_id === j.kelas_id && x.kitab_id === j.kitab_id).length;
+                        if (jumlah >= j.frekuensi) {
+                            return @js(__('Kitab')) + ' ' + j.kitab + ' ' + @js(__('di kelas')) + ' ' + j.kelas + ' ' + @js(__('sudah')) + ' ' + jumlah + ' ' + @js(__('kali seminggu (batas frekuensi')) + ' ' + j.frekuensi + ').';
+                        }
+                    }
+                    return null;
+                },
+                // Pilih Pindah / Salin: cek dulu, lalu langsung simpan ke server
+                async kirimGeser(mode) {
+                    const { j, hari, waktu } = this.tawaran;
+                    const salah = this.cekGeser(j, hari, waktu, mode);
+                    if (salah) {
+                        this.tawaran = null;
+                        notifikasi.gagal(salah, mode === 'salin' ? @js(__('Tidak bisa disalin')) : @js(__('Tidak bisa dipindah')));
+                        return;
+                    }
+                    this.menyimpan = true;
+                    try {
+                        const res = await fetch(ALAMAT_GESER.replace('__ID__', j.id), {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': CSRF },
+                            body: JSON.stringify({ mode, hari, waktu_pelajaran_id: waktu }),
+                        });
+                        const hasil = await res.json().catch(() => ({}));
+                        if (!res.ok) {
+                            const pesan = hasil.errors ? Object.values(hasil.errors)[0][0] : (hasil.message || @js(__('Gagal menyimpan. Muat ulang halaman lalu coba lagi.')));
+                            notifikasi.gagal(pesan, mode === 'salin' ? @js(__('Tidak bisa disalin')) : @js(__('Tidak bisa dipindah')));
+                            return;
+                        }
+                        if (mode === 'pindah') {
+                            j.hari = hari;
+                            j.waktu = waktu;
+                        } else {
+                            this.jadwal.push({ ...j, id: hasil.id, hari, waktu });
+                        }
+                        notifikasi.sukses(hasil.pesan);
+                    } catch (err) {
+                        notifikasi.gagal(@js(__('Tidak tersambung ke server. Coba lagi.')));
+                    } finally {
+                        this.menyimpan = false;
+                        this.tawaran = null;
+                    }
                 },
                 bukaTambah(hari, waktu) {
                     this.form = { ...kosongkanForm(), ...(hari ? { hari: String(hari), waktu_pelajaran_id: String(waktu) } : {}), kelas_id: this.kelasFilter ? String(this.kelasFilter) : '' };
@@ -512,28 +578,28 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 },
                 bukaUbah(j) {
                     this.form = {
-                        id: j.id, hari: String(j.asalHari), waktu_pelajaran_id: String(j.asalWaktu), kelas_id: String(j.kelas_id),
+                        id: j.id, hari: String(j.hari), waktu_pelajaran_id: String(j.waktu), kelas_id: String(j.kelas_id),
                         kitab_id: j.kitab_id ? String(j.kitab_id) : '', user_id: j.user_id ? String(j.user_id) : '', catatan: j.catatan ?? '',
                     };
                     this.bukaDialog('dialog-jadwal');
                 },
-                // Ingatkan bila meninggalkan halaman sebelum perpindahan disimpan
-                ingatkanPerubahan(e) {
-                    if (this.pindahan.length && this.adaPerubahan) { e.preventDefault(); e.returnValue = ''; }
+                // Tekan Esc = tutup menu Pindah/Salin
+                tutupTawaran(e) {
+                    if (e.key === 'Escape') this.tawaran = null;
                 },
             },
             mounted() {
-                window.addEventListener('beforeunload', this.ingatkanPerubahan);
+                window.addEventListener('keydown', this.tutupTawaran);
             },
             unmounted() {
-                window.removeEventListener('beforeunload', this.ingatkanPerubahan);
+                window.removeEventListener('keydown', this.tutupTawaran);
             },
         });
 
         // Komponen kartu jadwal (template: <template id="tpl-kartu-jadwal"> di atas)
         app.component('kartu-jadwal', {
             template: '#tpl-kartu-jadwal',
-            props: { j: Object, lengkap: Boolean, bentrok: String, dipindah: Boolean },
+            props: { j: Object, lengkap: Boolean, bentrok: String },
             emits: ['ubah', 'seret', 'selesai-seret'],
             computed: {
                 warna() { return WARNA[this.j.warna] ?? WARNA[0]; },

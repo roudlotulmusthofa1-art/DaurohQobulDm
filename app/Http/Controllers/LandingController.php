@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\PendaftaranSiswa;
 use App\Models\PendaftaranAsatid;
+use App\Models\PesanUmum;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class LandingController extends Controller
@@ -119,5 +122,29 @@ class LandingController extends Controller
         $jumlahAssatid = PendaftaranAsatid::where('status', PendaftaranAsatid::DITERIMA)->count();
 
         return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid'));
+    }
+
+    /**
+     * Pesan pengunjung untuk admin (pop-up "Hubungi Admin" di landing page & footer).
+     * Masuk ke Admin > Kotak Pesan > tab Umum. Isian "situs" disembunyikan: kalau terisi berarti bot.
+     */
+    public function kirimPesan(Request $request): RedirectResponse
+    {
+        $data = $request->validateWithBag('hubungiAdmin', [
+            'nama'   => ['required', 'string', 'max:100'],
+            'kontak' => ['required', 'string', 'max:100'],
+            'isi'    => ['required', 'string', 'max:2000'],
+            'situs'  => ['prohibited'], // jebakan bot
+        ], [
+            'nama.required'   => 'Nama wajib diisi.',
+            'kontak.required' => 'Nomor WhatsApp atau email wajib diisi.',
+            'isi.required'    => 'Tulis pesan Anda terlebih dahulu.',
+            'isi.max'         => 'Pesan maksimal 2000 karakter.',
+            'situs.prohibited' => 'Pesan tidak dapat dikirim.',
+        ]);
+
+        PesanUmum::create($data + ['ip' => $request->ip()]);
+
+        return back()->with('success', 'Pesan Anda terkirim ke admin. Kami akan membalas lewat kontak yang Anda tulis.');
     }
 }

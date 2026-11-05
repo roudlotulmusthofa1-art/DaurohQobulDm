@@ -23,6 +23,8 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     Route::get('/jadwal', [AsatidDashboardController::class, 'jadwal'])->name('jadwal');
     Route::get('/penilaian', [AsatidDashboardController::class, 'penilaian'])->name('penilaian');
     Route::get('/pesan', [AsatidDashboardController::class, 'pesan'])->name('pesan'); // Pesan dari Admin
+    Route::get('/pesan-saya', [AsatidDashboardController::class, 'pesanSaya'])->name('pesan-saya'); // Pesan untuk Admin
+    Route::post('/pesan-saya', [AsatidDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');
     Route::get('/peserta', [AsatidDashboardController::class, 'peserta'])->name('peserta');
     Route::get('/peserta/{siswa}', [AsatidDashboardController::class, 'pesertaShow'])->whereNumber('siswa')->name('peserta.show');
 

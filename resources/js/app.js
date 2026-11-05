@@ -1,11 +1,14 @@
 import "../css/app.css";
-import { createApp, reactive, ref } from "vue";
+import { createApp, reactive, ref, watch, computed } from "vue";
 
 // Sediakan Vue untuk skrip yang masih berada di file Blade.
+// Fungsi Vue yang dipakai di Blade (const { ... } = Vue) harus ada di sini, kalau tidak halamannya kosong.
 window.Vue = {
     createApp,
     reactive,
     ref,
+    watch,
+    computed,
 };
 
 // Pemindai QR (absensi kegiatan). Dimuat hanya saat dibutuhkan supaya halaman lain tetap ringan.

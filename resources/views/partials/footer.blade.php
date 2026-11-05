@@ -41,7 +41,10 @@
                 <p class="text-white font-bold mb-4">{{ __('Hubungi Kami') }}</p>
                 <ul class="space-y-3 text-sm">
                     <li class="flex items-center gap-2"><span>📍</span> {{ __('Solo, Jawa Tengah') }}</li>
-                    <li class="flex items-center gap-2"><span>✉️</span> {{ $kontak['email'] ?? 'info@ribathriyadh.com' }}</li>
+                    <li class="flex flex-wrap items-center gap-x-2 gap-y-1"><span>✉️</span> {{ $kontak['email'] ?? 'info@ribathriyadh.com' }}
+                        <span class="text-slate-500">·</span>
+                        <button type="button" onclick="bukaHubungiAdmin()" class="font-semibold text-teal-400 hover:text-teal-300 hover:underline">{{ __('Hubungi Admin langsung') }}</button>
+                    </li>
                     <li class="flex items-center gap-2"><span>📱</span> {{ __('WhatsApp:') }} {{ $kontak['whatsapp'] ?? '+62 877-8397-5110' }}</li>
                 </ul>
             </div>

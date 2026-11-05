@@ -28,6 +28,7 @@ class AsatidDashboardController extends Controller
             // Jumlah jam mengajar per minggu (Akademik > Jadwal Mengajar, bulan aktif)
             'jumlahJam'     => self::jadwalSaya()->count(),
             'jumlahPesanBaru' => PesanAsatid::jumlahBaru(Auth::id()),
+            'jumlahPesanSaya' => PesanAsatid::where('user_id', Auth::id())->dariAsatid()->count(),
         ]);
     }
 
@@ -103,7 +104,7 @@ class AsatidDashboardController extends Controller
     /** Pesan dari Admin (kotak masuk). Pesan yang tampil otomatis ditandai sudah dibaca. */
     public function pesan()
     {
-        $pesan = PesanAsatid::with('pengirim:id,name')->where('user_id', Auth::id())->latest('id')->paginate(15);
+        $pesan = PesanAsatid::with('pengirim:id,name')->where('user_id', Auth::id())->dariAdmin()->latest('id')->paginate(15);
 
         $baru = $pesan->getCollection()->whereNull('dibaca_at')->pluck('id');
         // Saat admin "Masuk sebagai" (hanya melihat), pesan tidak ditandai dibaca
@@ -112,6 +113,26 @@ class AsatidDashboardController extends Controller
         }
 
         return $this->tampil('asatid.pesan', ['pesan' => $pesan, 'idBaru' => $baru->all()]);
+    }
+
+    /** Pesan untuk Admin: tulis pesan + riwayat pesan beserta balasan admin */
+    public function pesanSaya()
+    {
+        $pesan = PesanAsatid::where('user_id', Auth::id())->dariAsatid()->with('balasan')->latest('id')->paginate(10);
+
+        return $this->tampil('asatid.pesan-saya', compact('pesan'));
+    }
+
+    public function kirimPesan(Request $request)
+    {
+        $data = $request->validate([
+            'judul' => ['nullable', 'string', 'max:150'],
+            'isi'   => ['required', 'string', 'max:2000'],
+        ], ['isi.required' => 'Tulis pesan Anda terlebih dahulu.', 'isi.max' => 'Pesan maksimal 2000 karakter.']);
+
+        PesanAsatid::create($data + ['user_id' => Auth::id(), 'dari' => PesanAsatid::DARI_ASATID]);
+
+        return redirect()->route('asatid.pesan-saya')->with('success', 'Pesan terkirim ke admin. Balasan akan muncul di halaman ini.');
     }
 
     public function logout(Request $request)
@@ -157,7 +178,7 @@ class AsatidDashboardController extends Controller
         // Pesan dari admin yang belum dibaca (paling atas)
         if ($pesanBaru = PesanAsatid::jumlahBaru(Auth::id())) {
             $items[] = [
-                'kunci' => 'pesan_admin:' . PesanAsatid::where('user_id', Auth::id())->belumDibaca()->max('id'),
+                'kunci' => 'pesan_admin:' . PesanAsatid::where('user_id', Auth::id())->dariAdmin()->belumDibaca()->max('id'),
                 'teks'  => "Ada <b>{$pesanBaru} pesan baru</b> dari admin",
                 'ket'   => 'Buka Pesan dari Admin',
                 'url'   => route('asatid.pesan'),

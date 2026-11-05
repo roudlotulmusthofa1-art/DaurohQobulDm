@@ -76,7 +76,7 @@ class MenuAdmin
                     // admin.pendaftaran.* ikut dihitung, supaya halaman detail/edit peserta juga masuk menu ini
                     ['route' => 'admin.data-masuk.index',      'active' => ['admin.data-masuk.*', 'admin.pendaftaran.*'], 'label' => __('Data Masuk Peserta'), 'icon' => 'user-plus'],
                     // Pesan dua arah dengan peserta (dasbor siswa)
-                    ['route' => 'admin.pesan-peserta.index',   'active' => 'admin.pesan-peserta.*', 'label' => __('Pesan Peserta'), 'icon' => 'messages-square'],
+                    ['route' => 'admin.pesan-peserta.index',   'active' => 'admin.pesan-peserta.*', 'label' => __('Kotak Pesan'), 'icon' => 'messages-square'],
                 ],
             ],
             [

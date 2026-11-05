@@ -52,7 +52,7 @@ class AdminDataAsatidController extends Controller
             'penerimaPesan' => self::penerimaPesan(),
             // Riwayat pesan admin untuk asatid ini (terbaru di atas)
             'riwayatPesan'  => $asatid->user_id
-                ? PesanAsatid::with('pengirim:id,name')->where('user_id', $asatid->user_id)->latest('id')->limit(30)->get()
+                ? PesanAsatid::with('pengirim:id,name')->where('user_id', $asatid->user_id)->dariAdmin()->latest('id')->limit(30)->get()
                 : collect(),
         ]);
     }

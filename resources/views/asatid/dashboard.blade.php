@@ -8,7 +8,7 @@ $hariIni = now()->locale('id')->translatedFormat('l, d F Y');
 $jam = (int) now()->format('H');
 $salam = $jam < 11 ? __('Selamat pagi') : ($jam < 15 ? __('Selamat siang') : ($jam < 18 ? __('Selamat sore') : __('Selamat malam')));
 
-// Kartu menu (7 kartu). 'lebar' = kartu yang melebar penuh satu baris (dipakai kartu ke-7 supaya baris terakhir rapi).
+// Kartu menu (8 kartu). 'separuh' = di laptop selebar setengah baris (2 kartu terakhir, supaya baris terakhir rapi).
 $kartuMenu = [
     [
         'judul' => __('Profil'),
@@ -69,6 +69,18 @@ $kartuMenu = [
         'ikon'  => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
     ],
     [
+        'judul' => __('Pesan untuk Admin'),
+        'ket'   => __('Kirim pertanyaan, izin, atau laporan ke admin'),
+        'url'   => route('asatid.pesan-saya'),
+        'warna' => 'from-teal-400 to-cyan-600',
+        'cahaya'=> 'bg-teal-400/30',
+        'lencana' => $jumlahPesanSaya > 0
+            ? [__(':jumlah pesan terkirim', ['jumlah' => $jumlahPesanSaya]), 'bg-teal-50 text-teal-700 ring-teal-100']
+            : [__('Tulis pesan'), 'bg-slate-100 text-slate-500 ring-slate-200'],
+        'ikon'  => 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5',
+        'separuh' => true, // laptop: 2 kartu terakhir masing-masing setengah baris
+    ],
+    [
         'judul' => __('Ganti Password'),
         'ket'   => __('Ubah password untuk masuk ke akun Anda'),
         'url'   => route('asatid.ganti-password'),
@@ -76,7 +88,7 @@ $kartuMenu = [
         'cahaya'=> 'bg-slate-400/30',
         'lencana' => [__('Keamanan akun'), 'bg-slate-100 text-slate-600 ring-slate-200'],
         'ikon'  => 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',
-        'lebar' => true, // kartu ke-7: melebar penuh supaya baris terakhir tetap rapi
+        'separuh' => true, // laptop: 2 kartu terakhir masing-masing setengah baris
     ],
 ];
 @endphp
@@ -113,9 +125,9 @@ $kartuMenu = [
             'group relative overflow-hidden rounded-3xl bg-white ring-1 ring-[#0b332c]/[0.06] p-4 sm:p-6 flex flex-col min-h-[170px] sm:min-h-[210px]',
             'shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]',
             'transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-20px_rgba(11,51,44,0.35)] hover:ring-emerald-200',
-            // HP: 2 kolom. Laptop: 3 kolom (6 kartu = 2 baris rapi). 'lebar' = kartu melebar penuh di HP.
-            'lg:col-span-2',
-            'col-span-2 lg:col-span-6' => !empty($k['lebar']),
+            // HP: 2 kolom (8 kartu = 4 baris rapi). Laptop: 3 kolom; 'separuh' = setengah baris (2 kartu terakhir).
+            'lg:col-span-2' => empty($k['separuh']),
+            'lg:col-span-3' => !empty($k['separuh']),
         ])>
         {{-- cahaya warna di pojok --}}
         <span class="pointer-events-none absolute -top-10 -right-10 w-32 h-32 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 {{ $k['cahaya'] }}"></span>

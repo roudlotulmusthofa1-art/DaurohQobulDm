@@ -1,7 +1,12 @@
-{{-- Admin > PSB > Pesan Peserta: kotak masuk (satu baris per peserta) + kirim pesan baru --}}
+{{--
+    Admin > PSB > Kotak Pesan: tab Siswa · Asatid · Umum (?asal=).
+    - Siswa : satu baris per peserta + kirim pesan baru (dialog)
+    - Asatid: satu baris per asatid (dasbor asatid > Pesan untuk Admin) -> percakapan (show-asatid)
+    - Umum  : pesan pengunjung landing page (Hubungi Admin), balas lewat WA/email
+--}}
 @extends('layouts.admin')
 
-@section('title', __('Pesan Peserta'))
+@section('title', __('Kotak Pesan'))
 
 @section('content')
 @php
@@ -22,21 +27,39 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         <div class="relative flex flex-col sm:flex-row sm:items-end gap-4">
             <div class="flex-1">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('PSB') }}</p>
-                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Pesan Peserta') }}</h1>
-                <p class="mt-1.5 text-sm text-white/75">{{ __('Pesan dua arah dengan dasbor siswa.') }} {{ $jumlahBelum ? __(':jumlah pesan belum dibaca.', ['jumlah' => $jumlahBelum]) : __('Semua pesan sudah dibaca.') }}</p>
+                <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Kotak Pesan') }}</h1>
+                <p class="mt-1.5 text-sm text-white/75">{{ __('Pesan dari siswa, asatid, dan pengunjung umum.') }} {{ $jumlahBelum ? __(':jumlah pesan belum dibaca.', ['jumlah' => $jumlahBelum]) : __('Semua pesan sudah dibaca.') }}</p>
             </div>
+            @if ($asal === 'siswa')
             <button type="button" @click="bukaDialog('dialog-kirim')" class="inline-flex items-center gap-2 self-start sm:self-auto rounded-2xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-amber-300 shadow-lg shadow-amber-500/30">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
                 {{ __('Kirim Pesan') }}
             </button>
+            @elseif ($asal === 'asatid' && Route::has('admin.asatid.index'))
+            <a href="{{ route('admin.asatid.index') }}" class="inline-flex items-center gap-2 self-start sm:self-auto rounded-2xl bg-amber-400 px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-amber-300 shadow-lg shadow-amber-500/30">
+                {{ __('Kirim pesan ke asatid') }}
+            </a>
+            @endif
         </div>
     </section>
 
+    {{-- Tab asal pengirim --}}
+    <nav class="flex gap-1.5 overflow-x-auto" aria-label="{{ __('Asal pesan') }}">
+        @foreach ($asalList as $kode => $nama)
+        <a href="{{ route('admin.pesan-peserta.index', ['asal' => $kode]) }}"
+            class="inline-flex shrink-0 items-center gap-2 rounded-2xl px-4 py-2.5 text-sm font-bold {{ $asal === $kode ? 'bg-[#0b332c] text-white shadow' : 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50' }}">
+            {{ __($nama) }}
+            @if ($belumPerAsal[$kode])<span class="min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold inline-flex items-center justify-center">{{ $belumPerAsal[$kode] }}</span>@endif
+        </a>
+        @endforeach
+    </nav>
+
     {{-- Saring --}}
     <form method="GET" class="{{ $kartu }} p-4 flex flex-col sm:flex-row gap-2">
+        <input type="hidden" name="asal" value="{{ $asal }}">
         <label class="flex-1 flex items-center gap-2 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 px-3 focus-within:ring-2 focus-within:ring-emerald-500">
             <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>
-            <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ __('Cari nama / nomor pendaftaran…') }}" class="flex-1 bg-transparent border-0 py-2.5 text-sm outline-none focus:ring-0">
+            <input type="search" name="q" value="{{ request('q') }}" placeholder="{{ $asal === 'umum' ? __('Cari nama / kontak / isi pesan…') : __('Cari nama / nomor pendaftaran…') }}" class="flex-1 bg-transparent border-0 py-2.5 text-sm outline-none focus:ring-0">
         </label>
         <div class="flex gap-1.5">
             @foreach (['semua' => __('Semua'), 'belum' => __('Belum dibaca')] as $kode => $nama)
@@ -46,7 +69,86 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         <button class="rounded-xl bg-[#0b332c] px-4 py-2.5 text-sm font-bold text-white hover:bg-[#135347]">{{ __('Cari') }}</button>
     </form>
 
-    {{-- Daftar percakapan --}}
+    @if ($asal === 'asatid')
+    {{-- ===== Tab Asatid: satu baris per asatid ===== --}}
+    <section class="{{ $kartu }} overflow-hidden">
+        @forelse ($ringkas as $r)
+        @php $a = $asatid[$r->user_id] ?? null; $akhir = $terakhir[$r->terakhir_id] ?? null; @endphp
+        @continue(! $a)
+        <a href="{{ route('admin.pesan-peserta.asatid.show', $r->user_id) }}" class="flex items-center gap-4 px-5 py-4 border-b border-slate-100 last:border-0 hover:bg-[#f8fbfa] transition-colors {{ $r->belum ? 'bg-emerald-50/40' : '' }}">
+            @if ($a->foto_url)
+            <img src="{{ $a->foto_url }}" alt="" class="w-11 h-11 shrink-0 rounded-2xl object-cover">
+            @else
+            <span class="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-violet-400 to-purple-600 text-white font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($a->nama_lengkap, 0, 1)) }}</span>
+            @endif
+            <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                    <p class="font-bold text-slate-800 truncate">{{ $a->nama_lengkap }}</p>
+                    <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-50 text-violet-700">{{ __('Asatid') }}</span>
+                    <span class="text-[11px] text-slate-400">{{ $a->nomor_pendaftaran }}</span>
+                </div>
+                <p class="mt-0.5 text-sm text-slate-500 truncate">
+                    @if ($akhir)<span class="font-semibold {{ $akhir->dari === \App\Models\PesanAsatid::DARI_ADMIN ? 'text-sky-600' : 'text-slate-700' }}">{{ $akhir->dari === \App\Models\PesanAsatid::DARI_ADMIN ? __('Admin:') : __('Asatid:') }}</span> {{ $akhir->judul ? $akhir->judul . ' — ' : '' }}{{ \Illuminate\Support\Str::limit($akhir->isi, 90) }}@endif
+                </p>
+            </div>
+            <div class="shrink-0 text-right">
+                <p class="text-[11px] text-slate-400">{{ $akhir?->created_at->diffForHumans() }}</p>
+                @if ($r->belum)<span class="mt-1 inline-flex min-w-[22px] h-[22px] px-1.5 rounded-full bg-rose-500 text-white text-[11px] font-bold items-center justify-center">{{ $r->belum }}</span>@endif
+            </div>
+        </a>
+        @empty
+        <div class="py-16 px-6 text-center">
+            <p class="font-bold text-slate-700">{{ $saring === 'belum' ? __('Tidak ada pesan yang belum dibaca') : __('Belum ada pesan') }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ __('Pesan dari asatid (menu "Pesan untuk Admin" di dasbor asatid) muncul di sini.') }}</p>
+        </div>
+        @endforelse
+    </section>
+    {{ $ringkas->links() }}
+
+    @elseif ($asal === 'umum')
+    {{-- ===== Tab Umum: pesan pengunjung landing page ===== --}}
+    <section class="space-y-3">
+        @forelse ($pesanUmum as $u)
+        <article class="{{ $kartu }} p-5 {{ $u->dibaca_at ? '' : 'ring-2 ring-emerald-200' }}">
+            <div class="flex flex-wrap items-start gap-3">
+                <span class="w-11 h-11 shrink-0 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($u->nama, 0, 1)) }}</span>
+                <div class="min-w-0 flex-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <p class="font-bold text-slate-800">{{ $u->nama }}</p>
+                        <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold bg-amber-50 text-amber-700">{{ __('Umum') }}</span>
+                        @unless ($u->dibaca_at)<span class="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white">{{ __('BARU') }}</span>@endunless
+                    </div>
+                    <p class="text-xs text-slate-500">{{ $u->kontak }} · {{ $u->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y · H:i') }}</p>
+                </div>
+            </div>
+            <p dir="auto" class="mt-3 text-sm text-slate-700 whitespace-pre-line break-words">{{ $u->isi }}</p>
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+                @if ($u->tautan_balas)
+                <a href="{{ $u->tautan_balas }}" target="_blank" rel="noopener" class="inline-flex items-center gap-1.5 rounded-xl bg-[#0b332c] px-3.5 py-2 text-xs font-bold text-white hover:bg-[#135347]">
+                    {{ $u->kontak_email ? __('Balas lewat email') : __('Balas lewat WhatsApp') }}
+                </a>
+                @endif
+                <form method="POST" action="{{ route('admin.pesan-peserta.umum.baca', $u) }}">
+                    @csrf
+                    <button class="rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ $u->dibaca_at ? __('Tandai belum dibaca') : __('Tandai sudah dibaca') }}</button>
+                </form>
+                <form method="POST" action="{{ route('admin.pesan-peserta.umum.hapus', $u) }}" @submit="konfirmasi" data-konfirmasi="{{ __('Hapus pesan ini?') }}" class="ml-auto">
+                    @csrf @method('DELETE')
+                    <button class="rounded-xl px-3.5 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50">{{ __('Hapus') }}</button>
+                </form>
+            </div>
+        </article>
+        @empty
+        <div class="{{ $kartu }} py-16 px-6 text-center">
+            <p class="font-bold text-slate-700">{{ $saring === 'belum' ? __('Tidak ada pesan yang belum dibaca') : __('Belum ada pesan') }}</p>
+            <p class="mt-1 text-sm text-slate-500">{{ __('Pesan dari pengunjung (tombol "Hubungi Admin" di landing page) muncul di sini.') }}</p>
+        </div>
+        @endforelse
+    </section>
+    {{ $pesanUmum->links() }}
+
+    @else
+    {{-- ===== Tab Siswa: daftar percakapan ===== --}}
     <section class="{{ $kartu }} overflow-hidden">
         @forelse ($ringkas as $r)
         @php $p = $peserta[$r->pendaftaran_siswa_id] ?? null; $akhir = $terakhir[$r->terakhir_id] ?? null; @endphp
@@ -80,8 +182,10 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         @endforelse
     </section>
     {{ $ringkas->links() }}
+    @endif
 </div>
 
+@if ($asal === 'siswa')
 {{-- ===== Kirim pesan baru ===== --}}
 <dialog id="dialog-kirim" ref="dialog-kirim" class="dialog-akademik" @click.self="tutupDialog">
     <form method="POST" action="{{ route('admin.pesan-peserta.kirim') }}" class="p-6 space-y-4">
@@ -113,6 +217,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         </div>
     </form>
 </dialog>
+@endif
 </div>
 @endsection
 
@@ -132,7 +237,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
             methods: { ...metodeHalaman }, // bukaDialog, tutupDialog
             mounted() {
                 // Gagal validasi saat mengirim -> buka lagi dialognya
-                @if ($errors->any() || session('error'))
+                @if ($asal === 'siswa' && ($errors->any() || session('error')))
                 this.bukaDialog('dialog-kirim');
                 @endif
             },

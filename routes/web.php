@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Route;
 
 
 Route::get('/', [LandingController::class, 'index'])->name('landing');
+// Pengunjung landing page mengirim pesan ke admin (tombol "Hubungi Admin" / partials/hubungi-admin)
+Route::post('/hubungi-admin', [LandingController::class, 'kirimPesan'])->middleware('throttle:5,1')->name('hubungi-admin');
 
 // route untuk Masuk/Login
 
@@ -72,7 +74,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::resource('kurikulum', \App\Http\Controllers\Admin\KurikulumController::class)->only(['index', 'store', 'update', 'destroy']);
     // Jadwal Mengajar
     Route::post('jadwal/salin', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'salin'])->name('jadwal.salin');
-    Route::post('jadwal/pindah', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'pindah'])->name('jadwal.pindah');
+    Route::post('jadwal/{jadwal}/geser', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'geser'])->name('jadwal.geser');
     Route::post('jadwal/ganti-ustadz', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'gantiUstadz'])->name('jadwal.ganti-ustadz');
     Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalMengajarController::class)->only(['index', 'store', 'update', 'destroy']);
 

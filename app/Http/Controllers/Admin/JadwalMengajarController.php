@@ -122,56 +122,30 @@ class JadwalMengajarController extends Controller
     }
 
     /**
-     * Simpan hasil geser kartu di tampilan Grid: beberapa jadwal pindah hari/jam sekaligus.
-     * Bentrok diperiksa pada susunan akhir (jadi dua kartu boleh saling bertukar tempat).
+     * Kartu ditarik ke slot lain di tampilan Grid: "pindah" (ganti hari/jam) atau "salin" (tambah jadwal sama di hari/jam baru).
+     * Langsung tersimpan; dijawab JSON supaya halaman tidak dimuat ulang.
      */
-    public function pindah(Request $request)
+    public function geser(Request $request, JadwalMengajar $jadwal)
     {
         $data = $request->validate([
-            'bulan_ajaran_id' => ['required', 'integer', Rule::exists('bulan_ajaran', 'id')],
-            'pindah' => ['required', 'array', 'max:200'],
-            'pindah.*.id' => ['required', 'integer', 'distinct'],
-            'pindah.*.hari' => ['required', 'integer', Rule::in(array_keys(JadwalMengajar::HARI))],
-            'pindah.*.waktu_pelajaran_id' => ['required', 'integer', Rule::exists('waktu_pelajaran', 'id')],
-        ], ['pindah.required' => 'Belum ada jadwal yang dipindah.']);
-
-        $semua = JadwalMengajar::with(['kelas', 'waktu'])->where('bulan_ajaran_id', $data['bulan_ajaran_id'])->get()->keyBy('id');
-        $pindah = collect($data['pindah'])->keyBy('id');
-
-        if ($pindah->keys()->diff($semua->keys())->isNotEmpty()) {
-            throw ValidationException::withMessages(['jadwal' => 'Ada jadwal yang tidak ditemukan di bulan ini. Muat ulang halaman lalu coba lagi.']);
-        }
-
-        // Susunan akhir setelah dipindah, lalu cek bentrok per slot (hari + jam)
-        $akhir = $semua->map(fn ($j) => [
-            'hari' => (int) ($pindah[$j->id]['hari'] ?? $j->hari),
-            'waktu' => (int) ($pindah[$j->id]['waktu_pelajaran_id'] ?? $j->waktu_pelajaran_id),
-            'kelas' => $j->kelas_id,
-            'ustadz' => $j->user_id,
+            'mode' => ['required', Rule::in(['pindah', 'salin'])],
+            'hari' => ['required', 'integer', Rule::in(array_keys(JadwalMengajar::HARI))],
+            'waktu_pelajaran_id' => ['required', 'integer', Rule::exists('waktu_pelajaran', 'id')],
         ]);
-        foreach ($akhir->groupBy(fn ($a) => $a['hari'] . '-' . $a['waktu']) as $isi) {
-            $slot = JadwalMengajar::HARI[$isi->first()['hari']] . ', ' . (\App\Models\WaktuPelajaran::find($isi->first()['waktu'])?->nama ?? '-');
-            if ($isi->pluck('kelas')->duplicates()->isNotEmpty()) {
-                $kelas = $semua->firstWhere('kelas_id', $isi->pluck('kelas')->duplicates()->first())?->kelas?->nama;
-                throw ValidationException::withMessages(['jadwal' => "Bentrok di {$slot}: kelas {$kelas} punya dua pelajaran."]);
-            }
-            if ($isi->pluck('ustadz')->filter()->duplicates()->isNotEmpty()) {
-                throw ValidationException::withMessages(['jadwal' => "Bentrok di {$slot}: satu ustadz mengajar dua kelas sekaligus."]);
-            }
+        $baru = ['hari' => (int) $data['hari'], 'waktu_pelajaran_id' => (int) $data['waktu_pelajaran_id']]
+            + $jadwal->only(['bulan_ajaran_id', 'kelas_id', 'kitab_id', 'user_id', 'catatan']);
+
+        if ($data['mode'] === 'pindah') {
+            $this->cekBentrok($baru, $jadwal->id);
+            $jadwal->update($baru);
+
+            return response()->json(['pesan' => __('Jadwal dipindah.'), 'id' => $jadwal->id]);
         }
 
-        DB::transaction(function () use ($pindah) {
-            // Pindahkan dulu ke hari sementara (8, 9, ...) agar tidak menabrak aturan unik saat dua kartu bertukar tempat
-            $sementara = 8;
-            foreach ($pindah as $id => $p) {
-                JadwalMengajar::whereKey($id)->update(['hari' => $sementara++]);
-            }
-            foreach ($pindah as $id => $p) {
-                JadwalMengajar::whereKey($id)->update(['hari' => $p['hari'], 'waktu_pelajaran_id' => $p['waktu_pelajaran_id']]);
-            }
-        });
+        $this->cekBentrok($baru); // termasuk cek frekuensi kitab
+        $salinan = JadwalMengajar::create($baru);
 
-        return back()->with('success', $pindah->count() . ' jadwal berhasil dipindah.');
+        return response()->json(['pesan' => __('Jadwal disalin.'), 'id' => $salinan->id]);
     }
 
     /** Ganti ustadz di seluruh jadwal bulan ini (mis. ustadz berhalangan). */
@@ -242,7 +216,16 @@ class JadwalMengajarController extends Controller
             return 'Kelas ini sudah punya pelajaran di hari dan jam tersebut.';
         }
         if (! empty($d['user_id']) && ($lain = $sama()->where('user_id', $d['user_id'])->first())) {
-            return 'Ustadz ini sudah mengajar di kelas ' . ($lain->kelas?->nama ?? '-') . ' pada hari dan jam yang sama.';
+            return 'Bentrok: ustadz ini sudah mengajar di kelas ' . ($lain->kelas?->nama ?? '-') . ' pada hari dan jam yang sama.';
+        }
+        // Frekuensi: jumlah jadwal kitab ini di kelas ini (seminggu) tidak boleh melebihi frekuensi kitab
+        if (! empty($d['kitab_id']) && ($kitab = Kitab::find($d['kitab_id']))) {
+            $sudah = JadwalMengajar::where('bulan_ajaran_id', $d['bulan_ajaran_id'])
+                ->where('kelas_id', $d['kelas_id'])->where('kitab_id', $kitab->id)
+                ->when($kecuali, fn ($q) => $q->whereKeyNot($kecuali))->count();
+            if ($sudah >= $kitab->frekuensi) {
+                return "Kitab {$kitab->nama} di kelas ini sudah {$sudah} kali seminggu (batas frekuensi {$kitab->frekuensi}).";
+            }
         }
 
         return null;

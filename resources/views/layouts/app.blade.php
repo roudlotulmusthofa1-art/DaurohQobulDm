@@ -39,6 +39,8 @@
     @include('partials.status-koneksi')
     {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
     @include('partials.notifikasi')
+    {{-- Pop-up "Hubungi Admin" untuk pengunjung (dibuka dari landing page & footer) --}}
+    @include('partials.hubungi-admin')
 
 
 
