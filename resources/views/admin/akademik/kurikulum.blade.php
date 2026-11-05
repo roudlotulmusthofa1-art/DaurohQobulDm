@@ -141,7 +141,7 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $ikonStat[0] }}"/></svg>
                         </span>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-bold text-slate-800 leading-snug">{{ $k->nama }}</h3>
+                            <h3 dir="auto" class="font-bold text-slate-800 leading-snug">{{ $k->nama }}</h3>
                             <p class="mt-0.5 text-[11px] font-semibold {{ $k->tahunAjaran?->is_active ? 'text-teal-600' : 'text-slate-400' }}">
                                 {{ $k->tahunAjaran ? __('TA') . ' ' . $k->tahunAjaran->nama : __('Tahun ajaran belum dipilih') }}{{ $k->tahunAjaran?->is_active ? ' · ' . __('aktif') : '' }}
                             </p>
@@ -150,11 +150,6 @@ $warnaStat = ['bg-sky-50 text-sky-600 ring-sky-100', 'bg-emerald-50 text-emerald
                         <span class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-[10px] font-bold text-amber-800 ring-1 ring-amber-200">{{ __('Bulan ini') }}</span>
                         @endif
                     </div>
-
-                    {{-- Nama Arab besar (font Amiri otomatis) --}}
-                    @if ($k->nama_arab)
-                    <p dir="rtl" class="mt-4 rounded-2xl bg-[#f8fbfa] ring-1 ring-[#0b332c]/[0.05] px-4 py-2 text-right text-2xl leading-relaxed text-[#0b332c]">{{ $k->nama_arab }}</p>
-                    @endif
 
                     {{-- Deskripsi (maks 2 baris) --}}
                     @if ($k->deskripsi)

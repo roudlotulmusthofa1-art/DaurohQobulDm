@@ -17,10 +17,8 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2 text-xs font-semibold ring-1 ring-
     </div>
 
     <div class="grid grid-cols-2 gap-3">
-        <label class="col-span-2 sm:col-span-1"><span class="{{ $label }}">{{ __('Nama kitab *') }}</span>
-            <input name="nama" required maxlength="150" value="{{ $k?->nama }}" placeholder="{{ __('cth. Al-Ajurrumiyyah') }}" class="{{ $input }}"></label>
-        <label class="col-span-2 sm:col-span-1"><span class="{{ $label }}">{{ __('Nama Arab') }}</span>
-            <input name="nama_arab" maxlength="150" value="{{ $k?->nama_arab }}" dir="rtl" placeholder="الآجرومية" class="{{ $input }}"></label>
+        <label class="col-span-2"><span class="{{ $label }}">{{ __('Nama kitab *') }}</span>
+            <input name="nama" required maxlength="150" value="{{ $k?->nama }}" dir="auto" placeholder="{{ __('cth. الآجرومية atau Al-Ajurrumiyyah') }}" class="{{ $input }}"></label>
         <label class="col-span-2 sm:col-span-1"><span class="{{ $label }}">{{ __('Bidang ilmu') }}</span>
             <select name="bidang_ilmu_id" class="{{ $input }}">
                 <option value="">{{ __('— Tanpa bidang —') }}</option>
