@@ -10,11 +10,17 @@ class AbsensiDetail extends Model
 {
     protected $table = 'absensi_detail';
 
-    protected $fillable = ['absensi_id', 'pendaftaran_siswa_id', 'status', 'catatan', 'waktu'];
+    protected $fillable = ['absensi_id', 'pendaftaran_siswa_id', 'status', 'catatan', 'waktu', 'dicatat_oleh'];
 
     public function absensi(): BelongsTo
     {
         return $this->belongsTo(Absensi::class);
+    }
+
+    /** Asatid / admin yang mencatat peserta ini (absensi kegiatan bersama) */
+    public function pencatat(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'dicatat_oleh');
     }
 
     public function siswa(): BelongsTo

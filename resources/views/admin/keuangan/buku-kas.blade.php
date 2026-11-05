@@ -16,11 +16,7 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
 @endphp
 
 <div id="halaman-buku-kas" class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-6 mb-10">
-    @foreach (['success' => 'bg-emerald-50 ring-emerald-200 text-emerald-900', 'error' => 'bg-rose-50 ring-rose-200 text-rose-800'] as $kunciFlash => $gayaFlash)
-    @if (session($kunciFlash))
-    <div class="p-3.5 rounded-2xl ring-1 text-sm {{ $gayaFlash }}">{{ session($kunciFlash) }}</div>
-    @endif
-    @endforeach
+    {{-- Pesan berhasil / gagal tampil sebagai notifikasi pojok (partials/notifikasi) --}}
     @if ($errors->any())
     <div class="p-3.5 rounded-2xl ring-1 ring-rose-200 bg-rose-50 text-rose-800 text-sm">{{ $errors->first() }}</div>
     @endif

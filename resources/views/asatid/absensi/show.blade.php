@@ -90,7 +90,7 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
                     @if ($d->catatan)
                         <p class="text-xs text-slate-500">“{{ $d->catatan }}”</p>
                     @else
-                        <p class="text-xs text-slate-400 truncate">{{ $d->siswa?->nomor_pendaftaran }}{{ $kegiatan && $d->waktu ? ' · ' . substr($d->waktu, 0, 5) : '' }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ $d->siswa?->nomor_pendaftaran }}{{ $kegiatan && $d->waktu ? ' · ' . substr($d->waktu, 0, 5) : '' }}{{ $d->pencatat ? ' · ' . __('dicatat') . ' ' . $d->pencatat->name : '' }}</p>
                     @endif
                 </div>
                 <span class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1 {{ $gaya[$d->status][0] ?? '' }}">
@@ -110,10 +110,13 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
         <a href="{{ route('asatid.absensi.kelas', ['kelas_id' => $absensi->kelas_id, 'bidang_ilmu_id' => $absensi->bidang_ilmu_id, 'waktu_pelajaran_id' => $absensi->waktu_pelajaran_id, 'tanggal' => $absensi->tanggal->toDateString()]) }}"
             class="flex-1 text-center py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">{{ __('Ubah Absensi') }}</a>
         @endunless
+        {{-- Absensi kegiatan dari admin hanya bisa dihapus admin --}}
+        @unless ($absensi->dari_admin)
         <form method="POST" action="{{ route('asatid.absensi.destroy', $absensi) }}" @submit="konfirmasi" data-konfirmasi="{{ __('Hapus absensi ini? Data kehadirannya ikut terhapus.') }}" class="sm:w-auto">
             @csrf @method('DELETE')
             <button class="w-full px-5 py-3 rounded-2xl bg-white ring-1 ring-rose-200 text-sm font-semibold text-rose-600 hover:bg-rose-50">{{ __('Hapus') }}</button>
         </form>
+        @endunless
     </div>
 </div>
 </div>

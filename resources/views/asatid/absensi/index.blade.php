@@ -21,8 +21,8 @@ $pilihan = [
     [
         'url'   => route('asatid.absensi.kegiatan'),
         'judul' => __('Absensi Kegiatan'),
-        'ket'   => __('Absen kegiatan pondok dengan pindai kartu QR atau cari nama.'),
-        'poin'  => [__('Pindai QR kartu peserta'), __('Terlambat & alfa otomatis menurut jam'), __('Atau cari nama peserta')],
+        'ket'   => __('Kegiatan dari admin, diabsen bersama semua asatid.'),
+        'poin'  => [__('Pindai QR kartu peserta'), __('Terlambat & alfa otomatis menurut jam'), __('Bisa dicatat bersama asatid lain')],
         'warna' => 'from-emerald-400 to-teal-600',
         'cahaya'=> 'bg-emerald-400/30',
         'aksen' => 'text-emerald-600 bg-emerald-50 ring-emerald-100',
@@ -32,14 +32,7 @@ $pilihan = [
 @endphp
 
 <div class="space-y-6">
-    @if (session('sukses'))
-    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm">
-        <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-        </span>
-        {{ session('sukses') }}
-    </div>
-    @endif
+    {{-- Pesan berhasil tampil sebagai notifikasi pojok (partials/notifikasi) --}}
 
     {{-- ===== Hero ===== --}}
     <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-8">
@@ -59,6 +52,22 @@ $pilihan = [
             </div>
         </div>
     </section>
+
+    {{-- ===== Absensi kegiatan dari admin yang sedang aktif (dicatat bersama) ===== --}}
+    @foreach ($kegiatanAdmin as $k)
+    <a href="{{ route('asatid.absensi.kegiatan.catat', $k) }}"
+        class="flex items-center gap-3 p-4 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 hover:bg-emerald-100/70 transition-colors">
+        <span class="relative flex w-3 h-3 shrink-0">
+            <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping"></span>
+            <span class="relative inline-flex w-3 h-3 rounded-full bg-emerald-500"></span>
+        </span>
+        <span class="flex-1 min-w-0 text-sm text-emerald-900" v-pre>
+            {{ __('Absensi kegiatan') }} <b>{{ $k->judul }}</b> · {{ $k->tanggal->locale('id')->translatedFormat('d M') }} {{ __('jam') }} {{ substr((string) $k->jam_mulai, 0, 5) }}
+            <span class="block text-xs text-emerald-700/80">{{ __(':jumlah peserta sudah tercatat · ayo bantu mengabsen', ['jumlah' => $k->detail_count]) }}</span>
+        </span>
+        <span class="shrink-0 text-xs font-bold text-white bg-emerald-600 rounded-xl px-3 py-1.5">{{ __('Absen') }}</span>
+    </a>
+    @endforeach
 
     {{-- ===== Absensi kegiatan yang belum ditutup ===== --}}
     @foreach ($berjalan as $b)

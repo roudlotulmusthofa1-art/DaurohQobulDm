@@ -86,6 +86,27 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Aturan grid untuk HP:** grid satu kolom tulis `grid grid-cols-1 md:grid-cols-2` (bukan `grid md:grid-cols-2`), supaya teks panjang (email) tidak mendorong kotak lebih lebar dari layar.
 - Bilah simpan & toast yang menempel di bawah dinaikkan di HP (`bottom-24 lg:bottom-…`) agar tidak tertutup menu bawah.
 
+### Absensi kegiatan bersama (dibuat admin)
+- **Admin > Akademik > Absensi Kegiatan** (`Admin/AbsensiKegiatanController`, view `admin/akademik/absensi-kegiatan`): buat (nama dari Master Data > Jenis Kegiatan + tanggal + jam mulai/terlambat/alfa + cara absen), Aktifkan/Nonaktifkan, Tutup (yang belum tercatat = Alfa), Ubah, Hapus. Terlihat siapa saja asatid yang mencatat.
+- **Asatid > Absensi > Kegiatan**: daftar kegiatan aktif dari admin; SEMUA asatid bisa mencatat di kegiatan yang sama. Halaman catat memperbarui diri tiap 10 detik (`absensi.kegiatan.status`). Asatid tidak lagi membuat kegiatan sendiri.
+- Migrasi `2026_11_13_100000_absensi_kegiatan_dari_admin`: `absensi.dari_admin`, `absensi.aktif`, `absensi_detail.dicatat_oleh` (perlu `migrate` + `sesi:migrate`).
+
+### Daftar Peserta asatid: Kartu / Foto
+- Tombol Kartu | Foto di `asatid/peserta.blade.php`; pilihan diingat per perangkat (localStorage `tampilan_peserta`).
+
+### Notifikasi pojok kanan bawah (semua halaman)
+- File: `resources/views/partials/notifikasi.blade.php`, dipasang di semua layout + login, PSB, Dashboard HP, pendaftaran asatid/admin.
+- Otomatis dari server: `->with('success'|'sukses'|'status')` hijau, `'error'` merah, `'warning'` kuning, `$errors` merah ("Ada N isian yang belum benar").
+- Dari JavaScript: `notifikasi.sukses('…')`, `.gagal()`, `.peringatan()`, `.info()`. Menutup sendiri (5 dtk, error 8 dtk), berhenti saat disentuh/kursor, ✕ untuk tutup. Tampil di atas pop-up.
+- Kotak pesan sukses/gagal lama di atas halaman sudah dihapus. Ringkasan `$errors` di formulir yang kolomnya tidak punya teks merah sendiri DIBIARKAN.
+- Halaman baru: cukup `->with('success', '…')` di controller, tidak perlu kotak pesan di view.
+
+### Formulir pendaftaran: validasi & pesan error
+- Berkas dibaca & dicek (ukuran 5 MB, format JPG/PNG/PDF; pas foto JPG/PNG/WEBP) SAAT DIPILIH (`pilihFile`). Berkas dari Drive/awan yang tidak bisa dibaca -> pesan di kolom berkas, bukan "koneksi".
+- Gagal kirim: pesan sesuai jenis (403 ditutup, 413 terlalu besar, 419 sesi habis, 429 terlalu sering, 5xx server, offline vs berkas tidak terkirim).
+- Semua pesan validasi server berbahasa Indonesia (`StorePendaftaranRequest::messages/attributes`). Error riwayat pondok/kitab diarahkan ke kolomnya (langkah 4).
+- Kelurahan, Nama & No. WA Muarrif, Nama & No. WA yang bisa dihubungi, Nama Sekolah, Nama Daerah: WAJIB (browser & server).
+
 ### Data Santri: cek persyaratan belum lengkap
 - Kotak "Persyaratan belum lengkap" di atas pencarian: jumlah santri + satu tombol per syarat (klik = saring tabel).
 - Saringan "Persyaratan" di panel Filter; kolom "Persyaratan" (3/5 + nama syarat yang belum) di tabel & kartu HP.

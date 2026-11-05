@@ -666,10 +666,6 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
             </div>
         </form>
     </div>
-
-    {{-- ================= NOTIFIKASI ================= --}}
-    <div v-if="toast.show" class="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-[60] rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
-        :class="toast.error ? 'bg-red-600' : 'bg-[#0b332c]'" v-text="toast.text"></div>
 </div>
 
 @push('scripts')
@@ -732,7 +728,6 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 terpilih: [],
                 massal: { kelas_id: null, kamar_id: null, loading: false, error: '' },
                 tambah: { buka: false, form: formKosong(), errors: {}, loading: false },
-                toast: { show: false, text: '', error: false },
                 menghapus: null, // id santri yang sedang dihapus
                 grupAktif: null, // kartu kelas/kamar yang sedang dibuka: { jenis, id }
             };
@@ -887,10 +882,9 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 this.$nextTick(() => document.querySelector('#data-santri-app table')?.scrollIntoView({ behavior: 'smooth', block: 'start' }));
             },
 
+            // Notifikasi pojok bersama (partials/notifikasi)
             notif(text, error = false) {
-                this.toast = { show: true, text, error };
-                clearTimeout(this._toast);
-                this._toast = setTimeout(() => (this.toast.show = false), 3000);
+                error ? window.notifikasi?.gagal(text) : window.notifikasi?.sukses(text);
             },
             toggleSemua() {
                 this.terpilih = this.pilihSemua

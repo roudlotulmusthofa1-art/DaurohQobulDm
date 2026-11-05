@@ -90,7 +90,7 @@ class StorePendaftaranRequest extends FormRequest
             ],
 
             'kelurahan' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'string',
                 'max:100',
                 "regex:$polaArab",
@@ -131,26 +131,26 @@ class StorePendaftaranRequest extends FormRequest
             ],
 
             'nama_muarrif' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'string',
                 'max:150',
                 "regex:$polaArab",
             ],
 
             'no_hp_muarrif' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'regex:/^(\+62|62)8[0-9]{7,12}$/',
             ],
 
             'nama_butuh' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'string',
                 'max:150',
                 "regex:$polaArab",
             ],
 
             'no_hp_nya' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'regex:/^(\+62|62)8[0-9]{7,12}$/',
             ],
 
@@ -193,14 +193,14 @@ class StorePendaftaranRequest extends FormRequest
             ],
 
             'nama_sekolah' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'string',
                 'max:100',
                 "regex:$polaArab",
             ],
 
             'nama_daerah' => [
-                'nullable',
+                'required', // wajib (sama dengan formulir di browser)
                 'string',
                 'max:100',
                 "regex:$polaArab",
@@ -358,6 +358,22 @@ class StorePendaftaranRequest extends FormRequest
             'image'            => ':attribute harus berupa gambar.',
             'max'              => ':attribute terlalu besar atau terlalu panjang.',
             'accepted'         => 'Anda harus menyetujui pernyataan kebenaran data.',
+            'string'           => ':attribute harus berupa teks.',
+            'date'             => ':attribute bukan tanggal yang benar.',
+            'before'           => ':attribute harus sebelum hari ini.',
+            'in'               => 'Pilihan :attribute tidak valid. Silakan pilih ulang.',
+            'numeric'          => ':attribute harus berupa angka.',
+            'integer'          => ':attribute harus berupa angka bulat.',
+            'array'            => ':attribute belum diisi dengan benar.',
+            'file'             => ':attribute harus berupa berkas.',
+            'mimes'            => ':attribute harus berformat JPG, PNG, atau PDF.',
+            'email'            => 'Format :attribute tidak valid.',
+            'unique'           => ':attribute ini sudah dipakai.',
+            'min'              => ':attribute terlalu kecil atau terlalu pendek.',
+            'persentasimuslim.max' => 'Persentase muslim maksimal 100.',
+            'riwayat_pondok.*.tahun_belajar.max' => 'Lama belajar maksimal 30 tahun.',
+            'riwayat_pondok.min' => 'Minimal isi satu riwayat pondok.',
+            'riwayat_pondok.max' => 'Maksimal 5 riwayat pondok.',
             'berkas_*.max'      => ':attribute maksimal 5 MB.',
             'berkas_*.uploaded' => ':attribute gagal diunggah. Pastikan ukurannya maksimal 5 MB lalu coba lagi.',
             // Pesan nomor WhatsApp HARUS di atas '*.regex': Laravel memakai pesan pertama yang cocok,
@@ -399,12 +415,17 @@ class StorePendaftaranRequest extends FormRequest
             'provinsi' => 'Provinsi',
             'kota' => 'Kota/Kabupaten',
             'kecamatan' => 'Kecamatan',
+            'kelurahan' => 'Kelurahan/Desa',
+            'nama_wali' => 'Nama wali',
+            'pekerjaan_wali' => 'Pekerjaan wali',
+            'pendidikan_terakhir' => 'Pendidikan terakhir',
+            'nama_sekolah' => 'Nama sekolah',
             'hubungan_wali' => 'Hubungan dengan wali',
-            'no_hp_wali' => 'Nomor WhatsApp',
+            'no_hp_wali' => 'Nomor WhatsApp wali',
             'nama_muarrif' => 'Nama Muarrif',
-            'no_hp_muarrif' => 'Nomor WhatsApp',
+            'no_hp_muarrif' => 'Nomor WhatsApp muarrif',
             'nama_butuh' => 'Nama Yang Bisa Di Hubungi',
-            'no_hp_nya' => 'Nomor WhatsApp',
+            'no_hp_nya' => 'Nomor WhatsApp yang bisa dihubungi',
             'asal_pondok' => 'Asal pondok',
             'nama_pengasuh' => 'Nama pengasuh',
             'nama_daerah' => 'Nama daerah',
@@ -412,6 +433,15 @@ class StorePendaftaranRequest extends FormRequest
             'nama_kitab' => 'Nama kitab',
             'fan_kitab' => 'Fan kitab',
             'sudah_diujikan' => 'Status ujian',
+            'riwayat_pondok' => 'Riwayat pondok',
+            'riwayat_pondok.*.asal_pondok' => 'Asal pondok',
+            'riwayat_pondok.*.nama_pengasuh' => 'Nama pengasuh',
+            'riwayat_pondok.*.nama_daerah' => 'Nama daerah pondok',
+            'riwayat_pondok.*.tahun_belajar' => 'Lama belajar',
+            'riwayat_kitab' => 'Riwayat kitab',
+            'riwayat_kitab.*.nama_kitab' => 'Nama kitab',
+            'riwayat_kitab.*.fan_kitab' => 'Fan kitab',
+            'riwayat_kitab.*.sudah_diujikan' => 'Status ujian kitab',
             'marhalah' => 'Marhalah',
             'lama_belajar' => 'Lama belajar',
             'kesehatan' => 'Kesehatan',

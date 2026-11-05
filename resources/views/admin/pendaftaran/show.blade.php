@@ -24,19 +24,6 @@ $svg = fn ($nama, $kelas = 'w-5 h-5') => '<svg class="' . $kelas . '" fill="none
 </div>
 <div class="space-y-6 pb-4 mx-4 md:mx-10 lg:mx-20 mt-3" id="psb-detail">
 
-    @if (session('success'))
-    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm" v-pre>
-        <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">{!! $svg('check', 'w-4 h-4') !!}</span>
-        {{ session('success') }}
-    </div>
-    @endif
-    @if (session('error'))
-    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm" v-pre>
-        <span class="w-7 h-7 rounded-full bg-rose-500 text-white flex items-center justify-center shrink-0">{!! $svg('x', 'w-4 h-4') !!}</span>
-        {{ session('error') }}
-    </div>
-    @endif
-
     {{-- Data santri: tampilan yang sama dipakai di profil siswa (partials/detail-santri) --}}
     @include('partials.detail-santri', ['admin' => true, 'sisipan' => 'admin.pendaftaran._persyaratan'])
 

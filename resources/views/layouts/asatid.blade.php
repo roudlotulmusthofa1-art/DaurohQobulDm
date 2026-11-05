@@ -135,12 +135,7 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
     </header>
 
     <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-12 anim-naik">
-        @if (session('error'))
-        <div class="mb-5 flex items-start gap-3 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-amber-900 text-sm">
-            <span class="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold">!</span>
-            <span class="pt-0.5">{{ session('error') }}</span>
-        </div>
-        @endif
+        {{-- Pesan sukses/gagal dari server tampil sebagai notifikasi pojok (partials/notifikasi) --}}
         {{-- Pita Pengumuman khusus dasbor ini (Admin > Landing Page > Pita Pengumuman, tujuan: Dasbor Asatid) --}}
         @include('partials.pita-dasbor', ['tujuan' => 'asatid'])
         @yield('content')
@@ -208,6 +203,8 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
     @include('partials.vue-metode')
     {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
     @include('partials.status-koneksi')
+    {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
+    @include('partials.notifikasi')
     @stack('scripts')
 </body>
 

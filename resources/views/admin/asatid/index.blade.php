@@ -26,17 +26,7 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
     {{-- Pop-up Kirim Pesan ke asatid (partials/kirim-pesan-asatid.blade.php) --}}
     @include('partials.kirim-pesan-asatid', ['penerimaPesan' => $penerimaPesan])
 <div class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-8">
-    @if (session('success'))
-    <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm">
-        <span class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-        </span>
-        {{ session('success') }}
-    </div>
-    @endif
-    @if (session('error'))
-    <div class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">{{ session('error') }}</div>
-    @endif
+    {{-- Pesan berhasil / gagal tampil sebagai notifikasi pojok (partials/notifikasi) --}}
 
     {{-- ===== Link pendaftaran asatid ===== --}}
     <div class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-5 sm:p-7 mx-4 md:mx-10 lg:mx-20">

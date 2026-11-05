@@ -135,20 +135,7 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
     </header>
 
     <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-5 sm:pt-8 pb-12 anim-naik">
-        @if (session('success'))
-        <div class="mb-5 flex items-start gap-3 p-4 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 text-emerald-900 text-sm">
-            <span class="w-7 h-7 shrink-0 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
-            </span>
-            <span class="pt-0.5">{{ session('success') }}</span>
-        </div>
-        @endif
-        @if (session('error'))
-        <div class="mb-5 flex items-start gap-3 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-amber-900 text-sm">
-            <span class="w-7 h-7 shrink-0 rounded-full bg-amber-400 text-white flex items-center justify-center font-bold">!</span>
-            <span class="pt-0.5">{{ session('error') }}</span>
-        </div>
-        @endif
+        {{-- Pesan sukses/gagal dari server tampil sebagai notifikasi pojok (partials/notifikasi) --}}
         {{-- Pita Pengumuman khusus dasbor ini (Admin > Landing Page > Pita Pengumuman, tujuan: Dasbor Peserta) --}}
         @include('partials.pita-dasbor', ['tujuan' => 'siswa'])
         @yield('content')
@@ -216,6 +203,8 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
     @include('partials.vue-metode')
     {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
     @include('partials.status-koneksi', ['posisi' => 'bottom-20 right-5'])
+    {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
+    @include('partials.notifikasi', ['bawah' => 'bottom-32'])
     @stack('scripts')
 </body>
 

@@ -79,6 +79,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
     // Laporan > Laporan Absensi (hasil absensi kelas & kegiatan dari asatid)
+    // Absensi kegiatan dibuat admin, dicatat bersama semua asatid
+    Route::post('absensi-kegiatan/{absensi}/aktif', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'aktif'])->name('absensi-kegiatan.aktif');
+    Route::post('absensi-kegiatan/{absensi}/tutup', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'tutup'])->name('absensi-kegiatan.tutup');
+    Route::resource('absensi-kegiatan', \App\Http\Controllers\Admin\AbsensiKegiatanController::class)
+        ->only(['index', 'store', 'update', 'destroy'])->parameters(['absensi-kegiatan' => 'absensi']);
     Route::get('laporan-absensi', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'index'])->name('laporan-absensi.index');
     Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
     Route::delete('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'destroy'])->name('laporan-absensi.destroy');

@@ -62,6 +62,8 @@ $nomorWa = $profil['telepon'] ? preg_replace('/\D+/', '', preg_replace('/^0/', '
     </div>
     {{-- Status koneksi internet + tombol muat ulang --}}
     @include('partials.status-koneksi')
+    {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
+    @include('partials.notifikasi')
 </body>
 
 </html>

@@ -31,6 +31,7 @@ $info = [
     'batas_terlambat' => substr((string) $absensi->batas_terlambat, 0, 5),
     'batas_alfa' => substr((string) $absensi->batas_alfa, 0, 5),
     'metode' => $absensi->metode,
+    'bersama' => (bool) $absensi->dari_admin, // dibuat admin: dicatat bersama semua asatid
 ];
 @endphp
 
@@ -41,9 +42,11 @@ $info = [
         <div class="pointer-events-none absolute -top-24 -right-10 w-72 h-72 rounded-full bg-lime-300/25 blur-3xl"></div>
         <div class="relative flex flex-col sm:flex-row sm:items-end gap-5">
             <div class="flex-1 min-w-0">
-                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80">{{ __('Absensi kegiatan berjalan') }}</p>
+                <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-100/80"
+                    v-text="info.bersama ? @js(__('Absensi bersama · dari admin')) : @js(__('Absensi kegiatan berjalan'))"></p>
                 <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight truncate" v-text="info.nama"></h2>
                 <p class="mt-1 text-sm text-white/75" v-text="info.tanggal + ' · ' + info.hijriyah"></p>
+                <p v-if="info.bersama" class="mt-1 text-xs text-emerald-100/90">{{ __('Catatan dari asatid lain ikut muncul otomatis setiap 10 detik.') }}</p>
                 <div class="mt-4 flex flex-wrap gap-2 text-xs font-semibold">
                     <span class="rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1.5">{{ __('Mulai') }} <b v-text="info.jam_mulai"></b></span>
                     <span class="rounded-full bg-amber-300/20 ring-1 ring-amber-200/30 px-3 py-1.5 text-amber-50">{{ __('Terlambat') }} <b v-text="info.batas_terlambat"></b></span>
@@ -138,7 +141,7 @@ $info = [
                     <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>
-                        <span class="block text-[11px] text-slate-400" v-text="p.waktu"></span>
+                        <span class="block text-[11px] text-slate-400" v-text="[p.waktu, p.oleh ? @js(__('oleh')) + ' ' + p.oleh : ''].filter(Boolean).join(' · ')"></span>
                     </span>
                     <span class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1" :class="gaya(p.status).lembut" v-text="gaya(p.status).label"></span>
                 </div>
@@ -168,7 +171,7 @@ $info = [
                     <span v-else class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>
-                        <span class="block text-[11px] text-slate-400 truncate" v-text="[p.nomor, p.kelas].filter(Boolean).join(' · ')"></span>
+                        <span class="block text-[11px] text-slate-400 truncate" v-text="[p.nomor, p.kelas, p.oleh ? @js(__('dicatat')) + ' ' + p.oleh : ''].filter(Boolean).join(' · ')"></span>
                     </span>
                     <span v-if="p.status" class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1" :class="gaya(p.status).lembut" v-text="gaya(p.status).label + (p.waktu ? ' · ' + p.waktu : '')"></span>
                     <span v-else class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-slate-50 text-slate-400 ring-1 ring-slate-200">{{ __('Belum') }}</span>
@@ -188,6 +191,14 @@ $info = [
     </section>
 
     {{-- ===== Tutup absensi ===== --}}
+    @if ($absensi->dari_admin)
+    <div class="{{ $kartu }} p-4 sm:p-5 flex items-start gap-3">
+        <span class="w-9 h-9 shrink-0 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
+        </span>
+        <p class="text-sm text-slate-500">{{ __('Setiap catatan langsung tersimpan. Absensi ini ditutup oleh admin; saat ditutup, peserta yang belum tercatat') }} (<b class="text-slate-800" v-text="belum"></b>) {{ __('dihitung') }} <b class="text-rose-600">{{ __('Alfa') }}</b>.</p>
+    </div>
+    @else
     <form method="POST" action="{{ route('asatid.absensi.kegiatan.selesai', $absensi) }}"
         @submit="konfirmasiTutup"
         class="{{ $kartu }} p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center gap-3">
@@ -195,6 +206,7 @@ $info = [
         <p class="flex-1 text-sm text-slate-500">{{ __('Sudah selesai? Tutup absensi. Peserta yang belum tercatat') }} (<b class="text-slate-800" v-text="belum"></b>) {{ __('otomatis ditandai') }} <b class="text-rose-600">{{ __('Alfa') }}</b>.</p>
         <button type="submit" class="px-5 py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-extrabold hover:bg-[#135347] shadow-[0_12px_28px_-12px_rgba(11,51,44,0.6)]">{{ __('Tutup & Simpan') }}</button>
     </form>
+    @endif
 </div>
 @endsection
 
@@ -275,6 +287,9 @@ document.addEventListener('DOMContentLoaded', () => {
             detak();
             setInterval(detak, 1000);
             window.addEventListener('pagehide', this.matikan);
+            // Ambil catatan terbaru (dari asatid lain juga) tiap 10 detik, saat halaman sedang dilihat
+            this._segar = setInterval(() => { if (!document.hidden) this.segarkan(); }, 10000);
+            document.addEventListener('visibilitychange', () => { if (!document.hidden) this.segarkan(); });
         },
         methods: {
             gaya: (k) => STATUS.find((s) => s.kunci === k) || {},
@@ -286,6 +301,30 @@ document.addEventListener('DOMContentLoaded', () => {
                     : @js(__('Tutup absensi sekarang?'));
                 if (!confirm(tanya)) e.preventDefault();
                 else this.matikan();
+            },
+
+            /** Samakan status peserta dengan server (catatan asatid lain ikut tampil) */
+            async segarkan() {
+                try {
+                    const res = await fetch(@json(route('asatid.absensi.kegiatan.status', $absensi)), { headers: { Accept: 'application/json' }, cache: 'no-store' });
+                    if (!res.ok) return;
+                    const json = await res.json();
+                    let baru = 0;
+                    this.peserta.forEach((p) => {
+                        const d = json.tercatat[p.id];
+                        if (!d) return;
+                        if (!p.status) baru++;
+                        p.status = d.status; p.waktu = d.waktu; p.oleh = d.oleh;
+                    });
+                    if (json.ditutup) {
+                        clearInterval(this._segar);
+                        window.notifikasi?.info(@js(__('Absensi ini sudah ditutup admin. Membuka hasilnya…')));
+                        setTimeout(() => location.reload(), 1500);
+                    } else if (!json.aktif && !this._infoNonaktif) {
+                        this._infoNonaktif = true;
+                        window.notifikasi?.peringatan(@js(__('Admin menonaktifkan absensi ini sementara. Catatan baru belum bisa disimpan.')));
+                    }
+                } catch (e) {}
             },
 
             gantiTab(t) {

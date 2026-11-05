@@ -32,11 +32,14 @@ class Absensi extends Model
         'jenis', 'user_id', 'tanggal', 'tanggal_hijriyah',
         'kelas_id', 'bidang_ilmu_id', 'waktu_pelajaran_id',
         'jenis_kegiatan_id', 'jam_mulai', 'batas_terlambat', 'batas_alfa', 'metode', 'selesai_at',
+        'dari_admin', 'aktif', // absensi kegiatan dibuat admin & dicatat bersama semua asatid
     ];
 
     protected $casts = [
         'tanggal' => 'date',
         'selesai_at' => 'datetime',
+        'dari_admin' => 'boolean',
+        'aktif' => 'boolean',
     ];
 
     public function detail(): HasMany
@@ -67,6 +70,19 @@ class Absensi extends Model
     public function kegiatan(): BelongsTo
     {
         return $this->belongsTo(JenisKegiatan::class, 'jenis_kegiatan_id');
+    }
+
+    /** Absensi kegiatan dari admin yang sedang dibuka untuk semua asatid (aktif & belum ditutup) */
+    public function scopeKegiatanTerbuka(Builder $q): Builder
+    {
+        return $q->where('jenis', self::KEGIATAN)->where('dari_admin', true)->where('aktif', true)->whereNull('selesai_at');
+    }
+
+    /** Asatid ini boleh mencatat: miliknya sendiri, atau kegiatan admin yang sedang terbuka */
+    public function bolehDicatatOleh(?int $userId): bool
+    {
+        return (int) $this->user_id === (int) $userId
+            || ($this->dari_admin && $this->aktif && ! $this->selesai_at);
     }
 
     public function scopeTerbaru(Builder $q): Builder

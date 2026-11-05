@@ -35,13 +35,6 @@
             <p v-if="psbPesan" class="basis-full text-xs font-semibold" :class="psbDibuka ? 'text-emerald-700' : 'text-rose-700'" v-text="psbPesan"></p>
         </div>
 
-        @if (session('success'))
-            <div class="p-3 rounded-lg bg-emerald-50 text-emerald-700 text-sm">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="p-3 rounded-lg bg-red-50 text-red-700 text-sm">{{ session('error') }}</div>
-        @endif
-
         {{-- Kartu statistik --}}
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             @foreach ([[__('Total'), $stat['total'], 'slate', ''], [__('Menunggu'), $stat['menunggu'], 'amber', 'menunggu'], [__('Diterima'), $stat['diterima'], 'emerald', 'diterima'], [__('Ditolak'), $stat['ditolak'], 'red', 'ditolak']] as [$label, $jml, $warna, $filter])

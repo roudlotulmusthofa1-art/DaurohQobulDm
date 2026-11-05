@@ -14,11 +14,6 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @endphp
 
 <div id="halaman-role" class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-6 mb-10">
-    @foreach (['success' => 'bg-emerald-50 ring-emerald-200 text-emerald-900', 'error' => 'bg-rose-50 ring-rose-200 text-rose-800'] as $kunciFlash => $gayaFlash)
-    @if (session($kunciFlash))
-    <div class="p-3.5 rounded-2xl ring-1 text-sm {{ $gayaFlash }}">{{ session($kunciFlash) }}</div>
-    @endif
-    @endforeach
     @if ($errors->any())
     <div class="p-3.5 rounded-2xl ring-1 ring-rose-200 bg-rose-50 text-rose-800 text-sm">{{ $errors->first() }}</div>
     @endif

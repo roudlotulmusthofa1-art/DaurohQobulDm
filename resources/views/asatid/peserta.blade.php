@@ -42,7 +42,45 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
 {{-- Daftar --}}
 @if ($peserta->count())
-<div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+{{-- Pilihan tampilan: Kartu (lengkap) / Foto (galeri). Diingat di perangkat ini (localStorage) --}}
+<div class="mt-6 flex items-center justify-between gap-3">
+    <p class="text-sm text-slate-500">{{ __('Menampilkan :dari–:sampai dari :total', ['dari' => $peserta->firstItem(), 'sampai' => $peserta->lastItem(), 'total' => $peserta->total()]) }}</p>
+    <div class="inline-flex rounded-2xl bg-white p-1 ring-1 ring-slate-200 shadow-sm">
+        <button type="button" @click="aturTampilan('kartu')" :aria-pressed="tampilan === 'kartu' ? 'true' : 'false'"
+            class="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-colors"
+            :class="tampilan === 'kartu' ? 'bg-[#0b332c] text-white' : 'text-slate-500 hover:bg-slate-50'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+            {{ __('Kartu') }}
+        </button>
+        <button type="button" @click="aturTampilan('foto')" :aria-pressed="tampilan === 'foto' ? 'true' : 'false'"
+            class="inline-flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-bold transition-colors"
+            :class="tampilan === 'foto' ? 'bg-[#0b332c] text-white' : 'text-slate-500 hover:bg-slate-50'">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"/></svg>
+            {{ __('Foto') }}
+        </button>
+    </div>
+</div>
+
+{{-- ===== Tampilan FOTO: galeri foto + nama ===== --}}
+<div v-show="tampilan === 'foto'" style="display: none" class="mt-4 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2.5 sm:gap-3">
+    @foreach ($peserta as $p)
+    <a href="{{ route('asatid.peserta.show', $p) }}" title="{{ $p->nama_lengkap }}"
+        class="group relative block aspect-[3/4] overflow-hidden rounded-2xl ring-1 ring-slate-200 bg-slate-100 shadow-sm hover:-translate-y-0.5 hover:shadow-[0_16px_32px_-16px_rgba(11,51,44,0.45)] transition-all">
+        @if ($p->foto_url)
+        <img src="{{ $p->foto_url }}" alt="{{ $p->nama_lengkap }}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+        @else
+        <span class="w-full h-full bg-gradient-to-br from-rose-200 to-pink-100 text-rose-700 text-4xl font-extrabold flex items-center justify-center">{{ mb_strtoupper(mb_substr($p->nama_lengkap, 0, 1)) }}</span>
+        @endif
+        <span class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#0b332c]/90 via-[#0b332c]/60 to-transparent px-2 pt-6 pb-2" v-pre>
+            <span class="block text-[11px] sm:text-xs font-bold text-white leading-tight line-clamp-2">{{ $p->nama_lengkap }}</span>
+            <span class="block text-[10px] text-white/70 truncate">{{ $p->kelasMaster?->nama ?? $p->nomor_pendaftaran }}</span>
+        </span>
+    </a>
+    @endforeach
+</div>
+
+{{-- ===== Tampilan KARTU (lengkap) ===== --}}
+<div v-show="tampilan === 'kartu'" class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
     @foreach ($peserta as $p)
     <a href="{{ route('asatid.peserta.show', $p) }}" class="{{ $kartu }} p-4 flex items-center gap-4 hover:-translate-y-0.5 hover:shadow-[0_20px_40px_-20px_rgba(11,51,44,0.35)] transition-all">
         @if ($p->foto_url)
@@ -86,6 +124,20 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 @push('scripts')
 <script>
     // Aplikasi Vue halaman ini: kirim form saat kelas diganti (metode dari partials/vue-metode.blade.php)
-    document.addEventListener('DOMContentLoaded', () => Vue.createApp({ methods: { ...metodeHalaman } }).mount('#halaman-daftar-peserta'));
+    // + pilihan tampilan Kartu / Foto (diingat di perangkat ini)
+    document.addEventListener('DOMContentLoaded', () => Vue.createApp({
+        data() {
+            let simpan = null;
+            try { simpan = localStorage.getItem('tampilan_peserta'); } catch (e) {}
+            return { tampilan: simpan === 'foto' ? 'foto' : 'kartu' };
+        },
+        methods: {
+            ...metodeHalaman,
+            aturTampilan(nilai) {
+                this.tampilan = nilai;
+                try { localStorage.setItem('tampilan_peserta', nilai); } catch (e) {}
+            },
+        },
+    }).mount('#halaman-daftar-peserta'));
 </script>
 @endpush

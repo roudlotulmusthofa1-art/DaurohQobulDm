@@ -36,6 +36,7 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
         Route::post('/kegiatan', 'mulaiKegiatan')->name('absensi.kegiatan.mulai');
         Route::get('/kegiatan/{absensi}', 'catatKegiatan')->name('absensi.kegiatan.catat');
         Route::post('/kegiatan/{absensi}/catat', 'simpanCatatan')->name('absensi.kegiatan.simpan');
+        Route::get('/kegiatan/{absensi}/status', 'statusKegiatan')->name('absensi.kegiatan.status'); // pembaruan otomatis (dicatat bersama)
         Route::post('/kegiatan/{absensi}/selesai', 'selesaiKegiatan')->name('absensi.kegiatan.selesai');
         Route::get('/{absensi}', 'show')->whereNumber('absensi')->name('absensi.show');
         Route::delete('/{absensi}', 'destroy')->whereNumber('absensi')->name('absensi.destroy');

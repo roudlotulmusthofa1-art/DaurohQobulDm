@@ -448,15 +448,6 @@
                     </div>
                 </div>
             </div>
-
-            {{-- ================= Notifikasi ================= --}}
-            <div v-if="toast.show"
-                class="fixed bottom-24 right-4 lg:bottom-6 lg:right-6 z-[60] flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium text-white shadow-lg"
-                :class="toast.type === 'error' ? 'bg-red-600' : 'bg-[#0b332c]'">
-                <span v-if="toast.type === 'error'"><x-master-data.icon name="alert" /></span>
-                <span v-else><x-master-data.icon name="check" /></span>
-                <span v-text="toast.text"></span>
-            </div>
         </div>
     </div>
 @endsection
@@ -548,22 +539,9 @@
                     rows[key] = (await api('GET', `/${key}`)).data;
                 }
 
-                // ---------- Notifikasi ----------
-                const toast = reactive({
-                    show: false,
-                    text: '',
-                    type: 'success'
-                });
-                let toastTimer;
-
+                // ---------- Notifikasi (pojok bersama: partials/notifikasi) ----------
                 function notify(text, type = 'success') {
-                    Object.assign(toast, {
-                        show: true,
-                        text,
-                        type
-                    });
-                    clearTimeout(toastTimer);
-                    toastTimer = setTimeout(() => (toast.show = false), 3000);
+                    type === 'error' ? window.notifikasi?.gagal(text) : window.notifikasi?.sukses(text);
                 }
 
                 // ---------- Tambah / Edit ----------
@@ -799,7 +777,6 @@
                     rows,
                     modal,
                     confirm,
-                    toast,
                     drag,
                     show,
                     colorHex,

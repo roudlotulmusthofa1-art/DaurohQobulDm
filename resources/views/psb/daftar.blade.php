@@ -107,12 +107,7 @@
                         </div>
 
                         <div class="p-5 sm:p-8">
-                        <div v-if="serverError" class="mb-5 flex items-start gap-3 p-4 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">
-                            <span class="w-7 h-7 shrink-0 rounded-full bg-rose-500 text-white flex items-center justify-center">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m0 3.75h.008v.008H12v-.008z"/></svg>
-                            </span>
-                            <span class="pt-1">@{{ serverError }}</span>
-                        </div>
+                        {{-- Pesan gagal kirim tampil sebagai notifikasi pojok kanan bawah (watch serverError) --}}
 
                         <!-- STEP 1 -->
                         <div v-show="step === 0" class="grid sm:grid-cols-2 gap-x-5 gap-y-5">
@@ -893,7 +888,8 @@
                 const {
                     createApp,
                     reactive,
-                    ref
+                    ref,
+                    watch
                 } = Vue;
 
                 createApp({
@@ -947,6 +943,10 @@
                         }
                         const loading = ref(false);
                         const serverError = ref('');
+                        // Setiap pesan gagal kirim tampil sebagai notifikasi pojok kanan bawah (partials/notifikasi)
+                        watch(serverError, (pesan) => {
+                            if (pesan) window.notifikasi?.gagal(pesan, @js(__('Pendaftaran belum terkirim')));
+                        });
                         const e = reactive({});
                         const files = {};
                         const f = reactive({
@@ -1302,29 +1302,28 @@
                         };
 
 
+                        // Isian langkah ini belum lengkap -> notifikasi ringkas (pesan rinci tetap di bawah tiap kolom)
+                        const beriTahuBelumLengkap = () => {
+                            const jumlah = Object.keys(e).length;
+                            if (!jumlah) return;
+                            const pertama = Object.values(e)[0];
+                            window.notifikasi?.peringatan(
+                                pertama === @js(__('Wajib diisi.')) ? @js(__('Lengkapi kolom yang ditandai merah, lalu lanjutkan.')) : pertama,
+                                jumlah > 1 ? @js(__('Ada :jumlah kolom yang belum benar')).replace(':jumlah', jumlah) : @js(__('Ada 1 kolom yang belum benar'))
+                            );
+                            // Gulir ke kolom pertama yang salah
+                            setTimeout(() => document.querySelector('.err')?.closest('div')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 50);
+                        };
+
                         const maju = () => {
-                            console.log('Tombol Lanjut diklik');
-                            console.log('Step sekarang:', step.value);
-
-                            const hasil = cekStep(step.value);
-
-                            console.log('Hasil validasi:', hasil);
-                            console.log('Error validasi:', JSON.stringify(e));
-                            if (cekStep(step.value)) {
-                                simpanData();
-
-                                step.value++;
-
-                                sessionStorage.setItem(
-                                    'psb_step',
-                                    String(step.value)
-                                );
-
-                                window.scrollTo({
-                                    top: 0,
-                                    behavior: 'smooth'
-                                });
+                            if (!cekStep(step.value)) {
+                                beriTahuBelumLengkap();
+                                return;
                             }
+                            simpanData();
+                            step.value++;
+                            sessionStorage.setItem('psb_step', String(step.value));
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         };
                         const mundur = () => {
                             simpanData();
@@ -1339,23 +1338,54 @@
                                 );
                             }
                         };
-                        const pilihFile = (ev, key) => {
+                        // Pilih berkas: cek ukuran & format, lalu BACA isinya sekarang dan simpan salinannya.
+                        // Kenapa dibaca sekarang: di HP (terutama dari Google Drive / galeri awan) berkas bisa
+                        // "hilang" sebelum dikirim, lalu browser gagal mengirim dan dulu tampil sebagai "Koneksi bermasalah".
+                        // HEIC (foto iPhone) tidak diterima server; iPhone biasanya otomatis mengubahnya ke JPG
+                        const FORMAT_GAMBAR = ['image/jpeg', 'image/png', 'image/webp'];
+                        const FORMAT_BERKAS = ['image/jpeg', 'image/png', 'application/pdf'];
+                        const pilihFile = async (ev, key) => {
                             const berkasDipilih = ev.target.files[0] || null;
-
-                            // Tolak berkas di atas 5 MB sebelum dikirim, supaya tidak gagal di server
-                            if (berkasDipilih && berkasDipilih.size > 5 * 1024 * 1024) {
+                            const tolak = (pesan) => {
                                 files[key] = null;
                                 ev.target.value = '';
-                                e[key] = @js(__('Ukuran berkas terlalu besar (maksimal 5 MB).'));
+                                e[key] = pesan;
+                            };
+                            if (!berkasDipilih) {
+                                files[key] = null;
                                 return;
                             }
 
-                            files[key] = berkasDipilih;
-                            delete e[key];
+                            // Tolak berkas di atas 5 MB sebelum dikirim, supaya tidak gagal di server
+                            if (berkasDipilih.size > 5 * 1024 * 1024) {
+                                return tolak(@js(__('Ukuran berkas terlalu besar (maksimal 5 MB).')));
+                            }
+                            if (berkasDipilih.size === 0) {
+                                return tolak(@js(__('Berkas kosong / rusak. Silakan pilih berkas lain.')));
+                            }
+
+                            // Format: pas foto harus gambar; berkas lain JPG/PNG/PDF
+                            const ext = (berkasDipilih.name.split('.').pop() || '').toLowerCase();
+                            const okFoto = FORMAT_GAMBAR.includes(berkasDipilih.type) || (!berkasDipilih.type && ['jpg', 'jpeg', 'png', 'webp'].includes(ext));
+                            const okBerkas = FORMAT_BERKAS.includes(berkasDipilih.type) || (!berkasDipilih.type && ['jpg', 'jpeg', 'png', 'pdf'].includes(ext));
+                            if (key === 'berkas_foto' ? !okFoto : !okBerkas) {
+                                return tolak(key === 'berkas_foto'
+                                    ? @js(__('Pas foto harus berupa gambar (JPG/PNG).'))
+                                    : @js(__('Format berkas harus JPG, PNG, atau PDF.')));
+                            }
+
+                            // Baca isi berkas sekarang (bila gagal -> beri tahu di kolom berkas, bukan "koneksi")
+                            try {
+                                const isi = await berkasDipilih.arrayBuffer();
+                                files[key] = new File([isi], berkasDipilih.name, { type: berkasDipilih.type || 'application/octet-stream' });
+                                delete e[key];
+                            } catch (_) {
+                                tolak(@js(__('Berkas tidak bisa dibaca. Simpan dulu berkasnya ke HP (bukan dari Drive/awan), lalu pilih ulang.')));
+                            }
                         };
 
                         const kirim = async () => {
-                            if (!cekStep(step.value)) return;
+                            if (!cekStep(step.value)) return beriTahuBelumLengkap();
                             serverError.value = '';
                             loading.value = true;
 
@@ -1404,30 +1434,7 @@
                                 );
                             });
 
-                            console.log(
-                                'DATA PONDOK:',
-                                JSON.stringify(pondoks.value)
-                            );
-
-                            console.log(
-                                'DATA KITAB:',
-                                JSON.stringify(riwayatKitab)
-                            );
-                            console.log(
-                                'ISI RIWAYAT KITAB SEBELUM DIKIRIM:',
-                                JSON.stringify(riwayatKitab)
-                            );
-                            // Debug untuk memastikan data kitab ikut terkirim.
-                            for (const [key, value] of fd.entries()) {
-                                if (
-                                    key.startsWith('riwayat_pondok') ||
-                                    key.startsWith('riwayat_kitab')
-                                ) {
-                                    console.log(key, value);
-                                }
-                            }
-
-                            // Mengirim berkas seperti sebelumnya.
+                            // Mengirim berkas (salinan yang sudah dibaca saat dipilih, lihat pilihFile).
                             Object.entries(files).forEach(
                                 ([k, v]) => v && fd.append(k, v)
                             );
@@ -1447,14 +1454,16 @@
                                 try {
                                     data = JSON.parse(raw);
                                 } catch (_) {}
-                                console.log('DEBUG', res.status, res.redirected, res.url, raw.slice(0,
-                                    500));
                                 if (res.status === 422) {
                                     bersihkan();
                                     let awal = 99;
                                     Object.entries(data.errors || {}).forEach(([k, msgs]) => {
-                                        e[k] = msgs[0];
-                                        const s = stepOf(k);
+                                        // Error bertingkat dari server -> nama kolom di formulir:
+                                        // riwayat_pondok.0.asal_pondok -> pondok_0_asal_pondok, riwayat_kitab.1.fan_kitab -> kitab_1_fan_kitab
+                                        const m = k.match(/^riwayat_(pondok|kitab)\.(\d+)\.(\w+)$/);
+                                        const kunci = m ? `${m[1]}_${m[2]}_${m[3]}` : k;
+                                        e[kunci] = msgs[0];
+                                        const s = k.startsWith('riwayat_') ? 3 : stepOf(k); // riwayat ada di langkah 4
                                         if (s >= 0 && s < awal) awal = s;
                                     });
                                     if (awal !== 99) step.value = awal;
@@ -1465,15 +1474,25 @@
                                         window.location.href = data.redirect;
                                         return;
                                     }
-                                    console.log('Respons server:', raw);
                                     serverError.value =
-                                        @js(__('Pendaftaran kemungkinan tersimpan, tetapi balasan server tidak terbaca. Cek menu Data Masuk.'));
+                                        @js(__('Pendaftaran kemungkinan sudah tersimpan, tetapi balasan server tidak terbaca. Jangan kirim ulang; hubungi admin untuk memastikan.'));
                                 } else {
-                                    serverError.value = data.message ||
-                                        @js(__('Server error (:status). Cek storage/logs/laravel.log')).replace(':status', res.status);
+                                    // Pesan sesuai jenis masalah (bukan pesan teknis untuk programmer)
+                                    const pesanStatus = {
+                                        403: data.message || @js(__('Mohon maaf, pendaftaran sedang ditutup.')),
+                                        413: @js(__('Total ukuran berkas terlalu besar. Kecilkan ukuran berkas (maks. 5 MB per berkas) lalu kirim lagi.')),
+                                        419: @js(__('Sesi halaman sudah habis. Muat ulang halaman (isian Anda tetap tersimpan), pilih ulang berkas, lalu kirim lagi.')),
+                                        429: @js(__('Terlalu sering mencoba. Tunggu 1 menit lalu kirim lagi.')),
+                                    };
+                                    serverError.value = pesanStatus[res.status] || (res.status >= 500
+                                        ? @js(__('Server sedang sibuk atau bermasalah (kode :status). Silakan coba beberapa menit lagi.')).replace(':status', res.status)
+                                        : @js(__('Pendaftaran gagal dikirim (kode :status). Silakan coba lagi.')).replace(':status', res.status));
                                 }
                             } catch (err) {
-                                serverError.value = @js(__('Koneksi bermasalah. Silakan coba lagi.'));
+                                // Gagal mengirim sama sekali: bedakan internet mati dengan berkas yang tidak bisa dikirim
+                                serverError.value = navigator.onLine
+                                    ? @js(__('Gagal mengirim. Internet Anda tampak normal, jadi kemungkinan ada berkas yang tidak bisa dikirim. Buka langkah 6, pilih ulang semua berkas (simpan dulu ke HP bila dari Drive), lalu kirim lagi.'))
+                                    : @js(__('Tidak ada koneksi internet. Periksa internet Anda lalu kirim lagi — isian Anda tetap tersimpan.'));
                             }
                             loading.value = false;
                         };
@@ -1548,6 +1567,8 @@
         </script>
     {{-- Status koneksi internet + tombol muat ulang --}}
     @include('partials.status-koneksi')
+    {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
+    @include('partials.notifikasi')
     </body>
 
 </html>

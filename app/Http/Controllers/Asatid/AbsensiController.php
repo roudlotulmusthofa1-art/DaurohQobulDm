@@ -41,7 +41,10 @@ class AbsensiController extends Controller
 
         $berjalan = $riwayat->where('jenis', Absensi::KEGIATAN)->whereNull('selesai_at');
 
-        return $this->tampil('asatid.absensi.index', compact('riwayat', 'berjalan'));
+        // Absensi kegiatan dari admin yang sedang dibuka untuk semua asatid
+        $kegiatanAdmin = $this->kegiatanAdmin();
+
+        return $this->tampil('asatid.absensi.index', compact('riwayat', 'berjalan', 'kegiatanAdmin'));
     }
 
     /* =====================================================================
@@ -133,14 +136,19 @@ class AbsensiController extends Controller
 
     public function kegiatan()
     {
+        // Absensi kegiatan sekarang dibuat & diaktifkan admin (Admin > Akademik > Absensi Kegiatan)
         return $this->tampil('asatid.absensi.kegiatan', [
-            'kegiatanList' => JenisKegiatan::where('is_active', true)->ordered()->get(['id', 'nama', 'warna', 'deskripsi']),
+            'kegiatanAdmin' => $this->kegiatanAdmin(),
         ]);
     }
 
     /** Buat sesi absensi kegiatan, lalu masuk ke halaman pencatatan */
     public function mulaiKegiatan(Request $request)
     {
+        // Absensi kegiatan sekarang dibuat admin; asatid tinggal mengabsen kegiatan yang aktif
+        return redirect()->route('asatid.absensi.kegiatan')
+            ->with('error', 'Absensi kegiatan sekarang dibuat oleh admin. Pilih kegiatan yang aktif di daftar.');
+
         $data = $request->validate([
             'jenis_kegiatan_id' => ['required', Rule::exists('jenis_kegiatan', 'id')->where('is_active', true)],
             'tanggal' => ['required', 'date'],
@@ -166,13 +174,13 @@ class AbsensiController extends Controller
     /** Halaman pencatatan kegiatan: pindai QR / cari nama */
     public function catatKegiatan(Absensi $absensi)
     {
-        $this->pastikanMilik($absensi, Absensi::KEGIATAN);
+        $this->pastikanBolehCatat($absensi);
 
         if ($absensi->selesai_at) {
             return redirect()->route('asatid.absensi.show', $absensi);
         }
 
-        $tercatat = $absensi->detail()->get()->keyBy('pendaftaran_siswa_id');
+        $tercatat = $absensi->detail()->with('pencatat:id,name')->get()->keyBy('pendaftaran_siswa_id');
 
         $peserta = PendaftaranSiswa::with('kelasMaster')
             ->where('status', PendaftaranSiswa::DITERIMA)
@@ -181,6 +189,7 @@ class AbsensiController extends Controller
             ->map(fn ($s) => $this->dataSiswa($s) + [
                 'status' => $tercatat[$s->id]->status ?? null,
                 'waktu' => isset($tercatat[$s->id]) ? substr((string) $tercatat[$s->id]->waktu, 0, 5) : null,
+                'oleh' => isset($tercatat[$s->id]) ? $tercatat[$s->id]->pencatat?->name : null, // asatid yang mencatat
             ]);
 
         $absensi->load('kegiatan');
@@ -194,8 +203,9 @@ class AbsensiController extends Controller
      */
     public function simpanCatatan(Request $request, Absensi $absensi): JsonResponse
     {
-        $this->pastikanMilik($absensi, Absensi::KEGIATAN);
         abort_if($absensi->selesai_at, 422, 'Absensi kegiatan ini sudah ditutup.');
+        abort_if($absensi->dari_admin && ! $absensi->aktif, 422, 'Absensi kegiatan ini sedang dinonaktifkan admin.');
+        $this->pastikanBolehCatat($absensi);
 
         $data = $request->validate([
             'kode' => ['nullable', 'string', 'max:100', 'required_without:siswa_id'],
@@ -224,7 +234,7 @@ class AbsensiController extends Controller
         // Pindai ulang kartu yang sudah tercatat tidak mengubah statusnya
         if ($lama && empty($data['status'])) {
             return response()->json([
-                'siswa' => $this->dataSiswa($siswa) + ['status' => $lama->status, 'waktu' => substr((string) $lama->waktu, 0, 5)],
+                'siswa' => $this->dataSiswa($siswa) + ['status' => $lama->status, 'waktu' => substr((string) $lama->waktu, 0, 5), 'oleh' => $lama->pencatat?->name],
                 'ulang' => true,
                 'message' => $siswa->nama_lengkap . ' sudah tercatat sebelumnya.',
             ]);
@@ -232,13 +242,36 @@ class AbsensiController extends Controller
 
         $detail = AbsensiDetail::updateOrCreate(
             ['absensi_id' => $absensi->id, 'pendaftaran_siswa_id' => $siswa->id],
-            ['status' => $status, 'waktu' => $lama?->waktu ?? $jam],
+            ['status' => $status, 'waktu' => $lama?->waktu ?? $jam, 'dicatat_oleh' => Auth::id()],
         );
 
         return response()->json([
-            'siswa' => $this->dataSiswa($siswa) + ['status' => $detail->status, 'waktu' => substr((string) $detail->waktu, 0, 5)],
+            'siswa' => $this->dataSiswa($siswa) + ['status' => $detail->status, 'waktu' => substr((string) $detail->waktu, 0, 5), 'oleh' => Auth::user()->name],
             'ulang' => false,
             'message' => $siswa->nama_lengkap . ' dicatat ' . Absensi::STATUS[$status][0] . '.',
+        ]);
+    }
+
+    /**
+     * JSON: status semua peserta yang sudah tercatat (dipanggil tiap 10 detik oleh halaman catat),
+     * supaya catatan asatid lain di kegiatan yang sama ikut terlihat.
+     */
+    public function statusKegiatan(Absensi $absensi): JsonResponse
+    {
+        abort_unless($absensi->jenis === Absensi::KEGIATAN, 404);
+        abort_unless((int) $absensi->user_id === (int) Auth::id() || $absensi->dari_admin, 404);
+
+        $detail = $absensi->detail()->with('pencatat:id,name')->get(['pendaftaran_siswa_id', 'status', 'waktu', 'dicatat_oleh'])
+            ->mapWithKeys(fn ($d) => [$d->pendaftaran_siswa_id => [
+                'status' => $d->status,
+                'waktu' => substr((string) $d->waktu, 0, 5),
+                'oleh' => $d->pencatat?->name,
+            ]]);
+
+        return response()->json([
+            'tercatat' => $detail,
+            'ditutup' => (bool) $absensi->selesai_at,
+            'aktif' => (bool) $absensi->aktif,
         ]);
     }
 
@@ -274,9 +307,11 @@ class AbsensiController extends Controller
 
     public function show(Absensi $absensi)
     {
-        $this->pastikanMilik($absensi);
+        if (! ($absensi->jenis === Absensi::KEGIATAN && $absensi->dari_admin)) {
+            $this->pastikanMilik($absensi);
+        }
 
-        $absensi->load(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan', 'detail.siswa.kelasMaster']);
+        $absensi->load(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan', 'detail.siswa.kelasMaster', 'detail.pencatat:id,name']);
         $detail = $absensi->detail->sortBy(fn ($d) => $d->siswa?->nama_lengkap)->values();
         $hitung = collect(Absensi::STATUS)->map(fn ($s, $k) => $detail->where('status', $k)->count());
 
@@ -315,6 +350,22 @@ class AbsensiController extends Controller
             ->where('waktu_pelajaran_id', $data['waktu_pelajaran_id'])
             ->whereDate('tanggal', $data['tanggal'])
             ->first();
+    }
+
+    /** Absensi kegiatan: milik sendiri, atau dibuat admin & sedang terbuka (dicatat bersama) */
+    private function pastikanBolehCatat(Absensi $absensi): void
+    {
+        abort_unless($absensi->jenis === Absensi::KEGIATAN, 404);
+        abort_unless($absensi->bolehDicatatOleh(Auth::id()) || ($absensi->dari_admin && $absensi->selesai_at), 404);
+    }
+
+    /** Daftar absensi kegiatan dari admin yang sedang terbuka (urut tanggal & jam) */
+    private function kegiatanAdmin()
+    {
+        return Absensi::kegiatanTerbuka()->with('kegiatan')
+            ->withCount('detail')
+            ->orderBy('tanggal')->orderBy('jam_mulai')
+            ->get();
     }
 
     private function pastikanMilik(Absensi $absensi, ?string $jenis = null): void

@@ -53,12 +53,7 @@ $lebar = [__('Alamat Lengkap')];
         {{ __('Kembali') }}
     </a>
 
-    @if (session('success'))
-    <div class="p-3.5 rounded-2xl bg-emerald-50 ring-1 ring-emerald-100 text-emerald-800 text-sm">{{ session('success') }}</div>
-    @endif
-    @if (session('error'))
-    <div class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">{{ session('error') }}</div>
-    @endif
+    {{-- Pesan berhasil / gagal tampil sebagai notifikasi pojok (partials/notifikasi) --}}
     @if ($errors->any())
     <div class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-rose-800 text-sm">{{ $errors->first() }}</div>
     @endif

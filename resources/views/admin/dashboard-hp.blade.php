@@ -340,5 +340,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
 </script>
 {{-- Status koneksi internet + tombol muat ulang --}}
 @include('partials.status-koneksi', ['posisi' => 'bottom-24 right-4'])
+{{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
+@include('partials.notifikasi', ['bawah' => 'bottom-36'])
 </body>
 </html>

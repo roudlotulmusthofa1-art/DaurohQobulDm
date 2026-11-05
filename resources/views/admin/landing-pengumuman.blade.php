@@ -320,10 +320,6 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
             </form>
         </div>
     </div>
-
-    {{-- ===== Pesan singkat ===== --}}
-    <div v-if="toast" class="fixed bottom-24 lg:bottom-6 left-1/2 -translate-x-1/2 z-[90] px-4 py-2.5 rounded-2xl shadow-lg text-sm font-semibold text-white"
-        :class="toast.galat ? 'bg-rose-600' : 'bg-emerald-700'" v-text="toast.teks"></div>
 </div>
 @endsection
 
@@ -353,7 +349,6 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                     form: null,
                     galat: '',
                     sibuk: false,
-                    toast: null,
                     // Tampilan pita (letak & ukuran) untuk semua pengumuman
                     tampilan: { ...@json($tampilan) },
                     tampilanTersimpan: @json($tampilan),
@@ -425,10 +420,9 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
                         nonaktif: { teks: @js(__('Dimatikan')), kelas: 'bg-slate-100 text-slate-500 ring-slate-200' },
                     }[p.status];
                 },
+                // Notifikasi pojok bersama (partials/notifikasi)
                 tampilkanToast(teks, galat = false) {
-                    this.toast = { teks, galat };
-                    clearTimeout(this.jedaToast);
-                    this.jedaToast = setTimeout(() => (this.toast = null), 2800);
+                    galat ? window.notifikasi?.gagal(teks) : window.notifikasi?.sukses(teks);
                 },
                 // Kirim ke server; daftar terbaru dikembalikan controller
                 async kirim(metode, url, isi) {

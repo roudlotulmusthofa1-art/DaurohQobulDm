@@ -490,6 +490,8 @@
     @include('partials.vue-metode')
     {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
     @include('partials.status-koneksi', ['posisi' => 'bottom-24 right-4 lg:bottom-5 lg:right-5'])
+    {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
+    @include('partials.notifikasi', ['bawah' => 'bottom-36 lg:bottom-16'])
     @stack('scripts')
 
 </body>
