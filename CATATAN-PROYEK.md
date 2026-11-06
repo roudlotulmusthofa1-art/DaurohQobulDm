@@ -91,6 +91,19 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Asatid > Absensi > Kegiatan**: daftar kegiatan aktif dari admin; SEMUA asatid bisa mencatat di kegiatan yang sama. Halaman catat memperbarui diri tiap 10 detik (`absensi.kegiatan.status`). Asatid tidak lagi membuat kegiatan sendiri.
 - Migrasi `2026_11_13_100000_absensi_kegiatan_dari_admin`: `absensi.dari_admin`, `absensi.aktif`, `absensi_detail.dicatat_oleh` (perlu `migrate` + `sesi:migrate`).
 
+- **Tutup otomatis (2026-11-06):** begitu tanggal + batas alfa lewat (jam WIB), absensi kegiatan tertutup sendiri dan yang belum tercatat = Alfa (`Absensi::tutupKalauLewat()` / `tutupYangLewat()`, dipanggil saat halaman absensi / laporan dibuka; tanpa cron).
+
+### Penilaian (2026-11-06)
+- **Admin > PENILAIAN**: Kelas & Pelajaran (`admin/penilaian/kelas`, 3 tombol: Nilai Harian · Ujian Lisan · Ujian, alurnya MENYUSUL), Pelanggaran & Pencapaian (satu halaman `admin/penilaian/catatan`, `Admin/PenilaianController`): ringkasan, rekap per siswa, semua laporan (saring + hapus).
+- **Asatid > Penilaian** (`Asatid/PenilaianController`, view `asatid/penilaian/*`): menu 5 kartu; lapor Pelanggaran/Pencapaian = pilih siswa (boleh beberapa) + jenis dari Master Data + tanggal (hari ikut) + jam (otomatis sekarang, bisa diubah) + catatan. Asatid hanya melihat/menghapus laporannya sendiri.
+- Tabel `pelanggaran_siswa`, `pencapaian_siswa` (migrasi `2026_11_14_100000_...`, perlu `migrate` + `sesi:migrate`). Pengaturan & data bersama di `App\Support\JenisPenilaian`; model dasar `CatatanPenilaian`.
+- Terlambat & Alfa dari absensi kelas/kegiatan ikut masuk Pelanggaran, dibaca langsung dari tabel absensi (tidak disalin).
+- **Kelulusan** disembunyikan dari menu Akademik (akan diperbaiki); halaman `admin/kelulusan` & datanya masih ada.
+
+### Data Santri: Ketua & Wakil kamar (2026-11-06)
+- Kartu kamar > daftar anggota: tombol ⋮ per santri → Ketua / Wakil / Anggota biasa (`AdminSantriController@jabatanKamar`, rute `admin.santri.jabatan-kamar`). Lencana tampil di daftar anggota, denah kasur, dan kolom Kamar tabel.
+- Kolom `pendaftaran_siswas.jabatan_kamar` (migrasi `2026_11_14_110000_...`). Satu kamar maks 1 ketua & 1 wakil (yang lama otomatis lepas). Pindah kamar → jabatan lepas (model `booted()` + Kelola Massal).
+
 ### Daftar Peserta asatid: Kartu / Foto
 - Tombol Kartu | Foto di `asatid/peserta.blade.php`; pilihan diingat per perangkat (localStorage `tampilan_peserta`).
 
@@ -145,6 +158,9 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 ---
 
 ## 5. Belum dikerjakan (bisa diminta nanti)
+
+- **Penilaian Kelas & Pelajaran:** alur Nilai Harian, Ujian Lisan, dan Ujian menunggu penjelasan dari pengguna.
+- **Kelulusan:** menunya disembunyikan, menunggu perbaikan.
 
 - **Formulir pendaftaran online**, perbaikan yang sudah diusulkan tapi belum dipasang:
   - WhatsApp dikirim *setelah* peserta mendapat jawaban, supaya formulir tidak tertahan saat Fonnte lambat;

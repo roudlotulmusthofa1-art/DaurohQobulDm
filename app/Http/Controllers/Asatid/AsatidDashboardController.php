@@ -94,13 +94,6 @@ class AsatidDashboardController extends Controller
         ]);
     }
 
-    public function penilaian()
-    {
-        return $this->tampil('asatid.penilaian', [
-            'bulan' => BulanAjaran::aktif(),
-        ]);
-    }
-
     /** Pesan dari Admin (kotak masuk). Pesan yang tampil otomatis ditandai sudah dibaca. */
     public function pesan()
     {

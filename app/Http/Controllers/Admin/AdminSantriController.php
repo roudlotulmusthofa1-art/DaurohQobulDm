@@ -141,7 +141,7 @@ class AdminSantriController extends Controller
             // Santri yang benar-benar pindah kamar: nomor kasur lamanya dikosongkan (denah kamar)
             PendaftaranSiswa::whereIn('id', $data['ids'])
                 ->where(fn ($q) => $q->whereNull('kamar_id')->orWhere('kamar_id', '!=', $ubah['kamar_id']))
-                ->update(['nomor_kasur' => null]);
+                ->update(['nomor_kasur' => null, 'jabatan_kamar' => null]); // jabatan Ketua/Wakil kamar lama ikut lepas
         }
 
         PendaftaranSiswa::whereIn('id', $data['ids'])->update($ubah);
@@ -155,6 +155,38 @@ class AdminSantriController extends Controller
             'message'      => count($data['ids']) . ' santri berhasil dipindahkan.',
             'santri'       => $santri,
             'kamarOptions' => $this->kamarOptions(),
+        ]);
+    }
+
+    /**
+     * POST /admin/santri/{santri}/jabatan-kamar — body { jabatan: 'ketua' | 'wakil' | null }
+     * Satu kamar hanya 1 ketua & 1 wakil: pemegang jabatan yang lama otomatis jadi anggota biasa.
+     * Hasil: jabatan semua anggota kamar itu (supaya tampilan langsung sama dengan server).
+     */
+    public function jabatanKamar(Request $request, PendaftaranSiswa $santri): JsonResponse
+    {
+        $data = $request->validate([
+            'jabatan' => ['nullable', Rule::in(array_keys(PendaftaranSiswa::JABATAN_KAMAR))],
+        ]);
+        $jabatan = $data['jabatan'] ?? null;
+
+        if (! $santri->kamar_id) {
+            throw ValidationException::withMessages(['jabatan' => 'Santri ini belum punya kamar.']);
+        }
+
+        DB::transaction(function () use ($santri, $jabatan) {
+            if ($jabatan) {
+                PendaftaranSiswa::where('kamar_id', $santri->kamar_id)->where('jabatan_kamar', $jabatan)
+                    ->whereKeyNot($santri->id)->update(['jabatan_kamar' => null]);
+            }
+            $santri->forceFill(['jabatan_kamar' => $jabatan])->saveQuietly();
+        });
+
+        $label = $jabatan ? strtolower(__(PendaftaranSiswa::JABATAN_KAMAR[$jabatan])) : __('anggota biasa');
+
+        return response()->json([
+            'message' => __(':nama sekarang :jabatan.', ['nama' => $santri->nama_lengkap, 'jabatan' => $label]),
+            'jabatan' => PendaftaranSiswa::where('kamar_id', $santri->kamar_id)->pluck('jabatan_kamar', 'id'),
         ]);
     }
 
@@ -174,6 +206,8 @@ class AdminSantriController extends Controller
             'kelas'         => $s->kelasMaster?->nama,
             'kamar'         => $s->kamarMaster?->nama,
             'nomor_kasur'   => $s->nomor_kasur,
+            'jabatan_kamar' => $s->kamar_id ? $s->jabatan_kamar : null, // ketua | wakil | null
+            'jabatan_url'   => route('admin.santri.jabatan-kamar', $s),
             'tanggal_masuk' => ($s->diproses_at ?? $s->created_at)?->translatedFormat('d M Y'),
             'wali'          => $s->nama_wali,
             'status'        => $s->user_id ? 'aktif' : 'belum punya akun',

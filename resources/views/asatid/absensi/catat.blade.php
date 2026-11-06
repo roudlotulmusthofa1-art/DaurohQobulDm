@@ -196,7 +196,7 @@ $info = [
         <span class="w-9 h-9 shrink-0 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>
         </span>
-        <p class="text-sm text-slate-500">{{ __('Setiap catatan langsung tersimpan. Absensi ini ditutup oleh admin; saat ditutup, peserta yang belum tercatat') }} (<b class="text-slate-800" v-text="belum"></b>) {{ __('dihitung') }} <b class="text-rose-600">{{ __('Alfa') }}</b>.</p>
+        <p class="text-sm text-slate-500">{{ __('Setiap catatan langsung tersimpan. Absensi ini ditutup oleh admin, atau otomatis saat batas alfa lewat; saat ditutup, peserta yang belum tercatat') }} (<b class="text-slate-800" v-text="belum"></b>) {{ __('dihitung') }} <b class="text-rose-600">{{ __('Alfa') }}</b>.</p>
     </div>
     @else
     <form method="POST" action="{{ route('asatid.absensi.kegiatan.selesai', $absensi) }}"
@@ -283,7 +283,15 @@ document.addEventListener('DOMContentLoaded', () => {
             lebih() { return this.tersaring.length > 60; },
         },
         mounted() {
-            const detak = () => { const d = new Date(); this.jam = `${dua(d.getHours())}:${dua(d.getMinutes())}:${dua(d.getSeconds())}`; };
+            const detak = () => {
+                const d = new Date();
+                this.jam = `${dua(d.getHours())}:${dua(d.getMinutes())}:${dua(d.getSeconds())}`;
+                // Tepat saat batas alfa tiba: tanya server, absensi akan ditutup otomatis
+                if (!this._cekBatas && this.info.batas_alfa && this.jam.slice(0, 5) >= this.info.batas_alfa) {
+                    this._cekBatas = true;
+                    this.segarkan();
+                }
+            };
             detak();
             setInterval(detak, 1000);
             window.addEventListener('pagehide', this.matikan);
@@ -317,14 +325,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         p.status = d.status; p.waktu = d.waktu; p.oleh = d.oleh;
                     });
                     if (json.ditutup) {
-                        clearInterval(this._segar);
-                        window.notifikasi?.info(@js(__('Absensi ini sudah ditutup admin. Membuka hasilnya…')));
-                        setTimeout(() => location.reload(), 1500);
+                        this.selesaiDitutup(json.lewat_batas);
                     } else if (!json.aktif && !this._infoNonaktif) {
                         this._infoNonaktif = true;
                         window.notifikasi?.peringatan(@js(__('Admin menonaktifkan absensi ini sementara. Catatan baru belum bisa disimpan.')));
                     }
                 } catch (e) {}
+            },
+
+            /** Absensi sudah ditutup (oleh admin atau karena lewat batas alfa): buka halaman hasil */
+            selesaiDitutup(lewatBatas) {
+                if (this._ditutup) return;
+                this._ditutup = true;
+                clearInterval(this._segar);
+                this.matikan();
+                window.notifikasi?.info(lewatBatas
+                    ? @js(__('Waktu absensi habis (lewat batas alfa). Peserta yang belum tercatat dihitung Alfa. Membuka hasilnya…'))
+                    : @js(__('Absensi ini sudah ditutup admin. Membuka hasilnya…')));
+                setTimeout(() => location.reload(), 1500);
             },
 
             gantiTab(t) {
@@ -343,6 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         body: JSON.stringify({ ...isi, jam: jamSekarang() }),
                     });
                     const json = await res.json();
+                    if (json.ditutup) this.selesaiDitutup(true);
                     if (!res.ok) throw new Error(json.message || @js(__('Gagal mencatat.')));
 
                     const s = json.siswa;

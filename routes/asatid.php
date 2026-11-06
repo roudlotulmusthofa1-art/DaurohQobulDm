@@ -3,6 +3,7 @@
 use App\Http\Controllers\Asatid\AbsensiController;
 use App\Http\Controllers\Asatid\AsatidDashboardController;
 use App\Http\Controllers\Asatid\PendaftaranAsatidController;
+use App\Http\Controllers\Asatid\PenilaianController;
 use Illuminate\Support\Facades\Route;
 
 /* Dimuat dari routes/web.php:  require __DIR__ . '/asatid.php'; */
@@ -21,7 +22,16 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     Route::get('/ganti-password', [AsatidDashboardController::class, 'gantiPassword'])->name('ganti-password');
     Route::post('/ganti-password', [AsatidDashboardController::class, 'simpanGantiPassword'])->middleware('throttle:10,1')->name('ganti-password.simpan');
     Route::get('/jadwal', [AsatidDashboardController::class, 'jadwal'])->name('jadwal');
-    Route::get('/penilaian', [AsatidDashboardController::class, 'penilaian'])->name('penilaian');
+    // Penilaian: menu + Nilai Harian/Ujian Lisan/Ujian (menyusul) + lapor Pelanggaran & Pencapaian
+    Route::controller(PenilaianController::class)->prefix('penilaian')->group(function () {
+        Route::get('/', 'index')->name('penilaian');
+        Route::get('/kelas/{bagian}', 'kelas')->whereIn('bagian', PenilaianController::BAGIAN_KELAS)->name('penilaian.kelas');
+        foreach (\App\Support\JenisPenilaian::TIPE as $tipe) {
+            Route::get("/{$tipe}", 'catatan')->defaults('tipe', $tipe)->name("penilaian.{$tipe}");
+            Route::post("/{$tipe}", 'simpan')->defaults('tipe', $tipe)->middleware('throttle:60,1')->name("penilaian.{$tipe}.simpan");
+            Route::delete("/{$tipe}/{id}", 'hapus')->defaults('tipe', $tipe)->whereNumber('id')->name("penilaian.{$tipe}.hapus");
+        }
+    });
     Route::get('/pesan', [AsatidDashboardController::class, 'pesan'])->name('pesan'); // Pesan dari Admin
     Route::get('/pesan-saya', [AsatidDashboardController::class, 'pesanSaya'])->name('pesan-saya'); // Pesan untuk Admin
     Route::post('/pesan-saya', [AsatidDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');

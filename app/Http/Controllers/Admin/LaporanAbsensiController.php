@@ -23,6 +23,8 @@ class LaporanAbsensiController extends Controller
 {
     public function index(Request $request)
     {
+        Absensi::tutupYangLewat(); // supaya laporan sudah memuat Alfa dari kegiatan yang waktunya habis
+
         $f = $this->saringan($request);
         $sesi = $this->querySesi($f);
 

@@ -25,6 +25,8 @@ class AbsensiKegiatanController extends Controller
     {
         $saring = $request->query('saring', 'berjalan'); // berjalan | selesai | semua
 
+        Absensi::tutupYangLewat(); // yang sudah lewat batas alfa ditutup otomatis (belum tercatat = Alfa)
+
         $daftar = Absensi::with('kegiatan')
             ->where('jenis', Absensi::KEGIATAN)
             ->where('dari_admin', true)
@@ -107,23 +109,7 @@ class AbsensiKegiatanController extends Controller
         $this->pastikanDariAdmin($absensi);
         abort_if($absensi->selesai_at, 422, 'Absensi kegiatan ini sudah ditutup.');
 
-        DB::transaction(function () use ($absensi) {
-            $sudah = $absensi->detail()->pluck('pendaftaran_siswa_id');
-            $sekarang = now();
-
-            $baru = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)
-                ->whereNotIn('id', $sudah)->pluck('id')
-                ->map(fn ($id) => [
-                    'absensi_id' => $absensi->id, 'pendaftaran_siswa_id' => $id, 'status' => 'alfa',
-                    'created_at' => $sekarang, 'updated_at' => $sekarang,
-                ]);
-
-            foreach ($baru->chunk(500) as $potong) {
-                AbsensiDetail::insert($potong->all());
-            }
-
-            $absensi->update(['selesai_at' => $sekarang, 'aktif' => false]);
-        });
+        $absensi->tutup();
 
         return back()->with('success', 'Absensi kegiatan ditutup. Peserta yang belum tercatat dihitung Alfa.');
     }

@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use IntlDateFormatter;
 
 /**
@@ -142,5 +144,75 @@ class Absensi extends Model
         }
 
         return $terlambat ? 'terlambat' : 'hadir';
+    }
+
+    /** Tanggal + batas alfa kegiatan ini sudah lewat (jam WIB)? */
+    public function lewatBatasAlfa(): bool
+    {
+        if ($this->jenis !== self::KEGIATAN || ! $this->batas_alfa || ! $this->tanggal) {
+            return false;
+        }
+
+        $batas = Carbon::parse($this->tanggal->format('Y-m-d') . ' ' . substr((string) $this->batas_alfa, 0, 5), 'Asia/Jakarta');
+
+        return now('Asia/Jakarta')->gte($batas);
+    }
+
+    /** Masih terbuka padahal batas alfa sudah lewat */
+    public function sudahLewatBatasAlfa(): bool
+    {
+        return ! $this->selesai_at && $this->lewatBatasAlfa();
+    }
+
+    /** Tutup kalau sudah lewat batas alfa. Hasilnya true kalau absensi ini baru saja ditutup. */
+    public function tutupKalauLewat(): bool
+    {
+        if (! $this->sudahLewatBatasAlfa()) {
+            return false;
+        }
+        $this->tutup();
+
+        return true;
+    }
+
+    /** Tutup semua absensi kegiatan yang sudah lewat batas alfa (dipanggil saat halaman absensi dibuka) */
+    public static function tutupYangLewat(): void
+    {
+        static::where('jenis', self::KEGIATAN)
+            ->whereNull('selesai_at')
+            ->whereNotNull('batas_alfa')
+            ->whereDate('tanggal', '<=', now('Asia/Jakarta')->toDateString())
+            ->get()
+            ->each->tutupKalauLewat();
+    }
+
+    /** Tutup absensi kegiatan: peserta yang belum tercatat ditandai Alfa */
+    public function tutup(): void
+    {
+        DB::transaction(function () {
+            // Kunci baris ini supaya dua orang yang menutup bersamaan tidak menulis Alfa dua kali
+            $segar = static::whereKey($this->id)->lockForUpdate()->first();
+            if (! $segar || $segar->selesai_at) {
+                $this->refresh();
+
+                return;
+            }
+
+            $sudah = AbsensiDetail::where('absensi_id', $this->id)->pluck('pendaftaran_siswa_id');
+            $sekarang = now();
+
+            $baru = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)
+                ->whereNotIn('id', $sudah)->pluck('id')
+                ->map(fn ($id) => [
+                    'absensi_id' => $this->id, 'pendaftaran_siswa_id' => $id, 'status' => 'alfa',
+                    'created_at' => $sekarang, 'updated_at' => $sekarang,
+                ]);
+
+            foreach ($baru->chunk(500) as $potong) {
+                AbsensiDetail::insert($potong->all());
+            }
+
+            $this->update(['selesai_at' => $sekarang] + ($this->dari_admin ? ['aktif' => false] : []));
+        });
     }
 }

@@ -200,6 +200,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                                     <span v-else class="flex h-9 w-9 items-center justify-center text-[10px] text-gray-300">{{ __('kosong') }}</span>
                                     <span class="mt-1 w-full truncate text-[11px] font-medium" :class="kasur.santri ? 'text-gray-800' : 'text-gray-400'"
                                         v-text="kasur.santri ? kasur.santri.nama : @js(__('Kosong'))"></span>
+                                    <span v-if="kasur.santri && JABATAN[kasur.santri.jabatan_kamar]" class="mt-0.5 rounded-full px-1.5 text-[9px] font-bold ring-1"
+                                        :class="JABATAN[kasur.santri.jabatan_kamar].lencana" v-text="JABATAN[kasur.santri.jabatan_kamar].label"></span>
                                 </component>
                             </div>
                             <div class="mt-2 flex justify-center">
@@ -218,21 +220,60 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     <div :class="grup.denah ? 'lg:col-span-2' : ''">
                         <p v-if="grup.denah" class="mb-3 text-sm font-semibold text-gray-800">{{ __('Daftar anggota') }}</p>
                         <div v-if="grup.anggota.length" class="grid gap-2" :class="grup.denah ? '' : 'sm:grid-cols-2 lg:grid-cols-3'">
-                            <a v-for="santri in grup.anggota" :key="santri.id" :href="santri.detail_url"
-                                class="flex items-center gap-3 rounded-xl p-2.5 ring-1 ring-gray-100 bg-gray-50/60 transition hover:bg-white hover:ring-emerald-200 hover:shadow-sm">
-                                <img :data-perbesar="santri.nama" v-if="santri.foto" :src="santri.foto" alt="" class="h-10 w-10 shrink-0 rounded-full object-cover">
-                                <span v-else class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700" v-text="inisial(santri.nama)"></span>
-                                <span class="min-w-0 flex-1">
-                                    <span class="block truncate text-sm font-semibold text-gray-800" v-text="santri.nama"></span>
-                                    <span class="block truncate text-[11px] text-gray-400" dir="auto" v-text="santri.nama_arab || santri.nomor"></span>
-                                </span>
-                                <span v-if="grup.jenis === 'kelas'" class="shrink-0 text-[11px] font-medium rounded-md px-2 py-0.5"
-                                    :class="santri.kamar ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"
-                                    v-text="santri.kamar ? santri.kamar + (santri.nomor_kasur ? ' · ' + @js(__('Kasur')) + ' ' + santri.nomor_kasur : '') : @js(__('Tanpa kamar'))"></span>
-                                <span v-else class="shrink-0 text-[11px] font-bold rounded-md px-2 py-0.5"
-                                    :class="santri.nomor_kasur ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"
-                                    v-text="santri.nomor_kasur ? @js(__('Kasur')) + ' ' + santri.nomor_kasur : @js(__('Belum ada kasur'))"></span>
-                            </a>
+                            <div v-for="santri in grup.anggota" :key="santri.id" class="flex flex-wrap items-center rounded-xl ring-1 transition hover:bg-white hover:shadow-sm"
+                                :class="jabatanKamar(santri, grup) ? JABATAN[santri.jabatan_kamar].baris : 'ring-gray-100 bg-gray-50/60 hover:ring-emerald-200'">
+                                <a :href="santri.detail_url" class="flex min-w-0 flex-1 items-center gap-3 p-2.5">
+                                    <span class="relative shrink-0">
+                                        <img :data-perbesar="santri.nama" v-if="santri.foto" :src="santri.foto" alt="" class="h-10 w-10 rounded-full object-cover">
+                                        <span v-else class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700" v-text="inisial(santri.nama)"></span>
+                                        {{-- Mahkota (ketua) / bintang (wakil) di pojok foto --}}
+                                        <span v-if="jabatanKamar(santri, grup)" class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full text-white ring-2 ring-white"
+                                            :class="JABATAN[santri.jabatan_kamar].titik">
+                                            <svg v-if="santri.jabatan_kamar === 'ketua'" class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5L3 7z"/></svg>
+                                            <svg v-else class="h-3 w-3" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9L12 2.5z"/></svg>
+                                        </span>
+                                    </span>
+                                    <span class="min-w-0 flex-1">
+                                        <span class="flex items-center gap-1.5">
+                                            <span class="truncate text-sm font-semibold text-gray-800" v-text="santri.nama"></span>
+                                            <span v-if="jabatanKamar(santri, grup)" class="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1"
+                                                :class="JABATAN[santri.jabatan_kamar].lencana" v-text="JABATAN[santri.jabatan_kamar].label"></span>
+                                        </span>
+                                        <span class="block truncate text-[11px] text-gray-400" dir="auto" v-text="santri.nama_arab || santri.nomor"></span>
+                                    </span>
+                                    <span v-if="grup.jenis === 'kelas'" class="shrink-0 text-[11px] font-medium rounded-md px-2 py-0.5"
+                                        :class="santri.kamar ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"
+                                        v-text="santri.kamar ? santri.kamar + (santri.nomor_kasur ? ' · ' + @js(__('Kasur')) + ' ' + santri.nomor_kasur : '') : @js(__('Tanpa kamar'))"></span>
+                                    <span v-else class="shrink-0 text-[11px] font-bold rounded-md px-2 py-0.5"
+                                        :class="santri.nomor_kasur ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"
+                                        v-text="santri.nomor_kasur ? @js(__('Kasur')) + ' ' + santri.nomor_kasur : @js(__('Belum ada kasur'))"></span>
+                                </a>
+
+                                {{-- Tombol Jabatan (khusus kartu kamar): Ketua / Wakil / Anggota biasa --}}
+                                <template v-if="grup.jenis === 'kamar' && grup.id !== 'kosong'">
+                                    <button type="button" @click="menuJabatan = menuJabatan === santri.id ? null : santri.id"
+                                        :disabled="jabatanMenyimpan === santri.id"
+                                        title="{{ __('Atur jabatan di kamar') }}" aria-label="{{ __('Atur jabatan di kamar') }}"
+                                        class="mr-1.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition hover:bg-gray-100 hover:text-gray-700 disabled:opacity-40">
+                                        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="12" cy="19" r="1.8"/></svg>
+                                    </button>
+                                    {{-- Pilihan jabatan: terbuka di bawah baris ini (tidak melayang, jadi tidak terpotong) --}}
+                                    <div v-if="menuJabatan === santri.id" class="flex w-full flex-wrap items-center gap-1.5 border-t border-gray-100 px-2.5 py-2">
+                                        <span class="mr-1 text-[11px] font-semibold text-gray-400">{{ __('Jabatan:') }}</span>
+                                        <button v-for="(j, kunci) in JABATAN" :key="kunci" type="button" @click="aturJabatan(santri, kunci)"
+                                            class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 transition"
+                                            :class="santri.jabatan_kamar === kunci ? j.pilih : 'bg-white text-gray-600 ring-gray-200 hover:bg-gray-50'">
+                                            <span class="h-2 w-2 rounded-full" :class="santri.jabatan_kamar === kunci ? 'bg-white' : j.titik"></span>
+                                            <span v-text="j.label"></span>
+                                        </button>
+                                        <button type="button" @click="aturJabatan(santri, null)"
+                                            class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 transition"
+                                            :class="!santri.jabatan_kamar ? 'bg-gray-700 text-white ring-gray-700' : 'bg-white text-gray-600 ring-gray-200 hover:bg-gray-50'">
+                                            {{ __('Anggota biasa') }}
+                                        </button>
+                                    </div>
+                                </template>
+                            </div>
                         </div>
                         <p v-else class="py-8 text-center text-sm text-gray-400">{{ __('Belum ada santri.') }}</p>
                     </div>
@@ -417,6 +458,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5V21H3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6"/></svg>
                     <span v-if="santri.kamar">@{{ santri.kamar }}</span>
                     <span v-else class="text-amber-600">{{ __('Belum dipilih') }}</span>
+                    <span v-if="santri.kamar && JABATAN[santri.jabatan_kamar]" class="rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1"
+                        :class="JABATAN[santri.jabatan_kamar].lencana" v-text="JABATAN[santri.jabatan_kamar].label"></span>
                 </span>
                 <span v-if="santri.nomor_kasur" class="inline-flex items-center gap-1">
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 18V7m0 7h18v4M21 14v-2a3 3 0 0 0-3-3h-7v5"/></svg>
@@ -542,6 +585,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <td class="px-4 py-3 text-gray-600">
                             <span v-if="santri.kamar">@{{ santri.kamar }}</span>
                             <span v-else class="text-xs text-amber-600">{{ __('Belum dipilih') }}</span>
+                            <span v-if="santri.kamar && JABATAN[santri.jabatan_kamar]" class="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1 whitespace-nowrap"
+                                :class="JABATAN[santri.jabatan_kamar].lencana" v-text="JABATAN[santri.jabatan_kamar].label"></span>
                         </td>
                         <td class="px-4 py-3">
                             <span v-if="santri.nomor_kasur" class="inline-flex items-center justify-center min-w-8 h-7 px-2 rounded-lg bg-amber-50 text-amber-700 ring-1 ring-amber-200 text-xs font-bold">@{{ santri.nomor_kasur }}</span>
@@ -708,6 +753,12 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 
     const URL_TAMBAH = @json(route('admin.santri.store'));
     const URL_MASSAL = @json(route('admin.santri.massal'));
+    // Jabatan di kamar: label + warna lencana (Ketua kuning, Wakil biru)
+    const JABATAN = {
+        ketua: { label: @js(__('Ketua')), lencana: 'bg-amber-100 text-amber-800 ring-amber-300', titik: 'bg-amber-500', baris: 'ring-amber-300 bg-amber-50/70', pilih: 'bg-amber-500 text-white ring-amber-500' },
+        wakil: { label: @js(__('Wakil')), lencana: 'bg-sky-100 text-sky-800 ring-sky-300', titik: 'bg-sky-500', baris: 'ring-sky-200 bg-sky-50/70', pilih: 'bg-sky-500 text-white ring-sky-500' },
+    };
+    const URUT_JABATAN = { ketua: 0, wakil: 1 };
     const formKosong = () => ({ nama_lengkap: '', nama_wali: '', no_hp_wali: '', kota: '', kelas_id: null, kamar_id: null });
 
     createApp({
@@ -730,6 +781,9 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 tambah: { buka: false, form: formKosong(), errors: {}, loading: false },
                 menghapus: null, // id santri yang sedang dihapus
                 grupAktif: null, // kartu kelas/kamar yang sedang dibuka: { jenis, id }
+                JABATAN,
+                menuJabatan: null,      // id santri yang pilihan jabatannya sedang terbuka
+                jabatanMenyimpan: null, // id santri yang jabatannya sedang disimpan
             };
         },
         computed: {
@@ -784,8 +838,9 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 const kamar = this.kamarOptions.find(k => k.id === g.id);
                 if (!kamar) return { ...g, nama: @js(__('Belum ada kamar')), anggota };
 
-                // Urut menurut nomor kasur; yang belum punya kasur di belakang
-                anggota.sort((a, b) => (a.nomor_kasur || 999) - (b.nomor_kasur || 999));
+                // Ketua & Wakil paling atas, lalu urut nomor kasur; yang belum punya kasur di belakang
+                anggota.sort((a, b) => (URUT_JABATAN[a.jabatan_kamar] ?? 9) - (URUT_JABATAN[b.jabatan_kamar] ?? 9)
+                    || (a.nomor_kasur || 999) - (b.nomor_kasur || 999));
 
                 // Denah: kasur 1..kapasitas (atau sampai nomor kasur terbesar yang terpakai)
                 const terbesar = Math.max(0, ...anggota.map(s => s.nomor_kasur || 0));
@@ -852,6 +907,28 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         },
         },
         methods: {
+            // Jabatan santri di kamar yang sedang dibuka (hanya tampil di kartu kamar)
+            jabatanKamar(santri, grup) {
+                return grup.jenis === 'kamar' && JABATAN[santri.jabatan_kamar] ? santri.jabatan_kamar : null;
+            },
+            // Simpan Ketua / Wakil / Anggota biasa. Server mengembalikan jabatan semua anggota kamar itu
+            // (ketua lama otomatis jadi anggota biasa), jadi tampilan langsung disamakan.
+            async aturJabatan(santri, jabatan) {
+                this.menuJabatan = null;
+                if ((santri.jabatan_kamar || null) === jabatan) return;
+                this.jabatanMenyimpan = santri.id;
+                try {
+                    const res = await kirim(santri.jabatan_url, { jabatan });
+                    this.santriList.forEach((s) => {
+                        if (Object.prototype.hasOwnProperty.call(res.jabatan, s.id)) s.jabatan_kamar = res.jabatan[s.id];
+                    });
+                    window.notifikasi?.sukses(res.message);
+                } catch (e) {
+                    window.notifikasi ? window.notifikasi.gagal(e.message) : alert(e.message);
+                } finally {
+                    this.jabatanMenyimpan = null;
+                }
+            },
             // ----- Persyaratan -----
             // Klik tombol syarat di kotak ringkasan: saring tabel (klik lagi = batal)
             saringSyarat(nilai) {

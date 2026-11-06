@@ -38,6 +38,11 @@ class CadanganDatabase
             'keterangan' => 'Semua absensi kelas & kegiatan beserta rinciannya.',
             'tabel' => ['absensi_detail', 'absensi'],
         ],
+        'penilaian' => [
+            'label' => 'Pelanggaran & Pencapaian',
+            'keterangan' => 'Semua laporan pelanggaran & pencapaian siswa dari asatid. Jenisnya (Master Data) tetap disimpan.',
+            'tabel' => ['pelanggaran_siswa', 'pencapaian_siswa'],
+        ],
         'akademik' => [
             'label' => 'Akademik',
             'keterangan' => 'Tahun & bulan ajaran, kurikulum & kitab, jadwal mengajar.',

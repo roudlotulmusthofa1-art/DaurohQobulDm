@@ -29,6 +29,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Manajemen Data
     Route::post('santri/massal', [AdminSantriController::class, 'massal'])->name('santri.massal'); // tombol Kelola Massal
     Route::get('santri/kartu-qr', [AdminSantriController::class, 'kartuQr'])->name('santri.kartu-qr'); // cetak kartu QR (semua / terpilih / satu)
+    Route::post('santri/{santri}/jabatan-kamar', [AdminSantriController::class, 'jabatanKamar'])->whereNumber('santri')->name('santri.jabatan-kamar'); // Ketua / Wakil kamar
     Route::resource('santri', AdminSantriController::class);
     // Data Asatid: daftar, detail, terima/tolak, hapus, dan link pendaftaran khusus
     // Pesan admin -> asatid (dibaca di dasbor asatid)
@@ -89,6 +90,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::get('laporan-absensi', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'index'])->name('laporan-absensi.index');
     Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
     Route::delete('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'destroy'])->name('laporan-absensi.destroy');
+
+    // Penilaian: Kelas & Pelajaran, Pelanggaran, Pencapaian (laporan dari asatid)
+    Route::controller(\App\Http\Controllers\Admin\PenilaianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {
+        Route::get('kelas', 'kelas')->name('kelas.index');
+        foreach (\App\Support\JenisPenilaian::TIPE as $tipe) {
+            Route::get($tipe, 'catatan')->defaults('tipe', $tipe)->name("{$tipe}.index");
+            Route::delete("{$tipe}/{id}", 'hapus')->defaults('tipe', $tipe)->whereNumber('id')->name("{$tipe}.hapus");
+        }
+    });
 
     // Sistem > Pengaturan: route-nya ada di routes/pengaturan.php
     // Route::resource('wali', AdminWaliController::class);

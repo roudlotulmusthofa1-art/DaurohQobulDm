@@ -47,7 +47,18 @@ class MenuAdmin
                     ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => __('Kurikulum & Kitab'), 'icon' => 'book-open'],
                     ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => __('Jadwal Mengajar'), 'icon' => 'calendar-clock'],
                     ['route' => 'admin.absensi-kegiatan.index', 'active' => 'admin.absensi-kegiatan.*', 'label' => __('Absensi Kegiatan'), 'icon' => 'calendar-check'],
-                    ['route' => 'admin.kelulusan.index',    'active' => 'admin.kelulusan.*',    'label' => __('Kelulusan'), 'icon' => 'award'],
+                    // Kelulusan disembunyikan sementara (akan diperbaiki). Halaman & datanya tetap ada:
+                    // ['route' => 'admin.kelulusan.index', 'active' => 'admin.kelulusan.*', 'label' => __('Kelulusan'), 'icon' => 'award'],
+                ],
+            ],
+
+            [
+                'label' => __('PENILAIAN'),
+                'icon'  => 'clipboard-pen-line',
+                'submenu' => [
+                    ['route' => 'admin.penilaian.kelas.index',       'active' => 'admin.penilaian.kelas.*',       'label' => __('Kelas & Pelajaran'), 'icon' => 'notebook-pen'],
+                    ['route' => 'admin.penilaian.pelanggaran.index', 'active' => 'admin.penilaian.pelanggaran.*', 'label' => __('Pelanggaran'), 'icon' => 'shield-alert'],
+                    ['route' => 'admin.penilaian.pencapaian.index',  'active' => 'admin.penilaian.pencapaian.*',  'label' => __('Pencapaian'), 'icon' => 'trophy'],
                 ],
             ],
 

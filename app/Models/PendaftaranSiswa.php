@@ -36,6 +36,9 @@ class PendaftaranSiswa extends Model
 
     public const MENUNGGU = 'menunggu';
     public const DITERIMA = 'diterima';
+
+    /** Jabatan di kamar (kolom jabatan_kamar). Kosong = anggota biasa. */
+    public const JABATAN_KAMAR = ['ketua' => 'Ketua kamar', 'wakil' => 'Wakil kamar'];
     public const DITOLAK  = 'ditolak';
 
     /** Kelulusan akhir dauroh (diisi di Akademik > Kelulusan). Bukan hasil seleksi pendaftaran. */
@@ -284,9 +287,13 @@ class PendaftaranSiswa extends Model
         });
 
         // Pindah kamar -> nomor kasur lama dikosongkan (kecuali nomor kasur ikut diisi, mis. dari denah kamar)
+        // dan jabatan Ketua/Wakil kamar lama ikut lepas
         static::saving(function (self $p) {
             if ($p->isDirty('kamar_id') && ! $p->isDirty('nomor_kasur')) {
                 $p->nomor_kasur = null;
+            }
+            if ($p->isDirty('kamar_id') && $p->exists) {
+                $p->jabatan_kamar = null;
             }
         });
     }

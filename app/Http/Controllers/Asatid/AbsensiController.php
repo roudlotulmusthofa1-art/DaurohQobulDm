@@ -32,6 +32,8 @@ class AbsensiController extends Controller
     /** Halaman pilihan: Absensi Kelas / Absensi Kegiatan + riwayat */
     public function index()
     {
+        Absensi::tutupYangLewat(); // absensi kegiatan yang lewat batas alfa ditutup otomatis
+
         $riwayat = Absensi::with(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan'])
             ->withCount('detail')
             ->where('user_id', Auth::id())
@@ -136,6 +138,8 @@ class AbsensiController extends Controller
 
     public function kegiatan()
     {
+        Absensi::tutupYangLewat();
+
         // Absensi kegiatan sekarang dibuat & diaktifkan admin (Admin > Akademik > Absensi Kegiatan)
         return $this->tampil('asatid.absensi.kegiatan', [
             'kegiatanAdmin' => $this->kegiatanAdmin(),
@@ -176,6 +180,10 @@ class AbsensiController extends Controller
     {
         $this->pastikanBolehCatat($absensi);
 
+        if ($absensi->tutupKalauLewat()) {
+            return redirect()->route('asatid.absensi.show', $absensi)
+                ->with('sukses', 'Waktu absensi sudah lewat batas alfa. Absensi ditutup otomatis, peserta yang belum tercatat dihitung Alfa.');
+        }
         if ($absensi->selesai_at) {
             return redirect()->route('asatid.absensi.show', $absensi);
         }
@@ -203,6 +211,9 @@ class AbsensiController extends Controller
      */
     public function simpanCatatan(Request $request, Absensi $absensi): JsonResponse
     {
+        if ($absensi->tutupKalauLewat()) {
+            return response()->json(['message' => 'Waktu absensi sudah lewat batas alfa. Absensi ditutup otomatis.', 'ditutup' => true], 422);
+        }
         abort_if($absensi->selesai_at, 422, 'Absensi kegiatan ini sudah ditutup.');
         abort_if($absensi->dari_admin && ! $absensi->aktif, 422, 'Absensi kegiatan ini sedang dinonaktifkan admin.');
         $this->pastikanBolehCatat($absensi);
@@ -261,6 +272,8 @@ class AbsensiController extends Controller
         abort_unless($absensi->jenis === Absensi::KEGIATAN, 404);
         abort_unless((int) $absensi->user_id === (int) Auth::id() || $absensi->dari_admin, 404);
 
+        $absensi->tutupKalauLewat();
+
         $detail = $absensi->detail()->with('pencatat:id,name')->get(['pendaftaran_siswa_id', 'status', 'waktu', 'dicatat_oleh'])
             ->mapWithKeys(fn ($d) => [$d->pendaftaran_siswa_id => [
                 'status' => $d->status,
@@ -271,6 +284,7 @@ class AbsensiController extends Controller
         return response()->json([
             'tercatat' => $detail,
             'ditutup' => (bool) $absensi->selesai_at,
+            'lewat_batas' => (bool) $absensi->selesai_at && $absensi->lewatBatasAlfa(), // ditutup karena waktunya habis
             'aktif' => (bool) $absensi->aktif,
         ]);
     }
@@ -280,23 +294,7 @@ class AbsensiController extends Controller
     {
         $this->pastikanMilik($absensi, Absensi::KEGIATAN);
 
-        DB::transaction(function () use ($absensi) {
-            $sudah = $absensi->detail()->pluck('pendaftaran_siswa_id');
-            $sekarang = now();
-
-            $baru = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)
-                ->whereNotIn('id', $sudah)->pluck('id')
-                ->map(fn ($id) => [
-                    'absensi_id' => $absensi->id, 'pendaftaran_siswa_id' => $id, 'status' => 'alfa',
-                    'created_at' => $sekarang, 'updated_at' => $sekarang,
-                ]);
-
-            foreach ($baru->chunk(500) as $potong) {
-                AbsensiDetail::insert($potong->all());
-            }
-
-            $absensi->update(['selesai_at' => $sekarang]);
-        });
+        $absensi->tutup();
 
         return redirect()->route('asatid.absensi.show', $absensi)->with('sukses', 'Absensi kegiatan ditutup dan tersimpan.');
     }
