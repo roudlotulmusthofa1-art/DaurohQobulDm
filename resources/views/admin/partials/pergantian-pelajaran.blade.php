@@ -3,10 +3,11 @@
     Jadwal hari ini per jam ke: Sekarang / Berikutnya / Nanti / Selesai, status tiap guru (absen, tanda dikirim, dilihat),
     tombol "Kirim tanda ke semua guru jam ini" dan "Tanda" per guru. Diperbarui sendiri tiap 30 detik.
     Data: Admin\PergantianPelajaranController::susun(). Skrip Vue: partials/pergantian-pelajaran-skrip (dimuat terpisah,
-    karena di dasbor HP panel ini berada di dalam aplikasi Vue lain -> dibungkus v-pre supaya tidak ikut dibaca).
+    karena panel ini berada di dalam aplikasi Vue dasbor -> skrip melepas panel sebelum Vue dasbor berjalan lalu memasangnya
+    kembali. Jangan pakai v-pre: browser HP lama menolak atribut @click/:class yang disalin v-pre, dasbor jadi kosong).
     Vue: #pergantian-pelajaran.
 --}}
-<div v-pre>
+<div id="tempat-pergantian-pelajaran">
 <section id="pergantian-pelajaran" v-cloak class="{{ $kelasKartu ?? 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-sm' }} p-4 sm:p-6">
     <div class="flex items-center justify-between gap-3">
         <div class="min-w-0">

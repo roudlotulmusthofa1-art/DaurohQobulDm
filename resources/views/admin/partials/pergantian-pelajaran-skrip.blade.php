@@ -1,8 +1,13 @@
 {{-- Skrip Vue untuk admin/partials/pergantian-pelajaran (lihat keterangan di sana). --}}
 <script>
+(() => {
+// Lepas panel dulu (sebelum Vue dasbor berjalan), supaya Vue dasbor tidak membaca @click/:class di dalamnya.
+const el = document.getElementById('pergantian-pelajaran');
+el?.remove();
 document.addEventListener('DOMContentLoaded', () => {
-    const el = document.getElementById('pergantian-pelajaran');
     if (!el) return;
+    // Pasang kembali setelah Vue dasbor selesai, lalu jalankan Vue panel ini
+    document.getElementById('tempat-pergantian-pelajaran')?.appendChild(el);
     const DATA = @json(route('admin.pergantian.data'));
     const TANDA = @json(route('admin.pergantian.tanda'));
     const CSRF = @json(csrf_token());
@@ -62,4 +67,5 @@ document.addEventListener('DOMContentLoaded', () => {
         },
     }).mount(el);
 });
+})();
 </script>
