@@ -48,7 +48,7 @@ class LaporanAbsensiController extends Controller
         $tabelPeserta = new LengthAwarePaginator($tersaring->forPage($halaman, 15)->values(), $tersaring->count(), 15, $halaman,
             ['path' => $request->url(), 'pageName' => 'hal', 'query' => $request->except('hal')]);
 
-        $daftarSesi = (clone $sesi)->with(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan', 'pengabsen'])
+        $daftarSesi = (clone $sesi)->with(['kelas', 'pelajaran', 'kitab', 'waktuPelajaran', 'kegiatan', 'pengabsen'])
             ->withCount('detail')
             ->withCount(['detail as hadir_count' => fn ($q) => $q->whereIn('status', ['hadir', 'terlambat'])])
             ->terbaru()
@@ -78,7 +78,7 @@ class LaporanAbsensiController extends Controller
 
     public function show(Absensi $absensi)
     {
-        $absensi->load(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan', 'pengabsen', 'detail.siswa.kelasMaster']);
+        $absensi->load(['kelas', 'pelajaran', 'kitab', 'waktuPelajaran', 'kegiatan', 'pengabsen', 'detail.siswa.kelasMaster']);
         $detail = $absensi->detail->sortBy(fn ($d) => $d->siswa?->nama_lengkap)->values();
         $hitung = collect(Absensi::STATUS)->map(fn ($s, $k) => $detail->where('status', $k)->count())->all();
 

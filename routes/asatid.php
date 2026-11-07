@@ -22,9 +22,15 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     Route::get('/ganti-password', [AsatidDashboardController::class, 'gantiPassword'])->name('ganti-password');
     Route::post('/ganti-password', [AsatidDashboardController::class, 'simpanGantiPassword'])->middleware('throttle:10,1')->name('ganti-password.simpan');
     Route::get('/jadwal', [AsatidDashboardController::class, 'jadwal'])->name('jadwal');
+    Route::get('/jadwal/pengingat', [AsatidDashboardController::class, 'jadwalPengingat'])->name('jadwal.pengingat'); // pengingat ganti pelajaran
+    Route::get('/tanda-pelajaran', [AsatidDashboardController::class, 'cekTanda'])->name('tanda.cek'); // tanda dari admin (tiap 20 detik)
+    Route::post('/tanda-pelajaran/{id}/lihat', [AsatidDashboardController::class, 'lihatTanda'])->whereNumber('id')->name('tanda.lihat');
     // Penilaian: menu + Nilai Harian/Ujian Lisan/Ujian (menyusul) + Catatan (pencapaian / pelanggaran)
     Route::controller(PenilaianController::class)->prefix('penilaian')->group(function () {
         Route::get('/', 'index')->name('penilaian');
+        Route::get('/harian', 'harian')->name('penilaian.harian');
+        Route::get('/harian/peserta', 'pesertaHarian')->name('penilaian.harian.peserta');
+        Route::post('/harian', 'simpanHarian')->middleware('throttle:120,1')->name('penilaian.harian.simpan');
         Route::get('/kelas/{bagian}', 'kelas')->whereIn('bagian', PenilaianController::BAGIAN_KELAS)->name('penilaian.kelas');
         Route::get('/catatan', 'catatan')->name('penilaian.catatan');
         Route::post('/catatan', 'simpan')->middleware('throttle:60,1')->name('penilaian.catatan.simpan');

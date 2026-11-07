@@ -19,7 +19,8 @@ class TeksTampilan
     /** kode halaman => [nama halaman, awalan path file (relatif dari folder proyek)] */
     public const HALAMAN = [
         'admin-menu'      => ['Admin — Menu sidebar & header', ['resources/views/layouts/admin', 'app/Support/MenuAdmin.php', 'app/Providers/AppServiceProvider.php']],
-        'admin-dasbor'    => ['Admin — Dasbor', ['resources/views/admin/dashboard']],
+        'admin-dasbor'    => ['Admin — Dasbor', ['resources/views/admin/dashboard', 'resources/views/admin/partials/pergantian-pelajaran']],
+        'admin-penilaian' => ['Admin — Penilaian', ['resources/views/admin/penilaian/', 'app/Http/Controllers/Admin/PenilaianController.php', 'app/Http/Controllers/Admin/PergantianPelajaranController.php']],
         'admin-santri'    => ['Admin — Data Santri & Pendaftaran', ['resources/views/admin/datasantri', 'resources/views/admin/pendaftaran/', 'resources/views/admin/santri-kartu-qr', 'resources/views/partials/detail-santri', 'resources/views/partials/rincian-peserta']],
         'admin-asatid'    => ['Admin — Data Asatid', ['resources/views/admin/asatid/']],
         'admin-admin'     => ['Admin — Data Admin', ['resources/views/admin/data-admin/']],
@@ -33,9 +34,10 @@ class TeksTampilan
         'admin-atur'      => ['Admin — Pengaturan', ['resources/views/admin/pengaturan/']],
         'admin-lain'      => ['Admin — Lainnya', ['resources/views/admin/']],
         'daftar'          => ['Formulir Pendaftaran', ['resources/views/psb/', 'resources/views/pendaftaran-admin/', 'resources/views/asatid/daftar', 'resources/views/asatid/sukses']],
-        'asatid-kerangka' => ['Asatid — Header & kerangka', ['resources/views/layouts/asatid']],
+        'asatid-kerangka' => ['Asatid — Header & kerangka', ['resources/views/layouts/asatid', 'resources/views/asatid/partials/pengingat-pelajaran']],
         'asatid-dasbor'   => ['Asatid — Dasbor', ['resources/views/asatid/dashboard']],
         'asatid-absensi'  => ['Asatid — Absensi', ['resources/views/asatid/absensi/']],
+        'asatid-penilaian' => ['Asatid — Penilaian', ['resources/views/asatid/penilaian/', 'app/Http/Controllers/Asatid/PenilaianController.php']],
         'asatid-lain'     => ['Asatid — Halaman lain (jadwal, peserta, penilaian, profil, pesan)', ['resources/views/asatid/']],
         'siswa-kerangka'  => ['Peserta — Header & kerangka', ['resources/views/layouts/siswa']],
         'siswa-dasbor'    => ['Peserta — Dasbor', ['resources/views/siswa/dashboard']],
@@ -101,6 +103,7 @@ class TeksTampilan
     {
         $statusAbsensi = array_column(\App\Models\Absensi::STATUS, 0);
         $hari = array_values(\App\Models\JadwalMengajar::HARI);
+        $aspekNilai = array_column(\App\Models\NilaiHarian::ASPEK, 0); // 6 penilaian Nilai Harian
         $siswa = \App\Models\PendaftaranSiswa::class;
         $dataPeserta = [
             'PendaftaranSiswa::SYARAT' => array_values($siswa::SYARAT),
@@ -118,6 +121,8 @@ class TeksTampilan
             'asatid-absensi' => ['Absensi::STATUS' => $statusAbsensi],
             'asatid-lain'    => ['Absensi::STATUS' => $statusAbsensi, 'JadwalMengajar::HARI' => $hari],
             'admin-akademik' => ['JadwalMengajar::HARI' => $hari],
+            'admin-penilaian'  => ['NilaiHarian::ASPEK' => $aspekNilai],
+            'asatid-penilaian' => ['NilaiHarian::ASPEK' => $aspekNilai],
             'admin-atur'     => [
                 'PengaturanController::TAB' => array_column(\App\Http\Controllers\Admin\PengaturanController::TAB, 'label'),
                 'NotifikasiAdmin::JENIS' => array_merge(...array_map(fn ($j) => [$j['judul'], $j['keterangan']], array_values(NotifikasiAdmin::JENIS))),

@@ -5,8 +5,11 @@ namespace App\Http\Controllers\Asatid;
 use App\Http\Controllers\Controller;
 use App\Models\BulanAjaran;
 use App\Models\CatatanSiswa;
+use App\Models\Kelas;
+use App\Models\NilaiHarian;
 use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
+use App\Support\DaftarKitab;
 use App\Support\DataCatatan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,14 +20,16 @@ use Illuminate\Validation\Rule;
 /**
  * Dasbor asatid > Penilaian.
  * - Menu: Nilai Harian, Ujian Lisan, Ujian (alur menyusul), Catatan
+ * - Nilai Harian: pilih kelas -> kitab -> santri -> isi 6 penilaian (batasnya di NilaiHarian::ASPEK).
+ *   Satu santri + kitab + tanggal = satu nilai (dinilai lagi = diperbarui). Masuk ke Admin > Penilaian > Kelas & Pelajaran.
  * - Catatan: asatid memilih santri, jenis (Pencapaian / Pelanggaran), menulis catatan, lalu tanggal & jam
  *   (otomatis hari ini & jam sekarang, bisa diubah). Langsung masuk ke Admin > Penilaian > Catatan.
  * Asatid hanya melihat & menghapus catatannya sendiri.
  */
 class PenilaianController extends Controller
 {
-    /** Halaman Nilai Harian / Ujian Lisan / Ujian (sementara "segera hadir") */
-    public const BAGIAN_KELAS = ['harian', 'lisan', 'ujian'];
+    /** Halaman Ujian Lisan / Ujian (sementara "segera hadir"). Nilai Harian punya halaman sendiri. */
+    public const BAGIAN_KELAS = ['lisan', 'ujian'];
 
     /** GET /asatid/penilaian — menu */
     public function index()
@@ -32,6 +37,7 @@ class PenilaianController extends Controller
         return $this->tampil('asatid.penilaian.index', [
             'bulan'  => BulanAjaran::aktif(),
             'jumlah' => CatatanSiswa::where('dicatat_oleh', Auth::id())->count(),
+            'jumlahNilai' => NilaiHarian::where('dinilai_oleh', Auth::id())->count(),
         ]);
     }
 
@@ -41,10 +47,99 @@ class PenilaianController extends Controller
         return $this->tampil('asatid.penilaian.kelas', ['bagian' => $bagian]);
     }
 
-    /** GET /asatid/penilaian/catatan */
-    public function catatan()
+    /* =====================================================================
+     |  Nilai Harian
+     * ===================================================================== */
+
+    /**
+     * GET /asatid/penilaian/harian
+     * Dari tombol "Nilai Harian" di absensi kelas: ?kelas_id=&siswa_id=&kitab_id=&tanggal= (form langsung terisi)
+     */
+    public function harian(Request $request)
+    {
+        return $this->tampil('asatid.penilaian.harian', [
+            'kelasList' => Kelas::where('is_active', true)->ordered()
+                ->withCount(['santri' => fn ($q) => $q->where('status', PendaftaranSiswa::DITERIMA)])->get(['id', 'nama', 'kode']),
+            'kitabList' => DaftarKitab::pilihan(),
+            'terjadwal' => DaftarKitab::terjadwal(), // kitab yang terjadwal di tiap kelas (ditaruh paling atas)
+            'aspek'     => NilaiHarian::daftarAspek(),
+            'awal'      => $request->only(['kelas_id', 'siswa_id', 'kitab_id', 'bidang_ilmu_id', 'tanggal']),
+        ]);
+    }
+
+    /** GET /asatid/penilaian/harian/peserta — JSON: santri di kelas itu + nilainya pada kitab & tanggal itu (kalau sudah ada) */
+    public function pesertaHarian(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'kelas_id' => ['required', 'integer', 'exists:kelas,id'],
+            'kitab_id' => ['required', 'integer', 'exists:kitab,id'],
+            'tanggal'  => ['required', 'date'],
+        ]);
+
+        $nilai = NilaiHarian::with('penilai:id,name')
+            ->where('kitab_id', $data['kitab_id'])->whereDate('tanggal', $data['tanggal'])
+            ->get()->keyBy('pendaftaran_siswa_id');
+
+        $peserta = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)
+            ->where('kelas_id', $data['kelas_id'])
+            ->orderBy('nama_lengkap')->get()
+            ->map(function ($s) use ($nilai) {
+                $n = $nilai[$s->id] ?? null;
+
+                return [
+                    'id'    => $s->id,
+                    'nama'  => $s->nama_lengkap,
+                    'arab'  => $s->nama_lengkap_arab,
+                    'nomor' => $s->nomor_pendaftaran,
+                    'foto'  => $s->foto_url,
+                    'nilai' => $n ? collect(NilaiHarian::ASPEK)->mapWithKeys(fn ($a, $k) => [$k => (int) $n->{$k}])->all() : null,
+                    'total' => $n?->total,
+                    'oleh'  => $n?->penilai?->name,
+                ];
+            });
+
+        return response()->json(['peserta' => $peserta]);
+    }
+
+    /** POST /asatid/penilaian/harian — simpan / perbarui nilai satu santri (nilai lebih dari batas ditolak) */
+    public function simpanHarian(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'kelas_id' => ['required', 'integer', 'exists:kelas,id'],
+            'kitab_id' => ['required', 'integer', 'exists:kitab,id'],
+            'tanggal'  => ['required', 'date'],
+            'siswa_id' => ['required', 'integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
+        ] + NilaiHarian::aturan(), [
+            'siswa_id.exists' => __('Santri tidak ditemukan / belum diterima.'),
+            '*.max'           => __('Nilai ":attribute" tidak boleh lebih dari :max.'),
+        ], collect(NilaiHarian::ASPEK)->mapWithKeys(fn ($a, $k) => [$k => __($a[0])])->all());
+
+        $nilai = NilaiHarian::updateOrCreate(
+            ['pendaftaran_siswa_id' => $data['siswa_id'], 'kitab_id' => $data['kitab_id'], 'tanggal' => $data['tanggal']],
+            collect($data)->only(array_keys(NilaiHarian::ASPEK))->all() + [
+                'kelas_id'     => $data['kelas_id'],
+                'dinilai_oleh' => Auth::id(),
+            ],
+        );
+
+        return response()->json([
+            'message' => __('Nilai harian :nama tersimpan: :total dari 100.', [
+                'nama' => $nilai->siswa?->nama_lengkap, 'total' => $nilai->total,
+            ]),
+            'total' => $nilai->total,
+            'oleh'  => Auth::user()->name,
+        ]);
+    }
+
+    /* =====================================================================
+     |  Catatan
+     * ===================================================================== */
+
+    /** GET /asatid/penilaian/catatan  (?siswa=ID dari tombol "Catatan" di absensi kelas: santri itu langsung terpilih) */
+    public function catatan(Request $request)
     {
         return $this->tampil('asatid.penilaian.catatan', [
+            'awalSiswa' => (int) $request->query('siswa') ?: null,
             'siswa'   => DataCatatan::daftarSiswa(),
             'riwayat' => CatatanSiswa::with(['siswa.kelasMaster', 'pencatat:id,name'])
                 ->where('dicatat_oleh', Auth::id())

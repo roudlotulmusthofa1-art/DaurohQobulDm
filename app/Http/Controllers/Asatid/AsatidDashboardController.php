@@ -9,7 +9,9 @@ use App\Models\PendaftaranSiswa;
 use App\Models\BulanAjaran;
 use App\Models\JadwalMengajar;
 use App\Models\PesanAsatid;
+use App\Models\TandaPelajaran;
 use App\Models\WaktuPelajaran;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -92,6 +94,73 @@ class AsatidDashboardController extends Controller
             'jadwal'    => self::jadwalSaya()->load(['kelas', 'kitab.bidangIlmu', 'waktu']),
             'jamList'   => WaktuPelajaran::where('is_active', true)->ordered()->get(),
         ]);
+    }
+
+    /** GET /asatid/jadwal/pengingat — JSON jadwal seminggu untuk pengingat ganti pelajaran (diperbarui tiap 30 menit) */
+    public function jadwalPengingat(): JsonResponse
+    {
+        return response()->json(['jadwal' => self::dataPengingat()]);
+    }
+
+    /** GET /asatid/tanda-pelajaran — tanda ganti pelajaran dari admin yang belum dilihat (dicek tiap 20 detik) */
+    public function cekTanda(): JsonResponse
+    {
+        $t = TandaPelajaran::with(['jadwal.kelas:id,nama', 'jadwal.kitab:id,nama', 'jadwal.waktu'])
+            ->where('user_id', Auth::id())
+            ->whereDate('tanggal', now('Asia/Jakarta')->toDateString())
+            ->whereNull('dilihat_at')
+            ->latest('dikirim_at')->first();
+
+        if (! $t || ! $t->jadwal) {
+            return response()->json(['tanda' => null]);
+        }
+        $j = $t->jadwal;
+
+        return response()->json(['tanda' => [
+            'id'      => $t->id,
+            'kunci'   => $t->id . ':' . $t->dikirim_at?->timestamp, // dikirim ulang = muncul lagi
+            'jam'     => $j->waktu?->nama,
+            'mulai'   => $j->waktu?->jam_mulai,
+            'selesai' => $j->waktu?->jam_selesai,
+            'kelas'   => $j->kelas?->nama,
+            'kitab'   => $j->kitab?->nama,
+            'absen'   => route('asatid.absensi.kelas', array_filter([
+                'kelas_id' => $j->kelas_id, 'kitab_id' => $j->kitab_id, 'waktu_pelajaran_id' => $j->waktu_pelajaran_id,
+            ])),
+        ]]);
+    }
+
+    /** POST /asatid/tanda-pelajaran/{id}/lihat — guru sudah melihat tanda (admin melihat "Dilihat guru") */
+    public function lihatTanda(string $id): JsonResponse
+    {
+        // Admin yang sedang "Masuk sebagai" guru tidak mengubah status
+        if (! \App\Support\MasukSebagai::aktif()) {
+            TandaPelajaran::where('user_id', Auth::id())->whereKey($id)->whereNull('dilihat_at')->update(['dilihat_at' => now()]);
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Jadwal mengajar guru yang login (bulan aktif) untuk pengingat ganti pelajaran
+     * (partials asatid/partials/pengingat-pelajaran): hari, jam mulai/selesai, kelas, kitab, alamat "Absen sekarang".
+     */
+    public static function dataPengingat(): array
+    {
+        return self::jadwalSaya()->load(['kelas:id,nama', 'kitab:id,nama', 'waktu'])
+            ->filter(fn ($j) => $j->waktu?->jam_mulai)
+            ->map(fn ($j) => [
+                'id'      => $j->id,
+                'hari'    => $j->hari, // 1 = Senin ... 7 = Ahad
+                'mulai'   => $j->waktu->jam_mulai,
+                'selesai' => $j->waktu->jam_selesai,
+                'jam'     => $j->waktu->nama,
+                'kelas'   => $j->kelas?->nama,
+                'kitab'   => $j->kitab?->nama,
+                'absen'   => route('asatid.absensi.kelas', array_filter([
+                    'kelas_id' => $j->kelas_id, 'kitab_id' => $j->kitab_id, 'waktu_pelajaran_id' => $j->waktu_pelajaran_id,
+                ])),
+            ])->values()->all();
     }
 
     /** Pesan dari Admin (kotak masuk). Pesan yang tampil otomatis ditandai sudah dibaca. */
@@ -220,6 +289,39 @@ class AsatidDashboardController extends Controller
             'ikon'  => 'M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5',
         ];
 
+        // Pelajaran yang sedang berlangsung / berikutnya hari ini (pengingat ganti pelajaran)
+        if ($p = self::pelajaranSekarang($jadwal)) {
+            $j = $p['jadwal'];
+            $judul = e(trim(($j->waktu?->nama ?? '') . ' · ' . ($j->kelas?->nama ?? '-') . ' · ' . ($j->kitab?->nama ?? '-'), ' ·'));
+            $items[] = [
+                'kunci' => 'pelajaran:' . now('Asia/Jakarta')->toDateString() . ':' . $j->id . ':' . ($p['sekarang'] ? 'sekarang' : 'berikut'),
+                'teks'  => ($p['sekarang'] ? __('Sekarang') : __('Berikutnya')) . ': ' . "<b>{$judul}</b>",
+                'ket'   => $p['sekarang']
+                    ? __('Pukul') . ' ' . $j->waktu->jam_mulai . ($j->waktu->jam_selesai ? '–' . $j->waktu->jam_selesai : '') . ' · ' . __('ketuk untuk absen')
+                    : __('Mulai pukul') . ' ' . $j->waktu->jam_mulai,
+                'url'   => route('asatid.absensi.kelas', array_filter(['kelas_id' => $j->kelas_id, 'kitab_id' => $j->kitab_id, 'waktu_pelajaran_id' => $j->waktu_pelajaran_id])),
+                'warna' => 'bg-amber-50 text-amber-600 ring-amber-100',
+                'ikon'  => 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0',
+            ];
+        }
+
         return $items;
+    }
+
+    /** Pelajaran hari ini (jam WIB) yang sedang berlangsung, atau kalau tidak ada: yang berikutnya. Null = tidak ada lagi. */
+    private static function pelajaranSekarang($jadwal): ?array
+    {
+        $sekarang = now('Asia/Jakarta');
+        $jam = $sekarang->format('H:i');
+        $hariIni = $jadwal->where('hari', $sekarang->dayOfWeekIso)->load(['kelas:id,nama', 'kitab:id,nama', 'waktu'])
+            ->filter(fn ($j) => $j->waktu?->jam_mulai)->sortBy(fn ($j) => $j->waktu->jam_mulai)->values();
+
+        $jalan = $hariIni->first(fn ($j) => $j->waktu->jam_mulai <= $jam && $jam < ($j->waktu->jam_selesai ?: '23:59'));
+        if ($jalan) {
+            return ['jadwal' => $jalan, 'sekarang' => true];
+        }
+        $berikut = $hariIni->first(fn ($j) => $j->waktu->jam_mulai > $jam);
+
+        return $berikut ? ['jadwal' => $berikut, 'sekarang' => false] : null;
     }
 }

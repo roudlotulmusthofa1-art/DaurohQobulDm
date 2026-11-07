@@ -205,6 +205,8 @@ $lonceng = \App\Support\StatusNotifikasi::terapkan($notif ?? []);
     @include('partials.status-koneksi')
     {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}
     @include('partials.notifikasi')
+    {{-- Pengingat ganti pelajaran: 5 menit sebelum & saat jam pelajaran mulai (menurut jadwal mengajar) --}}
+    @include('asatid.partials.pengingat-pelajaran')
     @stack('scripts')
 </body>
 

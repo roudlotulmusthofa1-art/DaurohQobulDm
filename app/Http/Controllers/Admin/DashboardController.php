@@ -79,15 +79,8 @@ class DashboardController extends Controller
         $totalAbsen = $absen->sum();
         $hadir = ($absen['hadir'] ?? 0) + ($absen['terlambat'] ?? 0);
 
-        // ----- Jadwal mengajar hari ini (bulan ajaran aktif) -----
+        // Jadwal mengajar hari ini: panel Pergantian Pelajaran (Admin\PergantianPelajaranController::susun)
         $bulan = BulanAjaran::aktif();
-        $jadwalHariIni = $bulan
-            ? JadwalMengajar::with(['kelas', 'kitab', 'waktu', 'ustadz:id,name'])
-                ->where('bulan_ajaran_id', $bulan->id)->where('hari', $hariIni->dayOfWeekIso)->get()
-                ->sortBy(fn ($j) => [$j->waktu?->urutan ?? 99, $j->kelas?->urutan ?? 99])->values()
-            : collect();
-        $namaUstadz = PendaftaranAsatid::whereNotNull('user_id')->pluck('nama_lengkap', 'user_id');
-        $arabUstadz = PendaftaranAsatid::whereNotNull('user_id')->pluck('nama_lengkap_arab', 'user_id'); // nama Arab ustadz
 
         // ----- Kelas & kamar -----
         $diterima = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA);
@@ -114,11 +107,8 @@ class DashboardController extends Controller
                 'belum_kamar' => (clone $diterima)->whereNull('kamar_id')->count(),
             ],
             'bulan' => $bulan,
-            'jadwalHariIni' => $jadwalHariIni,
-            'namaUstadz' => $namaUstadz,
-            'arabUstadz' => $arabUstadz,
             'pendaftarBaru' => PendaftaranSiswa::latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status', 'berkas_foto', 'created_at']),
-            'absensiTerbaru' => Absensi::with(['kelas', 'pelajaran', 'kegiatan', 'pengabsen:id,name'])->withCount('detail')->latest('tanggal')->latest('id')->take(5)->get(),
+            'absensiTerbaru' => Absensi::with(['kelas', 'pelajaran', 'kitab', 'kegiatan', 'pengabsen:id,name'])->withCount('detail')->latest('tanggal')->latest('id')->take(5)->get(),
             'kelas' => $kelas,
             'kamar' => $kamar,
             'tindakan' => NotifikasiAdmin::kumpulkan(),

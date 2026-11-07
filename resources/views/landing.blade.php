@@ -53,7 +53,9 @@
             </p>
 
             <p class="mt-2 text-teal-50/90">
-                {{ __('Bagi para pelajar dari wilayah') }} <span class="text-teal-50/90 font-bold">{{ __('Asia Tenggara') }}</span> {{ __('yang ingin melanjutkan pendidikannya') }} <br> {{ __('di Darul Musthafa, Tarim, Hadramaut, Yaman.') }}
+                {{ __('Bagi para pelajar dari wilayah') }} <span class="text-teal-50/90 font-bold">{{ __('Asia
+                    Tenggara') }}</span> {{ __('yang ingin melanjutkan pendidikannya') }} <br> {{ __('di Darul Musthafa,
+                Tarim, Hadramaut, Yaman.') }}
             </p>
 
             {{-- Tombol --}}
@@ -66,7 +68,7 @@
 
                 <a href="#tentang"
                     class="card w-full sm:w-auto px-7 py-3 rounded-lg border border-white/60 font-semibold hover:bg-white/20 transition-colors">
-                    {{ __('Informasi Pondok') }}
+                    {{ __('Informasi Dauroh') }}
                 </a>
 
                 {{-- Pop-up pesan ke admin: partials/hubungi-admin.blade.php --}}
@@ -125,14 +127,16 @@
                 ♡ {{ __('TENTANG KAMI') }}
             </span>
             <h2 class="mt-5 text-4xl sm:text-5xl font-extrabold">
-                <span class="text-teal-700">{{ __('Dauroh Qobul') }} <i class="mdi mdi-alpha-q-box-outline:"></i></span><br>
+                <span class="text-teal-700">{{ __('Dauroh Qobul') }} <i
+                        class="mdi mdi-alpha-q-box-outline:"></i></span><br>
                 <span class="text-amber-500">{{ __('Darul Muthofa Tarim') }}</span>
             </h2>
 
             <p class="mt-6 text-slate-600 leading-relaxed">
                 {{ __('Dauroh Qobul') }} <strong class="text-slate-800">{{ __('Darul MUsthofa Tarim') }}</strong>
                 {{ __('adalah pondok pesantren kilat, yang menenerima dan mendidik para pelajar') }}
-                <strong class="text-slate-800">{{ __('Asia tenggara') }}</strong> {{ __('yang ingin melanjutkan belajarnya di') }}
+                <strong class="text-slate-800">{{ __('Asia tenggara') }}</strong> {{ __('yang ingin melanjutkan
+                belajarnya di') }}
                 <strong class="text-slate-800">{{ __('Darul Musthofa Tarim , hadromaut , yaman') }}</strong>
             </p>
 
@@ -145,7 +149,9 @@
                     <h3 class="font-bold text-lg">{{ __('Visi Kami') }}</h3>
                 </div>
                 <p class="text-slate-600 italic border-l-2 border-teal-200 pl-4">
-                    "{{ __('Memilih para pelajar terbaik yang layak untuk belajar di Darul Musthofa, dan yang diharapkan dapat memberikan manfaat secara umum maupun khusus bagi umat setelah mereka kembali ke negeri masing-masing.') }}"
+                    "{{ __('Memilih para pelajar terbaik yang layak untuk belajar di Darul Musthofa, dan yang diharapkan
+                    dapat memberikan manfaat secara umum maupun khusus bagi umat setelah mereka kembali ke negeri
+                    masing-masing.') }}"
                 </p>
             </div>
 
@@ -157,8 +163,13 @@
                     <h3 class="font-bold text-lg">{{ __('Misi Kami') }}</h3>
                 </div>
                 <ul class="space-y-2 text-slate-600">
-                    <li>• {{ __('Tujuan ini diwujudkan dengan menyediakan suasana ilmiah dan ruhani Darul Musthofa bagi para calon pelajar sebelum mereka datang ke Tarim. Dengan demikian, calon pelajar dapat menguji dirinya sendiri; melihat dan memperlihatkan sejauh mana komitmennya terhadap adab, tata tertib, serta kesungguhannya dalam menuntut ilmu.') }}</li>
-                    <li>• {{ __('Melalui proses ini, pihak pengelola dapat melakukan seleksi dengan lebih baik terhadap para pelajar yang benar-benar layak dan memenuhi syarat untuk melanjutkan studi di Darul Musthofa.') }}</li>
+                    <li>• {{ __('Tujuan ini diwujudkan dengan menyediakan suasana ilmiah dan ruhani Darul Musthofa bagi
+                        para calon pelajar sebelum mereka datang ke Tarim. Dengan demikian, calon pelajar dapat menguji
+                        dirinya sendiri; melihat dan memperlihatkan sejauh mana komitmennya terhadap adab, tata tertib,
+                        serta kesungguhannya dalam menuntut ilmu.') }}</li>
+                    <li>• {{ __('Melalui proses ini, pihak pengelola dapat melakukan seleksi dengan lebih baik terhadap
+                        para pelajar yang benar-benar layak dan memenuhi syarat untuk melanjutkan studi di Darul
+                        Musthofa.') }}</li>
                 </ul>
             </div>
 
@@ -190,7 +201,7 @@
             </div>
 
             <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                <a href="#kurikulum"
+                <a href="#program-dauroh"
                     class="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-teal-700 text-white font-semibold hover:bg-teal-800 transition-colors">
                     <x-ribath-icon name="book-open" class="w-5 h-5" /> {{ __('Pelajari Program') }}
                 </a>
@@ -221,7 +232,11 @@
                     <span class="text-emerald-400">{{ __('Ujian') }}</span> {{ __('Penerimaan') }}
                 </h2>
                 <p class="mt-4 text-slate-400">
-                    {{ __('Darul Musthofa Tarim Menetapkan Bahwa Setiap') }} <span class="text-[#95c92e] font-semibold">{{ __('PELAJAR ASIA TENGGARA') }}</span> {{ __('Yang Ingin Melanjutkan Studi Di Darul Musthofa Wajib Mengikuti Program Dauroh Persiapan Dan Ujian Penerimaan (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma\'had Yang Telah Ditunjuk Di Indonesia.') }}
+                    {{ __('Darul Musthofa Tarim Menetapkan Bahwa Setiap') }} <span
+                        class="text-[#95c92e] font-semibold">{{ __('PELAJAR ASIA TENGGARA') }}</span> {{ __('Yang Ingin
+                    Melanjutkan Studi Di Darul Musthofa Wajib Mengikuti Program Dauroh Persiapan Dan Ujian Penerimaan
+                    (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma\'had Yang Telah Ditunjuk Di Indonesia.')
+                    }}
                 </p>
             </div>
 
@@ -264,8 +279,11 @@
                 </h2>
                 <p class="mt-4 leading-relaxed ">
                     <strong class="text-[#190644]">{{ __('PETUNJUK UMUM') }}</strong>
-                    <span class="text-[#866300]">{{ __('Disarankan Mengisi Formulir Pendaftaran Menggunakan Komputer Atau Laptop Agar Proses Pengisian Lebih Mudah Dan Nyaman.') }}</span>
-                    <span class="text-[#067002]">{{ __('Pastikan Seluruh Dokumen Berikut Telah Disiapkan Dan Tersimpan Dengan Baik Di Galeri Hp Atau Pada Komputer/Laptop Anda Sebelum Memulai Proses Pengisian Formulir Pendaftaran.') }}</span>
+                    <span class="text-[#866300]">{{ __('Disarankan Mengisi Formulir Pendaftaran Menggunakan Komputer
+                        Atau Laptop Agar Proses Pengisian Lebih Mudah Dan Nyaman.') }}</span>
+                    <span class="text-[#067002]">{{ __('Pastikan Seluruh Dokumen Berikut Telah Disiapkan Dan Tersimpan
+                        Dengan Baik Di Galeri Hp Atau Pada Komputer/Laptop Anda Sebelum Memulai Proses Pengisian
+                        Formulir Pendaftaran.') }}</span>
                 </p>
             </div>
 
@@ -374,7 +392,7 @@
                     class="rounded-2xl overflow-hidden min-h-80 bg-[#fafdfb] border border-[#44774455] shadow-xl transition-shadow p-2">
                     <iframe class=" w-full h-80 rounded-lg border border-[#2244551c]" loading="lazy"
                         referrerpolicy="no-referrer-when-downgrade"
-                        src="https://www.google.com/maps?q=Jl.+Ibu+Pertiwi,+Ps.+Kliwon,+Kota+Surakarta&output=embed">
+                        src="https://www.google.com/maps?q=93GM%2BV56,+Jl.+Gedangan,+Gedangan,+Salam,+Kec.+Karangpandan,+Kabupaten+Karanganyar,+Jawa+Tengah+57791&output=embed">
                     </iframe>
                 </div>
 
@@ -406,7 +424,7 @@
                                 <x-ribath-icon name="envelope" class="w-5 h-5 text-teal-700 shrink-0 mt-0.5" />
                                 <div>
                                     <p class="font-semibold text-slate-800">Email</p>
-                                    <p class="text-teal-700 mt-0.5">{{ $kontak['email'] }}</p>
+                                    <p class="text-teal-700 mt-0.5 cursor-pointer hover:underline">{{ $kontak['email'] }}</p>
                                 </div>
                             </div>
                             <div class="flex gap-3">
@@ -414,7 +432,9 @@
                                 <div>
                                     <p class="font-semibold text-slate-800">{{ __('Jam Layanan') }}</p>
                                     <p class="text-slate-500 mt-0.5">{{ $kontak['jam'] }}</p>
-                                    <p class="text-slate-400 text-xs">{{ __('Kami siap melayani pertanyaan Anda') }}</p>
+                                    <button type="button" onclick="bukaHubungiAdmin()"
+                                        class="text-teal-700 mt-0.5 cursor-pointer hover:underline">{{ __('Hubungi
+                                        Admin langsung') }}</button>
                                 </div>
                             </div>
                         </div>
@@ -423,9 +443,12 @@
                     <div class="rounded-2xl bg-[#fafdfb] border border-[#44774455] p-7 shadow-xl transition-shadow">
                         <p class="font-bold text-lg mb-4">{{ __('Media Sosial') }}</p>
                         <div class="flex gap-3">
-                            <a href="#" class="w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center">
-                                <x-ribath-icon name="chat" class="w-4 h-4 text-white" />
-                            </a>
+                            <button type="button" onclick="bukaHubungiAdmin()" class="mt-0.5 cursor-pointer w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.36a9.9 9.9 0 0 0 4.62 1.14h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.64-1.03-5.13-2.9-6.99A9.82 9.82 0 0 0 12.04 2z" />
+                                </svg>
+                            </button>
                             <a href="#" class="w-10 h-10 rounded-full bg-pink-600 flex items-center justify-center">
                                 <x-ribath-icon name="instagram" class="w-4 h-4 text-white" />
                             </a>

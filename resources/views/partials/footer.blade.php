@@ -16,9 +16,13 @@
                     {{ __('Darul Musthofa Tarim Menetapkan Bahwa Setiap PELAJAR ASIA TENGGARA Yang Ingin Melanjutkan Studi Di Darul Musthofa Wajib Mengikuti Program Dauroh Persiapan Dan Ujian Penerimaan (Dauroh Qobul) Yang Akan Diselenggarakan Di Salah Satu Ma\'had Yang Telah Ditunjuk Di Indonesia.') }}
                 </p>
                 <div class="flex gap-3 mt-5">
-                    <a href="#" aria-label="WhatsApp" class="w-9 h-9 rounded-full bg-teal-700 flex items-center justify-center hover:opacity-90">
-                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.36a9.9 9.9 0 0 0 4.62 1.14h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.64-1.03-5.13-2.9-6.99A9.82 9.82 0 0 0 12.04 2z"/></svg>
-                    </a>
+                    <button type="button" onclick="bukaHubungiAdmin()"
+                        class="mt-0.5 cursor-pointer w-10 h-10 rounded-full bg-teal-700 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.36a9.9 9.9 0 0 0 4.62 1.14h.01c5.46 0 9.9-4.45 9.9-9.91 0-2.64-1.03-5.13-2.9-6.99A9.82 9.82 0 0 0 12.04 2z" />
+                        </svg>
+                    </button>
                     <a href="#" aria-label="Instagram" class="w-9 h-9 rounded-full bg-pink-600 flex items-center justify-center hover:opacity-90">
                         <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2c2.72 0 3.06.01 4.12.06 1.06.05 1.79.22 2.43.47.66.26 1.21.6 1.76 1.15.55.55.9 1.1 1.15 1.76.25.64.42 1.37.47 2.43.05 1.06.06 1.4.06 4.12s-.01 3.06-.06 4.12c-.05 1.06-.22 1.79-.47 2.43a4.9 4.9 0 0 1-1.15 1.76 4.9 4.9 0 0 1-1.76 1.15c-.64.25-1.37.42-2.43.47-1.06.05-1.4.06-4.12.06s-3.06-.01-4.12-.06c-1.06-.05-1.79-.22-2.43-.47a4.9 4.9 0 0 1-1.76-1.15 4.9 4.9 0 0 1-1.15-1.76c-.25-.64-.42-1.37-.47-2.43C2.01 15.06 2 14.72 2 12s.01-3.06.06-4.12c.05-1.06.22-1.79.47-2.43.26-.66.6-1.21 1.15-1.76A4.9 4.9 0 0 1 5.45 2.53c.64-.25 1.37-.42 2.43-.47C8.94 2.01 9.28 2 12 2z"/></svg>
                     </a>
@@ -42,8 +46,7 @@
                 <ul class="space-y-3 text-sm">
                     <li class="flex items-center gap-2"><span>📍</span> {{ __('Solo, Jawa Tengah') }}</li>
                     <li class="flex flex-wrap items-center gap-x-2 gap-y-1"><span>✉️</span> {{ $kontak['email'] ?? 'info@ribathriyadh.com' }}
-                        <span class="text-slate-500">·</span>
-                        <button type="button" onclick="bukaHubungiAdmin()" class="font-semibold text-teal-400 hover:text-teal-300 hover:underline">{{ __('Hubungi Admin langsung') }}</button>
+
                     </li>
                     <li class="flex items-center gap-2"><span>📱</span> {{ __('WhatsApp:') }} {{ $kontak['whatsapp'] ?? '+62 877-8397-5110' }}</li>
                 </ul>

@@ -1,7 +1,8 @@
 {{--
     Admin > Penilaian > Kelas & Pelajaran (PenilaianController@kelas).
     Tiga halaman dalam satu menu: Nilai Harian · Ujian Lisan · Ujian, pindah lewat tombol di atas (seperti Master Data).
-    Alur penilaiannya menyusul; sementara tiap halaman berisi keterangan "alur menyusul".
+    - Nilai Harian: saringan + rekap per santri + semua nilai (isi di partials/nilai-harian.blade.php)
+    - Ujian Lisan & Ujian: alurnya menyusul.
     Vue: #halaman-penilaian-kelas (tab aktif + alamat ?tab=... ikut berubah).
 --}}
 @extends('layouts.admin')
@@ -64,8 +65,11 @@ $bagian = [
         </div>
     </div>
 
-    {{-- ===== Isi tiap halaman (alur menyusul) ===== --}}
-    @foreach ($bagian as $kunci => $b)
+    {{-- ===== Nilai Harian ===== --}}
+    @include('admin.penilaian.partials.nilai-harian')
+
+    {{-- ===== Ujian Lisan & Ujian (alur menyusul) ===== --}}
+    @foreach (array_diff_key($bagian, ['harian' => 1]) as $kunci => $b)
     <section v-show="tab === '{{ $kunci }}'" @if ($tab !== $kunci) style="display: none" @endif
         class="relative overflow-hidden {{ $kartu }} px-6 py-12 sm:py-16 text-center">
         <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-64 rounded-full bg-gradient-to-br {{ $b['warna'] }} opacity-10 blur-3xl"></div>
@@ -89,9 +93,71 @@ $bagian = [
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        const HAPUS = @json(route('admin.penilaian.nilai-harian.hapus', ['nilai' => '__ID__']));
+        const CSRF = @json(csrf_token());
+        const ASPEK = @json($aspek);
+        const kecil = (t) => (t || '').toString().toLowerCase();
+
         Vue.createApp({
-            data: () => ({ tab: @json($tab) }),
+            data: () => ({
+                tab: @json($tab),
+                aspek: ASPEK,
+                nilai: @json($nilai),
+                tampil: 'rekap',   // rekap | daftar
+                cari: '',
+                menghapus: null,
+            }),
+            computed: {
+                nilaiTersaring() {
+                    const k = kecil(this.cari.trim());
+                    return k ? this.nilai.filter((n) => kecil(n.siswa).includes(k) || kecil(n.nomor).includes(k) || kecil(n.kitab).includes(k)) : this.nilai;
+                },
+                // Rekap per santri: jumlah penilaian, rata-rata total, rata-rata tiap penilaian
+                rekap() {
+                    const peta = {};
+                    this.nilaiTersaring.forEach((n) => {
+                        const r = peta[n.siswa_id] ||= { siswa_id: n.siswa_id, siswa: n.siswa, arab: n.arab, nomor: n.nomor, foto: n.foto, kelas: n.kelas, jumlah: 0, total: 0, aspek: {} };
+                        r.jumlah++;
+                        r.total += n.total;
+                        ASPEK.forEach((a) => { r.aspek[a.kunci] = (r.aspek[a.kunci] || 0) + (n.nilai[a.kunci] || 0); });
+                    });
+                    return Object.values(peta).map((r) => ({
+                        ...r,
+                        rata: r.total / r.jumlah,
+                        rataAspek: Object.fromEntries(ASPEK.map((a) => [a.kunci, r.aspek[a.kunci] / r.jumlah])),
+                    })).sort((a, b) => b.rata - a.rata);
+                },
+                rataSemua() {
+                    return this.nilaiTersaring.length ? this.nilaiTersaring.reduce((n, x) => n + x.total, 0) / this.nilaiTersaring.length : 0;
+                },
+            },
             methods: {
+                bulat: (n) => (Math.round(n * 10) / 10).toLocaleString('id-ID'),
+                inisial: (n) => (n || '?').trim().charAt(0).toUpperCase(),
+                warnaTotal(t) {
+                    if (t >= 80) return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
+                    if (t >= 60) return 'bg-amber-50 text-amber-700 ring-amber-200';
+                    return 'bg-rose-50 text-rose-700 ring-rose-200';
+                },
+                async hapus(n) {
+                    const tanya = @js(__('Hapus nilai harian :nama (:kitab, :tanggal)?'));
+                    if (!confirm(tanya.replace(':nama', n.siswa).replace(':kitab', n.kitab || '-').replace(':tanggal', n.tanggal))) return;
+                    this.menghapus = n.id;
+                    try {
+                        const res = await fetch(HAPUS.replace('__ID__', n.id), {
+                            method: 'DELETE',
+                            headers: { Accept: 'application/json', 'X-CSRF-TOKEN': CSRF },
+                        });
+                        const json = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error(json.message || @js(__('Gagal menghapus.')));
+                        this.nilai = this.nilai.filter((x) => x.id !== n.id);
+                        window.notifikasi?.sukses(json.message);
+                    } catch (e) {
+                        window.notifikasi ? window.notifikasi.gagal(e.message) : alert(e.message);
+                    } finally {
+                        this.menghapus = null;
+                    }
+                },
                 // Pindah halaman tanpa memuat ulang; alamat ?tab=... ikut berubah (bisa dibagikan / dimuat ulang)
                 pilih(kunci) {
                     this.tab = kunci;

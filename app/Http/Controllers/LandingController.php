@@ -109,7 +109,7 @@ class LandingController extends Controller
         ];
 
         $kontak = [
-            'alamat' => 'Jl. Ibu Pertiwi, Ps. Kliwon, Kec. Ps. Kliwon, Kota Surakarta, Jawa Tengah, Indonesia',
+            'alamat' => '93GM+V56, Jl. Gedangan, Gedangan, Salam, Kec. Karangpandan, Kabupaten Karanganyar, Jawa Tengah 57791',
             'whatsapp' => '+967 733262518',
             'email' => 'daurohdmsolo.com',
             'jam' => 'Fast Response - Hubungi Kami Kapan Saja',

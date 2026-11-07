@@ -32,7 +32,7 @@ class Absensi extends Model
 
     protected $fillable = [
         'jenis', 'user_id', 'tanggal', 'tanggal_hijriyah',
-        'kelas_id', 'bidang_ilmu_id', 'waktu_pelajaran_id',
+        'kelas_id', 'bidang_ilmu_id', 'kitab_id', 'waktu_pelajaran_id',
         'jenis_kegiatan_id', 'jam_mulai', 'batas_terlambat', 'batas_alfa', 'metode', 'selesai_at',
         'dari_admin', 'aktif', // absensi kegiatan dibuat admin & dicatat bersama semua asatid
     ];
@@ -64,6 +64,12 @@ class Absensi extends Model
         return $this->belongsTo(BidangIlmu::class, 'bidang_ilmu_id');
     }
 
+    /** Kitab yang diajarkan (absensi kelas baru). Absensi lama hanya punya pelajaran (bidang ilmu). */
+    public function kitab(): BelongsTo
+    {
+        return $this->belongsTo(Kitab::class);
+    }
+
     public function waktuPelajaran(): BelongsTo
     {
         return $this->belongsTo(WaktuPelajaran::class);
@@ -92,14 +98,14 @@ class Absensi extends Model
         return $q->orderByDesc('tanggal')->orderByDesc('id');
     }
 
-    /** Judul singkat, mis. "Kelas Ula 1 · Nahwu" atau "Muhadharah" */
+    /** Judul singkat, mis. "Kelas Ula 1 · Taqrib" (absensi lama: "Kelas Ula 1 · Nahwu") atau "Muhadharah" */
     public function getJudulAttribute(): string
     {
         if ($this->jenis === self::KEGIATAN) {
             return $this->kegiatan?->nama ?? 'Kegiatan';
         }
 
-        return trim(($this->kelas?->nama ?? 'Kelas') . ' · ' . ($this->pelajaran?->nama ?? '-'));
+        return trim(($this->kelas?->nama ?? 'Kelas') . ' · ' . ($this->kitab?->nama ?? $this->pelajaran?->nama ?? '-'));
     }
 
     /** Keterangan waktu, mis. "Jam ke: Ba'da Subuh" atau "Mulai 05.00" */

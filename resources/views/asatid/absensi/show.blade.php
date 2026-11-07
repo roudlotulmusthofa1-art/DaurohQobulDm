@@ -107,7 +107,7 @@ $persenHadir = round((($hitung['hadir'] + $hitung['terlambat']) / $total) * 100)
         {{-- Kembali ke halaman sebelumnya; halaman pencatatan/pengisian absensi dilewati (otomatis melempar ke rekap ini) --}}
         <a href="{{ route('asatid.absensi') }}" @click="kembali" data-lewati="/absensi/kegiatan/,/absensi/kelas" class="flex-1 text-center py-3 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Kembali') }}</a>
         @unless ($kegiatan)
-        <a href="{{ route('asatid.absensi.kelas', ['kelas_id' => $absensi->kelas_id, 'bidang_ilmu_id' => $absensi->bidang_ilmu_id, 'waktu_pelajaran_id' => $absensi->waktu_pelajaran_id, 'tanggal' => $absensi->tanggal->toDateString()]) }}"
+        <a href="{{ route('asatid.absensi.kelas', ['kelas_id' => $absensi->kelas_id, 'kitab_id' => $absensi->kitab_id, 'waktu_pelajaran_id' => $absensi->waktu_pelajaran_id, 'tanggal' => $absensi->tanggal->toDateString()]) }}"
             class="flex-1 text-center py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-700 hover:bg-slate-50">{{ __('Ubah Absensi') }}</a>
         @endunless
         {{-- Absensi kegiatan dari admin hanya bisa dihapus admin --}}

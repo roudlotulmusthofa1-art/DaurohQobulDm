@@ -155,25 +155,8 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
             </div>
         </section>
 
-        {{-- ===== Jadwal hari ini ===== --}}
-        <section>
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="font-extrabold text-slate-800">{{ __('Jadwal Hari Ini') }}</h2>
-                <span class="text-xs text-slate-400">{{ __(':jumlah jam', ['jumlah' => $jadwalHariIni->count()]) }}</span>
-            </div>
-            <div class="-mx-4 px-4 flex gap-3 overflow-x-auto tanpa-scrollbar">
-                @forelse ($jadwalHariIni as $j)
-                <div class="shrink-0 w-[200px] rounded-2xl bg-white p-3 shadow-sm">
-                    <p class="text-[11px] font-semibold text-emerald-700">{{ $j->waktu?->nama ?? __('Jam') }}{{ $j->waktu?->jam_mulai ? ' · ' . $j->waktu->jam_mulai : '' }}</p>
-                    <p class="mt-1 font-bold text-slate-800 truncate">{{ $j->kitab?->nama ?? __('Kitab belum diatur') }}</p>
-                    <p class="text-xs text-slate-500 truncate">{{ $j->kelas?->nama }} · {{ $namaUstadz[$j->user_id] ?? $j->ustadz?->name ?? __('Belum ada ustadz') }}</p>
-                    @if (filled($arabUstadz[$j->user_id] ?? null))<p class="text-[15px] text-slate-600 truncate" dir="rtl" lang="ar">{{ $arabUstadz[$j->user_id] }}</p>@endif
-                </div>
-                @empty
-                <p class="w-full rounded-2xl bg-white py-6 text-center text-sm text-slate-400 shadow-sm">{{ __('Tidak ada jadwal mengajar hari ini.') }}</p>
-                @endforelse
-            </div>
-        </section>
+        {{-- ===== Pergantian pelajaran (jadwal hari ini + tanda ganti pelajaran ke guru) ===== --}}
+        @include('admin.partials.pergantian-pelajaran', ['kelasKartu' => 'bg-white rounded-2xl shadow-sm'])
 
         {{-- ===== Pendaftar terbaru ===== --}}
         <section>
@@ -338,6 +321,8 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         }).mount('#dashboard-hp');
     });
 </script>
+{{-- Panel Pergantian Pelajaran: dipasang SETELAH #dashboard-hp (panelnya ada di dalamnya, dibungkus v-pre) --}}
+@include('admin.partials.pergantian-pelajaran-skrip')
 {{-- Status koneksi internet + tombol muat ulang --}}
 @include('partials.status-koneksi', ['posisi' => 'bottom-24 right-4'])
 {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}

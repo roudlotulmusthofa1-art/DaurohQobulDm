@@ -10,7 +10,7 @@ $kelompok = [
     [
         'judul' => __('Kelas & Pelajaran'),
         'menu'  => [
-            ['url' => route('asatid.penilaian.kelas', 'harian'), 'judul' => __('Nilai Harian'), 'ket' => __('Nilai harian peserta per kelas & pelajaran.'), 'warna' => 'from-sky-400 to-blue-600', 'cahaya' => 'bg-sky-400/30', 'segera' => true,
+            ['url' => route('asatid.penilaian.harian'), 'judul' => __('Nilai Harian'), 'ket' => __('Pilih kelas, kitab, lalu santri. Nilai 6 penilaian (total 100).'), 'warna' => 'from-sky-400 to-blue-600', 'cahaya' => 'bg-sky-400/30', 'segera' => false, 'jumlah' => $jumlahNilai, 'satuan' => __('nilai Anda'),
                 'ikon' => 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10'],
             ['url' => route('asatid.penilaian.kelas', 'lisan'), 'judul' => __('Ujian Lisan'), 'ket' => __('Nilai ujian lisan (setoran) peserta.'), 'warna' => 'from-violet-400 to-purple-600', 'cahaya' => 'bg-violet-400/30', 'segera' => true,
                 'ikon' => 'M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z'],
@@ -63,7 +63,7 @@ $kelompok = [
                     @else
                     <span class="text-right">
                         <span class="block text-xl font-extrabold text-slate-800 tabular-nums">{{ $m['jumlah'] }}</span>
-                        <span class="block text-[10px] text-slate-400">{{ __('catatan Anda') }}</span>
+                        <span class="block text-[10px] text-slate-400">{{ $m['satuan'] ?? __('catatan Anda') }}</span>
                     </span>
                     @endif
                 </div>

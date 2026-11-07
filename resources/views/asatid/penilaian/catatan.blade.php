@@ -189,7 +189,8 @@ document.addEventListener('DOMContentLoaded', () => {
             siswa: @json($siswa),
             riwayat: @json($riwayat),
             cari: '',
-            dipilih: [],
+            // Dari tombol "Catatan" di absensi kelas (?siswa=ID): santri itu langsung terpilih
+            dipilih: @json($awalSiswa ? [$awalSiswa] : []),
             form: { jenis: null, catatan: '', ...sekarang() },
             menyimpan: false,
             menghapus: null,

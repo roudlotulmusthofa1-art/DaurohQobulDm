@@ -62,7 +62,7 @@ class DataCatatan
             ->whereIn('absensi_detail.status', ['terlambat', 'alfa'])
             ->when($dari, fn ($q) => $q->whereDate('absensi.tanggal', '>=', $dari))
             ->when($sampai, fn ($q) => $q->whereDate('absensi.tanggal', '<=', $sampai))
-            ->with(['siswa.kelasMaster', 'pencatat:id,name', 'absensi.kelas', 'absensi.pelajaran', 'absensi.kegiatan', 'absensi.waktuPelajaran', 'absensi.pengabsen:id,name'])
+            ->with(['siswa.kelasMaster', 'pencatat:id,name', 'absensi.kelas', 'absensi.pelajaran', 'absensi.kitab', 'absensi.kegiatan', 'absensi.waktuPelajaran', 'absensi.pengabsen:id,name'])
             ->get()
             ->filter(fn ($d) => $d->siswa && $d->absensi)
             ->map(function (AbsensiDetail $d) {

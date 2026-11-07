@@ -1,6 +1,7 @@
 {{--
     Akun Asatid > Absensi > Absensi Kelas
-    Tahap 1 (atur)    : pilih kelas, pelajaran, tanggal, jam ke
+    Tahap 1 (atur)    : pilih kelas, kitab, tanggal, jam ke
+                        (kelas + jam + hari cocok dengan jadwal guru -> kitab terpilih otomatis)
     Tahap 2 (absen)   : satu kartu per peserta; klik keterangan -> otomatis ke peserta berikutnya
     Tahap 3 (ringkas) : cek ulang semua peserta lalu Simpan
     Data dari database hanya ditampilkan lewat v-text / binding Vue (tidak di-echo ke template).
@@ -37,7 +38,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="relative">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-sky-100/80">{{ __('Langkah 1 dari 2') }}</p>
                 <h2 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ __('Atur absensi kelas') }}</h2>
-                <p class="mt-1.5 text-sm text-white/75">{{ __('Pilih kelas, pelajaran, tanggal, dan jam ke. Setelah itu absen peserta satu per satu.') }}</p>
+                <p class="mt-1.5 text-sm text-white/75">{{ __('Pilih kelas, kitab, tanggal, dan jam ke. Setelah itu absen peserta satu per satu.') }}</p>
             </div>
         </section>
 
@@ -61,21 +62,26 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada kelas aktif. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Kelas.') }}</p>
         </section>
 
-        <!-- Pelajaran -->
+        <!-- Kitab (yang terjadwal di kelas ini ditaruh paling atas) -->
         <section :class="kartu" class="p-5 sm:p-6">
             <h3 class="flex items-center gap-2 font-bold text-slate-800">
                 <span class="w-7 h-7 rounded-xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center text-xs font-extrabold">2</span>
-                {{ __('Pilih pelajaran') }}
+                {{ __('Pilih kitab') }}
             </h3>
-            <div v-if="pelajaranList.length" class="mt-4 flex flex-wrap gap-2">
-                <button v-for="p in pelajaranList" :key="p.id" type="button" @click="form.bidang_ilmu_id = p.id"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm font-semibold ring-1 transition-all"
-                    :class="form.bidang_ilmu_id === p.id ? 'bg-[#0b332c] text-white ring-[#0b332c]' : 'bg-[#f8fbfa] text-slate-700 ring-slate-200/80 hover:ring-slate-300 hover:bg-white'">
-                    <span class="w-2.5 h-2.5 rounded-full" :style="{ backgroundColor: warnaHex(p.warna) }"></span>
-                    <span v-text="p.nama"></span>
+            <p v-if="dariJadwal" class="mt-2 text-xs text-emerald-700">{{ __('Kitab dipilih otomatis dari jadwal mengajar Anda. Bisa diganti.') }}</p>
+            <div v-if="kitabList.length" class="mt-4 grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                <button v-for="k in kitabUrut" :key="k.id" type="button" @click="form.kitab_id = k.id; dariJadwal = false"
+                    class="flex items-center gap-3 text-left px-4 py-3 rounded-2xl ring-1 transition-all"
+                    :class="form.kitab_id === k.id ? 'bg-sky-50 ring-2 ring-sky-500' : 'bg-[#f8fbfa] ring-slate-200/80 hover:ring-sky-300 hover:bg-white'">
+                    <span class="flex-1 min-w-0">
+                        <span class="block text-sm font-bold text-slate-800 truncate" v-text="k.nama"></span>
+                        <span v-if="k.arab" dir="rtl" class="block text-slate-600 truncate" v-text="k.arab"></span>
+                        <span v-if="k.bidang" class="block text-[11px] text-slate-400 truncate" v-text="k.bidang"></span>
+                    </span>
+                    <span v-if="dijadwal(k.id)" class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">{{ __('Terjadwal') }}</span>
                 </button>
             </div>
-            <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada pelajaran. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Bidang Ilmu.') }}</p>
+            <p v-else class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada kitab untuk bulan ini. Minta admin mengisinya di Kurikulum & Kitab.') }}</p>
         </section>
 
         <!-- Tanggal & jam ke -->
@@ -191,11 +197,19 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             </div>
                         </div>
 
-                        <label class="mt-5 block text-left">
-                            <span class="text-xs font-semibold text-slate-500">{{ __('Catatan mudarris') }} <span class="font-normal text-slate-400">{{ __('(opsional, isi sebelum memilih keterangan)') }}</span></span>
-                            <textarea v-model="sekarang.catatan" rows="2" maxlength="500" placeholder="{{ __('cth. Belum hafal muqaddimah') }}"
-                                class="mt-1.5 w-full rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-4 py-3 text-sm text-slate-700 focus:ring-2 focus:ring-sky-500 outline-none resize-none"></textarea>
-                        </label>
+                        <!-- Nilai Harian & Catatan santri ini (menu Penilaian), dibuka di tab baru supaya absensi tidak hilang -->
+                        <div class="mt-5 grid grid-cols-2 gap-2">
+                            <a :href="linkNilai(sekarang)" target="_blank" rel="noopener"
+                                class="flex items-center justify-center gap-2 rounded-2xl bg-sky-50 hover:bg-sky-100 ring-1 ring-sky-200 px-3 py-3 text-sm font-bold text-sky-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"/></svg>
+                                {{ __('Nilai Harian') }}
+                            </a>
+                            <a :href="linkCatatan(sekarang)" target="_blank" rel="noopener"
+                                class="flex items-center justify-center gap-2 rounded-2xl bg-amber-50 hover:bg-amber-100 ring-1 ring-amber-200 px-3 py-3 text-sm font-bold text-amber-700 transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125"/></svg>
+                                {{ __('Catatan') }}
+                            </a>
+                        </div>
 
                         <div class="mt-4 grid grid-cols-2 sm:grid-cols-5 gap-2">
                             <button v-for="(s, i) in status" :key="s.kunci" type="button" @click="pilih(s.kunci)"
@@ -262,7 +276,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <span v-else class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>
-                        <span class="block text-xs truncate" :class="p.catatan ? 'text-slate-500' : 'text-slate-300'" v-text="p.catatan ? '“' + p.catatan + '”' : @js(__('Tanpa catatan'))"></span>
+                        <span class="block text-xs truncate" :class="p.status ? gaya(p.status).teks : 'text-slate-300'" v-text="p.status ? label(p.status) : @js(__('Belum diisi'))"></span>
                     </span>
                 </button>
                 <div class="flex gap-1.5">
@@ -303,13 +317,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { kunci: 'alfa',      label: @js(__('Tidak Hadir')), pendek: 'A', aktif: 'bg-rose-500 text-white ring-rose-500 shadow-[0_10px_24px_-10px_rgba(244,63,94,0.8)]',     lembut: 'bg-rose-50 text-rose-700 ring-rose-200 hover:bg-rose-100',           bulat: 'bg-rose-500 text-white',    teks: 'text-rose-700',    cincin: 'ring-rose-500',    titik: 'bg-rose-500' },
     ];
     const TOMBOL = { h: 'hadir', t: 'terlambat', s: 'sakit', i: 'izin', a: 'alfa' };
-    // Warna titik pelajaran (dari pilihan warna Bidang Ilmu di Master Data)
-    const WARNA = {
-        'bg-slate-100': '#94a3b8', 'bg-red-100': '#f87171', 'bg-orange-100': '#fb923c', 'bg-amber-100': '#fbbf24',
-        'bg-yellow-100': '#facc15', 'bg-lime-100': '#a3e635', 'bg-green-100': '#4ade80', 'bg-emerald-100': '#34d399',
-        'bg-teal-100': '#2dd4bf', 'bg-cyan-100': '#22d3ee', 'bg-sky-100': '#38bdf8', 'bg-blue-100': '#60a5fa',
-        'bg-indigo-100': '#818cf8', 'bg-violet-100': '#a78bfa', 'bg-purple-100': '#c084fc', 'bg-pink-100': '#f472b6', 'bg-rose-100': '#fb7185',
-    };
 
     const keTanggal = (iso) => new Date(iso + 'T12:00:00');
     const FMT_M = new Intl.DateTimeFormat('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -323,13 +330,16 @@ document.addEventListener('DOMContentLoaded', () => {
         data: () => ({
             kartu: @json($kartu),
             kelasList: @json($kelasList),
-            pelajaranList: @json($pelajaranList),
+            kitabList: @json($kitabList),
+            terjadwal: @json($terjadwal),
+            jadwalGuru: @json($jadwalGuru),
+            dariJadwal: false, // true = kitab dipilih otomatis dari jadwal guru
             jamList: @json($jamList),
             status: STATUS,
             tahap: 'atur',
             form: {
                 kelas_id: angka(awal.kelas_id),
-                bidang_ilmu_id: angka(awal.bidang_ilmu_id),
+                kitab_id: angka(awal.kitab_id),
                 waktu_pelajaran_id: angka(awal.waktu_pelajaran_id),
                 tanggal: awal.tanggal || hariIni(),
             },
@@ -342,7 +352,9 @@ document.addEventListener('DOMContentLoaded', () => {
             galat: '',
         }),
         computed: {
-            siapMulai() { return this.form.kelas_id && this.form.bidang_ilmu_id && this.form.waktu_pelajaran_id && this.form.tanggal; },
+            siapMulai() { return this.form.kelas_id && this.form.kitab_id && this.form.waktu_pelajaran_id && this.form.tanggal; },
+            // Kitab yang terjadwal di kelas yang dipilih ditaruh paling atas
+            kitabUrut() { return [...this.kitabList].sort((a, b) => this.dijadwal(b.id) - this.dijadwal(a.id)); },
             sekarang() { return this.peserta[this.idx] || {}; },
             hitung() {
                 const h = {};
@@ -353,22 +365,54 @@ document.addEventListener('DOMContentLoaded', () => {
             persenTerisi() { return this.peserta.length ? Math.round(((this.peserta.length - this.belum) / this.peserta.length) * 100) : 0; },
             judulSesi() {
                 const cari = (list, id) => (list.find((x) => x.id === id) || {}).nama || '-';
-                return `${cari(this.kelasList, this.form.kelas_id)} · ${cari(this.pelajaranList, this.form.bidang_ilmu_id)} · ${cari(this.jamList, this.form.waktu_pelajaran_id)}`;
+                return `${cari(this.kelasList, this.form.kelas_id)} · ${cari(this.kitabList, this.form.kitab_id)} · ${cari(this.jamList, this.form.waktu_pelajaran_id)}`;
             },
+        },
+        watch: {
+            // Kelas, jam, atau tanggal berubah -> cari kitabnya di jadwal guru
+            'form.kelas_id'() { this.cocokkanJadwal(); },
+            'form.waktu_pelajaran_id'() { this.cocokkanJadwal(); },
+            'form.tanggal'() { this.cocokkanJadwal(); },
         },
         mounted() {
             document.addEventListener('keydown', this.tombolCepat);
+            if (!this.form.kitab_id) this.cocokkanJadwal();
             if (this.siapMulai && awal.kelas_id) this.mulai();
         },
         methods: {
             masehi: (iso) => (iso ? FMT_M.format(keTanggal(iso)) : '-'),
             hijriyah: (iso) => (iso ? FMT_H.format(keTanggal(iso)) : '-'),
             jamRentang: (j) => (j.jam_mulai ? `${j.jam_mulai}${j.jam_selesai ? ' – ' + j.jam_selesai : ''}` : @js(__('Jam belum diatur'))),
-            warnaHex: (w) => WARNA[w] || '#cbd5e1',
+            dijadwal(id) { return (this.terjadwal[this.form.kelas_id] || []).includes(id); },
+            // Jadwal guru: hari (1 = Senin ... 7 = Ahad) + kelas + jam ke -> kitab
+            cocokkanJadwal() {
+                if (!this.form.kelas_id || !this.form.waktu_pelajaran_id || !this.form.tanggal) return;
+                const hari = keTanggal(this.form.tanggal).getDay() || 7;
+                const j = this.jadwalGuru.find((x) => x.hari === hari && x.kelas_id === this.form.kelas_id && x.waktu_pelajaran_id === this.form.waktu_pelajaran_id);
+                if (j && this.kitabList.some((k) => k.id === j.kitab_id)) {
+                    this.form.kitab_id = j.kitab_id;
+                    this.dariJadwal = true;
+                }
+            },
             inisial: (n) => (n || '?').trim().charAt(0).toUpperCase(),
             gaya: (k) => STATUS.find((s) => s.kunci === k) || {},
             label(k) { return this.gaya(k).label; },
             pendek(k) { return this.gaya(k).pendek; },
+            // Tombol Nilai Harian: kelas, kitab, tanggal & santri langsung terisi di halaman penilaian
+            linkNilai(p) {
+                const url = new URL(@json(route('asatid.penilaian.harian')));
+                url.searchParams.set('kelas_id', this.form.kelas_id);
+                url.searchParams.set('kitab_id', this.form.kitab_id);
+                url.searchParams.set('tanggal', this.form.tanggal);
+                url.searchParams.set('siswa_id', p.id);
+                return url.toString();
+            },
+            // Tombol Catatan: santri ini langsung terpilih di Penilaian > Catatan
+            linkCatatan(p) {
+                const url = new URL(@json(route('asatid.penilaian.catatan')));
+                url.searchParams.set('siswa', p.id);
+                return url.toString();
+            },
 
             async mulai() {
                 this.galat = '';

@@ -24,6 +24,9 @@ Route::middleware('guest')->group(function () {
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->group(function () {
     Route::get('beranda', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('beranda/tampilan/{mode}', [DashboardController::class, 'tampilan'])->name('dashboard.tampilan'); // ganti tampilan HP / laptop
+    // Dasbor > Pergantian Pelajaran: pantau jam pelajaran hari ini + kirim tanda ganti pelajaran ke guru
+    Route::get('pergantian-pelajaran', [\App\Http\Controllers\Admin\PergantianPelajaranController::class, 'data'])->name('pergantian.data');
+    Route::post('pergantian-pelajaran/tanda', [\App\Http\Controllers\Admin\PergantianPelajaranController::class, 'tanda'])->middleware('throttle:60,1')->name('pergantian.tanda');
     Route::post('logout', [\App\Http\Controllers\Auth\LoginController::class, 'logout'])->name('logout');
 
     // Manajemen Data
@@ -94,6 +97,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Penilaian: Kelas & Pelajaran, Catatan (pencapaian & pelanggaran dari asatid)
     Route::controller(\App\Http\Controllers\Admin\PenilaianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {
         Route::get('kelas', 'kelas')->name('kelas.index');
+        Route::delete('nilai-harian/{nilai}', 'hapusNilaiHarian')->whereNumber('nilai')->name('nilai-harian.hapus');
         Route::get('catatan', 'catatan')->name('catatan.index');
         Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
     });

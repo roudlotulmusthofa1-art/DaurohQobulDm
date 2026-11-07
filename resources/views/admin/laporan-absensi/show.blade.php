@@ -27,7 +27,8 @@ $info = $kegiatan
     ]
     : [
         [__('Kelas'), $absensi->kelas?->nama ?? '-'],
-        [__('Pelajaran'), $absensi->pelajaran?->nama ?? '-'],
+        // Absensi baru memakai kitab; absensi lama hanya punya pelajaran (bidang ilmu)
+        $absensi->kitab ? [__('Kitab'), $absensi->kitab->nama] : [__('Pelajaran'), $absensi->pelajaran?->nama ?? '-'],
         [__('Jam ke'), $absensi->waktuPelajaran?->nama ?? '-'],
     ];
 @endphp

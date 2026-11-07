@@ -5,12 +5,13 @@ namespace App\Http\Controllers\Asatid;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AbsensiDetail;
-use App\Models\BidangIlmu;
 use App\Models\JenisKegiatan;
 use App\Models\Kelas;
+use App\Models\Kitab;
 use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
 use App\Models\WaktuPelajaran;
+use App\Support\DaftarKitab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ use Illuminate\Validation\Rule;
 /**
  * Absensi peserta oleh asatid.
  *
- * 1. Absensi kelas    : pilih kelas, pelajaran, tanggal, jam ke -> kartu per peserta -> simpan sekaligus.
+ * 1. Absensi kelas    : pilih kelas, kitab, tanggal, jam ke -> kartu per peserta -> simpan sekaligus.
  * 2. Absensi kegiatan : pilih kegiatan + jam mulai / batas terlambat / batas alfa -> pindai QR atau cari nama,
  *                       tiap peserta langsung tersimpan -> tutup absensi (yang belum tercatat jadi alfa).
  *
@@ -34,7 +35,7 @@ class AbsensiController extends Controller
     {
         Absensi::tutupYangLewat(); // absensi kegiatan yang lewat batas alfa ditutup otomatis
 
-        $riwayat = Absensi::with(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan'])
+        $riwayat = Absensi::with(['kelas', 'pelajaran', 'kitab', 'waktuPelajaran', 'kegiatan'])
             ->withCount('detail')
             ->where('user_id', Auth::id())
             ->terbaru()
@@ -57,10 +58,13 @@ class AbsensiController extends Controller
     {
         return $this->tampil('asatid.absensi.kelas', [
             'kelasList' => Kelas::where('is_active', true)->ordered()->withCount(['santri' => fn ($q) => $q->where('status', PendaftaranSiswa::DITERIMA)])->get(['id', 'nama', 'kode']),
-            'pelajaranList' => BidangIlmu::where('is_active', true)->ordered()->get(['id', 'nama', 'warna']),
+            // Pilih KITAB (bukan bidang ilmu) supaya nyambung dengan Penilaian > Nilai Harian
+            'kitabList' => DaftarKitab::pilihan(),
+            'terjadwal' => DaftarKitab::terjadwal(),             // kitab terjadwal di tiap kelas: ditaruh paling atas
+            'jadwalGuru' => DaftarKitab::jadwalGuru(Auth::id()), // kelas + jam + hari cocok jadwal guru: kitab terpilih otomatis
             'jamList' => WaktuPelajaran::where('is_active', true)->ordered()->get(['id', 'nama', 'jam_mulai', 'jam_selesai']),
-            // Dari tombol "Ubah" di halaman hasil: form langsung terisi
-            'awal' => $request->only(['kelas_id', 'bidang_ilmu_id', 'waktu_pelajaran_id', 'tanggal']),
+            // Dari tombol "Ubah" di halaman hasil / "Absen sekarang" di pengingat: form langsung terisi
+            'awal' => $request->only(['kelas_id', 'kitab_id', 'waktu_pelajaran_id', 'tanggal']),
         ]);
     }
 
@@ -108,11 +112,16 @@ class AbsensiController extends Controller
             $absensi = $this->cariAbsensiKelas($data) ?? new Absensi([
                 'jenis' => Absensi::KELAS,
                 'kelas_id' => $data['kelas_id'],
-                'bidang_ilmu_id' => $data['bidang_ilmu_id'],
                 'waktu_pelajaran_id' => $data['waktu_pelajaran_id'],
                 'tanggal' => $data['tanggal'],
             ]);
-            $absensi->fill(['user_id' => Auth::id(), 'tanggal_hijriyah' => Absensi::hijriyah($data['tanggal'])])->save();
+            // Kitab disimpan; bidang ilmunya ikut diisi dari kitab itu (laporan lama tetap terbaca)
+            $absensi->fill([
+                'kitab_id' => $data['kitab_id'],
+                'bidang_ilmu_id' => Kitab::whereKey($data['kitab_id'])->value('bidang_ilmu_id'),
+                'user_id' => Auth::id(),
+                'tanggal_hijriyah' => Absensi::hijriyah($data['tanggal']),
+            ])->save();
 
             foreach ($data['data'] as $baris) {
                 if (! isset($idSah[$baris['id']])) {
@@ -309,7 +318,7 @@ class AbsensiController extends Controller
             $this->pastikanMilik($absensi);
         }
 
-        $absensi->load(['kelas', 'pelajaran', 'waktuPelajaran', 'kegiatan', 'detail.siswa.kelasMaster', 'detail.pencatat:id,name']);
+        $absensi->load(['kelas', 'pelajaran', 'kitab', 'waktuPelajaran', 'kegiatan', 'detail.siswa.kelasMaster', 'detail.pencatat:id,name']);
         $detail = $absensi->detail->sortBy(fn ($d) => $d->siswa?->nama_lengkap)->values();
         $hitung = collect(Absensi::STATUS)->map(fn ($s, $k) => $detail->where('status', $k)->count());
 
@@ -333,18 +342,25 @@ class AbsensiController extends Controller
     {
         return [
             'kelas_id' => ['required', Rule::exists('kelas', 'id')],
-            'bidang_ilmu_id' => ['required', Rule::exists('bidang_ilmu', 'id')],
+            'kitab_id' => ['required', Rule::exists('kitab', 'id')],
             'waktu_pelajaran_id' => ['required', Rule::exists('waktu_pelajaran', 'id')],
             'tanggal' => ['required', 'date'],
         ];
     }
 
-    /** Absensi kelas yang sama (kelas + pelajaran + jam + tanggal) tidak dibuat dua kali */
+    /**
+     * Absensi kelas yang sama (kelas + kitab + jam + tanggal) tidak dibuat dua kali.
+     * Absensi lama (belum punya kitab) dianggap sama kalau bidang ilmunya sama dengan bidang ilmu kitab itu.
+     */
     private function cariAbsensiKelas(array $data): ?Absensi
     {
+        $bidang = Kitab::whereKey($data['kitab_id'])->value('bidang_ilmu_id');
+
         return Absensi::where('jenis', Absensi::KELAS)
             ->where('kelas_id', $data['kelas_id'])
-            ->where('bidang_ilmu_id', $data['bidang_ilmu_id'])
+            ->where(fn ($q) => $q->where('kitab_id', $data['kitab_id'])
+                ->orWhere(fn ($q) => $q->whereNull('kitab_id')->whereNotNull('bidang_ilmu_id')->where('bidang_ilmu_id', $bidang)))
+            ->orderByRaw('kitab_id is null') // yang sudah punya kitab didahulukan
             ->where('waktu_pelajaran_id', $data['waktu_pelajaran_id'])
             ->whereDate('tanggal', $data['tanggal'])
             ->first();

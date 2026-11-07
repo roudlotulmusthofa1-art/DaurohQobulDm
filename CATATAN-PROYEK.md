@@ -51,6 +51,8 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
   - Kolom yang kosong tetap tampil dalam bahasa Indonesia. File `lang/ar.json` tidak dipakai lagi.
   - Terjemahan disimpan di tabel `terjemahan` (database utama, berlaku untuk semua sesi).
   - Tulisan yang berisi `:nama`, `:jumlah`, dan sejenisnya: tulis kata itu persis sama di terjemahan Arab.
+  - Usulan terjemahan ada di `lang/usulan-ar.json` (2026-11-07: semua tulisan sudah punya usulan, termasuk fitur Penilaian, Nilai Harian, Pergantian Pelajaran, Pengingat). Usulan baru dipakai setelah admin menyalakan "Pakai semua usulan" lalu Simpan per halaman.
+  - Kelompok halaman baru: "Admin — Penilaian", "Asatid — Penilaian"; panel Pergantian Pelajaran ikut "Admin — Dasbor"; pengingat pelajaran ikut "Asatid — Header & kerangka". Nama 6 penilaian Nilai Harian dibaca dari `NilaiHarian::ASPEK` (`TeksTampilan::dariKode`).
 - **File penting:**
   - `app/Support/TeksTampilan.php`: pemindai tulisan dan pengelompokan halaman (daftar `HALAMAN`).
   - `app/Support/PemuatTerjemahan.php`, `app/Models/Terjemahan.php`
@@ -98,6 +100,12 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Asatid > Penilaian** (`Asatid/PenilaianController`, view `asatid/penilaian/*`): kartu Nilai Harian/Ujian Lisan/Ujian (segera hadir) + **Catatan** = pilih santri (boleh beberapa) → jenis Pencapaian/Pelanggaran → isi catatan (wajib) → tanggal (hari ikut) & jam (otomatis sekarang, bisa diubah). Asatid hanya melihat/menghapus catatannya sendiri.
 - Tabel `catatan_siswa` (kolom `jenis` = pencapaian | pelanggaran; migrasi `2026_11_14_120000_...`). Data bersama di `App\Support\DataCatatan`, model `CatatanSiswa`.
 - Terlambat & Alfa dari absensi kelas/kegiatan ikut dihitung sebagai Pelanggaran, dibaca langsung dari tabel absensi (tidak disalin).
+- **Nilai Harian (2026-11-07):** Asatid > Penilaian > Nilai Harian (`asatid/penilaian/harian`, route `asatid.penilaian.harian`): pilih kelas → kitab (yang terjadwal di kelas itu bulan ini paling atas) + tanggal → santri → 6 penilaian. Batas: menjawab pertanyaan guru 20, kelengkapan belajar 10, konsentrasi & keaktifan 20, menulis faidah 15, menjawab sistematis 20, tugas tepat waktu 15 (total 100). Batas ada di SATU tempat: `NilaiHarian::ASPEK`; dicek di layar, validasi server, dan saat menyimpan model. Satu santri + kitab + tanggal = satu nilai (dinilai lagi = diperbarui). Tabel `nilai_harian` (migrasi `2026_11_15_100000_...`, perlu `migrate` + `sesi:migrate`).
+- Admin > Penilaian > Kelas & Pelajaran > Nilai Harian (`admin/penilaian/partials/nilai-harian.blade.php`): saringan kelas/kitab/periode, ringkasan, rekap per santri (rata-rata total & tiap penilaian), semua nilai (bisa dihapus). Ujian Lisan & Ujian masih menyusul.
+- **Absensi Kelas:** kolom "Catatan mudarris" dihapus (catatan lama tetap di `absensi_detail.catatan`, tidak dihapus). Diganti 2 tombol di kartu santri: **Nilai Harian** (kelas, pelajaran, tanggal, santri langsung terisi) dan **Catatan** (`?siswa=ID`, santri langsung terpilih). Keduanya buka tab baru supaya absensi tidak hilang.
+- **Absensi Kelas pakai KITAB (2026-11-07):** langkah 2 "Pilih kitab" (bukan bidang ilmu). Kolom baru `absensi.kitab_id` (migrasi `2026_11_15_110000_tambah_kitab_absensi`); `bidang_ilmu_id` tetap diisi dari bidang ilmu kitab, jadi absensi lama tetap tampil ("Pelajaran" di laporan bila belum ada kitab). Kelas + jam + hari cocok jadwal guru → kitab terpilih otomatis. Daftar kitab bersama di `App\Support\DaftarKitab` (dipakai absensi & nilai harian). Absensi lama tanpa kitab dianggap sama bila bidang ilmunya sama (tidak dobel saat diubah).
+- **Pengingat ganti pelajaran (2026-11-07):** `asatid/partials/pengingat-pelajaran.blade.php`, dimuat di `layouts/asatid` (semua halaman asatid). Dari jadwal mengajar guru (`AsatidDashboardController::dataPengingat`, diperbarui tiap 30 menit lewat `asatid.jadwal.pengingat`). Jam dari HP guru: 5 menit sebelum mulai & saat mulai → jendela + bunyi (Web Audio) + getar + notifikasi browser (kalau diizinkan) + tombol "Absen sekarang" (kelas, kitab, jam, tanggal terisi). Tiap pengingat sekali (localStorage). Lonceng juga menampilkan "Sekarang/Berikutnya". Batasan: hanya selama web terbuka; bunyi butuh halaman disentuh sekali. Notifikasi HP saat browser tertutup = belum (perlu Web Push + penjadwal server).
+- **Pergantian Pelajaran di dasbor admin (2026-11-07):** panel "Jadwal Hari Ini" (laptop & HP) diganti `admin/partials/pergantian-pelajaran` (+ `-skrip`, dibungkus `v-pre` karena berada di dalam aplikasi Vue dasbor; skrip dimuat SETELAH mount dasbor). Jadwal hari ini per jam ke (Sekarang/Berikutnya/Nanti/Selesai, jam WIB), status guru: sudah absen (absensi kelas + jam ke hari ini), tanda terkirim, dilihat guru. Tombol "Kirim tanda ke semua guru jam ini" + "Tanda" per guru (`Admin\PergantianPelajaranController`, route `admin.pergantian.data|tanda`, panel diperbarui tiap 30 detik). Tabel `tanda_pelajaran` (satu jadwal + tanggal = satu baris; dikirim ulang = belum dilihat lagi). Guru: pengingat-pelajaran mengecek `asatid.tanda.cek` tiap 20 detik → jendela "Admin: sudah pergantian pelajaran"; ditutup/Absen = `asatid.tanda.lihat` (tidak tercatat saat admin "Masuk sebagai"). Pengingat otomatis tetap jalan.
 - Master Data **Jenis Pelanggaran & Jenis Pencapaian sudah DIHAPUS** (model, tab, seeder, migrasi). Migrasi `2026_11_14_130000_hapus_jenis_pelanggaran_pencapaian` membuang tabelnya di server.
 - **Kelulusan** disembunyikan dari menu Akademik (akan diperbaiki); halaman `admin/kelulusan` & datanya masih ada.
 
@@ -160,7 +168,7 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 
 ## 5. Belum dikerjakan (bisa diminta nanti)
 
-- **Penilaian Kelas & Pelajaran:** alur Nilai Harian, Ujian Lisan, dan Ujian menunggu penjelasan dari pengguna.
+- **Penilaian Kelas & Pelajaran:** Nilai Harian sudah jadi; alur Ujian Lisan dan Ujian menunggu penjelasan dari pengguna.
 - **Kelulusan:** menunya disembunyikan, menunggu perbaikan.
 
 - **Formulir pendaftaran online**, perbaikan yang sudah diusulkan tapi belum dipasang:
