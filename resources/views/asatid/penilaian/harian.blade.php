@@ -54,13 +54,13 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
         {{-- ===== 2. Kitab & tanggal ===== --}}
         <section v-if="form.kelas_id" class="{{ $kartu }} p-5">
             <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span>{{ __('Pilih kitab') }}</h3>
-            <div v-if="kitabUrut.length" class="mt-3 grid sm:grid-cols-2 gap-2">
+            <div v-if="kitabUrut.length" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button v-for="k in kitabUrut" :key="k.id" type="button" @click="pilihKitab(k.id)"
-                    class="flex items-center gap-3 rounded-2xl px-4 py-3 text-left ring-1 transition-all"
+                    class="w-full min-w-0 flex items-center gap-3 rounded-2xl px-4 py-3 text-left ring-1 transition-all"
                     :class="form.kitab_id === k.id ? 'bg-sky-50 ring-2 ring-sky-500' : 'bg-[#f8fbfa] ring-slate-200 hover:bg-white'">
                     <span class="flex-1 min-w-0">
-                        <span class="block font-semibold text-slate-800 truncate" v-text="k.nama"></span>
-                        <span v-if="k.arab" dir="rtl" class="block text-slate-600 truncate" v-text="k.arab"></span>
+                        <span class="block font-semibold text-slate-800 break-words" v-text="k.nama"></span>
+                        <span v-if="k.arab" dir="rtl" class="block text-slate-600 break-words" v-text="k.arab"></span>
                         <span v-if="k.bidang" class="block text-xs text-slate-400 truncate" v-text="k.bidang"></span>
                     </span>
                     <span v-if="dijadwal(k.id)" class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">{{ __('Terjadwal') }}</span>

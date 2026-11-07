@@ -23,7 +23,7 @@ class JagaMasukSebagai
 
         $nama = (string) $request->route()?->getName();
 
-        if (in_array($nama, ['masuk-sebagai.selesai', 'masuk-sebagai.mode'], true)) {
+        if (in_array($nama, ['masuk-sebagai.selesai', 'masuk-sebagai.mode', 'asatid.tanda.lihat'], true)) {
             return $next($request);
         }
 
