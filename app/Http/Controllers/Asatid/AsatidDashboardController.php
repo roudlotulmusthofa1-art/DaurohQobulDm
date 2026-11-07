@@ -116,8 +116,20 @@ class AsatidDashboardController extends Controller
         }
         $j = $t->jadwal;
 
+        // Jenis pesan menurut jam saat admin mengirim tanda:
+        // habis = jam pelajaran guru sudah lewat, sekarang = sedang berjalan, ganti = belum mulai (pergantian pelajaran)
+        $jamKirim = ($t->dikirim_at ?? now())->copy()->setTimezone('Asia/Jakarta')->format('H:i');
+        $mulai = $j->waktu?->jam_mulai ? substr($j->waktu->jam_mulai, 0, 5) : null;
+        $selesai = $j->waktu?->jam_selesai ? substr($j->waktu->jam_selesai, 0, 5) : null;
+        $jenis = match (true) {
+            $selesai && $jamKirim >= $selesai => 'habis',
+            $mulai && $jamKirim >= $mulai     => 'sekarang',
+            default                           => 'ganti',
+        };
+
         return response()->json(['tanda' => [
             'id'      => $t->id,
+            'jenis'   => $jenis,
             'kunci'   => $t->id . ':' . $t->dikirim_at?->timestamp, // dikirim ulang = muncul lagi
             'jam'     => $j->waktu?->nama,
             'mulai'   => $j->waktu?->jam_mulai,

@@ -5,7 +5,9 @@
         * 5 menit sebelum jam mulai -> "Sebentar lagi ..."
         * saat jam mulai           -> "Pelajaran sudah dimulai" + tombol "Absen sekarang"
       Muncul jendela + bunyi alarm + getar HP (+ notifikasi browser kalau diizinkan). Tiap pengingat hanya sekali.
-    - Tanda dari admin (dasbor admin > Pergantian Pelajaran) dicek tiap 20 detik -> jendela "Admin: sudah pergantian pelajaran";
+    - Tanda dari admin (dasbor admin > Pergantian Pelajaran) dicek tiap 20 detik. Pesannya menurut jam saat admin mengirim:
+      jam guru sudah lewat -> "waktu pelajaran sudah habis", sedang berjalan -> "sekarang jam pelajaran Anda",
+      belum mulai -> "sudah pergantian pelajaran";
       ditutup / Absen sekarang = admin melihat "Dilihat guru".
     - Hanya bekerja selama web asatid terbuka (boleh di tab belakang). Bunyi baru bisa keluar setelah halaman disentuh sekali.
     Vue: #pengingat-pelajaran.
@@ -20,7 +22,7 @@ $pengingatData = \App\Http\Controllers\Asatid\AsatidDashboardController::dataPen
         <div v-if="tampil" class="fixed inset-x-0 bottom-0 z-[60] p-4 sm:p-6 flex justify-center pointer-events-none">
             <div role="alertdialog" aria-live="assertive"
                 class="pointer-events-auto w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-[0_24px_64px_-16px_rgba(11,51,44,0.55)] ring-1 ring-black/5">
-                <div class="relative p-5 text-white" :class="tampil.tipe === 'admin' ? 'bg-gradient-to-br from-[#135347] to-[#071f1a]' : (tampil.tipe === 'mulai' ? 'bg-gradient-to-br from-emerald-500 to-teal-700' : 'bg-gradient-to-br from-amber-400 to-orange-600')">
+                <div class="relative p-5 text-white" :class="warna(tampil)">
                     <div class="flex items-center gap-3">
                         <span class="w-12 h-12 shrink-0 rounded-2xl bg-white/20 flex items-center justify-center animate-bounce">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
@@ -34,6 +36,7 @@ $pengingatData = \App\Http\Controllers\Asatid\AsatidDashboardController::dataPen
                 <div class="p-5">
                     <p class="text-base font-bold text-slate-800" v-text="[tampil.kelas, tampil.kitab].filter(Boolean).join(' · ')"></p>
                     <p class="mt-0.5 text-sm text-slate-500" v-text="[tampil.jam, tampil.mulai ? tampil.mulai + (tampil.selesai ? '–' + tampil.selesai : '') : null].filter(Boolean).join(' · ')"></p>
+                    <p v-if="pesan(tampil)" class="mt-2 text-sm font-semibold" :class="tampil.jenis === 'habis' ? 'text-rose-600' : 'text-emerald-700'" v-text="pesan(tampil)"></p>
 
                     <button v-if="izin === 'default'" type="button" @click="mintaIzin"
                         class="mt-3 w-full rounded-2xl bg-sky-50 px-4 py-2.5 text-xs font-semibold text-sky-700 ring-1 ring-sky-200 hover:bg-sky-100">
@@ -112,8 +115,27 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         methods: {
             judul(p) {
-                if (p.tipe === 'admin') return @js(__('Admin: sudah pergantian pelajaran'));
+                if (p.tipe === 'admin') {
+                    if (p.jenis === 'habis') return @js(__('Admin: waktu pelajaran sudah habis'));
+                    if (p.jenis === 'sekarang') return @js(__('Admin: sekarang jam pelajaran Anda'));
+                    return @js(__('Admin: sudah pergantian pelajaran'));
+                }
                 return p.tipe === 'mulai' ? @js(__('Pelajaran sudah dimulai')) : @js(__('Sebentar lagi pelajaran dimulai'));
+            },
+            // Kalimat tambahan di bawah nama kelas (hanya untuk tanda dari admin)
+            pesan(p) {
+                if (p.tipe !== 'admin') return '';
+                if (p.jenis === 'habis') return @js(__('Silakan akhiri pelajaran.'));
+                if (p.jenis === 'sekarang') return @js(__('Silakan masuk kelas dan mulai mengajar.'));
+                return @js(__('Bersiap, sebentar lagi giliran Anda mengajar.'));
+            },
+            warna(p) {
+                if (p.tipe === 'admin') {
+                    if (p.jenis === 'habis') return 'bg-gradient-to-br from-rose-500 to-rose-800';
+                    if (p.jenis === 'sekarang') return 'bg-gradient-to-br from-emerald-500 to-teal-700';
+                    return 'bg-gradient-to-br from-[#135347] to-[#071f1a]';
+                }
+                return p.tipe === 'mulai' ? 'bg-gradient-to-br from-emerald-500 to-teal-700' : 'bg-gradient-to-br from-amber-400 to-orange-600';
             },
             // Tanda ganti pelajaran dari admin (dasbor admin > Pergantian Pelajaran)
             async cekTanda() {
