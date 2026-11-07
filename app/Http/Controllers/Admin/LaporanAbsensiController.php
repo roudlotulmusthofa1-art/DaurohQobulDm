@@ -105,8 +105,9 @@ class LaporanAbsensiController extends Controller
     {
         $tanggal = fn ($v, $bawaan) => rescue(fn () => $v ? Carbon::parse($v)->toDateString() : $bawaan, $bawaan, false);
 
-        $dari = $tanggal($request->dari, now()->startOfMonth()->toDateString());
-        $sampai = $tanggal($request->sampai, now()->toDateString());
+        // Pakai tanggal WIB (server memakai UTC, 7 jam di belakang)
+        $dari = $tanggal($request->dari, now('Asia/Jakarta')->startOfMonth()->toDateString());
+        $sampai = $tanggal($request->sampai, now('Asia/Jakarta')->toDateString());
         if ($dari > $sampai) {
             [$dari, $sampai] = [$sampai, $dari];
         }

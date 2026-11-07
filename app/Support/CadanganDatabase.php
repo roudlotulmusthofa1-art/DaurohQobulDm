@@ -39,9 +39,9 @@ class CadanganDatabase
             'tabel' => ['absensi_detail', 'absensi'],
         ],
         'penilaian' => [
-            'label' => 'Pelanggaran & Pencapaian',
-            'keterangan' => 'Semua laporan pelanggaran & pencapaian siswa dari asatid. Jenisnya (Master Data) tetap disimpan.',
-            'tabel' => ['pelanggaran_siswa', 'pencapaian_siswa'],
+            'label' => 'Catatan Santri',
+            'keterangan' => 'Semua catatan pencapaian & pelanggaran santri dari asatid (Penilaian > Catatan).',
+            'tabel' => ['catatan_siswa'],
         ],
         'akademik' => [
             'label' => 'Akademik',
@@ -56,8 +56,8 @@ class CadanganDatabase
         ],
         'master' => [
             'label' => 'Master Data',
-            'keterangan' => 'Bidang ilmu, waktu pelajaran, kelas, kamar, jenis kegiatan/pelanggaran/pencapaian/khidmah, kategori berita.',
-            'tabel' => ['bidang_ilmu', 'waktu_pelajaran', 'kelas', 'kamar', 'jenis_kegiatan', 'jenis_pelanggaran', 'jenis_pencapaian', 'jenis_khidmah', 'kategori_berita'],
+            'keterangan' => 'Bidang ilmu, waktu pelajaran, kelas, kamar, jenis kegiatan/khidmah, kategori berita.',
+            'tabel' => ['bidang_ilmu', 'waktu_pelajaran', 'kelas', 'kamar', 'jenis_kegiatan', 'jenis_khidmah', 'kategori_berita'],
         ],
         'pengaturan' => [
             'label' => 'Pengaturan',

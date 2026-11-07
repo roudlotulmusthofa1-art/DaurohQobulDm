@@ -57,8 +57,7 @@ class MenuAdmin
                 'icon'  => 'clipboard-pen-line',
                 'submenu' => [
                     ['route' => 'admin.penilaian.kelas.index',       'active' => 'admin.penilaian.kelas.*',       'label' => __('Kelas & Pelajaran'), 'icon' => 'notebook-pen'],
-                    ['route' => 'admin.penilaian.pelanggaran.index', 'active' => 'admin.penilaian.pelanggaran.*', 'label' => __('Pelanggaran'), 'icon' => 'shield-alert'],
-                    ['route' => 'admin.penilaian.pencapaian.index',  'active' => 'admin.penilaian.pencapaian.*',  'label' => __('Pencapaian'), 'icon' => 'trophy'],
+                    ['route' => 'admin.penilaian.catatan.index',     'active' => 'admin.penilaian.catatan.*',     'label' => __('Catatan'), 'icon' => 'notebook-text'],
                 ],
             ],
 

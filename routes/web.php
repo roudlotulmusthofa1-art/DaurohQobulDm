@@ -91,13 +91,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
     Route::delete('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'destroy'])->name('laporan-absensi.destroy');
 
-    // Penilaian: Kelas & Pelajaran, Pelanggaran, Pencapaian (laporan dari asatid)
+    // Penilaian: Kelas & Pelajaran, Catatan (pencapaian & pelanggaran dari asatid)
     Route::controller(\App\Http\Controllers\Admin\PenilaianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {
         Route::get('kelas', 'kelas')->name('kelas.index');
-        foreach (\App\Support\JenisPenilaian::TIPE as $tipe) {
-            Route::get($tipe, 'catatan')->defaults('tipe', $tipe)->name("{$tipe}.index");
-            Route::delete("{$tipe}/{id}", 'hapus')->defaults('tipe', $tipe)->whereNumber('id')->name("{$tipe}.hapus");
-        }
+        Route::get('catatan', 'catatan')->name('catatan.index');
+        Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
     });
 
     // Sistem > Pengaturan: route-nya ada di routes/pengaturan.php

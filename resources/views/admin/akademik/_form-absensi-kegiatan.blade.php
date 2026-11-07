@@ -6,6 +6,9 @@ $baru = ! $a;
 // Isian lama dipakai lagi hanya untuk form yang tadi dikirim
 $nilai = fn ($kolom, $bawaan) => $baru && old('_form') === 'baru' ? old($kolom, $bawaan) : $bawaan;
 $jam = fn ($v) => $v ? substr((string) $v, 0, 5) : null;
+// Formulir baru: jam mulai = jam sekarang (WIB), terlambat +15 menit, alfa +45 menit (paling lambat 23:59)
+$sekarang = now('Asia/Jakarta');
+$bawaan = fn ($menit) => $sekarang->copy()->addMinutes($menit)->isSameDay($sekarang) ? $sekarang->copy()->addMinutes($menit)->format('H:i') : '23:59';
 $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 ring-slate-200 bg-white text-slate-600 text-center has-[:checked]:bg-emerald-600 has-[:checked]:text-white has-[:checked]:ring-emerald-600 transition-colors';
 @endphp
 <form method="POST" action="{{ $aksi }}" class="p-5 sm:p-6 space-y-4 max-h-[85vh] overflow-y-auto">
@@ -32,12 +35,13 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 rin
         <label class="col-span-2"><span class="{{ $label }}">{{ __('Tanggal *') }}</span>
             <input type="date" name="tanggal" required value="{{ $nilai('tanggal', $a?->tanggal?->toDateString() ?? now('Asia/Jakarta')->toDateString()) }}" class="{{ $input }}"></label>
         <label><span class="{{ $label }}">{{ __('Jam mulai *') }}</span>
-            <input type="time" name="jam_mulai" required value="{{ $nilai('jam_mulai', $jam($a?->jam_mulai) ?? '20:00') }}" class="{{ $input }}"></label>
+            <input type="time" name="jam_mulai" required value="{{ $nilai('jam_mulai', $jam($a?->jam_mulai) ?? $bawaan(0)) }}" @change="geserBatas" class="{{ $input }}"></label>
         <label><span class="{{ $label }}">{{ __('Batas terlambat *') }}</span>
-            <input type="time" name="batas_terlambat" required value="{{ $nilai('batas_terlambat', $jam($a?->batas_terlambat) ?? '20:15') }}" class="{{ $input }}"></label>
+            <input type="time" name="batas_terlambat" required value="{{ $nilai('batas_terlambat', $jam($a?->batas_terlambat) ?? $bawaan(15)) }}" class="{{ $input }}"></label>
         <label class="col-span-2"><span class="{{ $label }}">{{ __('Batas alfa *') }}</span>
-            <input type="time" name="batas_alfa" required value="{{ $nilai('batas_alfa', $jam($a?->batas_alfa) ?? '20:45') }}" class="{{ $input }}">
-            <span class="mt-1 block text-[11px] text-slate-400">{{ __('Sebelum batas terlambat = Hadir · sampai batas alfa = Terlambat · setelahnya = Alfa.') }}</span></label>
+            <input type="time" name="batas_alfa" required value="{{ $nilai('batas_alfa', $jam($a?->batas_alfa) ?? $bawaan(45)) }}" class="{{ $input }}">
+            <span class="mt-1 block text-[11px] text-slate-400">{{ __('Sebelum batas terlambat = Hadir · sampai batas alfa = Terlambat · setelahnya = Alfa.') }}</span>
+            <span class="mt-0.5 block text-[11px] text-slate-400">{{ __('Saat jam mulai diganti, batas terlambat (+15 menit) dan batas alfa (+45 menit) ikut menyesuaikan. Absensi ditutup otomatis saat batas alfa lewat.') }}</span></label>
     </div>
 
     <div><span class="{{ $label }}">{{ __('Cara absen *') }}</span>

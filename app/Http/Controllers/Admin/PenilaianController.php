@@ -4,17 +4,16 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
-use App\Support\JenisPenilaian;
+use App\Models\CatatanSiswa;
+use App\Support\DataCatatan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
  * Admin > Penilaian.
  * - Kelas & Pelajaran : Nilai Harian / Ujian Lisan / Ujian (alurnya menyusul)
- * - Pelanggaran       : rekap per siswa + semua laporan asatid + Terlambat/Alfa dari absensi
- * - Pencapaian        : rekap per siswa + semua laporan asatid
- * Pelanggaran & Pencapaian memakai halaman yang sama (admin/penilaian/catatan.blade.php),
- * pengaturannya di App\Support\JenisPenilaian.
+ * - Catatan           : catatan Pencapaian & Pelanggaran dari asatid
+ *                       (+ Terlambat/Alfa dari absensi sebagai pelanggaran), lihat App\Support\DataCatatan
  */
 class PenilaianController extends Controller
 {
@@ -28,37 +27,30 @@ class PenilaianController extends Controller
         return view('admin.penilaian.kelas', ['tab' => $tab]);
     }
 
-    /** GET /admin/penilaian/pelanggaran  &  /admin/penilaian/pencapaian */
-    public function catatan(Request $request, string $tipe)
+    /** GET /admin/penilaian/catatan?jenis=pencapaian|pelanggaran&dari=&sampai= */
+    public function catatan(Request $request)
     {
-        $atur = JenisPenilaian::ambil($tipe);
-
         $f = $request->validate([
             'dari'   => ['nullable', 'date'],
             'sampai' => ['nullable', 'date', 'after_or_equal:dari'],
         ]);
-        $dari = $f['dari'] ?? null;
-        $sampai = $f['sampai'] ?? null;
+        $jenis = array_key_exists((string) $request->query('jenis'), CatatanSiswa::JENIS) ? $request->query('jenis') : '';
 
-        if ($atur['dari_absensi']) {
-            Absensi::tutupYangLewat(); // Alfa dari absensi kegiatan yang waktunya habis ikut terhitung
-        }
+        Absensi::tutupYangLewat(); // Alfa dari absensi kegiatan yang waktunya habis ikut terhitung
 
         return view('admin.penilaian.catatan', [
-            'atur'   => $atur,
-            'baris'  => JenisPenilaian::semuaBaris($tipe, $dari, $sampai),
-            'jenis'  => JenisPenilaian::daftarJenis($tipe, false),
-            'dari'   => $dari,
-            'sampai' => $sampai,
+            'baris'  => DataCatatan::semuaBaris($f['dari'] ?? null, $f['sampai'] ?? null),
+            'jenis'  => $jenis,
+            'dari'   => $f['dari'] ?? null,
+            'sampai' => $f['sampai'] ?? null,
         ]);
     }
 
-    /** DELETE /admin/penilaian/{tipe}/{id} — hapus laporan asatid yang salah */
-    public function hapus(Request $request, string $id): JsonResponse
+    /** DELETE /admin/penilaian/catatan/{catatan} — hapus catatan asatid yang salah */
+    public function hapus(CatatanSiswa $catatan): JsonResponse
     {
-        $model = JenisPenilaian::ambil($request->route('tipe'))['model'];
-        $model::findOrFail($id)->delete();
+        $catatan->delete();
 
-        return response()->json(['message' => __('Laporan dihapus.')]);
+        return response()->json(['message' => __('Catatan dihapus.')]);
     }
 }

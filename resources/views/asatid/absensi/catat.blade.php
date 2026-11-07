@@ -360,7 +360,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         headers: { 'Content-Type': 'application/json', Accept: 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) },
                         body: JSON.stringify({ ...isi, jam: jamSekarang() }),
                     });
-                    const json = await res.json();
+                    // Halaman galat (mis. sesi habis / 419) bukan JSON -> pakai pesan umum
+                    const json = await res.json().catch(() => ({
+                        message: res.status === 419
+                            ? @js(__('Sesi sudah habis. Muat ulang halaman lalu coba lagi.'))
+                            : @js(__('Gagal mencatat.')),
+                    }));
                     if (json.ditutup) this.selesaiDitutup(true);
                     if (!res.ok) throw new Error(json.message || @js(__('Gagal mencatat.')));
 
@@ -373,6 +378,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 } catch (e) {
                     this.galatPindai = e.message;
                     setTimeout(() => (this.galatPindai = ''), 3500);
+                    // Kotak galat di atas hanya terlihat di tab QR; di tab Cari Nama tampilkan notifikasi
+                    if (this.tab !== 'qr') window.notifikasi?.gagal(e.message);
                     bip(220);
                     return null;
                 } finally {

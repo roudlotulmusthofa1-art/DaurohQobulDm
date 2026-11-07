@@ -132,7 +132,7 @@ class Absensi extends Model
      */
     public function statusMenurutJam(?string $jam = null): string
     {
-        $jam ??= now()->format('H:i');
+        $jam ??= now('Asia/Jakarta')->format('H:i');
         $terlambat = substr((string) $this->batas_terlambat, 0, 5);
         $alfa = substr((string) $this->batas_alfa, 0, 5);
 

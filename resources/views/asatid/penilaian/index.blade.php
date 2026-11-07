@@ -1,4 +1,4 @@
-{{-- Akun Asatid > Penilaian: menu Nilai Harian, Ujian Lisan, Ujian, Pelanggaran, Pencapaian (Asatid\PenilaianController@index) --}}
+{{-- Akun Asatid > Penilaian: menu Nilai Harian, Ujian Lisan, Ujian, Catatan (Asatid\PenilaianController@index) --}}
 @extends('layouts.asatid')
 
 @section('judul', __('Penilaian'))
@@ -21,10 +21,8 @@ $kelompok = [
     [
         'judul' => __('Perilaku & Prestasi'),
         'menu'  => [
-            ['url' => route('asatid.penilaian.pelanggaran'), 'judul' => __('Pelanggaran'), 'ket' => __('Laporkan pelanggaran siswa. Langsung masuk ke admin.'), 'warna' => 'from-rose-400 to-red-600', 'cahaya' => 'bg-rose-400/30', 'segera' => false, 'jumlah' => $jumlah['pelanggaran'],
-                'ikon' => 'M12 9v3.75m0-10.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.75c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.25-8.25-3.286zm0 13.036h.008v.008H12v-.008z'],
-            ['url' => route('asatid.penilaian.pencapaian'), 'judul' => __('Pencapaian'), 'ket' => __('Laporkan pencapaian / prestasi siswa. Langsung masuk ke admin.'), 'warna' => 'from-emerald-400 to-teal-600', 'cahaya' => 'bg-emerald-400/30', 'segera' => false, 'jumlah' => $jumlah['pencapaian'],
-                'ikon' => 'M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0'],
+            ['url' => route('asatid.penilaian.catatan'), 'judul' => __('Catatan'), 'ket' => __('Catat pencapaian atau pelanggaran santri. Langsung masuk ke admin.'), 'warna' => 'from-rose-400 via-amber-400 to-emerald-500', 'cahaya' => 'bg-amber-400/30', 'segera' => false, 'jumlah' => $jumlah,
+                'ikon' => 'M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487zm0 0L19.5 7.125'],
         ],
     ],
 ];
@@ -65,7 +63,7 @@ $kelompok = [
                     @else
                     <span class="text-right">
                         <span class="block text-xl font-extrabold text-slate-800 tabular-nums">{{ $m['jumlah'] }}</span>
-                        <span class="block text-[10px] text-slate-400">{{ __('laporan Anda') }}</span>
+                        <span class="block text-[10px] text-slate-400">{{ __('catatan Anda') }}</span>
                     </span>
                     @endif
                 </div>

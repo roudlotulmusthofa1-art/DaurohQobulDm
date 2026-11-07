@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\BidangIlmu;
 use App\Models\JenisKegiatan;
 use App\Models\JenisKhidmah;
-use App\Models\JenisPelanggaran;
-use App\Models\JenisPencapaian;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
@@ -22,7 +20,7 @@ use Illuminate\View\View;
 
 /**
  * Master Data: Bidang Ilmu, Waktu Pelajaran, Kelas, Kamar, Jenis Kegiatan,
- * Jenis Pelanggaran, Jenis Pencapaian, Jenis Khidmah, Kategori Berita.
+ * Jenis Khidmah, Kategori Berita.
  * (Semester dipindah ke menu Akademik > Tahun & Bulan Ajaran.)
  *
  * Satu controller untuk 9 model.
@@ -40,8 +38,6 @@ class MasterDataController extends Controller
         'kelas' => Kelas::class,
         'kamar' => Kamar::class,
         'jenis-kegiatan' => JenisKegiatan::class,
-        'jenis-pelanggaran' => JenisPelanggaran::class,
-        'jenis-pencapaian' => JenisPencapaian::class,
         'jenis-khidmah' => JenisKhidmah::class,
         'kategori-berita' => KategoriBerita::class,
     ];
@@ -209,7 +205,7 @@ class MasterDataController extends Controller
                 'kasur_per_baris' => ['nullable', 'integer', 'min:1', 'max:12'],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
             ],
-            'jenis-kegiatan', 'jenis-pelanggaran', 'jenis-pencapaian', 'jenis-khidmah' => [
+            'jenis-kegiatan', 'jenis-khidmah' => [
                 'nama' => ['required', 'string', 'max:100'],
                 'warna' => ['nullable', 'string', Rule::in(array_keys(self::COLORS))],
                 'deskripsi' => ['nullable', 'string', 'max:1000'],
@@ -347,46 +343,6 @@ class MasterDataController extends Controller
                 'fields' => [
                     ['key' => 'nama', 'label' => __('Nama Kegiatan'), 'type' => 'text', 'required' => true, 'placeholder' => __('cth. Muhadharah')],
                     ['key' => 'warna', 'label' => __('Warna'), 'type' => 'color', 'default' => 'bg-teal-100'],
-                    ['key' => 'deskripsi', 'label' => __('Deskripsi'), 'type' => 'textarea'],
-                ],
-            ],
-
-            'jenis-pelanggaran' => [
-                'icon' => 'shield-alert',
-                'accent' => '#ef4444',
-                'label' => __('Jenis Pelanggaran'),
-                'title' => __('Jenis Pelanggaran'),
-                'description' => __('Kelola daftar jenis pelanggaran santri. Seret baris untuk mengubah urutan.'),
-                'add_label' => __('Tambah Pelanggaran'),
-                'singular' => __('Jenis Pelanggaran'),
-                'columns' => [
-                    ['key' => 'nama', 'label' => __('Nama Pelanggaran'), 'type' => 'name'],
-                    ['key' => 'warna', 'label' => __('Warna'), 'type' => 'color'],
-                    ['key' => 'deskripsi', 'label' => __('Deskripsi'), 'type' => 'text'],
-                ],
-                'fields' => [
-                    ['key' => 'nama', 'label' => __('Nama Pelanggaran'), 'type' => 'text', 'required' => true, 'placeholder' => __('cth. Terlambat sholat berjamaah')],
-                    ['key' => 'warna', 'label' => __('Warna'), 'type' => 'color', 'default' => 'bg-red-100'],
-                    ['key' => 'deskripsi', 'label' => __('Deskripsi'), 'type' => 'textarea'],
-                ],
-            ],
-
-            'jenis-pencapaian' => [
-                'icon' => 'trophy',
-                'accent' => '#f59e0b',
-                'label' => __('Jenis Pencapaian'),
-                'title' => __('Jenis Pencapaian'),
-                'description' => __('Kelola daftar jenis pencapaian/prestasi santri. Seret baris untuk mengubah urutan.'),
-                'add_label' => __('Tambah Pencapaian'),
-                'singular' => __('Jenis Pencapaian'),
-                'columns' => [
-                    ['key' => 'nama', 'label' => __('Nama Pencapaian'), 'type' => 'name'],
-                    ['key' => 'warna', 'label' => __('Warna'), 'type' => 'color'],
-                    ['key' => 'deskripsi', 'label' => __('Deskripsi'), 'type' => 'text'],
-                ],
-                'fields' => [
-                    ['key' => 'nama', 'label' => __('Nama Pencapaian'), 'type' => 'text', 'required' => true, 'placeholder' => __('cth. Hafal Juz 30')],
-                    ['key' => 'warna', 'label' => __('Warna'), 'type' => 'color', 'default' => 'bg-amber-100'],
                     ['key' => 'deskripsi', 'label' => __('Deskripsi'), 'type' => 'textarea'],
                 ],
             ],

@@ -5,8 +5,6 @@ namespace Database\Seeders;
 use App\Models\BidangIlmu;
 use App\Models\JenisKegiatan;
 use App\Models\JenisKhidmah;
-use App\Models\JenisPelanggaran;
-use App\Models\JenisPencapaian;
 use App\Models\Kamar;
 use App\Models\KategoriBerita;
 use App\Models\Kelas;
@@ -63,22 +61,6 @@ class MasterDataSeeder extends Seeder
             ['nama' => 'Ziarah',          'warna' => 'bg-violet-100', 'deskripsi' => 'Ziarah makam auliya.'],
             ['nama' => 'Maulid',          'warna' => 'bg-pink-100',   'deskripsi' => 'Pembacaan maulid bersama.'],
             ['nama' => 'Sholat Berjamaah','warna' => 'bg-sky-100',    'deskripsi' => 'Sholat lima waktu berjamaah.'],
-        ]);
-
-        $this->isi(JenisPelanggaran::class, [
-            ['nama' => 'Terlambat sholat berjamaah', 'warna' => 'bg-amber-100',  'deskripsi' => 'Datang setelah iqamah.'],
-            ['nama' => 'Tidak ikut pelajaran',       'warna' => 'bg-orange-100', 'deskripsi' => 'Absen tanpa izin.'],
-            ['nama' => 'Keluar pondok tanpa izin',   'warna' => 'bg-red-100',    'deskripsi' => 'Meninggalkan pondok tanpa izin pengurus.'],
-            ['nama' => 'Membawa HP',                 'warna' => 'bg-rose-100',   'deskripsi' => 'Menyimpan HP di kamar.'],
-            ['nama' => 'Tidur saat pelajaran',       'warna' => 'bg-yellow-100', 'deskripsi' => 'Tidur ketika pelajaran berlangsung.'],
-        ]);
-
-        $this->isi(JenisPencapaian::class, [
-            ['nama' => 'Hafal Juz 30',         'warna' => 'bg-emerald-100', 'deskripsi' => 'Menyelesaikan hafalan Juz Amma.'],
-            ['nama' => 'Khatam Kitab',         'warna' => 'bg-teal-100',    'deskripsi' => 'Menyelesaikan satu kitab pelajaran.'],
-            ['nama' => 'Juara Lomba',          'warna' => 'bg-amber-100',   'deskripsi' => 'Juara lomba di dalam atau luar pondok.'],
-            ['nama' => 'Santri Teladan',       'warna' => 'bg-sky-100',     'deskripsi' => 'Akhlak dan kedisiplinan terbaik.'],
-            ['nama' => 'Kehadiran Sempurna',   'warna' => 'bg-violet-100',  'deskripsi' => 'Hadir penuh selama satu bulan.'],
         ]);
 
         $this->isi(JenisKhidmah::class, [

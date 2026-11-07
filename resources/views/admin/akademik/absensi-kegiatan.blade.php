@@ -165,7 +165,23 @@ $hariIni = now('Asia/Jakarta')->toDateString();
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         Vue.createApp({
-            methods: { ...metodeHalaman }, // bukaDialog, tutupDialog, konfirmasi (partials/vue-metode)
+            methods: {
+                ...metodeHalaman, // bukaDialog, tutupDialog, konfirmasi (partials/vue-metode)
+
+                /** Jam mulai diganti -> batas terlambat = +15 menit, batas alfa = +45 menit (masih bisa diubah manual) */
+                geserBatas(e) {
+                    const form = e.target.form;
+                    const [j, m] = (e.target.value || '').split(':').map(Number);
+                    if (!form || isNaN(j) || isNaN(m)) return;
+                    // Paling lambat 23:59 supaya tidak loncat ke hari berikutnya
+                    const jadi = (tambah) => {
+                        const t = Math.min(j * 60 + m + tambah, 23 * 60 + 59);
+                        return String(Math.floor(t / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+                    };
+                    form.elements.batas_terlambat.value = jadi(15);
+                    form.elements.batas_alfa.value = jadi(45);
+                },
+            },
             mounted() {
                 // Gagal simpan (isian salah) -> buka lagi form baru supaya isian bisa diperbaiki
                 @if ($errors->any() && old('_form') === 'baru')

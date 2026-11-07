@@ -94,10 +94,11 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Tutup otomatis (2026-11-06):** begitu tanggal + batas alfa lewat (jam WIB), absensi kegiatan tertutup sendiri dan yang belum tercatat = Alfa (`Absensi::tutupKalauLewat()` / `tutupYangLewat()`, dipanggil saat halaman absensi / laporan dibuka; tanpa cron).
 
 ### Penilaian (2026-11-06)
-- **Admin > PENILAIAN**: Kelas & Pelajaran (`admin/penilaian/kelas`, 3 tombol: Nilai Harian · Ujian Lisan · Ujian, alurnya MENYUSUL), Pelanggaran & Pencapaian (satu halaman `admin/penilaian/catatan`, `Admin/PenilaianController`): ringkasan, rekap per siswa, semua laporan (saring + hapus).
-- **Asatid > Penilaian** (`Asatid/PenilaianController`, view `asatid/penilaian/*`): menu 5 kartu; lapor Pelanggaran/Pencapaian = pilih siswa (boleh beberapa) + jenis dari Master Data + tanggal (hari ikut) + jam (otomatis sekarang, bisa diubah) + catatan. Asatid hanya melihat/menghapus laporannya sendiri.
-- Tabel `pelanggaran_siswa`, `pencapaian_siswa` (migrasi `2026_11_14_100000_...`, perlu `migrate` + `sesi:migrate`). Pengaturan & data bersama di `App\Support\JenisPenilaian`; model dasar `CatatanPenilaian`.
-- Terlambat & Alfa dari absensi kelas/kegiatan ikut masuk Pelanggaran, dibaca langsung dari tabel absensi (tidak disalin).
+- **Admin > PENILAIAN**: Kelas & Pelajaran (`admin/penilaian/kelas`, 3 tombol: Nilai Harian · Ujian Lisan · Ujian, alurnya MENYUSUL) dan **Catatan** (`admin/penilaian/catatan`, `Admin/PenilaianController`): tombol Semua · Pencapaian · Pelanggaran, ringkasan, rekap per santri, semua catatan (saring + hapus).
+- **Asatid > Penilaian** (`Asatid/PenilaianController`, view `asatid/penilaian/*`): kartu Nilai Harian/Ujian Lisan/Ujian (segera hadir) + **Catatan** = pilih santri (boleh beberapa) → jenis Pencapaian/Pelanggaran → isi catatan (wajib) → tanggal (hari ikut) & jam (otomatis sekarang, bisa diubah). Asatid hanya melihat/menghapus catatannya sendiri.
+- Tabel `catatan_siswa` (kolom `jenis` = pencapaian | pelanggaran; migrasi `2026_11_14_120000_...`). Data bersama di `App\Support\DataCatatan`, model `CatatanSiswa`.
+- Terlambat & Alfa dari absensi kelas/kegiatan ikut dihitung sebagai Pelanggaran, dibaca langsung dari tabel absensi (tidak disalin).
+- Master Data **Jenis Pelanggaran & Jenis Pencapaian sudah DIHAPUS** (model, tab, seeder, migrasi). Migrasi `2026_11_14_130000_hapus_jenis_pelanggaran_pencapaian` membuang tabelnya di server.
 - **Kelulusan** disembunyikan dari menu Akademik (akan diperbaiki); halaman `admin/kelulusan` & datanya masih ada.
 
 ### Data Santri: Ketua & Wakil kamar (2026-11-06)
