@@ -179,11 +179,12 @@
                         <x-ribath-icon name="clock" class="w-5 h-5" /> {{ __('Informasi Waktu Dauroh') }}
                     </div>
                     <p class="text-sm text-slate-600">
-                        {{ __('Sistem unik 5 tahun:') }} <strong>{{ __('Tamhidi → Ibtida → Tsanawiyah') }}</strong>
+                        {{ __('Bisa Menghubungi Admin langsung ') }}
+                        {{-- <strong>{{ __('Tamhidi → Ibtida → Tsanawiyah') }}</strong> --}}
                     </p>
-                    <a href="#kurikulum"
+                    <a href="#kontak"
                         class="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-blue-700">
-                        {{ __('Struktur Komprehensif') }} <span aria-hidden="true">→</span>
+                        {{ __('Admin Dauroh') }} <span aria-hidden="true">→</span>
                     </a>
                 </div>
                 <div class="rounded-2xl bg-amber-50 p-6">
@@ -213,7 +214,9 @@
         </div>
     </section>
 
-    {{-- ============ program dauroh ============ --}}
+
+
+    {{-- ============ program dauroh ============
     <section id="program-dauroh" class="bg-linear-to-b from-[#073504] to-[#0e7407] text-[#f8fffb] py-20 min-h-screen">
         <div class="max-w-6xl mx-auto px-6">
             <div class="text-center max-w-2xl mx-auto">
@@ -261,11 +264,8 @@
                 @endforeach
             </div>
         </div>
-    </section>
-
-
-
-    {{-- ============ persiapan dan persyaratan dauroh ============ --}}
+    </section> --}}
+    {{-- ============ persiapan dan persyaratan dauroh ============
     <section id="persiapan-dauroh" class="bg-linear-to-b from-[#fbfbfb] to-[#e9ece6] text-white py-20 min-h-screen">
         <div class="max-w-6xl sm-max-w-12xl mx-auto px-6">
             <div class="text-center max-w-4xl mx-auto">
@@ -286,66 +286,6 @@
                         Formulir Pendaftaran.') }}</span>
                 </p>
             </div>
-
-            {{-- <div class="mt-14 grid md:grid-cols-2 gap-6">
-                @foreach ($kurikulum as $item)
-                <div @class([ 'rounded-2xl p-7 border'=> true,
-                    'bg-gradient-to-br from-amber-50 to-stone-100 text-slate-800 border-amber-200' =>
-                    !empty($item['highlight']),
-                    'bg-white/5 border-white/10' => empty($item['highlight']),
-                    'md:col-span-2' => $item['title'] === '45 Kitab Kuning Klasik',
-                    ])>
-                    <div class="flex items-start justify-between">
-                        <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0
-                                @class([
-                                    'bg-blue-500' => $item['color'] === 'blue',
-                                    'bg-purple-500' => $item['color'] === 'purple',
-                                    'bg-emerald-500' => $item['color'] === 'green',
-                                    'bg-orange-500' => $item['color'] === 'orange',
-                                    'bg-teal-500' => $item['color'] === 'teal',
-                                ])">
-                                <x-ribath-icon :name="$item['icon']" class="w-6 h-6 text-white" />
-                            </div>
-                            <h3 class="text-xl font-bold">{{ $item['title'] }}</h3>
-                        </div>
-                        <div class="text-right shrink-0">
-                            <p
-                                class="text-xs uppercase tracking-wide {{ !empty($item['highlight']) ? 'text-amber-700' : 'text-slate-400' }}">
-                                {{ $item['level'] }}</p>
-                            <p
-                                class="mt-1 text-sm font-semibold {{ !empty($item['highlight']) ? 'text-amber-700' : 'text-amber-400' }}">
-                                ⏱ {{ $item['duration'] }}</p>
-                        </div>
-                    </div>
-
-                    <p
-                        class="mt-4 text-sm leading-relaxed {{ !empty($item['highlight']) ? 'text-slate-700' : 'text-slate-400' }}">
-                        {{ $item['desc'] }}
-                    </p>
-
-                    <ul class="mt-4 space-y-2">
-                        @foreach ($item['points'] as $point)
-                        <li
-                            class="flex items-center gap-2 text-sm {{ !empty($item['highlight']) ? 'text-slate-700' : 'text-slate-300' }}">
-                            <x-ribath-icon name="check"
-                                class="w-4 h-4 {{ !empty($item['highlight']) ? 'text-amber-600' : 'text-amber-400' }} shrink-0" />
-                            {{ $point }}
-                        </li>
-                        @endforeach
-                    </ul>
-
-                    <div class="mt-5 flex items-center gap-1.5">
-                        @for ($i = 1; $i <= 5; $i++) <span @class([ 'h-1.5 rounded-full'=> true,
-                            'w-6 bg-amber-500' => $i <= $item['progress'], 'w-1.5 bg-white/15'=> $i > $item['progress']
-                                && empty($item['highlight']),
-                                'w-1.5 bg-slate-300' => $i > $item['progress'] && !empty($item['highlight']),
-                                ])></span>
-                                @endfor
-                    </div>
-                </div>
-                @endforeach
-            </div> --}}
             <div class="mt-14 grid md:grid-cols-2 gap-6 ">
                 @foreach ($fitur as $item)
                 <div
@@ -367,7 +307,7 @@
                 @endforeach
             </div>
         </div>
-    </section>
+    </section> --}}
 
     {{-- ============ HUBUNGI KAMI ============ --}}
     <section id="kontak" class="bg-linear-to-b from-white to-slate-300 py-20">
