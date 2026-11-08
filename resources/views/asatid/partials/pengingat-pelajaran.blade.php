@@ -144,8 +144,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const res = await fetch(CEK_TANDA, { headers: { Accept: 'application/json' } });
                     if (!res.ok) return;
                     const t = (await res.json()).tanda;
-                    if (!t || sudah.has('tanda:' + t.kunci)) return;
-                    sudah.add('tanda:' + t.kunci);
+                    if (!t || pernah('tanda:' + t.kunci)) return;
+                    tandai('tanda:' + t.kunci);
                     this.munculkan({ ...t, tipe: 'admin' });
                 } catch (e) { /* offline: coba lagi nanti */ }
             },
@@ -162,7 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         : (menit >= mulai - SEBELUM && menit < mulai ? 'segera' : null);
                     if (!tipe) continue;
                     const kunci = `pengingat-pelajaran:${tgl}:${j.id}:${tipe}`;
-                    if (pernah(kunci)) continue;
+                    if (pernah(kunci) || pernah(`pengingat-pelajaran:${tgl}:${j.id}:ditutup`)) continue;
                     tandai(kunci);
                     this.munculkan({ ...j, tipe });
                     break;
@@ -184,6 +184,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             },
             tutup() {
+                // Sudah ditutup = mudarris sudah tahu: pelajaran ini tidak diingatkan lagi hari ini
+                if (this.tampil && this.tampil.tipe !== 'admin') tandai(`pengingat-pelajaran:${tanggalIni(new Date())}:${this.tampil.id}:ditutup`);
                 // Tanda dari admin: beri tahu admin bahwa guru sudah melihat
                 if (this.tampil?.tipe === 'admin') {
                     fetch(LIHAT_TANDA.replace('__ID__', this.tampil.id), {

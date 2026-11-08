@@ -75,8 +75,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     :class="form.kitab_id === k.id ? 'bg-sky-50 ring-2 ring-sky-500' : 'bg-[#f8fbfa] ring-slate-200/80 hover:ring-sky-300 hover:bg-white'">
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-bold text-slate-800 break-words" v-text="k.nama"></span>
-                        <span v-if="k.arab" dir="rtl" class="block text-slate-600 break-words" v-text="k.arab"></span>
-                        <span v-if="k.bidang" class="block text-[11px] text-slate-400 truncate" v-text="k.bidang"></span>
+
+                        <span v-if="k.bidang" class="block text-[11px] text-slate-400 truncate mt-2" v-text="k.bidang"></span>
                     </span>
                     <span v-if="dijadwal(k.id)" class="shrink-0 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-200">{{ __('Terjadwal') }}</span>
                 </button>
