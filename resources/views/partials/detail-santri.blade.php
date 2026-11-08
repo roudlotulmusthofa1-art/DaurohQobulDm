@@ -16,7 +16,7 @@ $seksi = [
 __('Nama Lengkap (Indonesia)') => $p->nama_lengkap,
 __('Nama Lengkap (Arab)') => $p->nama_lengkap_arab,
 __('Tempat Lahir') => $p->tempat_lahir,
-'Tanggal Lahir' => optional($p->tanggal_lahir)->translatedFormat('d F Y'),
+__('Tanggal Lahir') => $p->tanggal_lahir ? $p->tanggal_lahir->translatedFormat('d F Y') : null,
 __('Status Pernikahan') => isset($p::STATUS_PERNIKAHAN[$p->status_pernikahan]) ? __($p::STATUS_PERNIKAHAN[$p->status_pernikahan]) : null,
 __('No. WhatsApp') => $p->no_hp,
 __('Email') => $p->email,
@@ -466,7 +466,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div class="pointer-events-none absolute -right-6 -bottom-8 text-white/10">{!! $svg('cap', 'w-32 h-32') !!}</div>
             <div class="relative flex items-start justify-between gap-3">
                 <span class="w-10 h-10 rounded-2xl bg-white/20 flex items-center justify-center">{!! $svg('cap') !!}</span>
-                
+
             </div>
             <p class="relative mt-4 text-xs font-medium text-white/70">{{ __('Kelas Ditempatkan') }}</p>
             <p class="relative text-lg font-bold">{{ $p->kelasMaster?->nama ?? __('Belum dipilih') }}</p>
