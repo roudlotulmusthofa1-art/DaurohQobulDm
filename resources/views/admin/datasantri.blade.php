@@ -486,7 +486,10 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 
             {{-- Tombol aksi --}}
             <div class="mt-3 grid grid-cols-3 gap-2">
-                <a :href="santri.detail_url" class="inline-flex items-center justify-center rounded-xl bg-teal-50 py-2 text-sm font-semibold text-teal-700 active:scale-95 transition">{{ __('Lihat detail') }}</a>
+                <a :href="santri.detail_url" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center justify-center rounded-xl bg-teal-50 py-2 text-sm font-semibold text-teal-700 active:scale-95 transition">
+                    {{ __('Lihat detail') }}
+                </a>
                 <a :href="urlKartuQr + '?ids=' + santri.id" target="_blank" rel="noopener"
                     class="inline-flex items-center justify-center rounded-xl bg-emerald-50 py-2 text-sm font-semibold text-emerald-700 active:scale-95 transition">{{ __('Cetak QR') }}</a>
                 <button type="button" @click="hapus(santri)" :disabled="menghapus === santri.id"
@@ -611,7 +614,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <td class="px-4 py-3">
                             <div class="flex items-center gap-3">
                                 {{-- Detail = halaman pendaftaran santri (di sana kelas/kamar bisa diubah) --}}
-                                <a :href="santri.detail_url"
+                                <a :href="santri.detail_url" target="_blank"
                                     class="text-gray-400 hover:text-teal-600 transition" title="{{ __('Lihat detail / ubah kelas & kamar') }}">
                                     <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"

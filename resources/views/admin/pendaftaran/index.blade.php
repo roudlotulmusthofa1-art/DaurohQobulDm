@@ -139,7 +139,7 @@
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-center gap-1">
                                     {{-- Ikon mata: buka detail siswa --}}
-                                    <a href="{{ route('admin.pendaftaran.show', $p) }}"
+                                    <a href="{{ route('admin.pendaftaran.show', $p) }}" target="_blank"
                                         class="inline-flex h-8 w-8 items-center justify-center rounded-lg text-teal-700 transition hover:bg-teal-50"
                                         title="{{ __('Lihat detail siswa') }}" aria-label="{{ __('Lihat detail :nama', ['nama' => $p->nama_lengkap]) }}">
                                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 24 24"

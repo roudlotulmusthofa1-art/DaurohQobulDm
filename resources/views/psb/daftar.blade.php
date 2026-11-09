@@ -23,9 +23,11 @@
             <div class="pointer-events-none absolute -bottom-40 -left-20 w-96 h-96 rounded-full bg-amber-300/10 blur-3xl"></div>
 
             <div class="relative max-w-5xl mx-auto px-4 text-center">
-                <div class="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#eff5f0] ring-4 ring-white/10 shadow-xl shadow-black/30 flex items-center justify-center overflow-hidden">
-                    <img src="{{ asset('images/Logo dar4.png') }}" alt="{{ __('Logo Dauroh Qobul') }}" class="w-full h-full object-contain">
-                </div>
+                <a href="/">
+                    <div class="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#eff5f0] ring-4 ring-white/10 shadow-xl shadow-black/30 flex items-center justify-center overflow-hidden" title="Kembali Ke beranda">
+                        <img src="{{ asset('images/Logo dar4.png') }}" alt="{{ __('Logo Dauroh Qobul') }}" class="w-full h-full object-contain">
+                    </div>
+                </a>
                 <p class="mt-5 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-amber-200/90">{{ __('Dauroh Qobul · Darul Musthofa Tarim') }}</p>
                 <h1 class="mt-2 text-3xl sm:text-5xl font-extrabold tracking-tight">{{ __('Pendaftaran Peserta Baru') }}</h1>
                 <p class="mt-3 text-sm sm:text-lg text-emerald-50/75 max-w-2xl mx-auto">{{ __('Isi 6 langkah berikut dengan data yang benar') }}</p>
@@ -37,7 +39,7 @@
                     </span>
                     <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 px-3.5 py-1.5">
                         <svg class="w-4 h-4 text-amber-200" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776"/></svg>
-                        {{ __('Siapkan paspor & berkas') }}
+                        {{ __('Siapkan Foto dan Berkas Yang Lain') }}
                     </span>
                     <span class="inline-flex items-center gap-2 rounded-full bg-white/10 ring-1 ring-white/15 px-3.5 py-1.5">
                         <svg class="w-4 h-4 text-cyan-300" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802"/></svg>
