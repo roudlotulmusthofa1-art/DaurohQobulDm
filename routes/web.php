@@ -101,6 +101,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::get('catatan', 'catatan')->name('catatan.index');
         Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
     });
+    // Penilaian Dakwah: Khitoba' & Khurujud Dakwah + Laporan Dakwah
+    Route::controller(\App\Http\Controllers\Admin\PenilaianDakwahController::class)->group(function () {
+        Route::get('penilaian/dakwah', 'index')->name('penilaian.dakwah.index');
+        Route::post('penilaian/dakwah/pilihan', 'simpanPilihan')->name('penilaian.dakwah.pilihan');
+        Route::delete('penilaian/dakwah/pilihan/{pilihan}', 'hapusPilihan')->whereNumber('pilihan')->name('penilaian.dakwah.pilihan.hapus');
+        Route::post('penilaian/dakwah/nilai', 'simpanNilai')->name('penilaian.dakwah.nilai');
+        Route::delete('penilaian/dakwah/nilai/{nilai}', 'hapusNilai')->whereNumber('nilai')->name('penilaian.dakwah.nilai.hapus');
+        Route::get('laporan-dakwah', 'laporan')->name('laporan-dakwah.index');
+    });
 
     // Sistem > Pengaturan: route-nya ada di routes/pengaturan.php
     // Route::resource('wali', AdminWaliController::class);

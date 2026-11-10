@@ -58,6 +58,7 @@ class MenuAdmin
                 'submenu' => [
                     ['route' => 'admin.penilaian.kelas.index',       'active' => 'admin.penilaian.kelas.*',       'label' => __('Kelas & Pelajaran'), 'icon' => 'notebook-pen'],
                     ['route' => 'admin.penilaian.catatan.index',     'active' => 'admin.penilaian.catatan.*',     'label' => __('Catatan'), 'icon' => 'notebook-text'],
+                    ['route' => 'admin.penilaian.dakwah.index',      'active' => 'admin.penilaian.dakwah.*',      'label' => __('Penilaian Dakwah'), 'icon' => 'mic'],
                 ],
             ],
 
@@ -77,6 +78,7 @@ class MenuAdmin
                     ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => __('Laporan Akademik'), 'icon' => 'chart-column'],
                     ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => __('Laporan Keuangan'), 'icon' => 'chart-pie'],
                     ['route' => 'admin.laporan-absensi.index',   'active' => 'admin.laporan-absensi.*',   'label' => __('Laporan Absensi'), 'icon' => 'clipboard-check'],
+                    ['route' => 'admin.laporan-dakwah.index',    'active' => 'admin.laporan-dakwah.*',    'label' => __('Laporan Dakwah'), 'icon' => 'megaphone'],
                 ],
             ],
             [
