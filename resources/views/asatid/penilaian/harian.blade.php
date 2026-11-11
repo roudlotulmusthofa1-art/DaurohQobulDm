@@ -1,8 +1,9 @@
 {{--
     Akun Asatid > Penilaian > Nilai Harian (Asatid\PenilaianController@harian).
-    Urutan: 1) pilih kelas  2) pilih kitab (+ tanggal)  3) pilih santri  4) isi 6 penilaian -> Simpan.
+    Urutan: 1) pilih kelas  2) pilih kitab  3) pilih santri  4) isi 6 penilaian -> Simpan.
     Batas tiap penilaian dari App\Models\NilaiHarian::ASPEK (total 100); angka di atas batas otomatis diturunkan ke batasnya
-    (server juga menolak nilai di atas batas). Satu santri + kitab + tanggal = satu nilai (dinilai lagi = diperbarui).
+    (server juga menolak nilai di atas batas). Satu santri + kitab + bulan ajaran aktif = satu nilai:
+    nilai kemarin langsung muncul dan tinggal diteruskan (bukan nilai baru tiap hari).
     Bisa dibuka dari tombol "Nilai Harian" di absensi kelas: ?kelas_id=&siswa_id=&kitab_id=&tanggal=
     Vue: #isi-nilai-harian.
 --}}
@@ -51,7 +52,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
             <p v-else class="mt-3 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada kelas. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Kelas.') }}</p>
         </section>
 
-        {{-- ===== 2. Kitab & tanggal ===== --}}
+        {{-- ===== 2. Kitab (nilai berlaku untuk bulan ajaran aktif) ===== --}}
         <section v-if="form.kelas_id" class="{{ $kartu }} p-5">
             <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span>{{ __('Pilih kitab') }}</h3>
             <div v-if="kitabUrut.length" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -68,11 +69,18 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
             </div>
             <p v-else class="mt-3 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada kitab untuk bulan ini. Minta admin mengisinya di Kurikulum & Kitab.') }}</p>
 
-            <label class="mt-4 block">
-                <span class="text-xs font-semibold text-slate-500">{{ __('Tanggal') }}</span>
-                <input type="date" v-model="form.tanggal" @change="muatPeserta" class="mt-1 {{ $input }}">
-                <span class="mt-1 block text-xs font-semibold text-slate-500">{{ __('Hari') }}: <b class="text-slate-800" v-text="hari"></b></span>
-            </label>
+            @if ($bulan)
+            <div class="mt-4 rounded-2xl bg-sky-50 ring-1 ring-sky-200 px-4 py-3">
+                <p class="text-xs font-semibold text-sky-700">{{ __('Bulan ajaran') }}</p>
+                <p class="font-bold text-slate-800">{{ __('Bulan ke-:n', ['n' => $bulan->urutan]) }} · {{ $bulan->nama }}</p>
+                @if ($bulan->periode)
+                <p class="text-xs text-slate-500">{{ $bulan->periode }}</p>
+                @endif
+                <p class="mt-1.5 text-xs text-slate-600">{{ __('Satu kitab = satu nilai untuk bulan ini. Santri yang sudah dinilai bisa diteruskan nilainya setiap hari.') }}</p>
+            </div>
+            @else
+            <p class="mt-4 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada bulan ajaran aktif. Minta admin mengaktifkannya di Tahun & Bulan Ajaran.') }}</p>
+            @endif
         </section>
 
         {{-- ===== 3. Santri ===== --}}
@@ -92,7 +100,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
                             <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                             <span class="flex-1 min-w-0">
                                 <span class="block font-semibold text-slate-800 truncate" v-text="p.nama"></span>
-                                <span class="block text-xs text-slate-400 truncate" v-text="p.oleh ? @js(__('Dinilai')) + ' · ' + p.oleh : p.nomor"></span>
+                                <span class="block text-xs text-slate-400 truncate" v-text="p.oleh ? [@js(__('Terakhir dinilai')) + ' ' + tglPendek(p.terakhir), p.oleh].join(' · ') : p.nomor"></span>
                             </span>
                             <span v-if="p.total !== null && p.total !== undefined" class="shrink-0 min-w-[3rem] rounded-xl px-2.5 py-1.5 text-center text-sm font-extrabold tabular-nums ring-1" :class="warnaTotal(p.total)" v-text="p.total"></span>
                             <span v-else class="shrink-0 rounded-xl bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-400 ring-1 ring-slate-200">{{ __('Belum') }}</span>
@@ -170,8 +178,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const ASPEK = @json($aspek);
     const awal = @json($awal);
     const angka = (v) => (v ? Number(v) : null);
-    // Tanggal hari ini dari HP guru (waktu setempat)
-    const hariIni = () => { const d = new Date(); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+    const NAMA_BULAN = @json($bulan?->nama);
     const kosong = () => Object.fromEntries(ASPEK.map((a) => [a.kunci, 0]));
 
     Vue.createApp({
@@ -180,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
             kelasList: @json($kelasList),
             kitabList: @json($kitabList),
             terjadwal: @json($terjadwal),
-            form: { kelas_id: angka(awal.kelas_id), kitab_id: null, tanggal: awal.tanggal || hariIni() },
+            form: { kelas_id: angka(awal.kelas_id), kitab_id: null },
             peserta: [],
             santri: null,          // santri yang sedang dinilai
             nilai: kosong(),
@@ -198,13 +205,9 @@ document.addEventListener('DOMContentLoaded', () => {
             },
             total() { return ASPEK.reduce((n, a) => n + (Number(this.nilai[a.kunci]) || 0), 0); },
             sudahDinilai() { return this.peserta.filter((p) => p.total !== null && p.total !== undefined).length; },
-            hari() {
-                if (!this.form.tanggal) return '–';
-                return new Date(this.form.tanggal + 'T12:00:00').toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-            },
             judulSesi() {
                 const cari = (list, id) => (list.find((x) => x.id === id) || {}).nama || '-';
-                return `${cari(this.kelasList, this.form.kelas_id)} · ${cari(this.kitabList, this.form.kitab_id)} · ${this.hari}`;
+                return [cari(this.kelasList, this.form.kelas_id), cari(this.kitabList, this.form.kitab_id), NAMA_BULAN].filter(Boolean).join(' · ');
             },
         },
         mounted() {
@@ -219,6 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         },
         methods: {
             inisial: (n) => (n || '?').trim().charAt(0).toUpperCase(),
+            tglPendek: (t) => (t ? new Date(t + 'T12:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) : '–'),
             dijadwal(id) { return (this.terjadwal[this.form.kelas_id] || []).includes(id); },
             warnaTotal(t) {
                 if (t >= 80) return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
@@ -236,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.muatPeserta();
             },
             async muatPeserta() {
-                if (!this.form.kelas_id || !this.form.kitab_id || !this.form.tanggal) return;
+                if (!this.form.kelas_id || !this.form.kitab_id) return;
                 this.galat = '';
                 this.memuat = true;
                 try {
@@ -290,7 +294,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const galat = json.errors ? Object.values(json.errors)[0][0] : null;
                         throw new Error(galat || json.message || @js(__('Gagal menyimpan.')));
                     }
-                    Object.assign(this.santri, { nilai: { ...this.nilai }, total: json.total, oleh: json.oleh });
+                    Object.assign(this.santri, { nilai: { ...this.nilai }, total: json.total, oleh: json.oleh, terakhir: json.terakhir });
                     window.notifikasi?.sukses(json.message);
                     this.tutup();
                 } catch (e) {

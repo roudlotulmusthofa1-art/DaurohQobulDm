@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\BulanAjaran;
 use App\Models\CatatanSiswa;
 use App\Models\Kelas;
 use App\Models\Kitab;
@@ -24,7 +25,8 @@ class PenilaianController extends Controller
 
     /**
      * GET /admin/penilaian/kelas?tab=harian|lisan|ujian
-     * Nilai Harian disaring: &kelas_id=&kitab_id=&dari=&sampai= ; rekap per santri dihitung Vue.
+     * Nilai Harian disaring: &kelas_id=&kitab_id=&bulan_id= (kosong = bulan ajaran aktif, "semua" = semua bulan);
+     * satu santri + kitab + bulan ajaran = satu nilai. Rekap per santri dihitung Vue.
      */
     public function kelas(Request $request)
     {
@@ -33,15 +35,14 @@ class PenilaianController extends Controller
         $f = $request->validate([
             'kelas_id' => ['nullable', 'integer'],
             'kitab_id' => ['nullable', 'integer'],
-            'dari'     => ['nullable', 'date'],
-            'sampai'   => ['nullable', 'date', 'after_or_equal:dari'],
+            'bulan_id' => ['nullable', 'regex:/^(\d+|semua)$/'],
         ]);
+        $bulanId = $f['bulan_id'] ?? (string) (BulanAjaran::aktif()?->id ?? 'semua');
 
-        $nilai = NilaiHarian::with(['siswa', 'kelas:id,nama', 'kitab:id,nama', 'penilai:id,name'])
+        $nilai = NilaiHarian::with(['siswa', 'kelas:id,nama', 'kitab:id,nama', 'bulanAjaran:id,nama', 'penilai:id,name'])
             ->when($f['kelas_id'] ?? null, fn ($q, $v) => $q->where('kelas_id', $v))
             ->when($f['kitab_id'] ?? null, fn ($q, $v) => $q->where('kitab_id', $v))
-            ->when($f['dari'] ?? null, fn ($q, $v) => $q->whereDate('tanggal', '>=', $v))
-            ->when($f['sampai'] ?? null, fn ($q, $v) => $q->whereDate('tanggal', '<=', $v))
+            ->when($bulanId !== 'semua', fn ($q) => $q->where('bulan_ajaran_id', $bulanId))
             ->orderByDesc('tanggal')->orderByDesc('id')
             ->get()
             ->map(fn (NilaiHarian $n) => $n->baris())->values();
@@ -52,12 +53,14 @@ class PenilaianController extends Controller
             'aspek'     => NilaiHarian::daftarAspek(),
             'kelasList' => Kelas::ordered()->get(['id', 'nama']),
             'kitabList' => Kitab::orderBy('nama')->get(['id', 'nama']),
+            'bulanList' => BulanAjaran::with('tahunAjaran:id,nama')->orderByDesc('tahun_ajaran_id')->orderByDesc('urutan')
+                ->get(['id', 'tahun_ajaran_id', 'nama', 'urutan', 'is_active']),
             'saring'    => [
                 'kelas_id' => $f['kelas_id'] ?? null,
                 'kitab_id' => $f['kitab_id'] ?? null,
-                'dari'     => $f['dari'] ?? null,
-                'sampai'   => $f['sampai'] ?? null,
+                'bulan_id' => $bulanId,
             ],
+            'saringDiubah' => (bool) array_filter($f),
         ]);
     }
 

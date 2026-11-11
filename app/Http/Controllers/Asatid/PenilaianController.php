@@ -21,7 +21,8 @@ use Illuminate\Validation\Rule;
  * Dasbor asatid > Penilaian.
  * - Menu: Nilai Harian, Ujian Lisan, Ujian (alur menyusul), Catatan
  * - Nilai Harian: pilih kelas -> kitab -> santri -> isi 6 penilaian (batasnya di NilaiHarian::ASPEK).
- *   Satu santri + kitab + tanggal = satu nilai (dinilai lagi = diperbarui). Masuk ke Admin > Penilaian > Kelas & Pelajaran.
+ *   Satu santri + kitab + BULAN AJARAN AKTIF = satu nilai, diteruskan setiap hari (bukan nilai baru tiap hari).
+ *   Masuk ke Admin > Penilaian > Kelas & Pelajaran.
  * - Catatan: asatid memilih santri, jenis (Pencapaian / Pelanggaran), menulis catatan, lalu tanggal & jam
  *   (otomatis hari ini & jam sekarang, bisa diubah). Langsung masuk ke Admin > Penilaian > Catatan.
  * Asatid hanya melihat & menghapus catatannya sendiri.
@@ -63,21 +64,22 @@ class PenilaianController extends Controller
             'kitabList' => DaftarKitab::pilihan(),
             'terjadwal' => DaftarKitab::terjadwal(), // kitab yang terjadwal di tiap kelas (ditaruh paling atas)
             'aspek'     => NilaiHarian::daftarAspek(),
+            'bulan'     => BulanAjaran::aktif(),
             'awal'      => $request->only(['kelas_id', 'siswa_id', 'kitab_id', 'bidang_ilmu_id', 'tanggal']),
         ]);
     }
 
-    /** GET /asatid/penilaian/harian/peserta — JSON: santri di kelas itu + nilainya pada kitab & tanggal itu (kalau sudah ada) */
+    /** GET /asatid/penilaian/harian/peserta — JSON: santri di kelas itu + nilainya pada kitab itu di bulan ajaran aktif (kalau sudah ada) */
     public function pesertaHarian(Request $request): JsonResponse
     {
         $data = $request->validate([
             'kelas_id' => ['required', 'integer', 'exists:kelas,id'],
             'kitab_id' => ['required', 'integer', 'exists:kitab,id'],
-            'tanggal'  => ['required', 'date'],
         ]);
+        $bulan = $this->bulanAktif();
 
         $nilai = NilaiHarian::with('penilai:id,name')
-            ->where('kitab_id', $data['kitab_id'])->whereDate('tanggal', $data['tanggal'])
+            ->where('kitab_id', $data['kitab_id'])->where('bulan_ajaran_id', $bulan->id)
             ->get()->keyBy('pendaftaran_siswa_id');
 
         $peserta = PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)
@@ -95,29 +97,32 @@ class PenilaianController extends Controller
                     'nilai' => $n ? collect(NilaiHarian::ASPEK)->mapWithKeys(fn ($a, $k) => [$k => (int) $n->{$k}])->all() : null,
                     'total' => $n?->total,
                     'oleh'  => $n?->penilai?->name,
+                    'terakhir' => $n?->tanggal?->toDateString(),
                 ];
             });
 
         return response()->json(['peserta' => $peserta]);
     }
 
-    /** POST /asatid/penilaian/harian — simpan / perbarui nilai satu santri (nilai lebih dari batas ditolak) */
+    /** POST /asatid/penilaian/harian — simpan / teruskan nilai satu santri di bulan ajaran aktif (nilai lebih dari batas ditolak) */
     public function simpanHarian(Request $request): JsonResponse
     {
         $data = $request->validate([
             'kelas_id' => ['required', 'integer', 'exists:kelas,id'],
             'kitab_id' => ['required', 'integer', 'exists:kitab,id'],
-            'tanggal'  => ['required', 'date'],
             'siswa_id' => ['required', 'integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
         ] + NilaiHarian::aturan(), [
             'siswa_id.exists' => __('Santri tidak ditemukan / belum diterima.'),
             '*.max'           => __('Nilai ":attribute" tidak boleh lebih dari :max.'),
         ], collect(NilaiHarian::ASPEK)->mapWithKeys(fn ($a, $k) => [$k => __($a[0])])->all());
 
+        $bulan = $this->bulanAktif();
+
         $nilai = NilaiHarian::updateOrCreate(
-            ['pendaftaran_siswa_id' => $data['siswa_id'], 'kitab_id' => $data['kitab_id'], 'tanggal' => $data['tanggal']],
+            ['pendaftaran_siswa_id' => $data['siswa_id'], 'kitab_id' => $data['kitab_id'], 'bulan_ajaran_id' => $bulan->id],
             collect($data)->only(array_keys(NilaiHarian::ASPEK))->all() + [
                 'kelas_id'     => $data['kelas_id'],
+                'tanggal'      => now('Asia/Jakarta')->toDateString(), // terakhir dinilai
                 'dinilai_oleh' => Auth::id(),
             ],
         );
@@ -128,6 +133,7 @@ class PenilaianController extends Controller
             ]),
             'total' => $nilai->total,
             'oleh'  => Auth::user()->name,
+            'terakhir' => $nilai->tanggal->toDateString(),
         ]);
     }
 
@@ -192,6 +198,14 @@ class PenilaianController extends Controller
         CatatanSiswa::where('dicatat_oleh', Auth::id())->findOrFail($id)->delete();
 
         return response()->json(['message' => __('Catatan dihapus.')]);
+    }
+
+    /** Bulan ajaran yang sedang aktif; kalau admin belum mengaktifkan, berhenti dengan pesan yang jelas */
+    private function bulanAktif(): BulanAjaran
+    {
+        return BulanAjaran::aktif() ?? abort(response()->json([
+            'message' => __('Belum ada bulan ajaran aktif. Minta admin mengaktifkannya di Tahun & Bulan Ajaran.'),
+        ], 422));
     }
 
     /** Sama seperti halaman asatid lain: profil singkat + notifikasi */

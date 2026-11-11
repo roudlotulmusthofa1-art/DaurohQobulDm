@@ -6,7 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Penilaian > Nilai Harian: nilai satu santri untuk satu kitab pada satu tanggal.
+ * Penilaian > Nilai Harian: nilai satu santri untuk satu kitab dalam satu BULAN AJARAN.
+ * Asatid meneruskan nilai yang sama setiap hari (tidak membuat nilai baru tiap hari);
+ * kolom "tanggal" = terakhir dinilai.
  * Enam penilaian dan batas nilainya ada di ASPEK (jumlah semua batas = 100).
  * Kolom "total" dihitung otomatis setiap kali disimpan.
  */
@@ -25,7 +27,7 @@ class NilaiHarian extends Model
     protected $table = 'nilai_harian';
 
     protected $fillable = [
-        'pendaftaran_siswa_id', 'kelas_id', 'kitab_id', 'tanggal', 'dinilai_oleh',
+        'pendaftaran_siswa_id', 'kelas_id', 'kitab_id', 'bulan_ajaran_id', 'tanggal', 'dinilai_oleh',
         'menjawab_pertanyaan', 'kelengkapan_belajar', 'konsentrasi_keaktifan',
         'menulis_faidah', 'menjawab_sistematis', 'tugas_tepat_waktu',
     ];
@@ -78,6 +80,11 @@ class NilaiHarian extends Model
         return $this->belongsTo(Kitab::class);
     }
 
+    public function bulanAjaran(): BelongsTo
+    {
+        return $this->belongsTo(BulanAjaran::class);
+    }
+
     /** Asatid yang menilai */
     public function penilai(): BelongsTo
     {
@@ -100,6 +107,8 @@ class NilaiHarian extends Model
             'kelas'    => $this->kelas?->nama,
             'kitab_id' => $this->kitab_id,
             'kitab'    => $this->kitab?->nama,
+            'bulan_id' => $this->bulan_ajaran_id,
+            'bulan'    => $this->bulanAjaran?->nama,
             'tanggal'  => $this->tanggal->toDateString(),
             'hari'     => $this->tanggal->locale('id')->translatedFormat('l'),
             'nilai'    => collect(self::ASPEK)->mapWithKeys(fn ($a, $k) => [$k => (int) $this->{$k}])->all(),

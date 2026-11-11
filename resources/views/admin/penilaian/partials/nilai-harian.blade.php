@@ -1,6 +1,7 @@
 {{--
     Admin > Penilaian > Kelas & Pelajaran > Nilai Harian (dimuat dari admin/penilaian/kelas.blade.php, di dalam Vue #halaman-penilaian-kelas).
-    - Saringan kelas, kitab, periode (form GET biasa)
+    - Saringan kelas, kitab, bulan ajaran (form GET biasa; awalnya bulan ajaran aktif)
+    - Satu santri + kitab + bulan ajaran = satu nilai (diteruskan asatid setiap hari, "tanggal" = terakhir dinilai)
     - Ringkasan, Rekap per santri (rata-rata total & tiap penilaian), Semua nilai (bisa dihapus)
     Data: $nilai (NilaiHarian::baris), $aspek (6 penilaian + batasnya), $saring.
 --}}
@@ -27,13 +28,16 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                     <option value="{{ $k->id }}" @selected((int) $saring['kitab_id'] === $k->id)>{{ $k->nama }}</option>
                     @endforeach
                 </select></label>
-            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Dari') }}</span>
-                <input type="date" name="dari" value="{{ $saring['dari'] }}" class="mt-1 {{ $inputSaring }}"></label>
-            <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Sampai') }}</span>
-                <input type="date" name="sampai" value="{{ $saring['sampai'] }}" class="mt-1 {{ $inputSaring }}"></label>
+            <label class="block col-span-2"><span class="text-xs font-semibold text-slate-500">{{ __('Bulan ajaran') }}</span>
+                <select name="bulan_id" class="mt-1 {{ $inputSaring }}">
+                    <option value="semua" @selected($saring['bulan_id'] === 'semua')>{{ __('Semua bulan') }}</option>
+                    @foreach ($bulanList as $b)
+                    <option value="{{ $b->id }}" @selected($saring['bulan_id'] === (string) $b->id)>{{ __('Bulan ke-:n', ['n' => $b->urutan]) }} · {{ $b->nama }}{{ $b->tahunAjaran ? ' · ' . $b->tahunAjaran->nama : '' }}{{ $b->is_active ? ' (' . __('aktif') . ')' : '' }}</option>
+                    @endforeach
+                </select></label>
             <div class="col-span-2 lg:col-span-1 flex gap-2">
                 <button class="flex-1 px-5 py-2.5 rounded-xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Terapkan') }}</button>
-                @if (array_filter($saring))
+                @if ($saringDiubah)
                 <a href="?tab=harian" class="px-3 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Reset') }}</a>
                 @endif
             </div>
@@ -90,7 +94,7 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                     <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(r.siswa)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block font-semibold text-slate-800 truncate" v-text="r.siswa"></span>
-                        <span class="block text-xs text-slate-400 truncate" v-text="[r.kelas, r.jumlah + ' ' + @js(__('kali dinilai'))].filter(Boolean).join(' · ')"></span>
+                        <span class="block text-xs text-slate-400 truncate" v-text="[r.kelas, r.jumlah + ' ' + @js(__('kitab dinilai'))].filter(Boolean).join(' · ')"></span>
                     </span>
                     <span class="shrink-0 rounded-xl px-2.5 py-1.5 text-sm font-extrabold tabular-nums ring-1" :class="warnaTotal(r.rata)" v-text="bulat(r.rata)"></span>
                 </div>
@@ -109,7 +113,7 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                     <tr class="text-left text-xs font-semibold text-slate-500 border-b border-slate-100">
                         <th class="py-2.5 pr-3 w-8">#</th>
                         <th class="py-2.5 pr-3">{{ __('Santri') }}</th>
-                        <th class="py-2.5 px-2 text-center">{{ __('Dinilai') }}</th>
+                        <th class="py-2.5 px-2 text-center">{{ __('Kitab') }}</th>
                         <th v-for="(a, i) in aspek" :key="a.kunci" class="py-2.5 px-2 text-center" :title="a.label">
                             <span v-text="i + 1"></span><span class="block text-[10px] font-normal text-slate-400" v-text="'/' + a.maks"></span>
                         </th>
@@ -144,7 +148,7 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                 <span class="shrink-0 min-w-[3rem] rounded-xl px-2.5 py-1.5 text-center text-sm font-extrabold tabular-nums ring-1" :class="warnaTotal(n.total)" v-text="n.total"></span>
                 <span class="flex-1 min-w-0">
                     <span class="block font-semibold text-slate-800" v-text="n.siswa"></span>
-                    <span class="block text-xs text-slate-400" v-text="[n.kelas, n.kitab, n.hari + ', ' + n.tanggal, n.oleh ? @js(__('oleh')) + ' ' + n.oleh : null].filter(Boolean).join(' · ')"></span>
+                    <span class="block text-xs text-slate-400" v-text="[n.kelas, n.kitab, n.bulan, @js(__('terakhir dinilai')) + ' ' + n.tanggal, n.oleh ? @js(__('oleh')) + ' ' + n.oleh : null].filter(Boolean).join(' · ')"></span>
                     <span class="mt-1.5 flex flex-wrap gap-1">
                         <span v-for="(a, i) in aspek" :key="a.kunci" :title="a.label"
                             class="rounded-lg bg-slate-50 px-2 py-0.5 text-[11px] text-slate-500 ring-1 ring-slate-200 tabular-nums"

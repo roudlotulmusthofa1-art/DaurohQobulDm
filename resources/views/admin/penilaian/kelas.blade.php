@@ -140,8 +140,8 @@ $bagian = [
                     return 'bg-rose-50 text-rose-700 ring-rose-200';
                 },
                 async hapus(n) {
-                    const tanya = @js(__('Hapus nilai harian :nama (:kitab, :tanggal)?'));
-                    if (!confirm(tanya.replace(':nama', n.siswa).replace(':kitab', n.kitab || '-').replace(':tanggal', n.tanggal))) return;
+                    const tanya = @js(__('Hapus nilai harian :nama (:kitab, :bulan)?'));
+                    if (!confirm(tanya.replace(':nama', n.siswa).replace(':kitab', n.kitab || '-').replace(':bulan', n.bulan || n.tanggal))) return;
                     this.menghapus = n.id;
                     try {
                         const res = await fetch(HAPUS.replace('__ID__', n.id), {
