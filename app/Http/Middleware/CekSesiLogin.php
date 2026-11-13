@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Support\AkunBersama;
+use App\Support\MasukSebagai;
 use App\Support\SesiAplikasi;
 use Closure;
 use Illuminate\Http\Request;
@@ -18,6 +19,16 @@ class CekSesiLogin
 {
     public function handle(Request $request, Closure $next): Response
     {
+        // Akun dinonaktifkan admin saat sedang masuk -> langsung dikeluarkan
+        // (kecuali Super Admin sedang "Masuk sebagai" akun itu, hanya untuk melihat)
+        if (Auth::check() && Auth::user()->aktif === false && ! MasukSebagai::aktif() && $request->hasSession()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->with('error', __('Akun Anda dinonaktifkan. Hubungi admin.'));
+        }
+
         $sesi = SesiAplikasi::aktif();
 
         if ($sesi && Auth::check() && $request->hasSession()) {

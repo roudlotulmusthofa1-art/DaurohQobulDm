@@ -37,6 +37,14 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
 
+            // Akun yang dinonaktifkan admin (Sistem > Daftar User) tidak bisa masuk
+            if ($user->aktif === false) {
+                Auth::logout();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors(['email' => __('Akun Anda dinonaktifkan. Hubungi admin.')])->onlyInput('email');
+            }
+
             // Akun siswa baru bisa dipakai setelah admin menyatakan DITERIMA
             if ($user->role === 'siswa' && ! $user->pendaftaran?->bolehMasukDasbor()) {
                 $pesan = $user->pendaftaran?->alasanBelumBolehMasuk() ?? 'Akun siswa ini belum terhubung ke data pendaftaran.';

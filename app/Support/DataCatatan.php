@@ -5,6 +5,7 @@ namespace App\Support;
 use App\Models\Absensi;
 use App\Models\AbsensiDetail;
 use App\Models\CatatanSiswa;
+use App\Models\IzinSantri;
 use App\Models\PendaftaranSiswa;
 use Illuminate\Support\Collection;
 
@@ -12,10 +13,11 @@ use Illuminate\Support\Collection;
  * Penilaian > Catatan: data bersama untuk halaman admin & asatid.
  *
  * Satu baris (untuk Vue) bentuknya selalu:
- *   id, nomor_id, sumber ('guru' | 'absensi'), asal ('terlambat' | 'alfa' | null), jenis ('pencapaian' | 'pelanggaran'), label,
+ *   id, nomor_id, sumber ('guru' | 'absensi' | 'izin'), asal ('terlambat' | 'alfa' | null), jenis ('pencapaian' | 'pelanggaran'), label,
  *   siswa_id, siswa, arab, nomor, kelas, foto, tanggal (Y-m-d), hari, jam (H:i), catatan, keterangan, oleh, url
  * Pelanggaran juga memuat setiap Terlambat & Alfa dari absensi kelas / kegiatan (sumber 'absensi'),
- * dibaca langsung dari tabel absensi, jadi ikut berubah bila absensinya dikoreksi.
+ * dan setiap izin yang terlambat kembali dari Perizinan (sumber 'izin').
+ * Keduanya dibaca langsung dari tabelnya, jadi ikut berubah bila absensi / waktu kembali dikoreksi.
  */
 class DataCatatan
 {
@@ -28,7 +30,7 @@ class DataCatatan
             ->get()
             ->map(fn (CatatanSiswa $c) => self::baris($c));
 
-        return $catatan->concat(self::barisAbsensi($dari, $sampai))
+        return $catatan->concat(self::barisAbsensi($dari, $sampai))->concat(self::barisIzin($dari, $sampai))
             ->sortByDesc(fn ($b) => $b['tanggal'] . ' ' . ($b['jam'] ?? '00:00'))
             ->values();
     }
@@ -84,6 +86,45 @@ class DataCatatan
                     'keterangan' => ($kegiatan ? __('Absensi kegiatan') : __('Absensi kelas')) . ' · ' . $a->judul,
                     'oleh'       => $d->pencatat?->name ?? $a->pengabsen?->name,
                     'url'        => route('admin.laporan-absensi.show', $a),
+                ];
+            })
+            ->values();
+    }
+
+    /** Izin yang terlambat kembali (atau belum kembali padahal batas lewat) = pelanggaran. Tanggal = tanggal batas izin. */
+    public static function barisIzin(?string $dari = null, ?string $sampai = null): Collection
+    {
+        return IzinSantri::terlambat()
+            ->when($dari, fn ($q) => $q->whereDate('selesai', '>=', $dari))
+            ->when($sampai, fn ($q) => $q->whereDate('selesai', '<=', $sampai))
+            ->with(['siswa.kelasMaster', 'pemberi:id,name'])
+            ->get()
+            ->filter(fn ($i) => $i->siswa)
+            ->map(function (IzinSantri $i) {
+                $batas = $i->waktu('selesai');
+                $kembali = $i->waktu('kembali');
+                $lama = IzinSantri::lama($i->menitTerlambat());
+
+                return self::siswa($i->siswa) + [
+                    'id'         => 'i' . $i->id,
+                    'nomor_id'   => null,
+                    'sumber'     => 'izin',
+                    'asal'       => null,
+                    'jenis'      => CatatanSiswa::PELANGGARAN,
+                    'label'      => __('Terlambat izin'),
+                    'tanggal'    => $batas->toDateString(),
+                    'hari'       => $batas->locale('id')->translatedFormat('l'),
+                    'jam'        => $batas->format('H:i'),
+                    'catatan'    => $kembali
+                        ? __('Izin :jenis sampai :batas, kembali :kembali (terlambat :lama).', [
+                            'jenis' => $i->jenis, 'batas' => $batas->format('d/m H:i'), 'kembali' => $kembali->format('d/m H:i'), 'lama' => $lama,
+                        ])
+                        : __('Izin :jenis sampai :batas, belum kembali (sudah lewat :lama).', [
+                            'jenis' => $i->jenis, 'batas' => $batas->format('d/m H:i'), 'lama' => $lama,
+                        ]),
+                    'keterangan' => __('Perizinan') . ' · ' . $i->jenis,
+                    'oleh'       => $i->pemberi?->name,
+                    'url'        => route('admin.penilaian.perizinan.index'),
                 ];
             })
             ->values();

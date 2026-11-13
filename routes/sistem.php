@@ -23,6 +23,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Daftar User (semua akun beserta role-nya)
     Route::get('user', [DaftarUserController::class, 'index'])->name('akun.index');
     Route::put('user/{user}/role', [DaftarUserController::class, 'ubahRole'])->name('akun.role');
+    Route::put('user/{user}/aktif', [DaftarUserController::class, 'ubahAktif'])->name('akun.aktif'); // Aktif / Nonaktif
 
     // Masuk sebagai asatid/siswa (khusus Super Admin, hanya untuk melihat dasbor mereka)
     Route::post('masuk-sebagai/{user}', [MasukSebagaiController::class, 'mulai'])->name('masuk-sebagai');

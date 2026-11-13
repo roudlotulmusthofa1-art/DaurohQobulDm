@@ -7,6 +7,8 @@ use App\Models\Absensi;
 use App\Models\AbsensiDetail;
 use App\Models\JenisKegiatan;
 use App\Models\PendaftaranSiswa;
+use App\Support\CatatKegiatan;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -143,6 +145,48 @@ class AbsensiKegiatanController extends Controller
             'batas_alfa.after'           => 'Batas alfa harus setelah batas terlambat.',
             '*.date_format'              => 'Format jam harus JJ:MM, mis. 20:00.',
         ]);
+    }
+
+    /** GET /admin/absensi-kegiatan/{absensi}/catat — admin ikut mengabsen (pindai QR / cari nama) */
+    public function catat(Absensi $absensi)
+    {
+        $this->pastikanDariAdmin($absensi);
+
+        if ($absensi->tutupKalauLewat()) {
+            return redirect()->route('admin.absensi-kegiatan.index', ['saring' => 'selesai'])
+                ->with('success', __('Waktu absensi sudah lewat batas alfa. Absensi ditutup otomatis, peserta yang belum tercatat dihitung Alfa.'));
+        }
+        if ($absensi->selesai_at) {
+            return redirect()->route('admin.absensi-kegiatan.index', ['saring' => 'selesai'])
+                ->with('success', __('Absensi kegiatan ini sudah ditutup. Hasilnya bisa dilihat lewat tombol "Lihat hasil".'));
+        }
+        if (! $absensi->aktif) {
+            return redirect()->route('admin.absensi-kegiatan.index')
+                ->with('error', __('Aktifkan dulu absensi kegiatan ini sebelum mengabsen.'));
+        }
+
+        $absensi->load('kegiatan');
+
+        return view('admin.akademik.absensi-kegiatan-catat', [
+            'absensi' => $absensi,
+            'peserta' => CatatKegiatan::peserta($absensi, 'admin.pendaftaran.show'),
+        ]);
+    }
+
+    /** POST /admin/absensi-kegiatan/{absensi}/catat — catat satu peserta (aturan sama dengan asatid) */
+    public function simpanCatatan(Request $request, Absensi $absensi): JsonResponse
+    {
+        $this->pastikanDariAdmin($absensi);
+
+        return CatatKegiatan::simpan($request, $absensi, 'admin.pendaftaran.show');
+    }
+
+    /** GET /admin/absensi-kegiatan/{absensi}/status — catatan terbaru (dari asatid & admin) tiap 10 detik */
+    public function status(Absensi $absensi): JsonResponse
+    {
+        $this->pastikanDariAdmin($absensi);
+
+        return CatatKegiatan::status($absensi);
     }
 
     private function pastikanDariAdmin(Absensi $absensi): void

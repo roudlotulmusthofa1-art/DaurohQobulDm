@@ -88,6 +88,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Absensi kegiatan dibuat admin, dicatat bersama semua asatid
     Route::post('absensi-kegiatan/{absensi}/aktif', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'aktif'])->name('absensi-kegiatan.aktif');
     Route::post('absensi-kegiatan/{absensi}/tutup', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'tutup'])->name('absensi-kegiatan.tutup');
+    // Admin ikut mengabsen (halaman catat sama dengan asatid)
+    Route::get('absensi-kegiatan/{absensi}/catat', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'catat'])->name('absensi-kegiatan.catat');
+    Route::post('absensi-kegiatan/{absensi}/catat', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'simpanCatatan'])->name('absensi-kegiatan.catat.simpan');
+    Route::get('absensi-kegiatan/{absensi}/status', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'status'])->name('absensi-kegiatan.catat.status');
     Route::resource('absensi-kegiatan', \App\Http\Controllers\Admin\AbsensiKegiatanController::class)
         ->only(['index', 'store', 'update', 'destroy'])->parameters(['absensi-kegiatan' => 'absensi']);
     Route::get('laporan-absensi', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'index'])->name('laporan-absensi.index');
@@ -109,6 +113,16 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('penilaian/dakwah/nilai', 'simpanNilai')->name('penilaian.dakwah.nilai');
         Route::delete('penilaian/dakwah/nilai/{nilai}', 'hapusNilai')->whereNumber('nilai')->name('penilaian.dakwah.nilai.hapus');
         Route::get('laporan-dakwah', 'laporan')->name('laporan-dakwah.index');
+    });
+    // Perizinan santri (yang terlambat kembali otomatis masuk catatan pelanggaran)
+    Route::controller(\App\Http\Controllers\Admin\PerizinanController::class)->prefix('penilaian/perizinan')->name('penilaian.perizinan.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('jenis', 'simpanJenis')->name('jenis');
+        Route::delete('jenis/{jenis}', 'hapusJenis')->whereNumber('jenis')->name('jenis.hapus');
+        Route::post('/', 'simpan')->name('simpan');
+        Route::put('{izin}/kembali', 'kembali')->whereNumber('izin')->name('kembali');
+        Route::post('pindai', 'pindai')->name('pindai'); // Pindai Kembali (kartu QR santri)
+        Route::delete('{izin}', 'hapus')->whereNumber('izin')->name('hapus');
     });
 
     // Sistem > Pengaturan: route-nya ada di routes/pengaturan.php

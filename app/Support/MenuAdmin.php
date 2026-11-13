@@ -46,7 +46,6 @@ class MenuAdmin
                     ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => __('Tahun & Bulan Ajaran'), 'icon' => 'calendar-range'],
                     ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => __('Kurikulum & Kitab'), 'icon' => 'book-open'],
                     ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => __('Jadwal Mengajar'), 'icon' => 'calendar-clock'],
-                    ['route' => 'admin.absensi-kegiatan.index', 'active' => 'admin.absensi-kegiatan.*', 'label' => __('Absensi Kegiatan'), 'icon' => 'calendar-check'],
                     // Kelulusan disembunyikan sementara (akan diperbaiki). Halaman & datanya tetap ada:
                     // ['route' => 'admin.kelulusan.index', 'active' => 'admin.kelulusan.*', 'label' => __('Kelulusan'), 'icon' => 'award'],
                 ],
@@ -58,6 +57,8 @@ class MenuAdmin
                 'submenu' => [
                     ['route' => 'admin.penilaian.kelas.index',       'active' => 'admin.penilaian.kelas.*',       'label' => __('Kelas & Pelajaran'), 'icon' => 'notebook-pen'],
                     ['route' => 'admin.penilaian.catatan.index',     'active' => 'admin.penilaian.catatan.*',     'label' => __('Catatan'), 'icon' => 'notebook-text'],
+                    ['route' => 'admin.penilaian.perizinan.index',   'active' => 'admin.penilaian.perizinan.*',   'label' => __('Perizinan'), 'icon' => 'door-open'],
+                    ['route' => 'admin.absensi-kegiatan.index',      'active' => 'admin.absensi-kegiatan.*',      'label' => __('Absensi Kegiatan'), 'icon' => 'calendar-check'],
                     ['route' => 'admin.penilaian.dakwah.index',      'active' => 'admin.penilaian.dakwah.*',      'label' => __('Penilaian Dakwah'), 'icon' => 'mic'],
                 ],
             ],

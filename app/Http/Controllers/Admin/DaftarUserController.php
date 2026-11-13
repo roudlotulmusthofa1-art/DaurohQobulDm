@@ -9,6 +9,7 @@ use App\Models\PendaftaranSiswa;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\MenuAdmin;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
@@ -17,6 +18,7 @@ use Illuminate\Validation\Rule;
  * Sistem > Daftar User: semua akun login beserta role-nya.
  * - Akun admin & asatid dipakai bersama semua sesi; akun peserta hanya dari sesi yang sedang aktif.
  * - Super Admin bisa mengganti role pengurus akun admin (Super Admin / Bendahara / ...).
+ * - Super Admin bisa menonaktifkan akun (tidak bisa masuk; yang sedang masuk dikeluarkan oleh CekSesiLogin).
  * Pencarian, saring role & halaman diatur Vue di tampilan (resources/views/admin/sistem/user.blade.php).
  */
 class DaftarUserController extends Controller
@@ -32,7 +34,7 @@ class DaftarUserController extends Controller
         $dataAsatid = PendaftaranAsatid::whereNotNull('user_id')->pluck('id', 'user_id');
         $dataSiswa = PendaftaranSiswa::whereNotNull('user_id')->pluck('id', 'user_id');
 
-        $users = User::orderBy('name')->get(['id', 'name', 'email', 'role', 'role_id', 'created_at'])
+        $users = User::orderBy('name')->get(['id', 'name', 'email', 'role', 'role_id', 'aktif', 'created_at'])
             ->map(function (User $u) use ($bawaan, $tambahan, $dataAdmin, $dataAsatid, $dataSiswa) {
                 $role = ($u->role === 'admin' && $u->role_id) ? ($tambahan[$u->role_id] ?? null) : ($bawaan[$u->role] ?? null);
 
@@ -55,6 +57,7 @@ class DaftarUserController extends Controller
                     'urut'     => $u->created_at?->timestamp ?? 0,
                     'detail'   => $detail,
                     'saya'     => $u->id === Auth::id(),
+                    'aktif'    => $u->aktif !== false,
                 ];
             });
 
@@ -65,6 +68,26 @@ class DaftarUserController extends Controller
                 ->concat($tambahan->values()->map(fn (Role $r) => ['id' => $r->id, 'nama' => $r->nama, 'warna' => $r->warna])),
             'bisaUbah'   => MenuAdmin::izinAkun(Auth::user()) === null, // hanya Super Admin
             'bisaLihat'  => \App\Support\MasukSebagai::bolehDipakai(Auth::user()), // tombol "Masuk sebagai"
+        ]);
+    }
+
+    /** PUT /admin/user/{user}/aktif — Aktif / Nonaktif (khusus Super Admin, tidak bisa untuk akun sendiri) */
+    public function ubahAktif(Request $request, User $user): JsonResponse
+    {
+        abort_unless(MenuAdmin::izinAkun(Auth::user()) === null, 403, __('Hanya Super Admin yang bisa mengubah status akun.'));
+        abort_if($user->id === Auth::id(), 422, __('Akun Anda sendiri tidak bisa dinonaktifkan (agar tidak terkunci).'));
+
+        $data = $request->validate(['aktif' => ['required', 'boolean']]);
+
+        // Disimpan lewat model: akun admin/asatid otomatis disalin ke semua sesi (App\Support\AkunBersama)
+        $user->aktif = (bool) $data['aktif'];
+        $user->save();
+
+        return response()->json([
+            'aktif'   => $user->aktif,
+            'message' => $user->aktif
+                ? __('Akun :nama aktif kembali dan bisa masuk.', ['nama' => $user->name])
+                : __('Akun :nama dinonaktifkan dan tidak bisa masuk.', ['nama' => $user->name]),
         ]);
     }
 

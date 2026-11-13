@@ -19,7 +19,7 @@ $hariIni = now('Asia/Jakarta')->toDateString();
 <div class="space-y-5 mx-0 md:mx-6 lg:mx-12">
     @include('admin.akademik._flash')
 
-    <x-header-admin :label="__('Akademik')" :judul="__('Absensi Kegiatan')"
+    <x-header-admin :label="__('Penilaian')" :judul="__('Absensi Kegiatan')"
         :keterangan="__('Buat absensi kegiatan & atur waktunya. Yang aktif tampil di dasbor semua asatid, sehingga bisa diabsen bersama-sama.')">
         <x-slot:aksi>
             <button type="button" @click="bukaDialog('dialog-kegiatan-baru')"
@@ -105,6 +105,14 @@ $hariIni = now('Asia/Jakarta')->toDateString();
             {{-- Tombol --}}
             <div class="flex flex-wrap gap-2 border-t border-slate-100 p-3">
                 @unless ($selesai)
+                {{-- Admin ikut mengabsen (halaman catat sama dengan asatid); hanya saat aktif --}}
+                @if ($a->aktif)
+                <a href="{{ route('admin.absensi-kegiatan.catat', $a) }}"
+                    class="basis-full sm:basis-auto sm:flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0b332c] py-2 px-3 text-sm font-bold text-white hover:bg-[#135347] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/></svg>
+                    {{ __('Absen') }}
+                </a>
+                @endif
                 <form method="POST" action="{{ route('admin.absensi-kegiatan.aktif', $a) }}" class="flex-1">
                     @csrf
                     <button class="w-full rounded-xl py-2 text-sm font-semibold transition-colors {{ $a->aktif ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-600 text-white hover:bg-emerald-500' }}">

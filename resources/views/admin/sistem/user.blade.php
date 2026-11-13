@@ -70,8 +70,24 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         <span v-text="u.role"></span>
                     </span>
                 </div>
-                <div v-if="u.daftar" class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-500">
-                    <span class="inline-flex items-center gap-1">
+                <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
+                            <button v-if="bisaUbah && !u.saya" type="button" role="switch" :aria-checked="u.aktif" @click="ubahAktif(u)" :disabled="mengubah === u.id"
+                                :title="u.aktif ? @js(__('Aktif: bisa masuk. Klik untuk menonaktifkan.')) : @js(__('Nonaktif: tidak bisa masuk. Klik untuk mengaktifkan.'))"
+                                class="inline-flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-xs font-bold ring-1 transition disabled:opacity-50"
+                                :class="u.aktif ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200'">
+                                <span class="relative h-5 w-9 rounded-full transition-colors" :class="u.aktif ? 'bg-emerald-500' : 'bg-slate-300'">
+                                    <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all" :class="u.aktif ? 'left-[18px]' : 'left-0.5'"></span>
+                                </span>
+                                <span v-if="u.aktif">{{ __('Aktif') }}</span>
+                                <span v-else>{{ __('Nonaktif') }}</span>
+                            </button>
+                            <span v-else class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ring-1"
+                                :class="u.aktif ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200'">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                <span v-if="u.aktif">{{ __('Aktif') }}</span>
+                                <span v-else>{{ __('Nonaktif') }}</span>
+                            </span>
+                    <span v-if="u.daftar" class="inline-flex items-center gap-1">
                         <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
                         <span v-text="u.daftar"></span>
                     </span>
@@ -95,6 +111,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <tr>
                         <th class="px-5 py-3">{{ __('Nama') }}</th>
                         <th class="px-5 py-3">{{ __('Role') }}</th>
+                        <th class="px-5 py-3">{{ __('Status') }}</th>
                         <th class="px-5 py-3 hidden md:table-cell">{{ __('Terdaftar') }}</th>
                         <th class="px-5 py-3 text-right">{{ __('Aksi') }}</th>
                     </tr>
@@ -119,6 +136,24 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 <span v-text="u.role"></span>
                             </span>
                         </td>
+                        <td class="px-5 py-3">
+                            <button v-if="bisaUbah && !u.saya" type="button" role="switch" :aria-checked="u.aktif" @click="ubahAktif(u)" :disabled="mengubah === u.id"
+                                :title="u.aktif ? @js(__('Aktif: bisa masuk. Klik untuk menonaktifkan.')) : @js(__('Nonaktif: tidak bisa masuk. Klik untuk mengaktifkan.'))"
+                                class="inline-flex items-center gap-2 rounded-full py-1 pl-1 pr-3 text-xs font-bold ring-1 transition disabled:opacity-50"
+                                :class="u.aktif ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200'">
+                                <span class="relative h-5 w-9 rounded-full transition-colors" :class="u.aktif ? 'bg-emerald-500' : 'bg-slate-300'">
+                                    <span class="absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all" :class="u.aktif ? 'left-[18px]' : 'left-0.5'"></span>
+                                </span>
+                                <span v-if="u.aktif">{{ __('Aktif') }}</span>
+                                <span v-else>{{ __('Nonaktif') }}</span>
+                            </button>
+                            <span v-else class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold ring-1"
+                                :class="u.aktif ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200'">
+                                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                                <span v-if="u.aktif">{{ __('Aktif') }}</span>
+                                <span v-else>{{ __('Nonaktif') }}</span>
+                            </span>
+                        </td>
                         <td class="px-5 py-3 text-slate-500 hidden md:table-cell" v-text="u.daftar ?? '–'"></td>
                         <td class="px-5 py-3">
                             <div class="flex items-center justify-end gap-1.5">
@@ -132,7 +167,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                         </td>
                     </tr>
                     <tr v-if="!tampil.length">
-                        <td colspan="4" class="px-5 py-12 text-center text-slate-400">{{ __('Tidak ada user yang cocok.') }}</td>
+                        <td colspan="5" class="px-5 py-12 text-center text-slate-400">{{ __('Tidak ada user yang cocok.') }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -204,6 +239,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     bisaLihat: @json($bisaLihat),
                     URL_MASUK: @json(url('admin/masuk-sebagai')),
                     URL_USER: @json(url('admin/user')),
+                    CSRF: @json(csrf_token()),
+                    mengubah: null,      // akun yang sedang diubah status aktifnya
                     PER_HALAMAN: 15,
                     tab: [
                         { kunci: 'semua', label: @js(__('Semua User')) },
@@ -267,6 +304,29 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     const f = this.$refs.formMasuk;
                     f.action = this.URL_MASUK + '/' + u.id;
                     f.submit();
+                },
+                // Super Admin: Aktif (bisa masuk) <-> Nonaktif (tidak bisa masuk, yang sedang masuk dikeluarkan)
+                async ubahAktif(u) {
+                    const tanya = u.aktif
+                        ? @js(__('Nonaktifkan akun :nama? Akun ini tidak bisa masuk dan langsung dikeluarkan bila sedang masuk.'))
+                        : @js(__('Aktifkan kembali akun :nama?'));
+                    if (!confirm(tanya.replace(':nama', u.nama))) return;
+                    this.mengubah = u.id;
+                    try {
+                        const res = await fetch(this.URL_USER + '/' + u.id + '/aktif', {
+                            method: 'PUT',
+                            headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.CSRF },
+                            body: JSON.stringify({ aktif: !u.aktif }),
+                        });
+                        const json = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error(json.message || @js(__('Gagal menyimpan. Coba lagi.')));
+                        u.aktif = json.aktif;
+                        window.notifikasi?.sukses(json.message);
+                    } catch (e) {
+                        window.notifikasi ? window.notifikasi.gagal(e.message) : alert(e.message);
+                    } finally {
+                        this.mengubah = null;
+                    }
                 },
                 bukaUbah(u) {
                     this.dipilih = u;

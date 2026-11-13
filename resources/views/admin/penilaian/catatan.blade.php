@@ -180,6 +180,7 @@ $cepat = [
                 <option value="">{{ __('Semua sumber') }}</option>
                 <option value="guru">{{ __('Catatan asatid') }}</option>
                 <option value="absensi">{{ __('Dari absensi (Terlambat/Alfa)') }}</option>
+                <option value="izin">{{ __('Dari perizinan (terlambat kembali)') }}</option>
             </select>
             <select v-model="saring.oleh" class="{{ $input }}">
                 <option value="">{{ __('Semua pelapor') }}</option>
@@ -219,6 +220,7 @@ $cepat = [
                     <span v-if="b.oleh" class="block mt-1 text-[11px] text-slate-400">
                         {{-- spasi di dalam template: Vue membuang spasi + baris baru di antara elemen --}}
                         <template v-if="b.sumber === 'absensi'">{{ __('Dicatat oleh') }} </template>
+                        <template v-else-if="b.sumber === 'izin'">{{ __('Izin diberikan oleh') }} </template>
                         <template v-else>{{ __('Ditulis oleh') }} </template>
                         <b class="text-slate-500" v-text="b.oleh"></b>
                     </span>
