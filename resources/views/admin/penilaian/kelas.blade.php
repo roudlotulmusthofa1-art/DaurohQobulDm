@@ -3,7 +3,7 @@
     Tiga halaman dalam satu menu: Nilai Harian · Ujian Lisan · Ujian, pindah lewat tombol di atas (seperti Master Data).
     - Nilai Harian: saringan + rekap per santri + semua nilai (isi di partials/nilai-harian.blade.php)
     - Ujian Lisan: pengaturan + beri nilai + semua nilai (isi di partials/ujian-lisan.blade.php)
-    - Ujian: alurnya menyusul.
+    - Ujian: pengaturan ujian + ringkasan per kitab + rekap nilai dari asatid (isi di partials/ujian.blade.php, Vue lewat mixins)
     Vue: #halaman-penilaian-kelas (tab aktif + alamat ?tab=... ikut berubah).
 --}}
 @extends('layouts.admin')
@@ -72,24 +72,8 @@ $bagian = [
     {{-- ===== Ujian Lisan ===== --}}
     @include('admin.penilaian.partials.ujian-lisan')
 
-    {{-- ===== Ujian (alur menyusul) ===== --}}
-    @foreach (array_diff_key($bagian, ['harian' => 1, 'lisan' => 1]) as $kunci => $b)
-    <section v-show="tab === '{{ $kunci }}'" @if ($tab !== $kunci) style="display: none" @endif
-        class="relative overflow-hidden {{ $kartu }} px-6 py-12 sm:py-16 text-center">
-        <div class="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-64 rounded-full bg-gradient-to-br {{ $b['warna'] }} opacity-10 blur-3xl"></div>
-        <div class="relative">
-            <span class="mx-auto w-20 h-20 rounded-[26px] bg-gradient-to-br {{ $b['warna'] }} text-white flex items-center justify-center shadow-xl shadow-black/10">
-                <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.6" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $b['ikon'] }}"/></svg>
-            </span>
-            <span class="mt-6 inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 bg-slate-100 rounded-full px-3 py-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> {{ __('Alur menyusul') }}
-            </span>
-            <h2 class="mt-3 text-xl sm:text-2xl font-extrabold text-slate-800">{{ $b['label'] }}</h2>
-            <p class="mt-2 text-sm text-slate-500 max-w-md mx-auto leading-relaxed">{{ $b['ket'] }}</p>
-            <p class="mt-1 text-sm text-slate-400 max-w-md mx-auto">{{ __('Halaman ini disiapkan; cara pengisian nilainya akan dibuat setelah alurnya ditentukan.') }}</p>
-        </div>
-    </section>
-    @endforeach
+    {{-- ===== Ujian (tulis): pengaturan + rekap nilai ===== --}}
+    @include('admin.penilaian.partials.ujian')
 </div>
 </div>
 @endsection
@@ -129,6 +113,7 @@ $bagian = [
         const gagal = (e) => (window.notifikasi ? window.notifikasi.gagal(e.message) : alert(e.message));
 
         Vue.createApp({
+            mixins: [window.UJIAN_TULIS, window.UJIAN_SOAL], // tab Ujian: panel Nilai (partials/ujian) + panel Soal Ujian (partials/ujian-soal)
             data: () => ({
                 tab: @json($tab),
                 aspek: ASPEK,
@@ -151,7 +136,7 @@ $bagian = [
                 modalAturLisan: false,
                 modalNilaiLisan: false,
                 formUjian: ujianKosong(),
-                formLisan: { siswa_id: null, ujian_lisan_id: null, tanggal: HARI_INI, nilai: [] },
+                formLisan: { siswa_id: null, ujian_lisan_id: null, tanggal: HARI_INI, nilai: [], catatan: '' },
                 cariSantriLisan: '',
                 adaNilaiLama: false,
                 menyimpan: false,
@@ -176,7 +161,7 @@ $bagian = [
                 nilaiLisanTersaring() {
                     const k = kecil(this.cariLisan.trim());
                     return this.nilaiLisan.filter((n) => (!this.saringFanLisan || n.fan === this.saringFanLisan)
-                        && (!k || kecil(n.siswa).includes(k) || kecil(n.nomor).includes(k) || kecil(n.kitab).includes(k)));
+                        && (!k || kecil(n.siswa).includes(k) || kecil(n.nomor).includes(k) || kecil(n.kitab).includes(k) || kecil(n.catatan).includes(k)));
                 },
                 rataLisan() {
                     const d = this.nilaiLisanTersaring;
@@ -313,13 +298,13 @@ $bagian = [
 
                 /* ===== Ujian Lisan: beri nilai (admin) ===== */
                 bukaNilaiLisan() {
-                    this.formLisan = { siswa_id: null, ujian_lisan_id: null, tanggal: HARI_INI, nilai: [] };
+                    this.formLisan = { siswa_id: null, ujian_lisan_id: null, tanggal: HARI_INI, nilai: [], catatan: '' };
                     this.cariSantriLisan = '';
                     this.adaNilaiLama = false;
                     this.modalNilaiLisan = true;
                 },
                 ubahNilaiLisan(n) {
-                    this.formLisan = { siswa_id: n.siswa_id, ujian_lisan_id: n.ujian_id, tanggal: n.tanggal, nilai: [] };
+                    this.formLisan = { siswa_id: n.siswa_id, ujian_lisan_id: n.ujian_id, tanggal: n.tanggal, nilai: [], catatan: '' };
                     this.modalNilaiLisan = true;
                     this.isiNilaiLama();
                 },
@@ -328,10 +313,11 @@ $bagian = [
                 // Kalau santri + ujian + tanggal ini sudah dinilai, nilainya dimunculkan (tinggal diperbarui)
                 isiNilaiLama() {
                     const u = this.ujianLisanTerpilih;
-                    if (!u) { this.formLisan.nilai = []; return; }
+                    if (!u) { this.formLisan.nilai = []; this.formLisan.catatan = ''; return; }
                     const lama = this.nilaiLisan.find((n) => n.siswa_id === this.formLisan.siswa_id && n.ujian_id === u.id && n.tanggal === this.formLisan.tanggal);
                     this.adaNilaiLama = !!lama;
                     this.formLisan.nilai = u.maks.map((m, i) => (lama && lama.nilai[i] !== undefined ? Math.min(lama.nilai[i], m) : ''));
+                    this.formLisan.catatan = lama?.catatan || '';
                 },
                 // Angka di luar 0..maks langsung dikembalikan ke batasnya
                 batasiNilai(i, m, e) {

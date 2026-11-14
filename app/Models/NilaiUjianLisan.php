@@ -14,6 +14,7 @@ use Illuminate\Validation\ValidationException;
  * Nilai Ujian Lisan: satu santri + satu ujian (UjianLisan) + satu tanggal = satu nilai.
  * Diisi asatid (Penilaian > Ujian Lisan) atau admin (tombol Beri Nilai). Dinilai lagi di tanggal yang sama = diperbarui.
  * Nama fan, kitab & batas nilai disalin saat menilai, jadi tetap terbaca walau pengaturannya diubah / dihapus.
+ * "catatan" = catatan penilai untuk santri ini (boleh kosong), tampil di Admin > Ujian Lisan di bawah nilainya.
  */
 class NilaiUjianLisan extends Model
 {
@@ -21,7 +22,7 @@ class NilaiUjianLisan extends Model
 
     protected $fillable = [
         'pendaftaran_siswa_id', 'ujian_lisan_id', 'fan', 'kitab', 'tanggal',
-        'maks', 'nilai', 'total', 'total_maks', 'dinilai_oleh',
+        'maks', 'nilai', 'total', 'total_maks', 'catatan', 'dinilai_oleh',
     ];
 
     protected $casts = [
@@ -60,7 +61,8 @@ class NilaiUjianLisan extends Model
 
     /**
      * Simpan nilai dari form (dipakai asatid & admin).
-     * Isian: siswa_id, ujian_lisan_id (hanya ujian aktif), tanggal, nilai[] (sebanyak pertanyaan, tiap nilai 0..batasnya).
+     * Isian: siswa_id, ujian_lisan_id (hanya ujian aktif), tanggal, nilai[] (sebanyak pertanyaan, tiap nilai 0..batasnya),
+     * catatan (boleh kosong).
      */
     public static function simpanDari(Request $request): self
     {
@@ -69,6 +71,7 @@ class NilaiUjianLisan extends Model
             'ujian_lisan_id' => ['required', 'integer', Rule::exists('ujian_lisan', 'id')->where('is_active', true)],
             'tanggal'        => ['required', 'date'],
             'nilai'          => ['required', 'array'],
+            'catatan'        => ['nullable', 'string', 'max:5000'],
         ], [
             'siswa_id.required'       => __('Pilih santri dulu.'),
             'siswa_id.exists'         => __('Santri tidak ditemukan / belum diterima.'),
@@ -97,6 +100,7 @@ class NilaiUjianLisan extends Model
                 'kitab'        => $ujian->kitab?->nama,
                 'maks'         => $maks,
                 'nilai'        => array_map(fn ($i) => (int) $data['nilai'][$i], array_keys($maks)),
+                'catatan'      => trim((string) ($data['catatan'] ?? '')) ?: null,
                 'dinilai_oleh' => Auth::id(),
             ],
         )->load(['siswa.kelasMaster', 'penilai:id,name']);
@@ -124,6 +128,7 @@ class NilaiUjianLisan extends Model
             'total'      => (int) $this->total,
             'total_maks' => (int) $this->total_maks,
             'persen'     => $this->total_maks ? round($this->total / $this->total_maks * 100) : 0,
+            'catatan'    => $this->catatan,
             'oleh'       => $this->penilai?->name,
             'oleh_arab'  => NamaArab::user($this->dinilai_oleh),
             'oleh_id'    => $this->dinilai_oleh,

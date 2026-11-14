@@ -33,11 +33,22 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
         Route::post('/harian', 'simpanHarian')->middleware('throttle:120,1')->name('penilaian.harian.simpan');
         Route::get('/lisan', 'lisan')->name('penilaian.lisan');
         Route::post('/lisan', 'simpanLisan')->middleware('throttle:120,1')->name('penilaian.lisan.simpan');
+        // Ujian (tulis): Nilai Ujian + kirim / hapus soal (Asatid\UjianController). Halaman Soal Ujian ada di menu sendiri (/asatid/soal-ujian).
+        Route::controller(\App\Http\Controllers\Asatid\UjianController::class)->prefix('ujian')->name('penilaian.ujian.')->group(function () {
+            Route::get('/soal', fn () => redirect()->route('asatid.soal-ujian'))->name('soal'); // alamat lama
+            Route::post('/soal', 'simpanSoal')->middleware('throttle:60,1')->name('soal.simpan');
+            Route::delete('/soal/{id}', 'hapusSoal')->whereNumber('id')->name('soal.hapus');
+            Route::get('/nilai', 'nilai')->name('nilai');
+            Route::get('/nilai/peserta', 'peserta')->name('nilai.peserta');
+            Route::post('/nilai', 'simpanNilai')->middleware('throttle:120,1')->name('nilai.simpan');
+        });
         Route::get('/kelas/{bagian}', 'kelas')->whereIn('bagian', PenilaianController::BAGIAN_KELAS)->name('penilaian.kelas');
         Route::get('/catatan', 'catatan')->name('penilaian.catatan');
         Route::post('/catatan', 'simpan')->middleware('throttle:60,1')->name('penilaian.catatan.simpan');
         Route::delete('/catatan/{id}', 'hapus')->whereNumber('id')->name('penilaian.catatan.hapus');
     });
+    // Soal Ujian (menu di beranda): tab Buat Soal + tab Soal Disetujui (?tab=buat|disetujui)
+    Route::get('/soal-ujian', [\App\Http\Controllers\Asatid\UjianController::class, 'soal'])->name('soal-ujian');
     Route::get('/pesan', [AsatidDashboardController::class, 'pesan'])->name('pesan'); // Pesan dari Admin
     Route::get('/pesan-saya', [AsatidDashboardController::class, 'pesanSaya'])->name('pesan-saya'); // Pesan untuk Admin
     Route::post('/pesan-saya', [AsatidDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');

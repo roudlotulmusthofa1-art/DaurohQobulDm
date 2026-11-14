@@ -2,7 +2,7 @@
     Admin > Penilaian > Kelas & Pelajaran > Ujian Lisan (dimuat dari admin/penilaian/kelas.blade.php, di dalam Vue #halaman-penilaian-kelas).
     - Tombol "Pengaturan Ujian Lisan": tambah / ubah / matikan / hapus ujian
       (fan + kitab boleh kosong + jumlah pertanyaan + nilai maksimal tiap pertanyaan). Lihat App\Models\UjianLisan.
-    - Tombol "Beri Nilai": admin ikut menilai, sama seperti asatid (santri -> ujian -> tanggal -> nilai tiap pertanyaan).
+    - Tombol "Beri Nilai": admin ikut menilai, sama seperti asatid (santri -> ujian -> tanggal -> nilai tiap pertanyaan -> catatan).
     - Daftar semua nilai (dari asatid & admin) + saringan fan & cari; bisa diubah / dihapus. Lihat App\Models\NilaiUjianLisan.
     Data: $ujianLisan, $nilaiLisan, $fanList, $kitabFan, $siswaList.
 --}}
@@ -78,6 +78,9 @@ $tutupIkon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-widt
                             <span class="text-slate-400" v-text="'P' + (i + 1) + ' '"></span><b v-text="v"></b><span class="text-slate-400" v-text="'/' + n.maks[i]"></span>
                         </span>
                     </div>
+                    <p v-if="n.catatan" class="mt-1.5 rounded-xl bg-amber-50 ring-1 ring-amber-100 px-2.5 py-1.5 text-xs text-slate-700 whitespace-pre-line" dir="auto">
+                        <b class="text-amber-800">{{ __('Catatan') }}:</b> <span v-text="n.catatan"></span>
+                    </p>
                 </div>
                 <div class="flex items-center gap-1.5">
                     <span class="rounded-full px-2.5 py-1 text-xs font-bold ring-1" :class="warnaTotal(n.persen)" v-text="n.total + '/' + n.total_maks"></span>
@@ -247,6 +250,12 @@ $tutupIkon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-widt
                     </label>
                 </div>
                 <p class="mt-3 text-sm text-slate-600">{{ __('Total') }}: <b class="text-violet-700" v-text="totalNilaiLisan + ' / ' + ujianLisanTerpilih.total_maks"></b></p>
+            </div>
+
+            {{-- 5. Catatan --}}
+            <div v-if="ujianLisanTerpilih">
+                <p class="text-sm font-bold text-slate-700"><span class="text-slate-400">5.</span> {{ __('Catatan') }} <span class="font-normal text-slate-400">({{ __('boleh dikosongkan') }})</span></p>
+                <textarea v-model="formLisan.catatan" rows="3" maxlength="5000" dir="auto" class="mt-2 {{ $inputLisan }}"></textarea>
             </div>
         </div>
 

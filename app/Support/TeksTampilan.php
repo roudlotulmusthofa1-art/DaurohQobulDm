@@ -20,7 +20,7 @@ class TeksTampilan
     public const HALAMAN = [
         'admin-menu'      => ['Admin — Menu sidebar & header', ['resources/views/layouts/admin', 'app/Support/MenuAdmin.php', 'app/Providers/AppServiceProvider.php']],
         'admin-dasbor'    => ['Admin — Dasbor', ['resources/views/admin/dashboard', 'resources/views/admin/partials/pergantian-pelajaran']],
-        'admin-penilaian' => ['Admin — Penilaian', ['resources/views/admin/penilaian/', 'resources/views/admin/laporan-dakwah/', 'app/Http/Controllers/Admin/PenilaianController.php', 'app/Http/Controllers/Admin/PenilaianDakwahController.php','app/Http/Controllers/Admin/PergantianPelajaranController.php']],
+        'admin-penilaian' => ['Admin — Penilaian', ['resources/views/admin/penilaian/', 'resources/views/admin/laporan-dakwah/', 'app/Http/Controllers/Admin/PenilaianController.php', 'app/Http/Controllers/Admin/PenilaianDakwahController.php', 'app/Http/Controllers/Admin/UjianController.php','app/Http/Controllers/Admin/PergantianPelajaranController.php']],
         'admin-santri'    => ['Admin — Data Santri & Pendaftaran', ['resources/views/admin/datasantri', 'resources/views/admin/pendaftaran/', 'resources/views/admin/santri-kartu-qr', 'resources/views/partials/detail-santri', 'resources/views/partials/rincian-peserta']],
         'admin-asatid'    => ['Admin — Data Asatid', ['resources/views/admin/asatid/']],
         'admin-admin'     => ['Admin — Data Admin', ['resources/views/admin/data-admin/']],
@@ -37,7 +37,7 @@ class TeksTampilan
         'asatid-kerangka' => ['Asatid — Header & kerangka', ['resources/views/layouts/asatid', 'resources/views/asatid/partials/pengingat-pelajaran']],
         'asatid-dasbor'   => ['Asatid — Dasbor', ['resources/views/asatid/dashboard']],
         'asatid-absensi'  => ['Asatid — Absensi', ['resources/views/asatid/absensi/']],
-        'asatid-penilaian' => ['Asatid — Penilaian', ['resources/views/asatid/penilaian/', 'app/Http/Controllers/Asatid/PenilaianController.php']],
+        'asatid-penilaian' => ['Asatid — Penilaian', ['resources/views/asatid/penilaian/', 'app/Http/Controllers/Asatid/PenilaianController.php', 'app/Http/Controllers/Asatid/UjianController.php']],
         'asatid-lain'     => ['Asatid — Halaman lain (jadwal, peserta, penilaian, profil, pesan)', ['resources/views/asatid/']],
         'siswa-kerangka'  => ['Peserta — Header & kerangka', ['resources/views/layouts/siswa']],
         'siswa-dasbor'    => ['Peserta — Dasbor', ['resources/views/siswa/dashboard']],

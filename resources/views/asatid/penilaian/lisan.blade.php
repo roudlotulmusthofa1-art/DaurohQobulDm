@@ -1,7 +1,8 @@
 {{--
     Akun Asatid > Penilaian > Ujian Lisan (Asatid\PenilaianController@lisan).
     Urutan: 1) pilih santri  2) pilih fan yang diujikan (ujian aktif dari Admin > Penilaian > Ujian Lisan > Pengaturan)
-            3) tanggal (otomatis hari ini WIB, bisa diubah)  4) isi nilai tiap pertanyaan (batasnya dari pengaturan admin) -> Simpan.
+            3) tanggal (otomatis hari ini WIB, bisa diubah)  4) isi nilai tiap pertanyaan (batasnya dari pengaturan admin)
+            5) catatan untuk santri ini (boleh kosong) -> Simpan. Nilai + catatan masuk ke admin.
     Satu santri + ujian + tanggal = satu nilai: kalau sudah pernah dinilai, nilainya langsung muncul & tinggal diperbarui.
     Nilai langsung masuk ke Admin > Penilaian > Kelas & Pelajaran > Ujian Lisan. Di bawah: nilai terakhir yang diisi asatid ini.
     Vue: #isi-ujian-lisan.
@@ -127,6 +128,16 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
             </div>
         </section>
 
+        {{-- ===== 5. Catatan (ikut terkirim ke admin bersama nilainya) ===== --}}
+        <section class="{{ $kartu }} p-5">
+            <h3 class="flex items-center gap-2 font-bold text-slate-800">
+                <span class="{{ $nomor }}">5</span>{{ __('Catatan') }}
+                <span class="text-xs font-normal text-slate-400">({{ __('boleh dikosongkan') }})</span>
+            </h3>
+            <textarea v-model="form.catatan" rows="3" maxlength="5000" dir="auto"
+                placeholder="{{ __('mis. bacaan lancar, hafalan kuat, perlu latihan i\'rob…') }}" class="mt-3 {{ $input }}"></textarea>
+        </section>
+
         <p v-if="galat" class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-sm text-rose-700" v-text="galat"></p>
 
         {{-- Tombol simpan (menempel di bawah layar) --}}
@@ -150,6 +161,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
                 <span class="flex-1 min-w-0">
                     <span class="block font-semibold text-slate-800 truncate" v-text="n.siswa"></span>
                     <span class="block text-xs text-slate-400 truncate"><span v-text="n.fan || '-'"></span><template v-if="n.kitab"> · <span v-text="n.kitab"></span></template> · <span v-text="tglPendek(n.tanggal)"></span></span>
+                    <span v-if="n.catatan" class="block mt-0.5 text-xs text-slate-600 whitespace-pre-line" dir="auto" v-text="n.catatan"></span>
                 </span>
                 <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold ring-1" :class="warna(n.persen)" v-text="n.total + '/' + n.total_maks"></span>
             </li>
@@ -171,12 +183,12 @@ document.addEventListener('DOMContentLoaded', () => {
         data: () => ({
             siswa: @json($siswa),
             ujian: @json($ujian),
-            sudah: @json($sudah),       // nilai yang sudah ada {siswa_id, ujian_id, tanggal, nilai, oleh}
+            sudah: @json($sudah),       // nilai yang sudah ada {siswa_id, ujian_id, tanggal, nilai, oleh, catatan}
             riwayat: @json($riwayat),
             teksPertanyaan: @js(__('pertanyaan')),
             teksPertanyaanKe: @js(__('Pertanyaan')),
             teksMaks: @js(__('maks')),
-            form: { siswa_id: null, ujian_lisan_id: null, tanggal: HARI_INI, nilai: [] },
+            form: { siswa_id: null, ujian_lisan_id: null, tanggal: HARI_INI, nilai: [], catatan: '' },
             cari: '',
             lama: null,
             menyimpan: false,
@@ -206,9 +218,10 @@ document.addEventListener('DOMContentLoaded', () => {
             isiNilaiLama() {
                 this.galat = '';
                 const u = this.ujianDipilih;
-                if (!u) { this.form.nilai = []; this.lama = null; return; }
+                if (!u) { this.form.nilai = []; this.form.catatan = ''; this.lama = null; return; }
                 this.lama = this.sudah.find((n) => n.siswa_id === this.form.siswa_id && n.ujian_id === u.id && n.tanggal === this.form.tanggal) || null;
                 this.form.nilai = u.maks.map((m, i) => (this.lama && this.lama.nilai[i] !== undefined ? Math.min(this.lama.nilai[i], m) : ''));
+                this.form.catatan = this.lama?.catatan || '';
             },
             // Angka di luar 0..maks langsung dikembalikan ke batasnya
             atur(i, m, e) {
@@ -240,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     const b = json.baris;
                     this.sudah = [...this.sudah.filter((n) => !(n.siswa_id === b.siswa_id && n.ujian_id === b.ujian_id && n.tanggal === b.tanggal)),
-                        { siswa_id: b.siswa_id, ujian_id: b.ujian_id, tanggal: b.tanggal, nilai: b.nilai, oleh: b.oleh }];
+                        { siswa_id: b.siswa_id, ujian_id: b.ujian_id, tanggal: b.tanggal, nilai: b.nilai, oleh: b.oleh, catatan: b.catatan }];
                     this.riwayat = [b, ...this.riwayat.filter((n) => n.id !== b.id)];
                     window.notifikasi?.sukses(json.message);
                     // Siap untuk santri berikutnya (fan & tanggal tetap)

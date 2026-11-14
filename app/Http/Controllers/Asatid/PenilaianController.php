@@ -44,6 +44,7 @@ class PenilaianController extends Controller
             'jumlah' => CatatanSiswa::where('dicatat_oleh', Auth::id())->count(),
             'jumlahNilai' => NilaiHarian::where('dinilai_oleh', Auth::id())->count(),
             'jumlahLisan' => NilaiUjianLisan::where('dinilai_oleh', Auth::id())->count(),
+            'jumlahUjian' => \App\Models\NilaiUjian::where('dinilai_oleh', Auth::id())->count(),
         ]);
     }
 
@@ -62,10 +63,11 @@ class PenilaianController extends Controller
             'hariIni'  => now('Asia/Jakarta')->toDateString(),
             // Nilai yang sudah ada untuk ujian aktif: kalau santri + ujian + tanggal sama, nilainya langsung muncul
             'sudah'    => NilaiUjianLisan::with('penilai:id,name')->whereIn('ujian_lisan_id', array_column($ujian, 'id'))
-                ->get(['id', 'pendaftaran_siswa_id', 'ujian_lisan_id', 'tanggal', 'nilai', 'dinilai_oleh'])
+                ->get(['id', 'pendaftaran_siswa_id', 'ujian_lisan_id', 'tanggal', 'nilai', 'catatan', 'dinilai_oleh'])
                 ->map(fn ($n) => [
                     'siswa_id' => $n->pendaftaran_siswa_id, 'ujian_id' => $n->ujian_lisan_id,
                     'tanggal' => $n->tanggal->toDateString(), 'nilai' => array_map('intval', $n->nilai ?? []), 'oleh' => $n->penilai?->name,
+                    'catatan' => $n->catatan,
                 ])->values(),
             'riwayat'  => NilaiUjianLisan::with(['siswa.kelasMaster', 'penilai:id,name'])->where('dinilai_oleh', Auth::id())
                 ->orderByDesc('updated_at')->limit(30)->get()
@@ -89,7 +91,8 @@ class PenilaianController extends Controller
     /** GET /asatid/penilaian/kelas/{bagian} */
     public function kelas(string $bagian)
     {
-        return $this->tampil('asatid.penilaian.kelas', ['bagian' => $bagian]);
+        // Ujian sudah punya halaman sendiri (Asatid\UjianController); alamat lama diarahkan ke sana
+        return redirect()->route('asatid.soal-ujian');
     }
 
     /* =====================================================================

@@ -113,6 +113,17 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::put('catatan/{catatan}', 'ubah')->whereNumber('catatan')->name('catatan.ubah');
         Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
     });
+    // Penilaian > Ujian (tulis): pengaturan + nilai dari asatid (tab Ujian) + halaman Soal Ujian
+    Route::controller(\App\Http\Controllers\Admin\UjianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {
+        Route::post('ujian', 'simpanUjian')->name('ujian.simpan');
+        Route::delete('ujian/{ujian}', 'hapusUjian')->whereNumber('ujian')->name('ujian.hapus');
+        Route::put('nilai-ujian/{nilai}', 'ubahNilai')->whereNumber('nilai')->name('nilai-ujian.ubah');
+        Route::delete('nilai-ujian/{nilai}', 'hapusNilai')->whereNumber('nilai')->name('nilai-ujian.hapus');
+        // Soal Ujian sekarang panel di tab Ujian; alamat lama diarahkan ke sana
+        Route::get('soal-ujian', fn () => redirect()->route('admin.penilaian.kelas.index', ['tab' => 'ujian', 'panel' => 'soal']))->name('soal-ujian.index');
+        Route::put('soal-ujian/{soal}', 'simpanSoal')->whereNumber('soal')->name('soal-ujian.simpan');
+        Route::delete('soal-ujian/{soal}', 'hapusSoal')->whereNumber('soal')->name('soal-ujian.hapus');
+    });
     // Penilaian Dakwah: Khitoba' & Khurujud Dakwah + Laporan Dakwah
     Route::controller(\App\Http\Controllers\Admin\PenilaianDakwahController::class)->group(function () {
         Route::get('penilaian/dakwah', 'index')->name('penilaian.dakwah.index');
@@ -134,6 +145,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('pindai', 'pindai')->name('pindai'); // Pindai Kembali (kartu QR santri)
         Route::delete('{izin}', 'hapus')->whereNumber('izin')->name('hapus');
     });
+
+    // Menu yang halamannya belum dibuat -> halaman umum "Dalam masa pembuatan" (daftarnya di App\Support\HalamanDalamPembuatan)
+    foreach (\App\Support\HalamanDalamPembuatan::DAFTAR as $nama => $alamat) {
+        Route::get($alamat, fn () => \App\Support\HalamanDalamPembuatan::tampil($nama))->name($nama);
+    }
 
     // Sistem > Pengaturan: route-nya ada di routes/pengaturan.php
     // Route::resource('wali', AdminWaliController::class);

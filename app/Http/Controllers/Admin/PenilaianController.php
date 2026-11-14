@@ -10,6 +10,9 @@ use App\Models\CatatanSiswa;
 use App\Models\Kelas;
 use App\Models\Kitab;
 use App\Models\NilaiHarian;
+use App\Models\NilaiUjian;
+use App\Models\SoalUjian;
+use App\Models\Ujian;
 use App\Models\NilaiUjianLisan;
 use App\Models\UjianLisan;
 use App\Support\DataCatatan;
@@ -78,6 +81,18 @@ class PenilaianController extends Controller
             'fanList'    => BidangIlmu::orderBy('urutan')->orderBy('nama')->get(['id', 'nama']),
             'kitabFan'   => Kitab::orderBy('nama')->get(['id', 'nama', 'bidang_ilmu_id']),
             'siswaList'  => DataCatatan::daftarSiswa(),
+            // Ujian (tulis): pengaturan + nilai dari asatid + jumlah soal per kitab (lihat Admin\UjianController)
+            'ujianTulis' => Ujian::daftar(),
+            'nilaiUjian' => NilaiUjian::with(NilaiUjian::MUAT)->orderByDesc('tanggal')->orderByDesc('id')->get()
+                ->tap(fn ($n) => NamaArab::untukUser($n->pluck('dinilai_oleh')))
+                ->map(fn (NilaiUjian $n) => $n->baris())->values(),
+            'soalUjian'  => SoalUjian::with(['pembuat:id,name', 'pemeriksa:id,name'])->latest('id')->get()
+                ->tap(fn ($s) => NamaArab::untukUser($s->pluck('dibuat_oleh')))
+                ->map(fn (SoalUjian $s) => $s->baris())->values(),
+            'panelUjian' => $request->query('panel') === 'soal' ? 'soal' : 'nilai', // tab Ujian: panel Nilai | Soal Ujian
+            // Bulan ajaran untuk Pengaturan Ujian (centang bulan) & saringan bulan, urut tahun ajaran lalu urutan bulan
+            'bulanUjian' => BulanAjaran::with('tahunAjaran:id,nama')->orderBy('tahun_ajaran_id')->orderBy('urutan')->get()
+                ->map(fn ($b) => ['id' => $b->id, 'nama' => $b->nama, 'ta' => $b->tahunAjaran?->nama, 'aktif' => (bool) $b->is_active])->values(),
         ]);
     }
 

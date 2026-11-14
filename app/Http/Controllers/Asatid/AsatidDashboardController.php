@@ -31,6 +31,7 @@ class AsatidDashboardController extends Controller
             'jumlahJam'     => self::jadwalSaya()->count(),
             'jumlahPesanBaru' => PesanAsatid::jumlahBaru(Auth::id()),
             'jumlahPesanSaya' => PesanAsatid::where('user_id', Auth::id())->dariAsatid()->count(),
+            'jumlahSoalDisetujui' => \App\Models\SoalUjian::where('status', \App\Models\SoalUjian::DISETUJUI)->count(), // kartu Soal Ujian
         ]);
     }
 
