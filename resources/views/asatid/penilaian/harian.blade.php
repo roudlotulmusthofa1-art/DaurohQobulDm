@@ -1,6 +1,7 @@
 {{--
     Akun Asatid > Penilaian > Nilai Harian (Asatid\PenilaianController@harian).
-    Urutan: 1) pilih kelas  2) pilih kitab  3) pilih santri  4) isi 6 penilaian -> Simpan.
+    Urutan: 1) pilih kelas  2) pilih fan/kategori (Bidang Ilmu kitab, menyaring daftar kitab)  3) pilih kitab
+            4) pilih santri  5) isi 6 penilaian -> Simpan. Fan tidak disimpan terpisah: sudah mengikuti kitabnya.
     Batas tiap penilaian dari App\Models\NilaiHarian::ASPEK (total 100); angka di atas batas otomatis diturunkan ke batasnya
     (server juga menolak nilai di atas batas). Satu santri + kitab + bulan ajaran aktif = satu nilai:
     nilai kemarin langsung muncul dan tinggal diteruskan (bukan nilai baru tiap hari).
@@ -31,7 +32,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
             <div class="min-w-0">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Penilaian') }}</p>
                 <h2 class="text-xl sm:text-2xl font-extrabold tracking-tight">{{ __('Nilai Harian') }}</h2>
-                <p class="text-sm text-white/70">{{ __('Pilih kelas, kitab, lalu santri. Total nilai maksimal 100.') }}</p>
+                <p class="text-sm text-white/70">{{ __('Pilih kelas, fan, kitab, lalu santri. Total nilai maksimal 100.') }}</p>
             </div>
         </div>
     </section>
@@ -52,9 +53,28 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
             <p v-else class="mt-3 p-4 rounded-2xl bg-amber-50 ring-1 ring-amber-200 text-sm text-amber-900">{{ __('Belum ada kelas. Minta admin mengisinya di Master Data') }} &rsaquo; {{ __('Kelas.') }}</p>
         </section>
 
-        {{-- ===== 2. Kitab (nilai berlaku untuk bulan ajaran aktif) ===== --}}
+        {{-- ===== 2. Fan / kategori (Bidang Ilmu) — menyaring daftar kitab ===== --}}
+        <section v-if="form.kelas_id && fanList.length" class="{{ $kartu }} p-5">
+            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span>{{ __('Pilih fan / kategori') }}</h3>
+            <div class="mt-3 flex flex-wrap gap-2">
+                <button type="button" @click="pilihFan(null)"
+                    class="rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all"
+                    :class="fan === null ? 'bg-[#0b332c] text-white ring-[#0b332c] shadow-md' : 'bg-[#f8fbfa] text-slate-700 ring-slate-200 hover:bg-white'">
+                    {{ __('Semua fan') }}
+                    <span class="ml-1 text-xs opacity-60" v-text="'(' + kitabList.length + ')'"></span>
+                </button>
+                <button v-for="f in fanList" :key="f.id" type="button" @click="pilihFan(f.id)"
+                    class="rounded-2xl px-4 py-2.5 text-sm font-semibold ring-1 transition-all"
+                    :class="fan === f.id ? 'bg-[#0b332c] text-white ring-[#0b332c] shadow-md' : 'bg-[#f8fbfa] text-slate-700 ring-slate-200 hover:bg-white'">
+                    <span v-text="f.nama"></span>
+                    <span class="ml-1 text-xs opacity-60" v-text="'(' + f.jumlah + ')'"></span>
+                </button>
+            </div>
+        </section>
+
+        {{-- ===== 3. Kitab (nilai berlaku untuk bulan ajaran aktif) ===== --}}
         <section v-if="form.kelas_id" class="{{ $kartu }} p-5">
-            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">2</span>{{ __('Pilih kitab') }}</h3>
+            <h3 class="flex items-center gap-2 font-bold text-slate-800"><span class="{{ $nomor }}">3</span>{{ __('Pilih kitab') }}</h3>
             <div v-if="kitabUrut.length" class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <button v-for="k in kitabUrut" :key="k.id" type="button" @click="pilihKitab(k.id)"
                     class="w-full min-w-0 flex items-center gap-3 rounded-2xl px-4 py-3 text-left ring-1 transition-all"
@@ -86,7 +106,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
         {{-- ===== 3. Santri ===== --}}
         <section v-if="form.kelas_id && form.kitab_id" class="{{ $kartu }} p-5">
             <h3 class="flex items-center gap-2 font-bold text-slate-800">
-                <span class="{{ $nomor }}">3</span>{{ __('Pilih santri') }}
+                <span class="{{ $nomor }}">4</span>{{ __('Pilih santri') }}
                 <span v-if="peserta.length" class="ml-auto rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600">
                     <span v-text="sudahDinilai"></span>/<span v-text="peserta.length"></span> {{ __('dinilai') }}
                 </span>
@@ -188,6 +208,8 @@ document.addEventListener('DOMContentLoaded', () => {
             kitabList: @json($kitabList),
             terjadwal: @json($terjadwal),
             form: { kelas_id: angka(awal.kelas_id), kitab_id: null },
+            fan: null,             // fan / kategori (bidang ilmu) yang dipilih; null = semua fan
+            tanpaFan: @js(__('Tanpa fan')),
             peserta: [],
             santri: null,          // santri yang sedang dinilai
             nilai: kosong(),
@@ -201,13 +223,26 @@ document.addEventListener('DOMContentLoaded', () => {
             kitabUrut() {
                 const bidang = angka(awal.bidang_ilmu_id);
                 const skor = (k) => (this.dijadwal(k.id) ? 2 : 0) + (bidang && k.bidang_ilmu_id === bidang ? 1 : 0);
-                return [...this.kitabList].sort((a, b) => skor(b) - skor(a));
+                return this.kitabList
+                    .filter((k) => this.fan === null || (k.bidang_ilmu_id || 0) === this.fan)
+                    .sort((a, b) => skor(b) - skor(a));
+            },
+            // Daftar fan dari kitab bulan ini (id 0 = kitab tanpa fan), urut abjad
+            fanList() {
+                const peta = {};
+                this.kitabList.forEach((k) => {
+                    const id = k.bidang_ilmu_id || 0;
+                    peta[id] = peta[id] || { id, nama: k.bidang || this.tanpaFan, jumlah: 0 };
+                    peta[id].jumlah++;
+                });
+                return Object.values(peta).sort((a, b) => (a.id === 0) - (b.id === 0) || a.nama.localeCompare(b.nama));
             },
             total() { return ASPEK.reduce((n, a) => n + (Number(this.nilai[a.kunci]) || 0), 0); },
             sudahDinilai() { return this.peserta.filter((p) => p.total !== null && p.total !== undefined).length; },
             judulSesi() {
                 const cari = (list, id) => (list.find((x) => x.id === id) || {}).nama || '-';
-                return [cari(this.kelasList, this.form.kelas_id), cari(this.kitabList, this.form.kitab_id), NAMA_BULAN].filter(Boolean).join(' · ');
+                const kitab = this.kitabList.find((x) => x.id === this.form.kitab_id) || {};
+                return [cari(this.kelasList, this.form.kelas_id), kitab.bidang, kitab.nama || '-', NAMA_BULAN].filter(Boolean).join(' · ');
             },
         },
         mounted() {
@@ -235,8 +270,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.form.kitab_id = null;
                 this.peserta = [];
             },
+            // Ganti fan: kitab yang dipilih dikosongkan kalau bukan dari fan itu
+            pilihFan(id) {
+                this.fan = id;
+                const k = this.kitabList.find((x) => x.id === this.form.kitab_id);
+                if (k && id !== null && (k.bidang_ilmu_id || 0) !== id) {
+                    this.form.kitab_id = null;
+                    this.peserta = [];
+                }
+            },
             pilihKitab(id) {
                 this.form.kitab_id = id;
+                // Fan ikut menyesuaikan kitab yang dipilih (mis. dari tombol di absensi)
+                const k = this.kitabList.find((x) => x.id === id);
+                if (k && this.fan !== null) this.fan = k.bidang_ilmu_id || 0;
                 this.muatPeserta();
             },
             async muatPeserta() {
