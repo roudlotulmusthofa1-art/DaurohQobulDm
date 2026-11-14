@@ -57,8 +57,6 @@ class MenuAdmin
                 'submenu' => [
                     ['route' => 'admin.penilaian.kelas.index',       'active' => 'admin.penilaian.kelas.*',       'label' => __('Kelas & Pelajaran'), 'icon' => 'notebook-pen'],
                     ['route' => 'admin.penilaian.catatan.index',     'active' => 'admin.penilaian.catatan.*',     'label' => __('Catatan'), 'icon' => 'notebook-text'],
-                    ['route' => 'admin.penilaian.perizinan.index',   'active' => 'admin.penilaian.perizinan.*',   'label' => __('Perizinan'), 'icon' => 'door-open'],
-                    ['route' => 'admin.absensi-kegiatan.index',      'active' => 'admin.absensi-kegiatan.*',      'label' => __('Absensi Kegiatan'), 'icon' => 'calendar-check'],
                     ['route' => 'admin.penilaian.dakwah.index',      'active' => 'admin.penilaian.dakwah.*',      'label' => __('Penilaian Dakwah'), 'icon' => 'mic'],
                 ],
             ],
@@ -88,18 +86,26 @@ class MenuAdmin
                 'submenu' => [
                     // admin.pendaftaran.* ikut dihitung, supaya halaman detail/edit peserta juga masuk menu ini
                     ['route' => 'admin.data-masuk.index',      'active' => ['admin.data-masuk.*', 'admin.pendaftaran.*'], 'label' => __('Data Masuk Peserta'), 'icon' => 'user-plus'],
-                    // Pesan dua arah dengan peserta (dasbor siswa)
-                    ['route' => 'admin.pesan-peserta.index',   'active' => 'admin.pesan-peserta.*', 'label' => __('Kotak Pesan'), 'icon' => 'messages-square'],
                 ],
             ],
             [
                 'label' => __('LANDING PAGE'),
                 'icon'  => 'globe',
                 'submenu' => [
-                    ['route' => 'admin.landing-pengumuman.index', 'active' => 'admin.landing-pengumuman.*', 'label' => __('Pita Pengumuman'), 'icon' => 'megaphone'],
                     ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => __('Hero & Statistik'), 'icon' => 'layout-template'],
                     ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => __('Fitur Unggulan'), 'icon' => 'sparkles'],
                     ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => __('Kurikulum Terintegrasi'), 'icon' => 'layers'],
+                ],
+            ],
+            [
+                'label' => __('FITUR LAINNYA'),
+                'icon'  => 'layout-grid',
+                'submenu' => [
+                    ['route' => 'admin.penilaian.perizinan.index', 'active' => 'admin.penilaian.perizinan.*', 'label' => __('Perizinan'), 'icon' => 'door-open'],
+                    ['route' => 'admin.absensi-kegiatan.index',    'active' => 'admin.absensi-kegiatan.*',    'label' => __('Absensi Kegiatan'), 'icon' => 'calendar-check'],
+                    // Pesan dua arah dengan peserta (dasbor siswa)
+                    ['route' => 'admin.pesan-peserta.index',       'active' => 'admin.pesan-peserta.*',       'label' => __('Kotak Pesan'), 'icon' => 'messages-square'],
+                    ['route' => 'admin.landing-pengumuman.index',  'active' => 'admin.landing-pengumuman.*',  'label' => __('Pita Pengumuman'), 'icon' => 'megaphone'],
                 ],
             ],
 

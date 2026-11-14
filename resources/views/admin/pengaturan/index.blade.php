@@ -22,7 +22,7 @@ $ukuran = fn ($b) => $b >= 1073741824 ? number_format($b / 1073741824, 1, ',', '
     : ($b >= 1048576 ? number_format($b / 1048576, 1, ',', '.') . ' MB' : number_format($b / 1024, 0, ',', '.') . ' KB');
 @endphp
 
-<div id="halaman-pengaturan" class="max-w-6xl mx-auto space-y-6">
+<div id="halaman-pengaturan" class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-8">
     {{-- ===== Judul ===== --}}
     <section class="relative overflow-hidden rounded-[28px] bg-linear-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6 sm:p-7">
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
