@@ -9,6 +9,7 @@ use App\Models\PendaftaranSiswa;
 use App\Models\Role;
 use App\Models\User;
 use App\Support\MenuAdmin;
+use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,8 +35,11 @@ class DaftarUserController extends Controller
         $dataAsatid = PendaftaranAsatid::whereNotNull('user_id')->pluck('id', 'user_id');
         $dataSiswa = PendaftaranSiswa::whereNotNull('user_id')->pluck('id', 'user_id');
 
-        $users = User::orderBy('name')->get(['id', 'name', 'email', 'role', 'role_id', 'aktif', 'created_at'])
-            ->map(function (User $u) use ($bawaan, $tambahan, $dataAdmin, $dataAsatid, $dataSiswa) {
+        $semuaUser = User::orderBy('name')->get(['id', 'name', 'email', 'role', 'role_id', 'aktif', 'created_at']);
+        $arab = NamaArab::untukUser($semuaUser->pluck('id')); // nama Arab semua akun, sekali kueri per tabel
+
+        $users = $semuaUser
+            ->map(function (User $u) use ($bawaan, $tambahan, $dataAdmin, $dataAsatid, $dataSiswa, $arab) {
                 $role = ($u->role === 'admin' && $u->role_id) ? ($tambahan[$u->role_id] ?? null) : ($bawaan[$u->role] ?? null);
 
                 $detail = match ($u->role) {
@@ -48,6 +52,7 @@ class DaftarUserController extends Controller
                 return [
                     'id'       => $u->id,
                     'nama'     => $u->name,
+                    'arab'     => $arab[$u->id] ?? null,
                     'email'    => $u->email,
                     'dasar'    => $u->role,                       // admin / asatid / siswa
                     'role_id'  => $u->role_id,

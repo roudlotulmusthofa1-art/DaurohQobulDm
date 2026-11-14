@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\DataCatatan;
+use App\Support\NamaArab;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -141,6 +142,7 @@ class IzinSantri extends Model
             'telat'           => $telat ? self::lama($telat) : null,
             'catatan'         => $this->catatan,
             'oleh'            => $this->pemberi?->name,
+            'oleh_arab'       => NamaArab::user($this->diberi_oleh),
         ];
     }
 }

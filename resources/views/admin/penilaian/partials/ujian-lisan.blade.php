@@ -66,11 +66,13 @@ $tutupIkon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-widt
                         <span v-text="n.siswa"></span>
                         <span v-if="n.kelas" class="ml-1 text-xs font-normal text-slate-400" v-text="n.kelas"></span>
                     </p>
+                    <x-nama-arab vue="n.arab" />
                     <p class="text-xs text-slate-500">
                         <span class="font-semibold text-violet-700" v-text="n.fan || '-'"></span><template v-if="n.kitab"> · <span v-text="n.kitab"></span></template>
                         · <span v-text="tglPanjang(n.tanggal)"></span>
                         <template v-if="n.oleh"> · {{ __('oleh') }} <span v-text="n.oleh"></span></template>
                     </p>
+                    <x-nama-arab vue="n.oleh_arab" kelas="text-xs text-slate-400" />
                     <div class="mt-1.5 flex flex-wrap gap-1">
                         <span v-for="(v, i) in n.nilai" :key="i" class="rounded-lg bg-slate-50 ring-1 ring-slate-200 px-1.5 py-0.5 text-[11px] text-slate-600">
                             <span class="text-slate-400" v-text="'P' + (i + 1) + ' '"></span><b v-text="v"></b><span class="text-slate-400" v-text="'/' + n.maks[i]"></span>
@@ -191,7 +193,8 @@ $tutupIkon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-widt
                     <span v-else class="w-10 h-10 rounded-xl bg-violet-600 text-white font-bold flex items-center justify-center" v-text="inisial(santriLisan.siswa)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block font-semibold text-slate-800 truncate" v-text="santriLisan.siswa"></span>
-                        <span class="block text-xs text-slate-500 truncate"><span v-text="santriLisan.nomor"></span><template v-if="santriLisan.kelas"> · <span v-text="santriLisan.kelas"></span></template></span>
+                        <x-nama-arab vue="santriLisan.arab" />
+                        <span v-if="santriLisan.kelas" class="block text-xs text-slate-500 truncate" v-text="santriLisan.kelas"></span>
                     </span>
                     <button type="button" @click="formLisan.siswa_id = null" class="px-3 py-1.5 rounded-xl text-xs font-bold text-violet-700 hover:bg-violet-100">{{ __('Ganti') }}</button>
                 </div>
@@ -204,7 +207,8 @@ $tutupIkon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-widt
                                 <span v-else class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 text-sm font-bold flex items-center justify-center" v-text="inisial(s.siswa)"></span>
                                 <span class="flex-1 min-w-0">
                                     <span class="block text-sm font-semibold text-slate-800 truncate" v-text="s.siswa"></span>
-                                    <span class="block text-[11px] text-slate-400 truncate"><span v-text="s.nomor"></span><template v-if="s.kelas"> · <span v-text="s.kelas"></span></template></span>
+                                    <x-nama-arab vue="s.arab" kelas="text-xs text-slate-500" />
+                                    <span v-if="s.kelas" class="block text-[11px] text-slate-400 truncate" v-text="s.kelas"></span>
                                 </span>
                             </button>
                         </li>

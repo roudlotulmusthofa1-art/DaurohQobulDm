@@ -12,6 +12,7 @@ use App\Models\Kelas;
 use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
 use App\Models\PesanPeserta;
+use App\Support\NamaArab;
 use App\Support\NotifikasiAdmin;
 use App\Support\SesiAplikasi;
 use Illuminate\Http\Request;
@@ -107,7 +108,7 @@ class DashboardController extends Controller
                 'belum_kamar' => (clone $diterima)->whereNull('kamar_id')->count(),
             ],
             'bulan' => $bulan,
-            'pendaftarBaru' => PendaftaranSiswa::latest()->take(5)->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status', 'berkas_foto', 'created_at']),
+            'pendaftarBaru' => PendaftaranSiswa::latest()->take(5)->get(['id', 'nama_lengkap', 'nama_lengkap_arab', 'nomor_pendaftaran', 'status', 'berkas_foto', 'created_at']),
             'absensiTerbaru' => Absensi::with(['kelas', 'pelajaran', 'kitab', 'kegiatan', 'pengabsen:id,name'])->withCount('detail')->latest('tanggal')->latest('id')->take(5)->get(),
             'kelas' => $kelas,
             'kamar' => $kamar,
@@ -128,7 +129,7 @@ class DashboardController extends Controller
             ->orderByRaw('belum > 0 DESC')->orderByDesc('terakhir_id')
             ->take(8)->get();
         $terakhir = PesanPeserta::whereIn('id', $ringkas->pluck('terakhir_id'))->get()->keyBy('id');
-        $peserta = PendaftaranSiswa::whereIn('id', $ringkas->pluck('pendaftaran_siswa_id'))->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status', 'berkas_foto'])->keyBy('id');
+        $peserta = PendaftaranSiswa::whereIn('id', $ringkas->pluck('pendaftaran_siswa_id'))->get(['id', 'nama_lengkap', 'nama_lengkap_arab', 'nomor_pendaftaran', 'status', 'berkas_foto'])->keyBy('id');
 
         $percakapan = $ringkas->map(fn ($r) => (object) [
             'peserta' => $peserta[$r->pendaftaran_siswa_id] ?? null,
@@ -143,6 +144,7 @@ class DashboardController extends Controller
         if ($dibuka) {
             $dibuka->pesan()->dariPeserta()->belumDibaca()->update(['dibaca_at' => now()]);
             $isi = $dibuka->pesan()->with('pengirim:id,name')->latest('id')->take(30)->get()->reverse()->values();
+            NamaArab::untukUser($isi->pluck('user_id')); // nama Arab admin pengirim, sekali kueri
             $percakapan->each(function ($p) use ($dibuka) {
                 if ($p->peserta->id === $dibuka->id) {
                     $p->belum = 0;

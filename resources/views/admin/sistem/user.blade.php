@@ -63,6 +63,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <span class="font-bold text-slate-800 truncate" v-text="u.nama"></span>
                             <span v-if="u.saya" class="shrink-0 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold">{{ __('Anda') }}</span>
                         </span>
+                        <x-nama-arab vue="u.arab" />
                         <span class="block text-[11px] text-slate-400 truncate" v-text="u.email"></span>
                     </span>
                     <span class="shrink-0 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ring-1" :class="gaya(u.warna)">
@@ -126,6 +127,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                         <span v-text="u.nama"></span>
                                         <span v-if="u.saya" class="ml-1 text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-semibold">{{ __('Anda') }}</span>
                                     </p>
+                                    <x-nama-arab vue="u.arab" />
                                     <p class="text-xs text-slate-500 truncate" v-text="u.email"></p>
                                 </div>
                             </div>
@@ -193,6 +195,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
             <div>
                 <h2 class="text-lg font-bold text-slate-800">{{ __('Ganti Role') }}</h2>
                 <p class="text-sm text-slate-500"><span v-text="dipilih.nama"></span> · <span v-text="dipilih.email"></span></p>
+                <x-nama-arab vue="dipilih.arab" />
             </div>
             <div class="space-y-2">
                 <label v-for="r in roleAdmin" :key="r.id ?? 'super'"

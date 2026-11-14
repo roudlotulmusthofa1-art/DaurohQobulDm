@@ -119,6 +119,7 @@ class KamarDenahController extends Controller
         return [
             'id' => $s->id,
             'nama' => $s->nama_lengkap,
+            'arab' => $s->nama_lengkap_arab, // nama Arab (tampil di bawah nama)
             'nomor' => $s->nomor_pendaftaran,
             'nomor_kasur' => $s->nomor_kasur,
             'foto' => $s->berkas_foto ? \Illuminate\Support\Facades\Storage::disk('public')->url($s->berkas_foto) : null,

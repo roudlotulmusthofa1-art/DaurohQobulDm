@@ -72,7 +72,7 @@ class PesanPesertaController extends Controller
             ->paginate(20)->withQueryString();
 
         $terakhir = PesanPeserta::whereIn('id', $ringkas->pluck('terakhir_id'))->get()->keyBy('id');
-        $peserta = PendaftaranSiswa::whereIn('id', $ringkas->pluck('pendaftaran_siswa_id'))->get(['id', 'nama_lengkap', 'nomor_pendaftaran', 'status', 'berkas_foto'])->keyBy('id');
+        $peserta = PendaftaranSiswa::whereIn('id', $ringkas->pluck('pendaftaran_siswa_id'))->get(['id', 'nama_lengkap', 'nama_lengkap_arab', 'nomor_pendaftaran', 'status', 'berkas_foto'])->keyBy('id');
 
         return view('admin.pesan-peserta.index', $umum + [
             'ringkas' => $ringkas,

@@ -48,6 +48,7 @@ $info = $kegiatan
                 <h1 class="mt-1 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ $absensi->judul }}</h1>
                 <p class="mt-1 text-sm text-white/75">{{ $absensi->tanggal->locale('id')->translatedFormat('l, d F Y') }} · {{ $absensi->tanggal_hijriyah }}</p>
                 <p class="mt-1 text-sm text-white/75">{{ __('Diabsen oleh') }} <b class="text-white">{{ $absensi->pengabsen?->name ?? '-' }}</b></p>
+                <x-nama-arab :teks="$absensi->pengabsen?->nama_arab" kelas="text-sm text-white/70" />
             </div>
             <div class="relative w-32 h-32 shrink-0 self-center">
                 <svg viewBox="0 0 36 36" class="w-full h-full -rotate-90">
@@ -105,10 +106,11 @@ $info = $kegiatan
                     <div class="flex-1 min-w-0">
                         @if ($d->siswa)
                             <a href="{{ route('admin.pendaftaran.show', $d->siswa) }}" class="block text-sm font-semibold text-slate-800 truncate hover:text-emerald-700">{{ $d->siswa->nama_lengkap }}</a>
+                            <x-nama-arab :teks="$d->siswa->nama_lengkap_arab" />
                         @else
                             <p class="text-sm font-semibold text-slate-400">{{ __('Peserta dihapus') }}</p>
                         @endif
-                        <p class="text-xs text-slate-400 truncate">{{ $d->siswa?->nomor_pendaftaran }}{{ $d->siswa?->kelasMaster ? ' · ' . $d->siswa->kelasMaster->nama : '' }}{{ $kegiatan && $d->waktu ? ' · ' . __('datang') . ' ' . substr($d->waktu, 0, 5) : '' }}</p>
+                        <p class="text-xs text-slate-400 truncate">{{ collect([$d->siswa?->kelasMaster?->nama, $kegiatan && $d->waktu ? __('datang') . ' ' . substr($d->waktu, 0, 5) : null])->filter()->implode(' · ') }}</p>
                         @if ($d->catatan)
                             <p class="mt-1 inline-block text-xs text-slate-600 bg-amber-50 ring-1 ring-amber-100 rounded-lg px-2 py-1">{{ __('Catatan mudarris:') }} {{ $d->catatan }}</p>
                         @endif

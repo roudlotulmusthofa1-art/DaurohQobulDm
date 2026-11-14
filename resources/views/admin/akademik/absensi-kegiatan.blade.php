@@ -97,7 +97,13 @@ $hariIni = now('Asia/Jakarta')->toDateString();
                     <div class="mt-1.5 h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500" style="width: {{ $persen }}%"></div></div>
                     @endunless
                     @if ($namaPencatat->isNotEmpty())
-                    <p class="mt-2 text-[11px] text-slate-500" v-pre>{{ __('Dicatat oleh:') }} <span class="font-semibold text-slate-700">{{ $namaPencatat->implode(', ') }}</span></p>
+                    <div class="mt-2 text-[11px] text-slate-500" v-pre>{{ __('Dicatat oleh:') }}
+                        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                            @foreach ($namaPencatat as $orangPencatat)
+                            <span class="min-w-0"><span class="block font-semibold text-slate-700">{{ $orangPencatat['nama'] }}</span><x-nama-arab :teks="$orangPencatat['arab']" kelas="text-xs text-slate-400" /></span>
+                            @endforeach
+                        </div>
+                    </div>
                     @endif
                 </div>
             </div>

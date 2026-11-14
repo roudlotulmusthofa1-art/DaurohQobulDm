@@ -112,7 +112,8 @@ class AdminDataAsatidController extends Controller
             ->map(fn (PendaftaranAsatid $a) => [
                 'user_id' => $a->user_id,
                 'nama'    => $a->nama_lengkap,
-                'nomor'   => $a->nomor_pendaftaran,
+                'arab'    => $a->nama_lengkap_arab,
+                'nomor'   => $a->nomor_pendaftaran, // tetap dikirim: dipakai pencarian
                 'foto'    => $a->foto_url,
             ])->all();
     }

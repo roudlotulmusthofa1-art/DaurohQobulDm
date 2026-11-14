@@ -40,6 +40,7 @@
                     <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-semibold text-slate-800" v-text="b.kitab || @js(__('Tanpa kitab'))"></p>
                         <p class="truncate text-[11px] text-slate-500" v-text="b.ustadz || @js(__('Ustadz belum ditentukan'))"></p>
+                        <x-nama-arab vue="b.arab" kelas="text-xs text-slate-500" />
                         <p class="mt-1 flex flex-wrap gap-1 text-[10px] font-semibold">
                             <span class="rounded-full px-2 py-0.5 ring-1" :class="b.absen ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-slate-50 text-slate-400 ring-slate-200'"
                                 v-text="b.absen ? @js(__('Sudah absen')) : @js(__('Belum absen'))"></span>

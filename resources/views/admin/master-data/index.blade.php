@@ -335,6 +335,7 @@
                                             <span class="mt-1 w-full truncate text-[11px] font-medium"
                                                 :class="penghuniKasur(n) ? 'text-gray-800' : 'text-gray-400'"
                                                 v-text="penghuniKasur(n) ? penghuniKasur(n).nama : @js(__('Kosong'))"></span>
+                                            <x-nama-arab vue="penghuniKasur(n) && penghuniKasur(n).arab" kelas="w-full text-[10px] text-gray-400" />
                                         </button>
                                     </div>
 
@@ -349,10 +350,12 @@
 
                                         {{-- Kasur terisi --}}
                                         <div v-if="penghuniKasur(denah.pilih)" class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                                            <p class="text-sm text-gray-700">
-                                                {{ __('Ditempati') }} <b v-text="penghuniKasur(denah.pilih).nama"></b>
-                                                <span class="text-xs text-gray-400" v-text="'(' + penghuniKasur(denah.pilih).nomor + ')'"></span>
-                                            </p>
+                                            <div class="min-w-0">
+                                                <p class="text-sm text-gray-700">
+                                                    {{ __('Ditempati') }} <b v-text="penghuniKasur(denah.pilih).nama"></b>
+                                                </p>
+                                                <x-nama-arab vue="penghuniKasur(denah.pilih).arab" />
+                                            </div>
                                             <div class="flex gap-2">
                                                 <button type="button" :disabled="denah.busy" @click="kosongkanKasur(penghuniKasur(denah.pilih), false)"
                                                     class="rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60">
@@ -388,7 +391,10 @@
                                         <p class="mb-1.5 text-xs font-medium text-amber-700">{{ __('Penghuni yang belum dapat kasur:') }}</p>
                                         <div class="flex flex-wrap gap-1.5">
                                             <span v-for="s in santriTanpaKasur()" :key="'c' + s.id"
-                                                class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 ring-1 ring-amber-200" v-text="s.nama"></span>
+                                                class="rounded-xl bg-amber-50 px-2.5 py-0.5 text-xs text-amber-800 ring-1 ring-amber-200">
+                                                <span class="block" v-text="s.nama"></span>
+                                                <x-nama-arab vue="s.arab" kelas="text-xs text-amber-700" />
+                                            </span>
                                         </div>
                                     </div>
                                 </template>

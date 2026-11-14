@@ -118,9 +118,9 @@ $pesanWa = "Assalamu'alaikum, berikut link pendaftaran asatid Dauroh Qobul Darul
                 @endif
                 <div class="flex-1 min-w-0">
                     <p class="font-bold text-slate-800 truncate">{{ $a->nama_lengkap }}</p>
+                    <x-nama-arab :teks="$a->nama_lengkap_arab" />
                     <p class="text-xs text-slate-500 truncate">
-                        <span class="font-semibold text-slate-600">{{ $a->nomor_pendaftaran }}</span>
-                        · <span dir="ltr">{{ $a->no_hp }}</span>
+                        <span dir="ltr">{{ $a->no_hp }}</span>
                         <span class="hidden sm:inline">· {{ $a->email }}</span>
                     </p>
                 </div>

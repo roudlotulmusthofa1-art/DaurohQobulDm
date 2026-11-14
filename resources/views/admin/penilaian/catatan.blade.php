@@ -149,7 +149,8 @@ $cepat = [
                         <td class="py-2.5 pr-3 text-slate-400 tabular-nums" v-text="i + 1"></td>
                         <td class="py-2.5 pr-3 min-w-40">
                             <span class="block font-semibold text-slate-800" v-text="r.siswa"></span>
-                            <span class="block text-xs text-slate-400" v-text="[r.nomor, r.kelas].filter(Boolean).join(' · ')"></span>
+                            <x-nama-arab vue="r.arab" />
+                            <span v-if="r.kelas" class="block text-xs text-slate-400" v-text="r.kelas"></span>
                         </td>
                         <td v-if="jenis !== 'pelanggaran'" class="py-2.5 px-2 text-center">
                             <span class="text-lg font-extrabold tabular-nums" :class="r.pencapaian ? 'text-emerald-600' : 'text-slate-300'" v-text="r.pencapaian || '–'"></span>
@@ -189,7 +190,11 @@ $cepat = [
         </div>
 
         <div v-if="saring.siswa" class="mt-3 inline-flex items-center gap-2 rounded-full bg-[#0b332c] text-white pl-3 pr-1 py-1 text-xs font-semibold">
-            {{ __('Santri:') }} <span v-text="saring.siswaNama"></span>
+            {{ __('Santri:') }}
+            <span class="min-w-0">
+                <span class="block" v-text="saring.siswaNama"></span>
+                <x-nama-arab vue="saring.siswaArab" kelas="text-xs font-normal text-white/70" />
+            </span>
             <button type="button" @click="saring.siswa = null" class="w-6 h-6 rounded-full bg-white/15 hover:bg-white/25 flex items-center justify-center" aria-label="{{ __('Hapus saringan santri') }}">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -210,6 +215,7 @@ $cepat = [
                         <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1"
                             :class="b.jenis === 'pencapaian' ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' : 'bg-rose-50 text-rose-700 ring-rose-200'" v-text="b.label"></span>
                     </span>
+                    <x-nama-arab vue="b.arab" />
                     <span class="block mt-0.5 text-xs text-slate-400">
                         <span v-text="b.hari"></span>, <span v-text="tanggalPanjang(b.tanggal)"></span>
                         <template v-if="b.jam"> · {{ __('jam') }} <span v-text="b.jam"></span></template>
@@ -224,6 +230,7 @@ $cepat = [
                         <template v-else>{{ __('Ditulis oleh') }} </template>
                         <b class="text-slate-500" v-text="b.oleh"></b>
                     </span>
+                    <x-nama-arab vue="b.oleh_arab" kelas="text-[11px] text-slate-400" />
                 </span>
                 <button v-if="b.sumber === 'guru'" type="button" @click="hapus(b)" :disabled="menghapus === b.id"
                     title="{{ __('Hapus catatan') }}" aria-label="{{ __('Hapus catatan') }}"
@@ -264,7 +271,7 @@ $cepat = [
                 hariIni: @json($hariIni->toDateString()),
                 tab: 'rekap',
                 cariRekap: '',
-                saring: { cari: '', sumber: '', oleh: '', siswa: null, siswaNama: '' },
+                saring: { cari: '', sumber: '', oleh: '', siswa: null, siswaNama: '', siswaArab: '' },
                 batas: 50,
                 menghapus: null,
             }),
@@ -283,7 +290,7 @@ $cepat = [
                 rekap() {
                     const per = {};
                     this.barisJenis.forEach((b) => {
-                        const r = per[b.siswa_id] ??= { siswa_id: b.siswa_id, siswa: b.siswa, nomor: b.nomor, kelas: b.kelas, pencapaian: 0, pelanggaran: 0, terlambat: 0, alfa: 0 };
+                        const r = per[b.siswa_id] ??= { siswa_id: b.siswa_id, siswa: b.siswa, arab: b.arab, nomor: b.nomor, kelas: b.kelas, pencapaian: 0, pelanggaran: 0, terlambat: 0, alfa: 0 };
                         r[b.jenis]++;
                         if (b.asal) r[b.asal]++; // asal: 'terlambat' | 'alfa' (hanya baris dari absensi)
                     });
@@ -330,7 +337,7 @@ $cepat = [
                     location.href = u;
                 },
                 lihatSantri(r) {
-                    this.saring = { cari: '', sumber: '', oleh: '', siswa: r.siswa_id, siswaNama: r.siswa };
+                    this.saring = { cari: '', sumber: '', oleh: '', siswa: r.siswa_id, siswaNama: r.siswa, siswaArab: r.arab };
                     this.tab = 'daftar';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                 },

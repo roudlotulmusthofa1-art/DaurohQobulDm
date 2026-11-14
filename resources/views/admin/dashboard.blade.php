@@ -11,6 +11,8 @@
 @php
 use App\Models\PendaftaranSiswa;
 use App\Models\PesanPeserta;
+use App\Support\NamaArab;
+NamaArab::untukUser($absensiTerbaru->pluck('user_id')); // nama Arab pengabsen, sekali kueri
 $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
 $jam = (int) $hariIni->format('H');
 $salam = $jam < 11 ? __('Selamat pagi') : ($jam < 15 ? __('Selamat siang') : ($jam < 18 ? __('Selamat sore') : __('Selamat malam')));
@@ -57,6 +59,7 @@ $statKartu = [
             <div class="flex-1 min-w-0">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/90">{{ $hariIni->locale('id')->translatedFormat('l, d F Y') }} · {{ $hijriyah }}</p>
                 <h1 class="mt-2 text-2xl sm:text-3xl font-extrabold tracking-tight">{{ $salam }}, {{ $user->name }}</h1>
+                <x-nama-arab :teks="$user->nama_arab" kelas="mt-1 text-lg text-white/75" />
                 <p class="mt-1.5 text-sm text-white/75">
                     {{ __('Sesi aktif:') }} <b class="text-white">{{ $sesi?->nama ?? '-' }}</b>
                     @if ($bulan) · {{ __('Bulan ajaran ke-:urutan', ['urutan' => $bulan->urutan]) }} ({{ $bulan->nama }}) @endif
@@ -121,6 +124,7 @@ $statKartu = [
                             <p class="truncate text-sm {{ $c->belum ? 'font-extrabold text-slate-900' : 'font-semibold text-slate-700' }}">{{ $c->peserta->nama_lengkap }}</p>
                             <span class="shrink-0 text-[10px] text-slate-400">{{ $c->terakhir ? $waktuPesan($c->terakhir->created_at) : '' }}</span>
                         </div>
+                        <x-nama-arab :teks="$c->peserta->nama_lengkap_arab" kelas="text-xs text-slate-500" />
                         <div class="flex items-center justify-between gap-2">
                             <p class="truncate text-xs {{ $c->belum ? 'text-slate-700' : 'text-slate-400' }}">
                                 @if ($c->terakhir?->dari === PesanPeserta::DARI_ADMIN)<span class="text-sky-600">{{ __('Anda:') }}</span>@endif
@@ -144,7 +148,8 @@ $statKartu = [
                 <div class="flex items-center gap-3 px-5 py-3 bg-white border-b border-slate-100">
                     <div class="min-w-0 flex-1">
                         <p class="font-bold text-slate-800 truncate">{{ $dibuka->nama_lengkap }}</p>
-                        <p class="text-[11px] text-slate-500">{{ $dibuka->nomor_pendaftaran }} · <span class="rounded-full px-1.5 ring-1 {{ $warnaStatus[$dibuka->status] ?? '' }}">{{ __($dibuka->label_status) }}</span></p>
+                        <x-nama-arab :teks="$dibuka->nama_lengkap_arab" />
+                        <p class="text-[11px] text-slate-500"><span class="rounded-full px-1.5 ring-1 {{ $warnaStatus[$dibuka->status] ?? '' }}">{{ __($dibuka->label_status) }}</span></p>
                     </div>
                     <a href="{{ route('admin.pendaftaran.show', $dibuka) }}" class="shrink-0 text-xs font-semibold text-emerald-700 hover:underline">{{ __('Detail') }}</a>
                     <a href="{{ route('admin.pesan-peserta.show', $dibuka) }}" class="shrink-0 text-xs font-semibold text-slate-500 hover:underline">{{ __('Buka penuh') }}</a>
@@ -160,6 +165,7 @@ $statKartu = [
                                 {{ $dariAdmin ? __('Admin') . ($p->pengirim ? ' · ' . $p->pengirim->name : '') . ' · ' : '' }}{{ $p->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M, H:i') }}
                                 @if ($dariAdmin) · {{ $p->dibaca_at ? __('dibaca') : __('terkirim') }} @endif
                             </p>
+                            @if ($dariAdmin)<x-nama-arab :teks="NamaArab::user($p->user_id)" kelas="text-[11px] text-slate-400" />@endif
                         </div>
                     </div>
                     @endforeach
@@ -230,7 +236,8 @@ $statKartu = [
                     @endif
                     <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-semibold text-slate-800">{{ $p->nama_lengkap }}</p>
-                        <p class="text-[11px] text-slate-400">{{ $p->nomor_pendaftaran }} · {{ $p->created_at->locale('id')->diffForHumans() }}</p>
+                        <x-nama-arab :teks="$p->nama_lengkap_arab" kelas="text-xs text-slate-500" />
+                        <p class="text-[11px] text-slate-400">{{ $p->created_at->locale('id')->diffForHumans() }}</p>
                     </div>
                     <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 {{ $warnaStatus[$p->status] ?? '' }}">{{ __($p->label_status) }}</span>
                 </a>
@@ -255,6 +262,7 @@ $statKartu = [
                     <div class="min-w-0 flex-1">
                         <p class="truncate text-sm font-semibold text-slate-800" dir="auto">{{ $a->judul }}</p>
                         <p class="text-[11px] text-slate-400">{{ $a->tanggal->locale('id')->translatedFormat('d M Y') }} · {{ $a->pengabsen?->name ?? '-' }}</p>
+                        <x-nama-arab :teks="NamaArab::user($a->user_id)" kelas="text-xs text-slate-500" />
                     </div>
                     <span class="shrink-0 text-xs font-semibold text-slate-500">{{ __(':jumlah peserta', ['jumlah' => $a->detail_count]) }}</span>
                 </a>

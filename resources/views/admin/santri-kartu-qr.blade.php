@@ -94,6 +94,7 @@
             <div v-for="s in tersaring" :key="s.id" class="kartu-cetak w-[45mm] h-[43mm] border border-dashed border-slate-300 rounded-[2mm] flex flex-col items-center justify-center px-[2mm]">
                 <div class="kartu-qr w-[30mm] h-[30mm]" v-html="s.qr"></div>
                 <p class="mt-[1mm] w-full text-center text-[2.6mm] font-bold leading-tight truncate" v-text="s.nama"></p>
+                <x-nama-arab vue="s.arab" kelas="w-full text-center text-[2.4mm] text-slate-600" />
                 <p class="text-[2.2mm] text-slate-500" v-text="s.nomor"></p>
             </div>
         </div>

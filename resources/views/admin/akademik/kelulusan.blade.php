@@ -113,7 +113,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <span v-else class="w-11 h-11 shrink-0 rounded-xl bg-emerald-100 text-emerald-700 font-bold flex items-center justify-center" v-text="s.nama.charAt(0).toUpperCase()"></span>
                     <div class="min-w-0 flex-1">
                         <p class="font-bold text-slate-800 truncate" v-text="s.nama"></p>
-                        <p class="text-[11px] text-slate-400 truncate" v-text="s.nomor + (s.kelas ? ' · ' + s.kelas : '')"></p>
+                        <x-nama-arab vue="s.arab" />
+                        <p v-if="s.kelas" class="text-[11px] text-slate-400 truncate" v-text="s.kelas"></p>
                     </div>
                     <span v-if="sudahDiubah(s)" class="shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-700">{{ __('Diubah') }}</span>
                 </div>
@@ -163,7 +164,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 <span v-else class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center" v-text="s.nama.charAt(0).toUpperCase()"></span>
                                 <div class="min-w-0">
                                     <p class="font-semibold text-slate-800 truncate" v-text="s.nama"></p>
-                                    <p class="text-[11px] text-slate-400" v-text="s.nomor + (s.kelas ? ' · ' + s.kelas : '')"></p>
+                                    <x-nama-arab vue="s.arab" />
+                                    <p v-if="s.kelas" class="text-[11px] text-slate-400" v-text="s.kelas"></p>
                                 </div>
                             </div>
                         </td>

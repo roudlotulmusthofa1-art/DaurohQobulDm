@@ -118,6 +118,7 @@ $info = [
                     <span v-else class="w-14 h-14 shrink-0 rounded-2xl bg-slate-100 text-slate-500 text-xl font-extrabold flex items-center justify-center" v-text="inisial(hasil.siswa.nama)"></span>
                     <div class="flex-1 min-w-0">
                         <p class="font-extrabold text-slate-800 truncate" v-text="hasil.siswa.nama"></p>
+                        <x-nama-arab vue="hasil.siswa.arab" />
                         <p class="text-xs text-slate-500 truncate" v-text="hasil.ulang ? @js(__('Sudah tercatat sebelumnya')) : @js(__('Tercatat pukul')) + ' ' + hasil.siswa.waktu"></p>
                     </div>
                     <span class="shrink-0 px-3 py-2 rounded-xl text-sm font-extrabold" :class="gaya(hasil.siswa.status).aktif" v-text="gaya(hasil.siswa.status).label"></span>
@@ -145,7 +146,9 @@ $info = [
                     <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>
+                        <x-nama-arab vue="p.arab" />
                         <span class="block text-[11px] text-slate-400" v-text="[p.waktu, p.oleh ? @js(__('oleh')) + ' ' + p.oleh : ''].filter(Boolean).join(' · ')"></span>
+                        <x-nama-arab vue="p.oleh && p.oleh_arab" kelas="text-xs text-slate-400" />
                     </span>
                     <span class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1" :class="gaya(p.status).lembut" v-text="gaya(p.status).label"></span>
                 </div>
@@ -175,7 +178,9 @@ $info = [
                     <span v-else class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>
-                        <span class="block text-[11px] text-slate-400 truncate" v-text="[p.nomor, p.kelas, p.oleh ? @js(__('dicatat')) + ' ' + p.oleh : ''].filter(Boolean).join(' · ')"></span>
+                        <x-nama-arab vue="p.arab" />
+                        <span class="block text-[11px] text-slate-400 truncate" v-text="[p.kelas, p.oleh ? @js(__('dicatat')) + ' ' + p.oleh : ''].filter(Boolean).join(' · ')"></span>
+                        <x-nama-arab vue="p.oleh && p.oleh_arab" kelas="text-xs text-slate-400" />
                     </span>
                     <span v-if="p.status" class="shrink-0 text-[11px] font-bold rounded-full px-2.5 py-1 ring-1" :class="gaya(p.status).lembut" v-text="gaya(p.status).label + (p.waktu ? ' · ' + p.waktu : '')"></span>
                     <span v-else class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-slate-50 text-slate-400 ring-1 ring-slate-200">{{ __('Belum') }}</span>
@@ -325,7 +330,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         const d = json.tercatat[p.id];
                         if (!d) return;
                         if (!p.status) baru++;
-                        p.status = d.status; p.waktu = d.waktu; p.oleh = d.oleh;
+                        p.status = d.status; p.waktu = d.waktu; p.oleh = d.oleh; p.oleh_arab = d.oleh_arab;
                     });
                     if (json.ditutup) {
                         this.selesaiDitutup(json.lewat_batas);

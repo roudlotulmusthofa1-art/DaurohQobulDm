@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\DataCatatan;
+use App\Support\NamaArab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -53,6 +54,7 @@ class NilaiDakwah extends Model
             'nilai'   => $this->nilai,
             'catatan' => $this->catatan,
             'oleh'    => $this->penilai?->name,
+            'oleh_arab' => NamaArab::user($this->dinilai_oleh),
         ];
     }
 

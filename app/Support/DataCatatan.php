@@ -28,6 +28,8 @@ class DataCatatan
             ->when($dari, fn ($q) => $q->whereDate('tanggal', '>=', $dari))
             ->when($sampai, fn ($q) => $q->whereDate('tanggal', '<=', $sampai))
             ->get()
+            // nama Arab pencatat diambil sekaligus (tanpa kueri per baris)
+            ->tap(fn ($c) => NamaArab::untukUser($c->pluck('dicatat_oleh')))
             ->map(fn (CatatanSiswa $c) => self::baris($c));
 
         return $catatan->concat(self::barisAbsensi($dari, $sampai))->concat(self::barisIzin($dari, $sampai))
@@ -51,6 +53,7 @@ class DataCatatan
             'catatan'    => $c->catatan,
             'keterangan' => null,
             'oleh'       => $c->pencatat?->name,
+            'oleh_arab'  => NamaArab::user($c->dicatat_oleh),
             'url'        => null,
         ];
     }
@@ -67,6 +70,7 @@ class DataCatatan
             ->with(['siswa.kelasMaster', 'pencatat:id,name', 'absensi.kelas', 'absensi.pelajaran', 'absensi.kitab', 'absensi.kegiatan', 'absensi.waktuPelajaran', 'absensi.pengabsen:id,name'])
             ->get()
             ->filter(fn ($d) => $d->siswa && $d->absensi)
+            ->tap(fn ($d) => NamaArab::untukUser($d->pluck('dicatat_oleh')->merge($d->pluck('absensi.user_id'))))
             ->map(function (AbsensiDetail $d) {
                 $a = $d->absensi;
                 $kegiatan = $a->jenis === Absensi::KEGIATAN;
@@ -85,6 +89,7 @@ class DataCatatan
                     'catatan'    => $d->catatan,
                     'keterangan' => ($kegiatan ? __('Absensi kegiatan') : __('Absensi kelas')) . ' · ' . $a->judul,
                     'oleh'       => $d->pencatat?->name ?? $a->pengabsen?->name,
+                    'oleh_arab'  => NamaArab::user($d->pencatat?->id ?? $a->pengabsen?->id),
                     'url'        => route('admin.laporan-absensi.show', $a),
                 ];
             })
@@ -100,6 +105,7 @@ class DataCatatan
             ->with(['siswa.kelasMaster', 'pemberi:id,name'])
             ->get()
             ->filter(fn ($i) => $i->siswa)
+            ->tap(fn ($i) => NamaArab::untukUser($i->pluck('diberi_oleh')))
             ->map(function (IzinSantri $i) {
                 $batas = $i->waktu('selesai');
                 $kembali = $i->waktu('kembali');
@@ -124,6 +130,7 @@ class DataCatatan
                         ]),
                     'keterangan' => __('Perizinan') . ' · ' . $i->jenis,
                     'oleh'       => $i->pemberi?->name,
+                    'oleh_arab'  => NamaArab::user($i->diberi_oleh),
                     'url'        => route('admin.penilaian.perizinan.index'),
                 ];
             })

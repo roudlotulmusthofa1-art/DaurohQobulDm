@@ -7,6 +7,7 @@ use App\Models\IzinSantri;
 use App\Models\JenisIzin;
 use App\Models\PendaftaranSiswa;
 use App\Support\DataCatatan;
+use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -34,6 +35,7 @@ class PerizinanController extends Controller
             'siswa'    => DataCatatan::daftarSiswa(),
             'izin'     => IzinSantri::with(['siswa.kelasMaster', 'pemberi:id,name'])
                 ->orderByDesc('mulai')->orderByDesc('id')->get()
+                ->tap(fn ($i) => NamaArab::untukUser($i->pluck('diberi_oleh'))) // nama Arab pemberi izin sekaligus
                 ->map(fn (IzinSantri $i) => $i->baris())->values(),
             'hariIni'  => $sekarang->toDateString(),
             'jamIni'   => $sekarang->format('H:i'),
@@ -155,7 +157,7 @@ class PerizinanController extends Controller
             ->whereNull('kembali')->where('mulai', '<=', $sekarang)
             ->orderBy('selesai')->orderBy('id')->first();
 
-        $santri = ['nama' => $siswa->nama_lengkap, 'foto' => $siswa->foto_url, 'nomor' => $siswa->nomor_pendaftaran];
+        $santri = ['nama' => $siswa->nama_lengkap, 'arab' => $siswa->nama_lengkap_arab, 'foto' => $siswa->foto_url, 'nomor' => $siswa->nomor_pendaftaran];
         if (! $izin) {
             return response()->json([
                 'tipe'    => 'tidak',

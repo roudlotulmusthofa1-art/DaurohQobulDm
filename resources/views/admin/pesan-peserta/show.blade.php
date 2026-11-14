@@ -28,7 +28,8 @@ $waktu = fn ($t) => $t->timezone('Asia/Jakarta')->locale('id')->translatedFormat
         @endif
         <div class="min-w-0 flex-1">
             <p class="font-bold text-slate-800">{{ $peserta->nama_lengkap }}</p>
-            <p class="text-xs text-slate-500">{{ $peserta->nomor_pendaftaran }} · {{ __($peserta->label_status) }}{{ $peserta->kelasMaster ? ' · ' . __('Kelas :nama', ['nama' => $peserta->kelasMaster->nama]) : '' }}</p>
+            <x-nama-arab :teks="$peserta->nama_lengkap_arab" />
+            <p class="text-xs text-slate-500">{{ __($peserta->label_status) }}{{ $peserta->kelasMaster ? ' · ' . __('Kelas :nama', ['nama' => $peserta->kelasMaster->nama]) : '' }}</p>
         </div>
         <a href="{{ route('admin.pendaftaran.show', $peserta) }}" class="shrink-0 rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Detail peserta') }}</a>
     </section>
@@ -48,6 +49,7 @@ $waktu = fn ($t) => $t->timezone('Asia/Jakarta')->locale('id')->translatedFormat
                         <button class="text-rose-500 hover:text-rose-700" title="{{ __('Hapus pesan') }}">{{ __('Hapus') }}</button>
                     </form>
                 </div>
+                <x-nama-arab :teks="$admin ? $p->pengirim?->nama_arab : $peserta->nama_lengkap_arab" kelas="text-xs text-slate-500" />
                 @if ($p->judul)<p class="mt-1 text-sm font-bold text-slate-800">{{ $p->judul }}</p>@endif
                 <p class="mt-1 text-sm text-slate-700 whitespace-pre-line break-words">{{ $p->isi }}</p>
             </div>

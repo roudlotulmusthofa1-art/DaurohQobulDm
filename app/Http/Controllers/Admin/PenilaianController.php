@@ -13,6 +13,7 @@ use App\Models\NilaiHarian;
 use App\Models\NilaiUjianLisan;
 use App\Models\UjianLisan;
 use App\Support\DataCatatan;
+use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -51,6 +52,7 @@ class PenilaianController extends Controller
             ->when($bulanId !== 'semua', fn ($q) => $q->where('bulan_ajaran_id', $bulanId))
             ->orderByDesc('tanggal')->orderByDesc('id')
             ->get()
+            ->tap(fn ($n) => NamaArab::untukUser($n->pluck('dinilai_oleh'))) // nama Arab penilai sekaligus
             ->map(fn (NilaiHarian $n) => $n->baris())->values();
 
         return view('admin.penilaian.kelas', [
@@ -71,6 +73,7 @@ class PenilaianController extends Controller
             'ujianLisan' => UjianLisan::daftar(),
             'nilaiLisan' => NilaiUjianLisan::with(['siswa.kelasMaster', 'penilai:id,name'])
                 ->orderByDesc('tanggal')->orderByDesc('id')->get()
+                ->tap(fn ($n) => NamaArab::untukUser($n->pluck('dinilai_oleh'))) // nama Arab penilai sekaligus
                 ->map(fn (NilaiUjianLisan $n) => $n->baris())->values(),
             'fanList'    => BidangIlmu::orderBy('urutan')->orderBy('nama')->get(['id', 'nama']),
             'kitabFan'   => Kitab::orderBy('nama')->get(['id', 'nama', 'bidang_ilmu_id']),

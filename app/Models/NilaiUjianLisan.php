@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\NamaArab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
@@ -124,6 +125,7 @@ class NilaiUjianLisan extends Model
             'total_maks' => (int) $this->total_maks,
             'persen'     => $this->total_maks ? round($this->total / $this->total_maks * 100) : 0,
             'oleh'       => $this->penilai?->name,
+            'oleh_arab'  => NamaArab::user($this->dinilai_oleh),
             'oleh_id'    => $this->dinilai_oleh,
         ];
     }

@@ -73,7 +73,7 @@
                     @endif
                     <span class="min-w-0 flex-1">
                         <span class="block font-bold text-slate-800 truncate">{{ $p->nama_lengkap }}</span>
-                        <span class="block text-[11px] text-slate-400">{{ $p->nomor_pendaftaran }}</span>
+                        <x-nama-arab :teks="$p->nama_lengkap_arab" />
                     </span>
                     <span @class([
                         'shrink-0 px-2.5 py-1 rounded-full text-[11px] font-semibold',
@@ -124,7 +124,7 @@
                     @forelse ($pendaftar as $p)
                         <tr class="hover:bg-slate-50">
                             <td class="px-4 py-3 font-medium">{{ $p->nomor_pendaftaran }}</td>
-                            <td class="px-4 py-3">{{ $p->nama_lengkap }}</td>
+                            <td class="px-4 py-3">{{ $p->nama_lengkap }}<x-nama-arab :teks="$p->nama_lengkap_arab" /></td>
                             {{-- Kota asal saja --}}
                             <td class="px-4 py-3" dir="auto">{{ $p->kota ?: '-' }}</td>
                             <td class="px-4 py-3">{{ $p->created_at->translatedFormat('d M Y') }}</td>

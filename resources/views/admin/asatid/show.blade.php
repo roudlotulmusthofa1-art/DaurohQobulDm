@@ -203,6 +203,7 @@ $lebar = [__('Alamat Lengkap')];
                 </div>
                 <p dir="auto" class="mt-1 text-sm text-slate-600 whitespace-pre-line line-clamp-3">{{ $rp->isi }}</p>
                 <p class="mt-1.5 text-[11px] text-slate-400">{{ $rp->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M Y · H:i') }}{{ $rp->pengirim ? ' · ' . __('oleh :nama', ['nama' => $rp->pengirim->name]) : '' }}</p>
+                @if ($rp->pengirim)<x-nama-arab :teks="$rp->pengirim->nama_arab" kelas="text-xs text-slate-400" />@endif
             </div>
             @empty
             <p class="rounded-2xl border border-dashed border-slate-200 py-6 text-center text-sm text-slate-400">{{ __('Belum ada pesan untuk asatid ini.') }}</p>

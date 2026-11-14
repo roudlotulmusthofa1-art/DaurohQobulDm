@@ -7,6 +7,7 @@ use App\Models\NilaiDakwah;
 use App\Models\PendaftaranSiswa;
 use App\Models\PilihanDakwah;
 use App\Support\DataCatatan;
+use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,7 @@ class PenilaianDakwahController extends Controller
             'pilihan' => PilihanDakwah::untukVue(),
             'siswa'   => DataCatatan::daftarSiswa(),
             'nilai'   => NilaiDakwah::lengkap()->orderByDesc('tanggal')->orderByDesc('id')->get()
+                ->tap(fn ($n) => NamaArab::untukUser($n->pluck('dinilai_oleh'))) // nama Arab penilai sekaligus
                 ->map(fn (NilaiDakwah $n) => $n->baris())->values(),
             'hariIni' => now('Asia/Jakarta')->toDateString(),
         ]);
@@ -130,6 +132,7 @@ class PenilaianDakwahController extends Controller
                 ->when($f['dari'] ?? null, fn ($q, $v) => $q->whereDate('tanggal', '>=', $v))
                 ->when($f['sampai'] ?? null, fn ($q, $v) => $q->whereDate('tanggal', '<=', $v))
                 ->orderByDesc('tanggal')->orderByDesc('id')->get()
+                ->tap(fn ($n) => NamaArab::untukUser($n->pluck('dinilai_oleh'))) // nama Arab penilai sekaligus
                 ->map(fn (NilaiDakwah $n) => $n->baris())->values(),
             'pilihan' => PilihanDakwah::untukVue(),
             'dari'    => $f['dari'] ?? null,

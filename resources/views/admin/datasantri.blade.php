@@ -200,6 +200,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                                     <span v-else class="flex h-9 w-9 items-center justify-center text-[10px] text-gray-300">{{ __('kosong') }}</span>
                                     <span class="mt-1 w-full truncate text-[11px] font-medium" :class="kasur.santri ? 'text-gray-800' : 'text-gray-400'"
                                         v-text="kasur.santri ? kasur.santri.nama : @js(__('Kosong'))"></span>
+                                    <x-nama-arab vue="kasur.santri && kasur.santri.nama_arab" kelas="w-full text-[10px] text-gray-400" />
                                     <span v-if="kasur.santri && JABATAN[kasur.santri.jabatan_kamar]" class="mt-0.5 rounded-full px-1.5 text-[9px] font-bold ring-1"
                                         :class="JABATAN[kasur.santri.jabatan_kamar].lencana" v-text="JABATAN[kasur.santri.jabatan_kamar].label"></span>
                                 </component>
@@ -239,7 +240,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                                             <span v-if="jabatanKamar(santri, grup)" class="shrink-0 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1"
                                                 :class="JABATAN[santri.jabatan_kamar].lencana" v-text="JABATAN[santri.jabatan_kamar].label"></span>
                                         </span>
-                                        <span class="block truncate text-[11px] text-gray-400" dir="auto" v-text="santri.nama_arab || santri.nomor"></span>
+                                        <x-nama-arab vue="santri.nama_arab" kelas="text-[11px] text-gray-400" />
                                     </span>
                                     <span v-if="grup.jenis === 'kelas'" class="shrink-0 text-[11px] font-medium rounded-md px-2 py-0.5"
                                         :class="santri.kamar ? 'bg-amber-50 text-amber-700' : 'bg-gray-100 text-gray-400'"

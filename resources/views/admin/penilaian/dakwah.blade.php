@@ -131,12 +131,14 @@ $panel = [
                             <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1 bg-emerald-50 text-emerald-700 ring-emerald-200" v-text="n.nilai"></span>
                             <span v-if="n.waktu" class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-600" v-text="n.waktu"></span>
                         </span>
+                        <x-nama-arab vue="n.arab" />
                         <span class="block mt-0.5 text-xs text-slate-400">
                             <span v-text="n.hari"></span>, <span v-text="tanggalPanjang(n.tanggal)"></span>
                             <template v-if="n.kelas"> · <span v-text="n.kelas"></span></template>
                         </span>
                         <span v-if="n.catatan" class="block mt-1 text-sm text-slate-700 whitespace-pre-line" v-text="n.catatan"></span>
                         <span v-if="n.oleh" class="block mt-1 text-[11px] text-slate-400">{{ __('Dinilai oleh') }} <b class="text-slate-500" v-text="n.oleh"></b></span>
+                        <x-nama-arab vue="n.oleh_arab" kelas="text-[11px] text-slate-400" />
                     </span>
                     <button type="button" @click="hapusNilai(n)" :disabled="menghapus === n.id"
                         title="{{ __('Hapus nilai') }}" aria-label="{{ __('Hapus nilai') }}"
@@ -219,7 +221,8 @@ $panel = [
                     <span v-else class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center" v-text="inisial(santriTerpilih.siswa)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block font-semibold text-slate-800 truncate" v-text="santriTerpilih.siswa"></span>
-                        <span class="block text-xs text-slate-500 truncate"><span v-text="santriTerpilih.nomor"></span><template v-if="santriTerpilih.kelas"> · <span v-text="santriTerpilih.kelas"></span></template></span>
+                        <x-nama-arab vue="santriTerpilih.arab" />
+                        <span v-if="santriTerpilih.kelas" class="block text-xs text-slate-500 truncate" v-text="santriTerpilih.kelas"></span>
                     </span>
                     <button type="button" @click="form.siswa_id = null" class="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-100">{{ __('Ganti') }}</button>
                 </div>
@@ -232,7 +235,8 @@ $panel = [
                                 <span v-else class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 text-sm font-bold flex items-center justify-center" v-text="inisial(s.siswa)"></span>
                                 <span class="flex-1 min-w-0">
                                     <span class="block text-sm font-semibold text-slate-800 truncate" v-text="s.siswa"></span>
-                                    <span class="block text-[11px] text-slate-400 truncate"><span v-text="s.nomor"></span><template v-if="s.kelas"> · <span v-text="s.kelas"></span></template></span>
+                                    <x-nama-arab vue="s.arab" kelas="text-xs text-slate-500" />
+                                    <span v-if="s.kelas" class="block text-[11px] text-slate-400 truncate" v-text="s.kelas"></span>
                                 </span>
                             </button>
                         </li>

@@ -203,6 +203,7 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
                     @endif
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate">{{ $p['nama'] }}</span>
+                        <x-nama-arab :teks="$p['arab'] ?? null" />
                         <span class="block text-[11px] text-slate-400">{{ $p['kelas'] ?? __('Tanpa kelas') }} · {{ __('alfa :jumlah×', ['jumlah' => $p['alfa']]) }}</span>
                     </span>
                     <span class="shrink-0 text-sm font-extrabold {{ $warnaPersen($p['persen'])[1] }}">{{ $p['persen'] }}%</span>
@@ -274,7 +275,8 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
                     @endif
                     <span class="min-w-0 flex-1">
                         <span class="block font-bold text-slate-800 truncate">{{ $p['nama'] }}</span>
-                        <span class="block text-[11px] text-slate-400 truncate">{{ $p['nomor'] }}{{ $p['kelas'] ? ' · ' . $p['kelas'] : '' }}</span>
+                        <x-nama-arab :teks="$p['arab'] ?? null" />
+                        @if ($p['kelas'])<span class="block text-[11px] text-slate-400 truncate">{{ $p['kelas'] }}</span>@endif
                     </span>
                     <span class="shrink-0 text-sm font-extrabold {{ $teks }}">{{ $p['persen'] }}%</span>
                 </a>
@@ -319,7 +321,8 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
                                 @endif
                                 <span class="min-w-0">
                                     <span class="block font-semibold text-slate-800 truncate hover:text-emerald-700">{{ $p['nama'] }}</span>
-                                    <span class="block text-[11px] text-slate-400">{{ $p['nomor'] }}{{ $p['kelas'] ? ' · ' . $p['kelas'] : '' }}</span>
+                                    <x-nama-arab :teks="$p['arab'] ?? null" />
+                                    @if ($p['kelas'])<span class="block text-[11px] text-slate-400">{{ $p['kelas'] }}</span>@endif
                                 </span>
                             </a>
                         </td>
@@ -366,6 +369,7 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
                     <span class="block text-xs text-slate-400 truncate">
                         {{ $s->tanggal->locale('id')->translatedFormat('d M Y') }} · {{ $s->tanggal_hijriyah }} · {{ $s->keterangan_waktu }} · {{ __('oleh') }} {{ $s->pengabsen?->name ?? '-' }}
                     </span>
+                    <x-nama-arab :teks="$s->pengabsen?->nama_arab" kelas="text-xs text-slate-400" />
                 </span>
                 @if ($kegiatan && ! $s->selesai_at)
                     <span class="shrink-0 text-[11px] font-semibold rounded-full px-2.5 py-1 bg-amber-50 text-amber-700 ring-1 ring-amber-200">{{ __('Berjalan') }}</span>

@@ -156,6 +156,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     {!! $svg('pencil', 'w-3.5 h-3.5') !!} {{ __('Edit Data Santri') }}
                 </p>
                 <h1 class="mt-1 text-2xl sm:text-3xl leading-tight font-extrabold tracking-tight break-words">{{ $p->nama_lengkap }}</h1>
+                <x-nama-arab :teks="$p->nama_lengkap_arab" kelas="mt-1 text-lg text-white/80" />
                 <div class="mt-2.5 flex flex-wrap items-center gap-2 text-xs">
                     <span class="inline-flex items-center rounded-full bg-white/10 ring-1 ring-white/15 px-3 py-1 font-semibold tracking-wide"># {{ $p->nomor_pendaftaran }}</span>
                     <span class="inline-flex items-center rounded-full ring-1 px-3 py-1 font-semibold {{ $warnaStatus }}">{{ __($p->label_status) }}</span>

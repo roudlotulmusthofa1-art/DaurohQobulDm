@@ -8,6 +8,7 @@ use App\Models\AbsensiDetail;
 use App\Models\JenisKegiatan;
 use App\Models\PendaftaranSiswa;
 use App\Support\CatatKegiatan;
+use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -41,13 +42,16 @@ class AbsensiKegiatanController extends Controller
             ->orderByRaw('selesai_at IS NULL DESC')->orderBy('tanggal')->orderBy('jam_mulai')->orderByDesc('id')
             ->paginate(20)->withQueryString();
 
-        // Nama asatid yang ikut mencatat tiap kegiatan
-        $pencatat = AbsensiDetail::whereIn('absensi_id', $daftar->pluck('id'))
+        // Nama asatid yang ikut mencatat tiap kegiatan (+ nama Arab, tampil di bawah nama)
+        $detailPencatat = AbsensiDetail::whereIn('absensi_id', $daftar->pluck('id'))
             ->whereNotNull('dicatat_oleh')
             ->with('pencatat:id,name')
-            ->get(['absensi_id', 'dicatat_oleh'])
+            ->get(['absensi_id', 'dicatat_oleh']);
+        NamaArab::untukUser($detailPencatat->pluck('dicatat_oleh')); // ambil sekaligus, tanpa kueri per baris
+        $pencatat = $detailPencatat
             ->groupBy('absensi_id')
-            ->map(fn ($d) => $d->pluck('pencatat.name')->filter()->unique()->values());
+            ->map(fn ($d) => $d->filter(fn ($x) => $x->pencatat?->name)->unique('dicatat_oleh')
+                ->map(fn ($x) => ['nama' => $x->pencatat->name, 'arab' => NamaArab::user($x->dicatat_oleh)])->values());
 
         return view('admin.akademik.absensi-kegiatan', [
             'daftar'       => $daftar,

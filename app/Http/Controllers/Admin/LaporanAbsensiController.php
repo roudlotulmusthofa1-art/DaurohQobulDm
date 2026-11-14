@@ -7,6 +7,7 @@ use App\Models\Absensi;
 use App\Models\JenisKegiatan;
 use App\Models\Kelas;
 use App\Models\PendaftaranSiswa;
+use App\Support\NamaArab;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -54,6 +55,7 @@ class LaporanAbsensiController extends Controller
             ->terbaru()
             ->paginate(10, ['*'], 'sesi')
             ->withQueryString();
+        NamaArab::untukUser($daftarSesi->pluck('user_id')); // nama Arab pengabsen, diambil sekaligus
 
         return view('admin.laporan-absensi.index', [
             'f' => $f,
@@ -187,6 +189,7 @@ class LaporanAbsensiController extends Controller
             return [
                 'id' => (int) $id,
                 'nama' => $s?->nama_lengkap ?? 'Peserta dihapus',
+                'arab' => $s?->nama_lengkap_arab, // nama Arab (tampil di bawah nama)
                 'nomor' => $s?->nomor_pendaftaran,
                 'kelas' => $s?->kelasMaster?->nama,
                 'foto' => $s?->foto_url,

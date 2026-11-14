@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\NamaArab;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -114,6 +115,7 @@ class NilaiHarian extends Model
             'nilai'    => collect(self::ASPEK)->mapWithKeys(fn ($a, $k) => [$k => (int) $this->{$k}])->all(),
             'total'    => (int) $this->total,
             'oleh'     => $this->penilai?->name,
+            'oleh_arab' => NamaArab::user($this->dinilai_oleh),
         ];
     }
 }

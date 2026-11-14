@@ -113,6 +113,7 @@ $saringan = [
                         <span dir="auto" class="rounded-full px-2.5 py-0.5 text-[11px] font-semibold bg-slate-100 text-slate-600" v-text="i.jenis"></span>
                         <span class="rounded-full px-2.5 py-0.5 text-[11px] font-bold ring-1" :class="warna(i.status).label" v-text="labelStatus(i.status)"></span>
                     </span>
+                    <x-nama-arab vue="i.arab" />
                     <span class="block mt-0.5 text-xs text-slate-500">
                         <span v-text="rentang(i)"></span>
                         <template v-if="i.kelas"> · <span v-text="i.kelas"></span></template>
@@ -126,6 +127,7 @@ $saringan = [
                     </span>
                     <span v-if="i.catatan" class="block mt-1 text-sm text-slate-700 whitespace-pre-line" v-text="i.catatan"></span>
                     <span v-if="i.oleh" class="block mt-1 text-[11px] text-slate-400">{{ __('Izin diberikan oleh') }} <b class="text-slate-500" v-text="i.oleh"></b></span>
+                    <x-nama-arab vue="i.oleh_arab" kelas="text-[11px] text-slate-400" />
                 </span>
                 <span class="shrink-0 flex flex-col items-end gap-1.5">
                     <button v-if="!i.kembali_jam" type="button" @click="bukaKembali(i)"
@@ -206,7 +208,8 @@ $saringan = [
                     <span v-else class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center" v-text="inisial(santriTerpilih.siswa)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block font-semibold text-slate-800 truncate" v-text="santriTerpilih.siswa"></span>
-                        <span class="block text-xs text-slate-500 truncate"><span v-text="santriTerpilih.nomor"></span><template v-if="santriTerpilih.kelas"> · <span v-text="santriTerpilih.kelas"></span></template></span>
+                        <x-nama-arab vue="santriTerpilih.arab" />
+                        <span v-if="santriTerpilih.kelas" class="block text-xs text-slate-500 truncate" v-text="santriTerpilih.kelas"></span>
                     </span>
                     <button type="button" @click="form.siswa_id = null" class="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-100">{{ __('Ganti') }}</button>
                 </div>
@@ -219,7 +222,8 @@ $saringan = [
                                 <span v-else class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 text-sm font-bold flex items-center justify-center" v-text="inisial(s.siswa)"></span>
                                 <span class="flex-1 min-w-0">
                                     <span class="block text-sm font-semibold text-slate-800 truncate" v-text="s.siswa"></span>
-                                    <span class="block text-[11px] text-slate-400 truncate"><span v-text="s.nomor"></span><template v-if="s.kelas"> · <span v-text="s.kelas"></span></template></span>
+                                    <x-nama-arab vue="s.arab" kelas="text-xs text-slate-500" />
+                                    <span v-if="s.kelas" class="block text-[11px] text-slate-400 truncate" v-text="s.kelas"></span>
                                 </span>
                                 <span v-if="sedangIzin(s.siswa_id)" class="shrink-0 rounded-full bg-sky-50 px-2 py-0.5 text-[10px] font-bold text-sky-700 ring-1 ring-sky-200">{{ __('Sedang izin') }}</span>
                             </button>
@@ -320,6 +324,7 @@ $saringan = [
                     <span v-else-if="hasil.santri" class="w-14 h-14 shrink-0 rounded-2xl bg-white/20 text-xl font-extrabold flex items-center justify-center" v-text="inisial(hasil.santri.nama)"></span>
                     <div class="flex-1 min-w-0">
                         <p v-if="hasil.santri" class="font-extrabold truncate" v-text="hasil.santri.nama"></p>
+                        <x-nama-arab vue="hasil.santri && hasil.santri.arab" kelas="text-sm opacity-80" />
                         <p class="text-sm font-semibold" v-text="hasil.message"></p>
                     </div>
                 </div>
@@ -337,7 +342,10 @@ $saringan = [
                 <ul class="mt-2 space-y-1.5">
                     <li v-for="b in baruKembali" :key="b.kunci" class="flex items-center gap-2 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-100 px-3 py-2 text-sm">
                         <span class="w-2 h-2 shrink-0 rounded-full" :class="b.tipe === 'terlambat' ? 'bg-rose-500' : 'bg-emerald-500'"></span>
-                        <span class="flex-1 min-w-0 truncate font-semibold text-slate-700" v-text="b.santri.nama"></span>
+                        <span class="flex-1 min-w-0">
+                            <span class="block truncate font-semibold text-slate-700" v-text="b.santri.nama"></span>
+                            <x-nama-arab vue="b.santri.arab" kelas="text-xs text-slate-500" />
+                        </span>
                         <span class="shrink-0 text-xs font-semibold" :class="b.tipe === 'terlambat' ? 'text-rose-600' : 'text-emerald-700'" v-text="b.message"></span>
                     </li>
                 </ul>
@@ -357,6 +365,7 @@ $saringan = [
         <div class="border-b border-slate-100 px-6 py-4">
             <h3 class="text-base font-extrabold text-slate-800">{{ __('Sudah kembali') }}</h3>
             <p class="mt-0.5 text-xs text-slate-500"><span v-text="kembali.izin.siswa"></span> · <span v-text="kembali.izin.jenis"></span></p>
+            <x-nama-arab vue="kembali.izin.arab" kelas="text-xs text-slate-500" />
         </div>
         <div class="p-6 space-y-3">
             <p class="text-xs text-slate-500">{{ __('Batas kembali') }}: <b class="text-slate-700" v-text="waktuPendek(kembali.izin.selesai_tanggal, kembali.izin.selesai_jam)"></b></p>

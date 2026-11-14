@@ -85,8 +85,8 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
                 <div class="flex flex-wrap items-center gap-2">
                     <p class="font-bold text-slate-800 truncate">{{ $a->nama_lengkap }}</p>
                     <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold bg-violet-50 text-violet-700">{{ __('Asatid') }}</span>
-                    <span class="text-[11px] text-slate-400">{{ $a->nomor_pendaftaran }}</span>
                 </div>
+                <x-nama-arab :teks="$a->nama_lengkap_arab" />
                 <p class="mt-0.5 text-sm text-slate-500 truncate">
                     @if ($akhir)<span class="font-semibold {{ $akhir->dari === \App\Models\PesanAsatid::DARI_ADMIN ? 'text-sky-600' : 'text-slate-700' }}">{{ $akhir->dari === \App\Models\PesanAsatid::DARI_ADMIN ? __('Admin:') : __('Asatid:') }}</span> {{ $akhir->judul ? $akhir->judul . ' — ' : '' }}{{ \Illuminate\Support\Str::limit($akhir->isi, 90) }}@endif
                 </p>
@@ -163,8 +163,8 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
                 <div class="flex flex-wrap items-center gap-2">
                     <p class="font-bold text-slate-800 truncate">{{ $p->nama_lengkap }}</p>
                     <span class="rounded-full px-2 py-0.5 text-[10px] font-semibold {{ $warnaStatus[$p->status] ?? 'bg-slate-100 text-slate-500' }}">{{ __($p->label_status) }}</span>
-                    <span class="text-[11px] text-slate-400">{{ $p->nomor_pendaftaran }}</span>
                 </div>
+                <x-nama-arab :teks="$p->nama_lengkap_arab" />
                 <p class="mt-0.5 text-sm text-slate-500 truncate">
                     @if ($akhir)<span class="font-semibold {{ $akhir->dari === PesanPeserta::DARI_ADMIN ? 'text-sky-600' : 'text-slate-700' }}">{{ $akhir->dari === PesanPeserta::DARI_ADMIN ? __('Admin:') : __('Peserta:') }}</span> {{ $akhir->judul ? $akhir->judul . ' — ' : '' }}{{ \Illuminate\Support\Str::limit($akhir->isi, 90) }}@endif
                 </p>

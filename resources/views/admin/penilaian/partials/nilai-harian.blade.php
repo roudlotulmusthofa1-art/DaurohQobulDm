@@ -94,6 +94,7 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                     <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(r.siswa)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block font-semibold text-slate-800 truncate" v-text="r.siswa"></span>
+                        <x-nama-arab vue="r.arab" />
                         <span class="block text-xs text-slate-400 truncate" v-text="[r.kelas, r.jumlah + ' ' + @js(__('kitab dinilai'))].filter(Boolean).join(' · ')"></span>
                     </span>
                     <span class="shrink-0 rounded-xl px-2.5 py-1.5 text-sm font-extrabold tabular-nums ring-1" :class="warnaTotal(r.rata)" v-text="bulat(r.rata)"></span>
@@ -125,7 +126,8 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                         <td class="py-2.5 pr-3 text-slate-400 tabular-nums" v-text="i + 1"></td>
                         <td class="py-2.5 pr-3 min-w-48">
                             <span class="block font-semibold text-slate-800" v-text="r.siswa"></span>
-                            <span class="block text-xs text-slate-400" v-text="[r.nomor, r.kelas].filter(Boolean).join(' · ')"></span>
+                            <x-nama-arab vue="r.arab" />
+                            <span v-if="r.kelas" class="block text-xs text-slate-400" v-text="r.kelas"></span>
                         </td>
                         <td class="py-2.5 px-2 text-center tabular-nums text-slate-600" v-text="r.jumlah"></td>
                         <td v-for="a in aspek" :key="a.kunci" class="py-2.5 px-2 text-center tabular-nums text-slate-600" v-text="bulat(r.rataAspek[a.kunci])"></td>
@@ -148,7 +150,9 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                 <span class="shrink-0 min-w-[3rem] rounded-xl px-2.5 py-1.5 text-center text-sm font-extrabold tabular-nums ring-1" :class="warnaTotal(n.total)" v-text="n.total"></span>
                 <span class="flex-1 min-w-0">
                     <span class="block font-semibold text-slate-800" v-text="n.siswa"></span>
+                    <x-nama-arab vue="n.arab" />
                     <span class="block text-xs text-slate-400" v-text="[n.kelas, n.kitab, n.bulan, @js(__('terakhir dinilai')) + ' ' + n.tanggal, n.oleh ? @js(__('oleh')) + ' ' + n.oleh : null].filter(Boolean).join(' · ')"></span>
+                    <x-nama-arab vue="n.oleh_arab" kelas="text-xs text-slate-400" />
                     <span class="mt-1.5 flex flex-wrap gap-1">
                         <span v-for="(a, i) in aspek" :key="a.kunci" :title="a.label"
                             class="rounded-lg bg-slate-50 px-2 py-0.5 text-[11px] text-slate-500 ring-1 ring-slate-200 tabular-nums"

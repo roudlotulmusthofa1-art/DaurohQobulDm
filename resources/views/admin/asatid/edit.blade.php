@@ -53,7 +53,8 @@ $salah = fn ($kolom) => $errors->has($kolom) ? 'border-rose-300 bg-rose-50/40' :
             <div class="flex-1 min-w-0">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700/70">{{ __('Edit Data Asatid') }}</p>
                 <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-slate-800 break-words">{{ $a->nama_lengkap }}</h1>
-                <p class="mt-1 text-sm text-slate-500"># {{ $a->nomor_pendaftaran }} · {{ __($a->label_status) }}</p>
+                <x-nama-arab :teks="$a->nama_lengkap_arab" kelas="mt-1 text-lg text-slate-500" />
+                <p class="mt-1 text-sm text-slate-500">{{ __($a->label_status) }}</p>
                 <p v-if="namaFoto" class="mt-3 inline-flex items-center gap-2 text-xs px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-100">
                     {{ __('Foto baru:') }} <b v-text="namaFoto"></b>
                 </p>

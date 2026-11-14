@@ -43,6 +43,7 @@ class CatatKegiatan
     public static function peserta(Absensi $absensi, ?string $rinci = null): Collection
     {
         $tercatat = $absensi->detail()->with('pencatat:id,name')->get()->keyBy('pendaftaran_siswa_id');
+        NamaArab::untukUser($tercatat->pluck('dicatat_oleh')); // nama Arab pencatat, diambil sekaligus
 
         return PendaftaranSiswa::with('kelasMaster')
             ->where('status', PendaftaranSiswa::DITERIMA)
@@ -52,6 +53,7 @@ class CatatKegiatan
                 'status' => $tercatat[$s->id]->status ?? null,
                 'waktu' => isset($tercatat[$s->id]) ? substr((string) $tercatat[$s->id]->waktu, 0, 5) : null,
                 'oleh' => isset($tercatat[$s->id]) ? $tercatat[$s->id]->pencatat?->name : null, // yang mencatat
+                'oleh_arab' => isset($tercatat[$s->id]) ? NamaArab::user($tercatat[$s->id]->dicatat_oleh) : null,
             ]);
     }
 
@@ -94,7 +96,7 @@ class CatatKegiatan
         // Pindai ulang kartu yang sudah tercatat tidak mengubah statusnya
         if ($lama && empty($data['status'])) {
             return response()->json([
-                'siswa' => self::siswa($siswa, $rinci) + ['status' => $lama->status, 'waktu' => substr((string) $lama->waktu, 0, 5), 'oleh' => $lama->pencatat?->name],
+                'siswa' => self::siswa($siswa, $rinci) + ['status' => $lama->status, 'waktu' => substr((string) $lama->waktu, 0, 5), 'oleh' => $lama->pencatat?->name, 'oleh_arab' => NamaArab::user($lama->dicatat_oleh)],
                 'ulang' => true,
                 'message' => __(':nama sudah tercatat sebelumnya.', ['nama' => $siswa->nama_lengkap]),
             ]);
@@ -106,7 +108,7 @@ class CatatKegiatan
         );
 
         return response()->json([
-            'siswa' => self::siswa($siswa, $rinci) + ['status' => $detail->status, 'waktu' => substr((string) $detail->waktu, 0, 5), 'oleh' => Auth::user()->name],
+            'siswa' => self::siswa($siswa, $rinci) + ['status' => $detail->status, 'waktu' => substr((string) $detail->waktu, 0, 5), 'oleh' => Auth::user()->name, 'oleh_arab' => NamaArab::user(Auth::id())],
             'ulang' => false,
             'message' => $siswa->nama_lengkap . ' ' . __('dicatat') . ' ' . __(Absensi::STATUS[$status][0]) . '.',
         ]);
@@ -117,11 +119,14 @@ class CatatKegiatan
     {
         $absensi->tutupKalauLewat();
 
-        $detail = $absensi->detail()->with('pencatat:id,name')->get(['pendaftaran_siswa_id', 'status', 'waktu', 'dicatat_oleh'])
+        $detail = $absensi->detail()->with('pencatat:id,name')->get(['pendaftaran_siswa_id', 'status', 'waktu', 'dicatat_oleh']);
+        NamaArab::untukUser($detail->pluck('dicatat_oleh')); // nama Arab pencatat, diambil sekaligus
+        $detail = $detail
             ->mapWithKeys(fn ($d) => [$d->pendaftaran_siswa_id => [
                 'status' => $d->status,
                 'waktu' => substr((string) $d->waktu, 0, 5),
                 'oleh' => $d->pencatat?->name,
+                'oleh_arab' => NamaArab::user($d->dicatat_oleh),
             ]]);
 
         return response()->json([

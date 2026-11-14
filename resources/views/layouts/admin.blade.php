@@ -214,6 +214,7 @@
                     <div class="sb-teks flex flex-col items-start justify-center min-w-0" v-pre>
                         <p class="text-white text-[15px] font-medium truncate">@yield('page-heading', '' .
                             (auth()->user()->name ?? 'Admin'))</p>
+                        <x-nama-arab :teks="auth()->user()?->nama_arab" kelas="max-w-full text-xs text-white/70" />
                         <p class="text-white/45 text-xs">{{ __('Super Admin') }}</p>
                     </div>
                 </div>
@@ -310,6 +311,7 @@
                                 class="w-10 h-10 rounded-xl object-cover" alt="Avatar admin" />
                             <span class="hidden lg:flex flex-col items-start leading-tight text-left" v-pre>
                                 <span class="text-[13px] font-semibold text-[#0f1f1a] max-w-[10rem] truncate">{{ auth()->user()->name ?? 'Admin' }}</span>
+                                <x-nama-arab :teks="auth()->user()?->nama_arab" kelas="max-w-[10rem] text-[11px] text-gray-600" />
                                 <span class="text-[11px] text-gray-600">{{ __('Super Admin') }}</span>
                             </span>
                             <svg class="hidden lg:block w-4 h-4 text-gray-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5"/></svg>
@@ -319,6 +321,7 @@
                             class="absolute right-0 mt-2 w-60 bg-white rounded-2xl ring-1 ring-[#0b332c]/10 shadow-[0_24px_48px_-16px_rgba(11,51,44,0.35)] overflow-hidden z-50">
                             <div class="px-4 py-3 border-b border-slate-100" v-pre>
                                 <p class="text-sm font-bold text-slate-800 truncate">{{ auth()->user()->name ?? 'Admin' }}</p>
+                                <x-nama-arab :teks="auth()->user()?->nama_arab" kelas="text-xs text-slate-500" />
                                 <p class="text-xs text-slate-400 truncate">{{ auth()->user()->email ?? '' }}</p>
                             </div>
                             <a href="/" target="_blank" rel="noopener"

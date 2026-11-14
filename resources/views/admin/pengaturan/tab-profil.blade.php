@@ -20,6 +20,7 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
 
     <div class="min-w-0 flex-1 text-center sm:text-left">
         <p class="font-bold text-slate-800 truncate">{{ $user->name }}</p>
+        <x-nama-arab :teks="$user->nama_arab" />
         <p class="text-sm text-slate-500 truncate">{{ $user->email }}</p>
         <span class="mt-1 inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 ring-1 ring-emerald-100">{{ ucfirst($user->role) }}</span>
 

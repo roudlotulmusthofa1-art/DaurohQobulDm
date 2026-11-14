@@ -50,6 +50,12 @@ class User extends Authenticatable
         return $this->hasOne(\App\Models\PendaftaranAsatid::class);
     }
 
+    /** $user->nama_arab : nama Arab pemilik akun (admin / asatid / santri), lihat App\Support\NamaArab */
+    public function getNamaArabAttribute(): ?string
+    {
+        return \App\Support\NamaArab::user($this->id);
+    }
+
     /**
      * Gambar avatar: foto profil (Pengaturan > Profil) bila ada,
      * kalau belum ada pakai gambar inisial nama dengan warna $latar/$huruf (hex tanpa #).

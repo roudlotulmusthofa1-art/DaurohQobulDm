@@ -71,6 +71,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
             <div class="flex-1 min-w-0">
                 <p class="text-[11px] text-emerald-200/80">{{ $salam }},</p>
                 <p class="font-extrabold truncate">{{ $namaDepan }}</p>
+                <x-nama-arab :teks="$user->nama_arab" kelas="text-xs text-white/70" />
             </div>
             <a href="{{ $rute('admin.pengaturan.index', ['tab' => 'sesi']) }}" class="max-w-[110px] truncate rounded-full bg-white/10 px-2.5 py-1 text-[10px] font-semibold ring-1 ring-white/15">
                 {{ $sesi?->nama ?? __('Sesi') }}
@@ -174,7 +175,8 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
                     @endif
                     <span class="min-w-0 flex-1">
                         <span class="block font-semibold text-slate-800 truncate">{{ $p->nama_lengkap }}</span>
-                        <span class="block text-[11px] text-slate-400">{{ $p->nomor_pendaftaran }} · {{ $p->created_at->locale('id')->diffForHumans() }}</span>
+                        <x-nama-arab :teks="$p->nama_lengkap_arab" kelas="text-xs text-slate-500" />
+                        <span class="block text-[11px] text-slate-400">{{ $p->created_at->locale('id')->diffForHumans() }}</span>
                     </span>
                     <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold {{ $warnaStatus[$p->status] ?? 'bg-slate-100 text-slate-500' }}">{{ __($p->label_status) }}</span>
                 </a>
@@ -196,6 +198,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
                     <span class="w-10 h-10 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center shrink-0">{{ mb_strtoupper(mb_substr($c->peserta->nama_lengkap, 0, 1)) }}</span>
                     <span class="min-w-0 flex-1">
                         <span class="block font-semibold text-slate-800 truncate">{{ $c->peserta->nama_lengkap }}</span>
+                        <x-nama-arab :teks="$c->peserta->nama_lengkap_arab" kelas="text-xs text-slate-500" />
                         <span class="block text-xs text-slate-500 truncate">{{ \Illuminate\Support\Str::limit($c->terakhir?->isi, 60) }}</span>
                     </span>
                     @if ($c->belum)

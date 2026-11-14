@@ -60,7 +60,7 @@ $isianPesan = 'mt-1 w-full bg-[#f5f9f7] border border-slate-200 rounded-2xl px-4
                     <span v-else class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center" v-text="a.nama.charAt(0).toUpperCase()"></span>
                     <span class="min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="a.nama"></span>
-                        <span class="block text-[11px] text-slate-400" v-text="a.nomor"></span>
+                        <x-nama-arab vue="a.arab" kelas="text-xs text-slate-500" />
                     </span>
                 </label>
                 <p v-if="!penerimaTampil.length" class="px-3 py-6 text-center text-sm text-slate-400">{{ __('Tidak ada asatid yang cocok.') }}</p>
