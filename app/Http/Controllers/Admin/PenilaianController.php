@@ -4,18 +4,24 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
+use App\Models\BidangIlmu;
 use App\Models\BulanAjaran;
 use App\Models\CatatanSiswa;
 use App\Models\Kelas;
 use App\Models\Kitab;
 use App\Models\NilaiHarian;
+use App\Models\NilaiUjianLisan;
+use App\Models\UjianLisan;
 use App\Support\DataCatatan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 /**
  * Admin > Penilaian.
- * - Kelas & Pelajaran : Nilai Harian (6 penilaian dari asatid, lihat App\Models\NilaiHarian) / Ujian Lisan / Ujian (alurnya menyusul)
+ * - Kelas & Pelajaran : Nilai Harian (6 penilaian dari asatid, lihat App\Models\NilaiHarian)
+ *                       / Ujian Lisan (pengaturan + nilai dari asatid & admin, lihat App\Models\UjianLisan & NilaiUjianLisan)
+ *                       / Ujian (alurnya menyusul)
  * - Catatan           : catatan Pencapaian & Pelanggaran dari asatid
  *                       (+ Terlambat/Alfa dari absensi sebagai pelanggaran), lihat App\Support\DataCatatan
  */
@@ -61,7 +67,83 @@ class PenilaianController extends Controller
                 'bulan_id' => $bulanId,
             ],
             'saringDiubah' => (bool) array_filter($f),
+            // Ujian Lisan
+            'ujianLisan' => UjianLisan::daftar(),
+            'nilaiLisan' => NilaiUjianLisan::with(['siswa.kelasMaster', 'penilai:id,name'])
+                ->orderByDesc('tanggal')->orderByDesc('id')->get()
+                ->map(fn (NilaiUjianLisan $n) => $n->baris())->values(),
+            'fanList'    => BidangIlmu::orderBy('urutan')->orderBy('nama')->get(['id', 'nama']),
+            'kitabFan'   => Kitab::orderBy('nama')->get(['id', 'nama', 'bidang_ilmu_id']),
+            'siswaList'  => DataCatatan::daftarSiswa(),
         ]);
+    }
+
+    /* =====================================================================
+     |  Ujian Lisan
+     * ===================================================================== */
+
+    /** POST /admin/penilaian/ujian-lisan — tambah / ubah pengaturan ujian (isi "id" = ubah) */
+    public function simpanUjianLisan(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'id'                 => ['nullable', 'integer', 'exists:ujian_lisan,id'],
+            'bidang_ilmu_id'     => ['required', 'integer', 'exists:bidang_ilmu,id'],
+            'kitab_id'           => ['nullable', 'integer', Rule::exists('kitab', 'id')->where('bidang_ilmu_id', (int) $request->input('bidang_ilmu_id'))],
+            'nilai_pertanyaan'   => ['required', 'array', 'min:1', 'max:' . UjianLisan::MAKS_PERTANYAAN],
+            'nilai_pertanyaan.*' => ['required', 'integer', 'min:1', 'max:' . UjianLisan::MAKS_NILAI],
+            'is_active'          => ['boolean'],
+        ], [
+            'bidang_ilmu_id.required'     => __('Pilih fan / kategori.'),
+            'bidang_ilmu_id.exists'       => __('Fan / kategori tidak ditemukan.'),
+            'kitab_id.exists'             => __('Kitab ini bukan dari fan yang dipilih.'),
+            'nilai_pertanyaan.required'   => __('Isi jumlah pertanyaan.'),
+            'nilai_pertanyaan.max'        => __('Pertanyaan paling banyak :max.'),
+            'nilai_pertanyaan.*.required' => __('Nilai tiap pertanyaan wajib diisi.'),
+            'nilai_pertanyaan.*.min'      => __('Nilai tiap pertanyaan minimal 1.'),
+            'nilai_pertanyaan.*.max'      => __('Nilai tiap pertanyaan paling besar :max.'),
+        ]);
+
+        $ujian = UjianLisan::findOrNew($data['id'] ?? null);
+        $ujian->fill([
+            'bidang_ilmu_id'   => $data['bidang_ilmu_id'],
+            'kitab_id'         => $data['kitab_id'] ?? null,
+            'nilai_pertanyaan' => $data['nilai_pertanyaan'],
+            'is_active'        => $data['is_active'] ?? true,
+        ])->save();
+
+        return response()->json([
+            'message' => $ujian->wasRecentlyCreated ? __('Ujian lisan ditambahkan.') : __('Pengaturan ujian lisan disimpan.'),
+            'ujian'   => UjianLisan::daftar(),
+        ]);
+    }
+
+    /** DELETE /admin/penilaian/ujian-lisan/{ujian} — nilai yang sudah ada tetap tersimpan (nama fan & kitab sudah disalin) */
+    public function hapusUjianLisan(UjianLisan $ujian): JsonResponse
+    {
+        $ujian->delete();
+
+        return response()->json(['message' => __('Ujian lisan dihapus. Nilai yang sudah ada tetap tersimpan.'), 'ujian' => UjianLisan::daftar()]);
+    }
+
+    /** POST /admin/penilaian/nilai-lisan — admin ikut menilai (sama seperti asatid) */
+    public function simpanNilaiLisan(Request $request): JsonResponse
+    {
+        $nilai = NilaiUjianLisan::simpanDari($request);
+
+        return response()->json([
+            'message' => __('Nilai ujian lisan :nama tersimpan: :total dari :maks.', [
+                'nama' => $nilai->siswa?->nama_lengkap, 'total' => $nilai->total, 'maks' => $nilai->total_maks,
+            ]),
+            'baris' => $nilai->baris(),
+        ]);
+    }
+
+    /** DELETE /admin/penilaian/nilai-lisan/{nilai} — hapus nilai ujian lisan yang salah */
+    public function hapusNilaiLisan(NilaiUjianLisan $nilai): JsonResponse
+    {
+        $nilai->delete();
+
+        return response()->json(['message' => __('Nilai ujian lisan dihapus.')]);
     }
 
     /** DELETE /admin/penilaian/nilai-harian/{nilai} — hapus nilai harian yang salah */

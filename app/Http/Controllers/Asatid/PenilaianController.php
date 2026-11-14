@@ -7,8 +7,10 @@ use App\Models\BulanAjaran;
 use App\Models\CatatanSiswa;
 use App\Models\Kelas;
 use App\Models\NilaiHarian;
+use App\Models\NilaiUjianLisan;
 use App\Models\PendaftaranAsatid;
 use App\Models\PendaftaranSiswa;
+use App\Models\UjianLisan;
 use App\Support\DaftarKitab;
 use App\Support\DataCatatan;
 use Illuminate\Http\JsonResponse;
@@ -23,14 +25,16 @@ use Illuminate\Validation\Rule;
  * - Nilai Harian: pilih kelas -> kitab -> santri -> isi 6 penilaian (batasnya di NilaiHarian::ASPEK).
  *   Satu santri + kitab + BULAN AJARAN AKTIF = satu nilai, diteruskan setiap hari (bukan nilai baru tiap hari).
  *   Masuk ke Admin > Penilaian > Kelas & Pelajaran.
+ * - Ujian Lisan: pilih santri -> fan yang diujikan (ujian aktif dari pengaturan admin) -> tanggal -> nilai tiap pertanyaan.
+ *   Satu santri + ujian + tanggal = satu nilai (dinilai lagi = diperbarui). Masuk ke Admin > Penilaian > Kelas & Pelajaran > Ujian Lisan.
  * - Catatan: asatid memilih santri, jenis (Pencapaian / Pelanggaran), menulis catatan, lalu tanggal & jam
  *   (otomatis hari ini & jam sekarang, bisa diubah). Langsung masuk ke Admin > Penilaian > Catatan.
  * Asatid hanya melihat & menghapus catatannya sendiri.
  */
 class PenilaianController extends Controller
 {
-    /** Halaman Ujian Lisan / Ujian (sementara "segera hadir"). Nilai Harian punya halaman sendiri. */
-    public const BAGIAN_KELAS = ['lisan', 'ujian'];
+    /** Halaman Ujian (sementara "segera hadir"). Nilai Harian & Ujian Lisan punya halaman sendiri. */
+    public const BAGIAN_KELAS = ['ujian'];
 
     /** GET /asatid/penilaian — menu */
     public function index()
@@ -39,6 +43,46 @@ class PenilaianController extends Controller
             'bulan'  => BulanAjaran::aktif(),
             'jumlah' => CatatanSiswa::where('dicatat_oleh', Auth::id())->count(),
             'jumlahNilai' => NilaiHarian::where('dinilai_oleh', Auth::id())->count(),
+            'jumlahLisan' => NilaiUjianLisan::where('dinilai_oleh', Auth::id())->count(),
+        ]);
+    }
+
+    /* =====================================================================
+     |  Ujian Lisan
+     * ===================================================================== */
+
+    /** GET /asatid/penilaian/lisan */
+    public function lisan()
+    {
+        $ujian = UjianLisan::daftar(true);
+
+        return $this->tampil('asatid.penilaian.lisan', [
+            'siswa'    => DataCatatan::daftarSiswa(),
+            'ujian'    => $ujian,
+            'hariIni'  => now('Asia/Jakarta')->toDateString(),
+            // Nilai yang sudah ada untuk ujian aktif: kalau santri + ujian + tanggal sama, nilainya langsung muncul
+            'sudah'    => NilaiUjianLisan::with('penilai:id,name')->whereIn('ujian_lisan_id', array_column($ujian, 'id'))
+                ->get(['id', 'pendaftaran_siswa_id', 'ujian_lisan_id', 'tanggal', 'nilai', 'dinilai_oleh'])
+                ->map(fn ($n) => [
+                    'siswa_id' => $n->pendaftaran_siswa_id, 'ujian_id' => $n->ujian_lisan_id,
+                    'tanggal' => $n->tanggal->toDateString(), 'nilai' => array_map('intval', $n->nilai ?? []), 'oleh' => $n->penilai?->name,
+                ])->values(),
+            'riwayat'  => NilaiUjianLisan::with(['siswa.kelasMaster', 'penilai:id,name'])->where('dinilai_oleh', Auth::id())
+                ->orderByDesc('updated_at')->limit(30)->get()
+                ->map(fn ($n) => $n->baris())->values(),
+        ]);
+    }
+
+    /** POST /asatid/penilaian/lisan — simpan nilai ujian lisan (aturan sama dengan admin, lihat NilaiUjianLisan::simpanDari) */
+    public function simpanLisan(Request $request): JsonResponse
+    {
+        $nilai = NilaiUjianLisan::simpanDari($request);
+
+        return response()->json([
+            'message' => __('Nilai ujian lisan :nama tersimpan: :total dari :maks.', [
+                'nama' => $nilai->siswa?->nama_lengkap, 'total' => $nilai->total, 'maks' => $nilai->total_maks,
+            ]),
+            'baris' => $nilai->baris(),
         ]);
     }
 

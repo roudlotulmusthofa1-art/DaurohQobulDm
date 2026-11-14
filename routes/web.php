@@ -102,6 +102,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::controller(\App\Http\Controllers\Admin\PenilaianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {
         Route::get('kelas', 'kelas')->name('kelas.index');
         Route::delete('nilai-harian/{nilai}', 'hapusNilaiHarian')->whereNumber('nilai')->name('nilai-harian.hapus');
+        // Ujian Lisan: pengaturan (tombol Pengaturan) + nilai (admin ikut menilai)
+        Route::post('ujian-lisan', 'simpanUjianLisan')->name('ujian-lisan.simpan');
+        Route::delete('ujian-lisan/{ujian}', 'hapusUjianLisan')->whereNumber('ujian')->name('ujian-lisan.hapus');
+        Route::post('nilai-lisan', 'simpanNilaiLisan')->name('nilai-lisan.simpan');
+        Route::delete('nilai-lisan/{nilai}', 'hapusNilaiLisan')->whereNumber('nilai')->name('nilai-lisan.hapus');
         Route::get('catatan', 'catatan')->name('catatan.index');
         Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
     });

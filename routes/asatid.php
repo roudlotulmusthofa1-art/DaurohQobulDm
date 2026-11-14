@@ -31,6 +31,8 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
         Route::get('/harian', 'harian')->name('penilaian.harian');
         Route::get('/harian/peserta', 'pesertaHarian')->name('penilaian.harian.peserta');
         Route::post('/harian', 'simpanHarian')->middleware('throttle:120,1')->name('penilaian.harian.simpan');
+        Route::get('/lisan', 'lisan')->name('penilaian.lisan');
+        Route::post('/lisan', 'simpanLisan')->middleware('throttle:120,1')->name('penilaian.lisan.simpan');
         Route::get('/kelas/{bagian}', 'kelas')->whereIn('bagian', PenilaianController::BAGIAN_KELAS)->name('penilaian.kelas');
         Route::get('/catatan', 'catatan')->name('penilaian.catatan');
         Route::post('/catatan', 'simpan')->middleware('throttle:60,1')->name('penilaian.catatan.simpan');
