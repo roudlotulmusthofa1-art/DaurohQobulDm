@@ -73,17 +73,46 @@ class PenilaianDakwahController extends Controller
     /** POST /admin/penilaian/dakwah/nilai — simpan satu penilaian */
     public function simpanNilai(Request $request): JsonResponse
     {
+        $nilai = NilaiDakwah::create($this->isianNilai($request) + ['dinilai_oleh' => Auth::id()]);
+
+        return response()->json([
+            'message' => __('Nilai :nama disimpan.', ['nama' => $nilai->siswa?->nama_lengkap]),
+            'baris'   => NilaiDakwah::lengkap()->find($nilai->id)->baris(),
+        ]);
+    }
+
+    /** PUT /admin/penilaian/dakwah/nilai/{nilai} — ubah satu penilaian (penilai awal tetap tercatat) */
+    public function ubahNilai(Request $request, NilaiDakwah $nilai): JsonResponse
+    {
+        $nilai->update($this->isianNilai($request, $nilai));
+
+        return response()->json([
+            'message' => __('Nilai :nama diperbarui.', ['nama' => $nilai->siswa?->nama_lengkap]),
+            'baris'   => NilaiDakwah::lengkap()->find($nilai->id)->baris(),
+        ]);
+    }
+
+    /**
+     * Cek isian Beri Nilai / Ubah Nilai -> kolom tabel nilai_dakwah.
+     * Saat mengubah, nama nilai / waktu yang lama tetap boleh dipakai walau pilihannya sudah dihapus.
+     */
+    private function isianNilai(Request $request, ?NilaiDakwah $lama = null): array
+    {
         $khitobah = $request->input('jenis') === NilaiDakwah::KHITOBAH;
         $kelompokNilai = $khitobah ? 'nilai_khitobah' : 'nilai_khuruj';
+        // Harus ada di pengaturan, kecuali isiannya sama dengan nilai lama (tidak diganti)
+        $adaDi = fn (string $kelompok, string $kolom, ?string $nilaiLama) => $nilaiLama !== null && $request->input($kolom) === $nilaiLama
+            ? null
+            : Rule::exists('pilihan_dakwah', 'nama')->where('kelompok', $kelompok);
 
         $data = $request->validate([
             'jenis'    => ['required', Rule::in(array_keys(NilaiDakwah::JENIS))],
             'siswa_id' => ['required', 'integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
             'waktu'    => $khitobah
-                ? ['required', 'string', 'max:100', Rule::exists('pilihan_dakwah', 'nama')->where('kelompok', 'waktu_khitobah')]
+                ? array_filter(['required', 'string', 'max:100', $adaDi('waktu_khitobah', 'waktu', $lama?->waktu)])
                 : ['nullable'],
             'tanggal'  => ['required', 'date'],
-            'nilai'    => ['required', 'string', 'max:100', Rule::exists('pilihan_dakwah', 'nama')->where('kelompok', $kelompokNilai)],
+            'nilai'    => array_filter(['required', 'string', 'max:100', $adaDi($kelompokNilai, 'nilai', $lama?->nilai)]),
             'catatan'  => ['nullable', 'string', 'max:5000'],
         ], [
             'siswa_id.required' => __('Pilih santri dulu.'),
@@ -95,20 +124,14 @@ class PenilaianDakwahController extends Controller
             'nilai.exists'      => __('Nilai tidak ada di pengaturan.'),
         ]);
 
-        $nilai = NilaiDakwah::create([
+        return [
             'jenis'                => $data['jenis'],
             'pendaftaran_siswa_id' => $data['siswa_id'],
             'waktu'                => $khitobah ? $data['waktu'] : null,
             'tanggal'              => $data['tanggal'],
             'nilai'                => $data['nilai'],
             'catatan'              => trim((string) ($data['catatan'] ?? '')) ?: null,
-            'dinilai_oleh'         => Auth::id(),
-        ]);
-
-        return response()->json([
-            'message' => __('Nilai :nama disimpan.', ['nama' => $nilai->siswa?->nama_lengkap]),
-            'baris'   => NilaiDakwah::lengkap()->find($nilai->id)->baris(),
-        ]);
+        ];
     }
 
     /** DELETE /admin/penilaian/dakwah/nilai/{nilai} */

@@ -149,6 +149,21 @@ class PenilaianController extends Controller
         return response()->json(['message' => __('Nilai ujian lisan dihapus.')]);
     }
 
+    /** PUT /admin/penilaian/nilai-harian/{nilai} — ubah 6 penilaian (batasnya dari NilaiHarian::ASPEK, total dihitung model) */
+    public function ubahNilaiHarian(Request $request, NilaiHarian $nilai): JsonResponse
+    {
+        $aturan = collect(NilaiHarian::ASPEK)->mapWithKeys(fn ($a, $kolom) => [$kolom => ['required', 'integer', 'min:0', 'max:' . $a[1]]])->all();
+        $nama = collect(NilaiHarian::ASPEK)->mapWithKeys(fn ($a, $kolom) => [$kolom => __($a[0])])->all();
+
+        $nilai->update($request->validate($aturan, [], $nama));
+        $nilai->load(['siswa', 'kelas:id,nama', 'kitab:id,nama', 'bulanAjaran:id,nama', 'penilai:id,name']);
+
+        return response()->json([
+            'message' => __('Nilai harian :nama diperbarui.', ['nama' => $nilai->siswa?->nama_lengkap]),
+            'baris'   => $nilai->baris(),
+        ]);
+    }
+
     /** DELETE /admin/penilaian/nilai-harian/{nilai} — hapus nilai harian yang salah */
     public function hapusNilaiHarian(NilaiHarian $nilai): JsonResponse
     {
@@ -174,6 +189,30 @@ class PenilaianController extends Controller
             'dari'   => $f['dari'] ?? null,
             'sampai' => $f['sampai'] ?? null,
         ]);
+    }
+
+    /** PUT /admin/penilaian/catatan/{catatan} — ubah catatan asatid (jenis, isi, tanggal, jam) */
+    public function ubah(Request $request, CatatanSiswa $catatan): JsonResponse
+    {
+        $data = $request->validate([
+            'jenis'   => ['required', 'in:' . implode(',', array_keys(CatatanSiswa::JENIS))],
+            'catatan' => ['required', 'string', 'max:5000'],
+            'tanggal' => ['required', 'date'],
+            'jam'     => ['nullable', 'date_format:H:i'],
+        ], [
+            'catatan.required' => __('Isi catatan dulu.'),
+            'tanggal.required' => __('Isi tanggal dulu.'),
+        ]);
+
+        $catatan->update([
+            'jenis'   => $data['jenis'],
+            'catatan' => trim($data['catatan']),
+            'tanggal' => $data['tanggal'],
+            'jam'     => $data['jam'] ?? null,
+        ]);
+        $catatan->load(['siswa.kelasMaster', 'pencatat:id,name']);
+
+        return response()->json(['message' => __('Catatan diperbarui.'), 'baris' => DataCatatan::baris($catatan)]);
     }
 
     /** DELETE /admin/penilaian/catatan/{catatan} — hapus catatan asatid yang salah */

@@ -92,6 +92,27 @@ class LaporanAbsensiController extends Controller
         ]);
     }
 
+    /** PUT /admin/laporan-absensi/{absensi} — tombol "Ubah kehadiran": ganti status santri (hanya baris milik absensi ini) */
+    public function update(Request $request, Absensi $absensi)
+    {
+        $data = $request->validate([
+            'status'   => ['required', 'array'],
+            'status.*' => ['required', 'in:' . implode(',', array_keys(Absensi::STATUS))],
+        ]);
+
+        $diubah = 0;
+        foreach ($absensi->detail()->whereIn('id', array_keys($data['status']))->get() as $d) {
+            $baru = $data['status'][$d->id];
+            if ($d->status !== $baru) {
+                $d->update(['status' => $baru]);
+                $diubah++;
+            }
+        }
+
+        return redirect()->route('admin.laporan-absensi.show', $absensi)
+            ->with('success', $diubah ? __(':jumlah status kehadiran diubah.', ['jumlah' => $diubah]) : __('Tidak ada yang diubah.'));
+    }
+
     public function destroy(Absensi $absensi)
     {
         $absensi->delete();

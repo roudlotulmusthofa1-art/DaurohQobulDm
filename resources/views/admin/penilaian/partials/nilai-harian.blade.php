@@ -159,6 +159,11 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                             v-text="(i + 1) + ': ' + n.nilai[a.kunci] + '/' + a.maks"></span>
                     </span>
                 </span>
+                <button type="button" @click="bukaUbahHarian(n)"
+                    title="{{ __('Ubah nilai') }}" aria-label="{{ __('Ubah nilai') }}"
+                    class="shrink-0 w-9 h-9 rounded-xl text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                </button>
                 <button type="button" @click="hapus(n)" :disabled="menghapus === n.id"
                     title="{{ __('Hapus nilai') }}" aria-label="{{ __('Hapus nilai') }}"
                     class="shrink-0 w-9 h-9 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center disabled:opacity-40">
@@ -167,4 +172,37 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
             </li>
         </ul>
     </section>
+
+    {{-- ===== Modal: Ubah Nilai Harian (6 penilaian, batas dari NilaiHarian::ASPEK) ===== --}}
+    <div v-if="ubahHarian" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/40 p-4 sm:items-center" @mousedown.self="ubahHarian = null">
+        <form class="w-full max-w-lg rounded-3xl bg-white shadow-xl" @submit.prevent="simpanUbahHarian">
+            <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+                <div class="min-w-0">
+                    <h3 class="text-base font-extrabold text-slate-800">{{ __('Ubah Nilai Harian') }}</h3>
+                    <p class="text-xs text-slate-500 truncate" v-text="[ubahHarian.siswa, ubahHarian.kitab, ubahHarian.bulan].filter(Boolean).join(' · ')"></p>
+                </div>
+                <button type="button" @click="ubahHarian = null" class="w-8 h-8 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center" aria-label="{{ __('Tutup') }}">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+            <div class="px-6 py-5 space-y-3">
+                <label v-for="(a, i) in aspek" :key="a.kunci" class="flex items-center gap-3">
+                    <span class="flex-1 text-sm text-slate-700"><b class="text-slate-400" v-text="(i + 1) + '.'"></b> <span v-text="a.label"></span></span>
+                    <input type="number" min="0" :max="a.maks" step="1" required v-model.number="ubahHarian.nilai[a.kunci]"
+                        class="w-20 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-3 py-2 text-sm text-center tabular-nums text-slate-700 focus:ring-2 focus:ring-sky-500 outline-none">
+                    <span class="w-10 text-xs text-slate-400 tabular-nums" v-text="'/ ' + a.maks"></span>
+                </label>
+                <p class="pt-2 border-t border-slate-100 flex justify-between text-sm font-bold text-slate-700">
+                    <span>{{ __('Total') }}</span><span class="tabular-nums" v-text="totalUbahHarian + ' / 100'"></span>
+                </p>
+            </div>
+            <div class="border-t border-slate-100 px-6 py-4 flex justify-end gap-2">
+                <button type="button" @click="ubahHarian = null" class="px-5 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Batal') }}</button>
+                <button :disabled="menyimpan" class="px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] disabled:opacity-50">
+                    <template v-if="menyimpan">{{ __('Menyimpan...') }}</template>
+                    <template v-else>{{ __('Simpan Perubahan') }}</template>
+                </button>
+            </div>
+        </form>
+    </div>
 </div>

@@ -71,9 +71,42 @@ class PerizinanController extends Controller
     /** POST /admin/penilaian/perizinan — beri izin satu santri */
     public function simpan(Request $request): JsonResponse
     {
+        $izin = IzinSantri::create($this->isianIzin($request) + ['diberi_oleh' => Auth::id()]);
+
+        return response()->json([
+            'message' => __('Izin :jenis untuk :nama disimpan.', ['jenis' => $izin->jenis, 'nama' => $izin->siswa?->nama_lengkap]),
+            'baris'   => $this->baris($izin->id),
+        ]);
+    }
+
+    /** PUT /admin/penilaian/perizinan/{izin} — ubah izin (santri, jenis, mulai, berakhir, catatan); waktu kembali tidak diubah di sini */
+    public function ubah(Request $request, IzinSantri $izin): JsonResponse
+    {
+        $isian = $this->isianIzin($request, $izin);
+        $kembali = $izin->getAttributes()['kembali'] ?? null;
+        if ($kembali && substr((string) $kembali, 0, 19) < $isian['mulai']) {
+            throw ValidationException::withMessages(['mulai_jam' => __('Waktu mulai tidak boleh setelah waktu kembali yang sudah dicatat.')]);
+        }
+
+        $izin->update($isian);
+
+        return response()->json([
+            'message' => __('Izin :jenis untuk :nama diperbarui.', ['jenis' => $izin->jenis, 'nama' => $izin->siswa?->nama_lengkap]),
+            'baris'   => $this->baris($izin->id),
+        ]);
+    }
+
+    /**
+     * Cek isian Beri Izin / Ubah Izin -> kolom tabel izin_santri (waktu disimpan sebagai WIB apa adanya).
+     * Saat mengubah, jenis izin yang lama tetap boleh dipakai walau sudah dihapus dari pengaturan.
+     */
+    private function isianIzin(Request $request, ?IzinSantri $lama = null): array
+    {
+        $jenisLama = $lama && $request->input('jenis') === $lama->jenis;
+
         $data = $request->validate([
             'siswa_id'        => ['required', 'integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
-            'jenis'           => ['required', 'string', 'max:100', Rule::exists('jenis_izin', 'nama')],
+            'jenis'           => array_filter(['required', 'string', 'max:100', $jenisLama ? null : Rule::exists('jenis_izin', 'nama')]),
             'mulai_tanggal'   => ['required', 'date'],
             'mulai_jam'       => ['required', 'date_format:H:i'],
             'selesai_tanggal' => ['required', 'date', 'after_or_equal:mulai_tanggal'],
@@ -95,19 +128,13 @@ class PerizinanController extends Controller
             throw ValidationException::withMessages(['selesai_jam' => __('Waktu berakhir harus setelah waktu mulai.')]);
         }
 
-        $izin = IzinSantri::create([
+        return [
             'pendaftaran_siswa_id' => $data['siswa_id'],
             'jenis'                => $data['jenis'],
             'mulai'                => $mulai,
             'selesai'              => $selesai,
             'catatan'              => trim((string) ($data['catatan'] ?? '')) ?: null,
-            'diberi_oleh'          => Auth::id(),
-        ]);
-
-        return response()->json([
-            'message' => __('Izin :jenis untuk :nama disimpan.', ['jenis' => $izin->jenis, 'nama' => $izin->siswa?->nama_lengkap]),
-            'baris'   => $this->baris($izin->id),
-        ]);
+        ];
     }
 
     /** PUT /admin/penilaian/perizinan/{izin}/kembali — catat waktu kembali (kosong = batalkan "sudah kembali") */

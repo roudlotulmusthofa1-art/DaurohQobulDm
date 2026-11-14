@@ -98,6 +98,7 @@ $bagian = [
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const HAPUS = @json(route('admin.penilaian.nilai-harian.hapus', ['nilai' => '__ID__']));
+        const UBAH_HARIAN = @json(route('admin.penilaian.nilai-harian.ubah', ['nilai' => '__ID__']));
         const CSRF = @json(csrf_token());
         const ASPEK = @json($aspek);
         const kecil = (t) => (t || '').toString().toLowerCase();
@@ -133,6 +134,7 @@ $bagian = [
                 aspek: ASPEK,
                 nilai: @json($nilai),
                 tampil: 'rekap',   // rekap | daftar
+                ubahHarian: null,  // nilai harian yang sedang diubah (salinan)
                 cari: '',
                 menghapus: null,
                 // Ujian Lisan
@@ -155,6 +157,9 @@ $bagian = [
                 menyimpan: false,
             }),
             computed: {
+                totalUbahHarian() {
+                    return this.ubahHarian ? ASPEK.reduce((t, a) => t + (Number(this.ubahHarian.nilai[a.kunci]) || 0), 0) : 0;
+                },
                 // ===== Ujian Lisan =====
                 ujianLisanAktif() { return this.ujianLisan.filter((u) => u.is_active); },
                 ujianLisanTerpilih() { return this.ujianLisan.find((u) => u.id === this.formLisan.ujian_lisan_id) || null; },
@@ -208,6 +213,21 @@ $bagian = [
                     if (t >= 80) return 'bg-emerald-50 text-emerald-700 ring-emerald-200';
                     if (t >= 60) return 'bg-amber-50 text-amber-700 ring-amber-200';
                     return 'bg-rose-50 text-rose-700 ring-rose-200';
+                },
+                bukaUbahHarian(n) {
+                    this.ubahHarian = { id: n.id, siswa: n.siswa, kitab: n.kitab, bulan: n.bulan, nilai: { ...n.nilai } };
+                },
+                async simpanUbahHarian() {
+                    const u = this.ubahHarian;
+                    const lewat = ASPEK.find((a) => !(u.nilai[a.kunci] >= 0 && u.nilai[a.kunci] <= a.maks));
+                    if (lewat) return gagal(new Error(@js(__(':nama: nilai 0 sampai :maks.')).replace(':nama', lewat.label).replace(':maks', lewat.maks)));
+                    this.menyimpan = true;
+                    try {
+                        const json = await kirim(UBAH_HARIAN.replace('__ID__', u.id), 'PUT', u.nilai);
+                        this.nilai = this.nilai.map((x) => (x.id === u.id ? json.baris : x));
+                        this.ubahHarian = null;
+                        window.notifikasi?.sukses(json.message);
+                    } catch (e) { gagal(e); } finally { this.menyimpan = false; }
                 },
                 async hapus(n) {
                     const tanya = @js(__('Hapus nilai harian :nama (:kitab, :bulan)?'));

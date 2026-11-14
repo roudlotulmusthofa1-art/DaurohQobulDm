@@ -96,11 +96,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         ->only(['index', 'store', 'update', 'destroy'])->parameters(['absensi-kegiatan' => 'absensi']);
     Route::get('laporan-absensi', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'index'])->name('laporan-absensi.index');
     Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
+    Route::put('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'update'])->name('laporan-absensi.update'); // Ubah kehadiran
     Route::delete('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'destroy'])->name('laporan-absensi.destroy');
 
     // Penilaian: Kelas & Pelajaran, Catatan (pencapaian & pelanggaran dari asatid)
     Route::controller(\App\Http\Controllers\Admin\PenilaianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {
         Route::get('kelas', 'kelas')->name('kelas.index');
+        Route::put('nilai-harian/{nilai}', 'ubahNilaiHarian')->whereNumber('nilai')->name('nilai-harian.ubah');
         Route::delete('nilai-harian/{nilai}', 'hapusNilaiHarian')->whereNumber('nilai')->name('nilai-harian.hapus');
         // Ujian Lisan: pengaturan (tombol Pengaturan) + nilai (admin ikut menilai)
         Route::post('ujian-lisan', 'simpanUjianLisan')->name('ujian-lisan.simpan');
@@ -108,6 +110,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('nilai-lisan', 'simpanNilaiLisan')->name('nilai-lisan.simpan');
         Route::delete('nilai-lisan/{nilai}', 'hapusNilaiLisan')->whereNumber('nilai')->name('nilai-lisan.hapus');
         Route::get('catatan', 'catatan')->name('catatan.index');
+        Route::put('catatan/{catatan}', 'ubah')->whereNumber('catatan')->name('catatan.ubah');
         Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
     });
     // Penilaian Dakwah: Khitoba' & Khurujud Dakwah + Laporan Dakwah
@@ -116,6 +119,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('penilaian/dakwah/pilihan', 'simpanPilihan')->name('penilaian.dakwah.pilihan');
         Route::delete('penilaian/dakwah/pilihan/{pilihan}', 'hapusPilihan')->whereNumber('pilihan')->name('penilaian.dakwah.pilihan.hapus');
         Route::post('penilaian/dakwah/nilai', 'simpanNilai')->name('penilaian.dakwah.nilai');
+        Route::put('penilaian/dakwah/nilai/{nilai}', 'ubahNilai')->whereNumber('nilai')->name('penilaian.dakwah.nilai.ubah');
         Route::delete('penilaian/dakwah/nilai/{nilai}', 'hapusNilai')->whereNumber('nilai')->name('penilaian.dakwah.nilai.hapus');
         Route::get('laporan-dakwah', 'laporan')->name('laporan-dakwah.index');
     });
@@ -125,6 +129,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('jenis', 'simpanJenis')->name('jenis');
         Route::delete('jenis/{jenis}', 'hapusJenis')->whereNumber('jenis')->name('jenis.hapus');
         Route::post('/', 'simpan')->name('simpan');
+        Route::put('{izin}', 'ubah')->whereNumber('izin')->name('ubah'); // Ubah izin
         Route::put('{izin}/kembali', 'kembali')->whereNumber('izin')->name('kembali');
         Route::post('pindai', 'pindai')->name('pindai'); // Pindai Kembali (kartu QR santri)
         Route::delete('{izin}', 'hapus')->whereNumber('izin')->name('hapus');

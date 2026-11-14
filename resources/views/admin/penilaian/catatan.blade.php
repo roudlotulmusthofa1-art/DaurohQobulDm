@@ -232,6 +232,11 @@ $cepat = [
                     </span>
                     <x-nama-arab vue="b.oleh_arab" kelas="text-[11px] text-slate-400" />
                 </span>
+                <button v-if="b.sumber === 'guru'" type="button" @click="bukaUbah(b)"
+                    title="{{ __('Ubah catatan') }}" aria-label="{{ __('Ubah catatan') }}"
+                    class="shrink-0 w-9 h-9 rounded-xl text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                </button>
                 <button v-if="b.sumber === 'guru'" type="button" @click="hapus(b)" :disabled="menghapus === b.id"
                     title="{{ __('Hapus catatan') }}" aria-label="{{ __('Hapus catatan') }}"
                     class="shrink-0 w-9 h-9 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center disabled:opacity-40">
@@ -248,6 +253,44 @@ $cepat = [
         </div>
     </section>
 </div>
+
+{{-- ===== Modal: Ubah Catatan (hanya catatan yang ditulis asatid / admin) ===== --}}
+<div v-if="ubah" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/40 p-4 sm:items-center" @mousedown.self="ubah = null">
+    <form class="w-full max-w-lg rounded-3xl bg-white shadow-xl" @submit.prevent="simpanUbah">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+            <div class="min-w-0">
+                <h3 class="text-base font-extrabold text-slate-800">{{ __('Ubah Catatan') }}</h3>
+                <p class="text-xs text-slate-500 truncate" v-text="ubah.siswa"></p>
+            </div>
+            <button type="button" @click="ubah = null" class="w-8 h-8 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center" aria-label="{{ __('Tutup') }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" @click="ubah.jenis = 'pencapaian'" class="py-2.5 rounded-xl text-sm font-bold ring-1"
+                    :class="ubah.jenis === 'pencapaian' ? 'bg-emerald-600 text-white ring-emerald-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'">{{ __('Pencapaian') }}</button>
+                <button type="button" @click="ubah.jenis = 'pelanggaran'" class="py-2.5 rounded-xl text-sm font-bold ring-1"
+                    :class="ubah.jenis === 'pelanggaran' ? 'bg-rose-600 text-white ring-rose-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'">{{ __('Pelanggaran') }}</button>
+            </div>
+            <label class="block"><span class="text-[11px] font-semibold text-slate-500">{{ __('Isi catatan') }}</span>
+                <textarea v-model="ubah.catatan" rows="4" maxlength="5000" required class="mt-1 {{ $input }}"></textarea></label>
+            <div class="grid grid-cols-2 gap-2">
+                <label class="block"><span class="text-[11px] font-semibold text-slate-500">{{ __('Tanggal') }}</span>
+                    <input type="date" v-model="ubah.tanggal" required class="mt-1 {{ $input }}"></label>
+                <label class="block"><span class="text-[11px] font-semibold text-slate-500">{{ __('Jam') }}</span>
+                    <input type="time" v-model="ubah.jam" class="mt-1 {{ $input }}"></label>
+            </div>
+        </div>
+        <div class="border-t border-slate-100 px-6 py-4 flex justify-end gap-2">
+            <button type="button" @click="ubah = null" class="px-5 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Batal') }}</button>
+            <button :disabled="menyimpan" class="px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] disabled:opacity-50">
+                <template v-if="menyimpan">{{ __('Menyimpan...') }}</template>
+                <template v-else>{{ __('Simpan Perubahan') }}</template>
+            </button>
+        </div>
+    </form>
+</div>
 </div>
 @endsection
 
@@ -255,6 +298,7 @@ $cepat = [
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const HAPUS = @json(route('admin.penilaian.catatan.hapus', ['catatan' => '__ID__']));
+        const UBAH = @json(route('admin.penilaian.catatan.ubah', ['catatan' => '__ID__']));
         const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const kecil = (t) => (t || '').toString().toLowerCase();
         const PILIHAN = [
@@ -274,6 +318,8 @@ $cepat = [
                 saring: { cari: '', sumber: '', oleh: '', siswa: null, siswaNama: '', siswaArab: '' },
                 batas: 50,
                 menghapus: null,
+                ubah: null,       // catatan yang sedang diubah (salinan isian)
+                menyimpan: false,
             }),
             computed: {
                 jumlah() {
@@ -340,6 +386,31 @@ $cepat = [
                     this.saring = { cari: '', sumber: '', oleh: '', siswa: r.siswa_id, siswaNama: r.siswa, siswaArab: r.arab };
                     this.tab = 'daftar';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                bukaUbah(b) {
+                    this.ubah = { id: b.id, nomor_id: b.nomor_id, siswa: b.siswa, jenis: b.jenis, catatan: b.catatan || '', tanggal: b.tanggal, jam: b.jam || '' };
+                },
+                async simpanUbah() {
+                    const u = this.ubah;
+                    this.menyimpan = true;
+                    try {
+                        const res = await fetch(UBAH.replace('__ID__', u.nomor_id), {
+                            method: 'PUT',
+                            headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) },
+                            body: JSON.stringify({ jenis: u.jenis, catatan: u.catatan, tanggal: u.tanggal, jam: u.jam || null }),
+                        });
+                        const json = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error((json.errors && Object.values(json.errors)[0][0]) || json.message || @js(__('Gagal menyimpan. Coba lagi.')));
+                        this.baris = this.baris.map((x) => (x.id === u.id ? json.baris : x))
+                            .sort((a, b) => (b.tanggal + ' ' + (b.jam || '00:00')).localeCompare(a.tanggal + ' ' + (a.jam || '00:00')));
+                        this.ubah = null;
+                        window.notifikasi?.sukses(json.message);
+                    } catch (e) {
+                        window.notifikasi ? window.notifikasi.gagal(e.message) : alert(e.message);
+                    } finally {
+                        this.menyimpan = false;
+                    }
                 },
 
                 async hapus(b) {

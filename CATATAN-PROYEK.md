@@ -78,6 +78,14 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 ### Data Admin: Edit Data
 - **Tombol Edit Data** di detail Data Admin (khusus Super Admin). Bisa mengubah nama, nama Arab, nomor WhatsApp, alamat, foto, email, dan password.
 
+### Tombol Edit di menu admin (2026-11-14)
+- **Laporan Absensi > detail**: tombol **Ubah kehadiran** → tiap santri pilih H/T/S/I/A → **Simpan perubahan** (form biasa, `PUT admin.laporan-absensi.update`, `LaporanAbsensiController@update`; hanya baris milik absensi itu). Terlambat/Alfa otomatis ikut Catatan > Pelanggaran.
+- **Penilaian > Catatan**: tombol ✏️ (hanya catatan tulisan asatid) → jenis, isi, tanggal, jam (`PUT admin.penilaian.catatan.ubah`, `PenilaianController@ubah`).
+- **Nilai Harian**: tombol ✏️ → 6 nilai, batas dari `NilaiHarian::ASPEK` (`PUT admin.penilaian.nilai-harian.ubah`, `ubahNilaiHarian`).
+- **Penilaian Dakwah**: ✏️ memakai jendela Beri Nilai (`ubahId`), `PUT admin.penilaian.dakwah.nilai.ubah`. Cek isian bersama di `isianNilai()`; nama nilai/waktu lama tetap boleh walau pilihannya sudah dihapus.
+- **Perizinan**: ✏️ memakai jendela Beri Izin (`ubahId`), `PUT admin.penilaian.perizinan.ubah`. Cek isian bersama di `isianIzin()`; waktu kembali tidak diubah di sini (tetap lewat "Ubah kembali"); mulai tidak boleh setelah waktu kembali.
+- Penilai/pemberi izin awal tetap tercatat. Tidak ada migrasi baru.
+
 ### Admin versi HP (layout)
 - **Cara kerja:** dilihat dari **lebar layar**. Di bawah 1024px (`lg`), sidebar disembunyikan, bilah atas jadi hijau tua ringkas (tombol kembali + judul halaman), dan muncul menu bawah: Beranda, PSB, Santri, Pesan, Menu.
 - **Tombol Menu** membuka lembar berisi semua menu sesuai izin role, Lihat Website, dan Keluar.

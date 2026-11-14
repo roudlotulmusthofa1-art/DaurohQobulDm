@@ -138,11 +138,18 @@ $saringan = [
                         class="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-500 ring-1 ring-slate-200 hover:bg-slate-50 whitespace-nowrap">
                         {{ __('Ubah kembali') }}
                     </button>
+                    <span class="flex gap-1">
+                    <button type="button" @click="bukaUbah(i)"
+                        title="{{ __('Ubah izin') }}" aria-label="{{ __('Ubah izin') }}"
+                        class="w-9 h-9 rounded-xl text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                    </button>
                     <button type="button" @click="hapus(i)" :disabled="menghapus === i.id"
                         title="{{ __('Hapus izin') }}" aria-label="{{ __('Hapus izin') }}"
                         class="w-9 h-9 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center disabled:opacity-40">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.067-2.09 1.02-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
                     </button>
+                    </span>
                 </span>
             </li>
         </ul>
@@ -193,7 +200,10 @@ $saringan = [
 <div v-if="modalIzin" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/40 p-4 sm:items-center" @mousedown.self="modalIzin = false">
     <form class="w-full max-w-lg rounded-3xl bg-white shadow-xl" @submit.prevent="simpan">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
-            <h3 class="text-base font-extrabold text-slate-800">{{ __('Beri Izin') }}</h3>
+            <h3 class="text-base font-extrabold text-slate-800">
+                <template v-if="ubahId">{{ __('Ubah Izin') }}</template>
+                <template v-else>{{ __('Beri Izin') }}</template>
+            </h3>
             <button type="button" @click="modalIzin = false" class="w-8 h-8 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center" aria-label="{{ __('Tutup') }}">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
@@ -395,6 +405,7 @@ $saringan = [
             jenis: @json(route('admin.penilaian.perizinan.jenis')),
             hapusJenis: @json(route('admin.penilaian.perizinan.jenis.hapus', ['jenis' => '__ID__'])),
             simpan: @json(route('admin.penilaian.perizinan.simpan')),
+            ubah: @json(route('admin.penilaian.perizinan.ubah', ['izin' => '__ID__'])),
             kembali: @json(route('admin.penilaian.perizinan.kembali', ['izin' => '__ID__'])),
             hapus: @json(route('admin.penilaian.perizinan.hapus', ['izin' => '__ID__'])),
             pindai: @json(route('admin.penilaian.perizinan.pindai')),
@@ -467,6 +478,7 @@ $saringan = [
                 menghapus: null,
                 modalJenis: false,
                 modalIzin: false,
+                ubahId: null,     // berisi id izin saat jendela dipakai untuk Ubah Izin
                 jenisBaru: '',
                 cariSantri: '',
                 form: {},
@@ -554,12 +566,25 @@ $saringan = [
                 sedangIzin(id) { return this.izinStatus.some((i) => i.siswa_id === id && (i.status === 'sedang' || (i.status === 'terlambat' && !i.kembali_jam))); },
                 bukaIzin() {
                     const sekarang = this.detik;
+                    this.ubahId = null;
                     // Jenis terakhir diingat supaya memberi izin beberapa santri berturut-turut lebih cepat
                     this.form = {
                         siswa_id: null, jenis: this.form.jenis || '',
                         mulai_tanggal: sekarang.slice(0, 10), mulai_jam: sekarang.slice(11, 16),
                         selesai_tanggal: sekarang.slice(0, 10), selesai_jam: '',
                         catatan: '',
+                    };
+                    this.cariSantri = '';
+                    this.modalIzin = true;
+                },
+                // Jendela yang sama dengan Beri Izin, isiannya diambil dari izin yang dipilih
+                bukaUbah(i) {
+                    this.ubahId = i.id;
+                    this.form = {
+                        siswa_id: i.siswa_id, jenis: i.jenis,
+                        mulai_tanggal: i.mulai_tanggal, mulai_jam: i.mulai_jam,
+                        selesai_tanggal: i.selesai_tanggal, selesai_jam: i.selesai_jam,
+                        catatan: i.catatan || '',
                     };
                     this.cariSantri = '';
                     this.modalIzin = true;
@@ -591,8 +616,11 @@ $saringan = [
                     if (!f.jenis) return gagal(new Error(@js(__('Pilih jenis izin dulu.'))));
                     this.menyimpan = true;
                     try {
-                        const json = await kirim(RUTE.simpan, 'POST', f);
-                        this.izin.unshift(json.baris);
+                        const json = this.ubahId
+                            ? await kirim(RUTE.ubah.replace('__ID__', this.ubahId), 'PUT', f)
+                            : await kirim(RUTE.simpan, 'POST', f);
+                        if (this.ubahId) this.izin = this.izin.map((x) => (x.id === this.ubahId ? json.baris : x));
+                        else this.izin.unshift(json.baris);
                         this.izin.sort((a, b) => (b.mulai_tanggal + b.mulai_jam).localeCompare(a.mulai_tanggal + a.mulai_jam) || b.id - a.id);
                         this.modalIzin = false;
                         window.notifikasi?.sukses(json.message);

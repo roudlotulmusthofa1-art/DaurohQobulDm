@@ -140,6 +140,11 @@ $panel = [
                         <span v-if="n.oleh" class="block mt-1 text-[11px] text-slate-400">{{ __('Dinilai oleh') }} <b class="text-slate-500" v-text="n.oleh"></b></span>
                         <x-nama-arab vue="n.oleh_arab" kelas="text-[11px] text-slate-400" />
                     </span>
+                    <button type="button" @click="bukaUbahNilai(n)"
+                        title="{{ __('Ubah nilai') }}" aria-label="{{ __('Ubah nilai') }}"
+                        class="shrink-0 w-9 h-9 rounded-xl text-slate-400 hover:text-emerald-700 hover:bg-emerald-50 flex items-center justify-center">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                    </button>
                     <button type="button" @click="hapusNilai(n)" :disabled="menghapus === n.id"
                         title="{{ __('Hapus nilai') }}" aria-label="{{ __('Hapus nilai') }}"
                         class="shrink-0 w-9 h-9 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center disabled:opacity-40">
@@ -203,7 +208,8 @@ $panel = [
     <form class="w-full max-w-lg rounded-3xl bg-white shadow-xl" @submit.prevent="simpanNilai">
         <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
             <h3 class="text-base font-extrabold text-slate-800">
-                {{ __('Beri Nilai') }} —
+                <template v-if="ubahId">{{ __('Ubah Nilai') }}</template>
+                <template v-else>{{ __('Beri Nilai') }}</template> —
                 <template v-if="tab === 'khitobah'">{{ __("Khitoba'") }}</template>
                 <template v-else>{{ __('Khurujud Dakwah') }}</template>
             </h3>
@@ -304,6 +310,7 @@ $panel = [
             pilihan: @json(route('admin.penilaian.dakwah.pilihan')),
             hapusPilihan: @json(route('admin.penilaian.dakwah.pilihan.hapus', ['pilihan' => '__ID__'])),
             nilai: @json(route('admin.penilaian.dakwah.nilai')),
+            ubahNilai: @json(route('admin.penilaian.dakwah.nilai.ubah', ['nilai' => '__ID__'])),
             hapusNilai: @json(route('admin.penilaian.dakwah.nilai.hapus', ['nilai' => '__ID__'])),
         };
         const CSRF = @json(csrf_token());
@@ -349,6 +356,7 @@ $panel = [
                 menyimpan: false,
                 modalAtur: false,
                 modalNilai: false,
+                ubahId: null,     // berisi id nilai saat jendela dipakai untuk Ubah Nilai
                 baru: { nilai_khitobah: '', waktu_khitobah: '', nilai_khuruj: '' },
                 cariSantri: '',
                 form: { siswa_id: null, waktu: '', tanggal: '', nilai: '', catatan: '' },
@@ -386,7 +394,15 @@ $panel = [
                 bukaAtur() { this.modalAtur = true; },
                 bukaNilai() {
                     // Tanggal & waktu terakhir tetap diingat supaya menilai beberapa santri berturut-turut lebih cepat
+                    this.ubahId = null;
                     this.form = { siswa_id: null, waktu: this.form.waktu, tanggal: this.form.tanggal || this.hariIni, nilai: '', catatan: '' };
+                    this.cariSantri = '';
+                    this.modalNilai = true;
+                },
+                // Jendela yang sama dengan Beri Nilai, isiannya diambil dari nilai yang dipilih
+                bukaUbahNilai(n) {
+                    this.ubahId = n.id;
+                    this.form = { siswa_id: n.siswa_id, waktu: n.waktu || '', tanggal: n.tanggal, nilai: n.nilai, catatan: n.catatan || '' };
                     this.cariSantri = '';
                     this.modalNilai = true;
                 },
@@ -414,8 +430,12 @@ $panel = [
                     if (!f.nilai) return gagal(new Error(@js(__('Pilih nilai dulu.'))));
                     this.menyimpan = true;
                     try {
-                        const json = await kirim(RUTE.nilai, 'POST', { ...f, jenis: this.tab });
-                        this.nilai.unshift(json.baris);
+                        const isi = { ...f, jenis: this.tab };
+                        const json = this.ubahId
+                            ? await kirim(RUTE.ubahNilai.replace('__ID__', this.ubahId), 'PUT', isi)
+                            : await kirim(RUTE.nilai, 'POST', isi);
+                        if (this.ubahId) this.nilai = this.nilai.map((x) => (x.id === this.ubahId ? json.baris : x));
+                        else this.nilai.unshift(json.baris);
                         this.nilai.sort((a, b) => b.tanggal.localeCompare(a.tanggal) || b.id - a.id);
                         this.modalNilai = false;
                         window.notifikasi?.sukses(json.message);
