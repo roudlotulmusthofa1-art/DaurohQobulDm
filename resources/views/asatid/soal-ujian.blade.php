@@ -91,7 +91,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
                     <button v-for="g in u.kelompok" :key="g.kitab_ids.join('-')" type="button" @click="pilihKelompok(u.id, g)"
                         class="px-3.5 py-2 rounded-xl text-sm font-semibold ring-1 transition"
                         :class="terpilih(u.id, g) ? 'bg-amber-500 text-white ring-amber-500' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'"
-                        v-text="g.nama"></button>
+                        v-text="g.label || g.nama"></button>
                 </div>
             </div>
         </div>

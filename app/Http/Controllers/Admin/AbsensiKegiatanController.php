@@ -27,6 +27,7 @@ class AbsensiKegiatanController extends Controller
     public function index(Request $request)
     {
         $saring = $request->query('saring', 'berjalan'); // berjalan | selesai | semua
+        $cari = trim((string) $request->query('cari'));   // cari nama kegiatan
 
         Absensi::tutupYangLewat(); // yang sudah lewat batas alfa ditutup otomatis (belum tercatat = Alfa)
 
@@ -35,6 +36,7 @@ class AbsensiKegiatanController extends Controller
             ->where('dari_admin', true)
             ->when($saring === 'berjalan', fn ($q) => $q->whereNull('selesai_at'))
             ->when($saring === 'selesai', fn ($q) => $q->whereNotNull('selesai_at'))
+            ->when($cari !== '', fn ($q) => $q->whereHas('kegiatan', fn ($k) => $k->where('nama', 'like', "%{$cari}%")))
             ->withCount([
                 'detail',
                 'detail as tercatat_count' => fn ($q) => $q->whereNotNull('dicatat_oleh'),
@@ -57,6 +59,7 @@ class AbsensiKegiatanController extends Controller
             'daftar'       => $daftar,
             'pencatat'     => $pencatat,
             'saring'       => $saring,
+            'cari'         => $cari,
             'kegiatanList' => JenisKegiatan::where('is_active', true)->ordered()->get(['id', 'nama', 'warna']),
             'jumlahPeserta' => PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count(),
             'jumlah'       => [

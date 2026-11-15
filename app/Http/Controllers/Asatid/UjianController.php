@@ -79,7 +79,7 @@ class UjianController extends Controller
         }
 
         // Kitab yang dipilih harus sama persis dengan salah satu kelompok dari pengaturan admin
-        $ujian = Ujian::with(['bidangIlmu:id,nama', 'kitab:kitab.id,kitab.nama'])->findOrFail($data['ujian_id']);
+        $ujian = Ujian::with(Ujian::MUAT)->findOrFail($data['ujian_id']);
         $kelompok = $ujian->cariKelompok($data['kitab_ids']);
         if (! $kelompok) {
             throw ValidationException::withMessages(['kitab_ids' => __('Pilihan kitab tidak sesuai pengaturan ujian dari admin.')]);
@@ -88,7 +88,7 @@ class UjianController extends Controller
             'ujian_id'   => $ujian->id,
             'kitab_ids'  => $kelompok['kitab_ids'],
             'nama_ujian' => $ujian->nama,
-            'fan'        => $ujian->bidangIlmu?->nama,
+            'fan'        => $kelompok['fan'] ?: null,   // fan kitab soal ini (ujian boleh banyak fan)
             'kitab'      => $kelompok['nama'],
             'kelas_ids'  => array_values(array_unique(array_map('intval', $data['kelas_ids']))),
             'butir'      => $butir,

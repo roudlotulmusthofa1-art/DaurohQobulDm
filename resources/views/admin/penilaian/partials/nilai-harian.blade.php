@@ -10,10 +10,10 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
 @endphp
 
 <div v-show="tab === 'harian'" @if ($tab !== 'harian') style="display: none" @endif class="space-y-5">
-    {{-- ===== Saringan ===== --}}
+    {{-- ===== Saringan (+ tombol Isi Nilai Harian: admin ikut mengisi, halaman sama seperti asatid) ===== --}}
     <form method="GET" class="{{ $kartu }} p-4 sm:p-5">
         <input type="hidden" name="tab" value="harian">
-        <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+        <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 items-end">
             <label class="block"><span class="text-xs font-semibold text-slate-500">{{ __('Kelas') }}</span>
                 <select name="kelas_id" class="mt-1 {{ $inputSaring }}">
                     <option value="">{{ __('Semua kelas') }}</option>
@@ -35,11 +35,18 @@ $inputSaring = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0
                     <option value="{{ $b->id }}" @selected($saring['bulan_id'] === (string) $b->id)>{{ __('Bulan ke-:n', ['n' => $b->urutan]) }} · {{ $b->nama }}{{ $b->tahunAjaran ? ' · ' . $b->tahunAjaran->nama : '' }}{{ $b->is_active ? ' (' . __('aktif') . ')' : '' }}</option>
                     @endforeach
                 </select></label>
-            <div class="col-span-2 lg:col-span-1 flex gap-2">
+            <div class="col-span-2 flex gap-2">
                 <button class="flex-1 px-5 py-2.5 rounded-xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Terapkan') }}</button>
                 @if ($saringDiubah)
                 <a href="?tab=harian" class="px-3 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Reset') }}</a>
                 @endif
+                <a href="{{ route('admin.penilaian.isi.harian') }}"
+                    class="shrink-0 inline-flex items-center gap-2 whitespace-nowrap px-4 py-2.5 rounded-xl bg-sky-600 text-sm font-bold text-white shadow-sm hover:bg-sky-700">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" d="M12 4.5v15m7.5-7.5h-15" />
+                    </svg>
+                    {{ __('Isi Nilai Harian') }}
+                </a>
             </div>
         </div>
     </form>

@@ -6,10 +6,12 @@
     Satu santri + ujian + kelompok = satu nilai: yang sudah dinilai langsung muncul & tinggal diperbarui.
     Kotak yang dikosongkan tidak disimpan. Nilai langsung masuk ke Admin > Penilaian > Kelas & Pelajaran > Ujian.
     Vue: #nilai-ujian.
+    Dipakai juga oleh admin (Admin\IsiNilaiController@ujian): $tataLetak, $rute, $bungkus, $batangBawah, $kembaliAdmin.
 --}}
-@extends('layouts.asatid')
+@extends($tataLetak ?? 'layouts.asatid')
 
 @section('judul', __('Nilai Ujian'))
+@section('title', __('Isi Nilai Ujian'))
 @section('kembali', route('asatid.penilaian'))
 
 @section('content')
@@ -19,7 +21,13 @@ $input = 'w-full rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-4
 $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center justify-center';
 @endphp
 
-<div id="nilai-ujian" v-cloak class="space-y-5 pb-28">
+<div id="nilai-ujian" v-cloak class="space-y-5 pb-28 {{ $bungkus ?? '' }}">
+    @isset($kembaliAdmin)
+    <a href="{{ $kembaliAdmin }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        {{ __('Kembali ke Kelas & Pelajaran') }}
+    </a>
+    @endisset
     {{-- ===== Hero ===== --}}
     <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6">
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
@@ -34,7 +42,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
                 <p class="text-sm text-white/70">{{ __('Pilih ujian & kitab, halaqoh, lalu tulis nilai tiap santri.') }}</p>
             </div>
         </div>
-        <a href="{{ route('asatid.soal-ujian') }}" class="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 ring-1 ring-white/20 px-3.5 py-1.5 text-xs font-bold hover:bg-white/20">
+        <a href="{{ $rute['soal'] ?? route('asatid.soal-ujian') }}" class="relative mt-4 inline-flex items-center gap-1.5 rounded-full bg-white/10 ring-1 ring-white/20 px-3.5 py-1.5 text-xs font-bold hover:bg-white/20">
             {{ __('Buat soal ujian') }} &rsaquo;
         </a>
     </section>
@@ -54,7 +62,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
                     <button v-for="g in u.kelompok" :key="g.kunci" type="button" @click="pilihKelompok(u.id, g)"
                         class="px-3.5 py-2 rounded-xl text-sm font-semibold ring-1 transition"
                         :class="form.ujian_id === u.id && form.kelompok === g.kunci ? 'bg-orange-500 text-white ring-orange-500' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'"
-                        v-text="g.nama"></button>
+                        v-text="g.label || g.nama"></button>
                 </div>
             </div>
         </div>
@@ -107,7 +115,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
     <p v-if="galat" class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-sm text-rose-700" v-text="galat"></p>
 
     {{-- Tombol simpan (menempel di bawah layar) --}}
-    <div v-if="siap" class="fixed inset-x-0 bottom-0 z-30 bg-white/90 backdrop-blur border-t border-slate-200 px-4 py-3">
+    <div v-if="siap" class="{{ $batangBawah ?? 'fixed inset-x-0 bottom-0 z-30 bg-white/90 backdrop-blur border-t border-slate-200 px-4 py-3' }}">
         <div class="mx-auto max-w-6xl flex items-center gap-3">
             <p class="flex-1 min-w-0 text-xs text-slate-500 truncate">
                 <b class="text-slate-800" v-text="jumlahTerisi"></b> {{ __('nilai terisi') }} · <b class="text-orange-700" v-text="jumlahBerubah"></b> {{ __('baru / berubah') }}
@@ -126,8 +134,8 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const RUTE = {
-        peserta: @json(route('asatid.penilaian.ujian.nilai.peserta')),
-        simpan: @json(route('asatid.penilaian.ujian.nilai.simpan')),
+        peserta: @json($rute['peserta'] ?? route('asatid.penilaian.ujian.nilai.peserta')),
+        simpan: @json($rute['simpan'] ?? route('asatid.penilaian.ujian.nilai.simpan')),
     };
     const CSRF = @json(csrf_token());
     const kecil = (t) => (t || '').toString().toLowerCase();

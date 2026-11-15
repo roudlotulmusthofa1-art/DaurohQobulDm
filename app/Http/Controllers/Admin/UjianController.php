@@ -28,28 +28,28 @@ class UjianController extends Controller
     /** POST /admin/penilaian/ujian — tambah / ubah ujian (isi "id" = ubah) */
     public function simpanUjian(Request $request): JsonResponse
     {
-        // Bulan wajib dipilih. Pengecualian: ujian lama yang belum punya bulan & tidak dikirim bulannya
-        // (mis. tombol Aktif/Mati) -> nama lamanya dipakai.
+        // Bulan wajib dipilih. Pengecualian: ujian lama yang belum punya bulan & tidak dikirim bulannya (mis. tombol Aktif/Mati).
+        // Nama ujian ditulis sendiri oleh admin (wajib).
         $lama = $request->filled('id') ? Ujian::with('bulan:bulan_ajaran.id')->find($request->integer('id')) : null;
         $tanpaBulan = $lama && $lama->bulan->isEmpty() && ! $request->filled('bulan_ids');
 
         $data = $request->validate([
             'id'             => ['nullable', 'integer', 'exists:ujian,id'],
+            'nama'           => ['required', 'string', 'max:150'],
             'bulan_ids'      => [$tanpaBulan ? 'nullable' : 'required', 'array'],
             'bulan_ids.*'    => ['integer', 'exists:bulan_ajaran,id'],
-            'bidang_ilmu_id' => ['required', 'integer', 'exists:bidang_ilmu,id'],
-            'kitab_ids'      => ['required', 'array', 'min:1'],
-            'kitab_ids.*'    => ['integer', Rule::exists('kitab', 'id')->where('bidang_ilmu_id', $request->integer('bidang_ilmu_id'))],
+            'kitab_ids'      => ['required', 'array', 'min:1'],           // boleh dari banyak fan
+            'kitab_ids.*'    => ['integer', 'exists:kitab,id'],
             'nilai_maks'     => ['required', 'integer', 'min:1', 'max:' . Ujian::MAKS_NILAI],
             'cara_soal'      => ['required', Rule::in(array_keys(Ujian::CARA_SOAL))],
             'kelompok_soal'  => ['nullable', 'array'],
             'is_active'      => ['boolean'],
         ], [
+            'nama.required'           => __('Tulis nama ujian dulu.'),
             'bulan_ids.required'      => __('Centang minimal satu bulan.'),
-            'bidang_ilmu_id.required' => __('Pilih fan dulu.'),
             'kitab_ids.required'      => __('Centang minimal satu kitab.'),
             'kitab_ids.min'           => __('Centang minimal satu kitab.'),
-            'kitab_ids.*.exists'      => __('Kitab yang dicentang tidak termasuk fan ini.'),
+            'kitab_ids.*.exists'      => __('Ada kitab yang tidak ditemukan.'),
             'nilai_maks.required'     => __('Isi nilai maksimal.'),
         ]);
 
@@ -57,11 +57,14 @@ class UjianController extends Controller
         $kelompok = $data['cara_soal'] === 'kelompok' ? $this->cekKelompok($data['kelompok_soal'] ?? [], $kitabIds) : null;
 
         $bulanIds = array_values(array_unique(array_map('intval', $data['bulan_ids'] ?? [])));
+        // Kolom fan ujian hanya diisi kalau semua kitabnya dari satu fan (ujian banyak fan = kosong)
+        $fanIds = \App\Models\Kitab::whereIn('id', $kitabIds)->pluck('bidang_ilmu_id')->unique()->values();
+        $fanTunggal = $fanIds->count() === 1 ? $fanIds->first() : null;
 
-        DB::transaction(function () use ($data, $kitabIds, $kelompok, $bulanIds, $lama) {
+        DB::transaction(function () use ($data, $kitabIds, $kelompok, $bulanIds, $fanTunggal) {
             $ujian = Ujian::updateOrCreate(['id' => $data['id'] ?? null], [
-                'nama'           => $bulanIds ? Ujian::namaDariBulan($bulanIds) : $lama?->nama,
-                'bidang_ilmu_id' => $data['bidang_ilmu_id'],
+                'nama'           => trim($data['nama']),
+                'bidang_ilmu_id' => $fanTunggal,
                 'nilai_maks'     => $data['nilai_maks'],
                 'cara_soal'      => $data['cara_soal'],
                 'kelompok_soal'  => $kelompok,

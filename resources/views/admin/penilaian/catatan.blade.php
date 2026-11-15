@@ -37,6 +37,11 @@ $cepat = [
                     <p class="text-2xl font-extrabold leading-tight text-rose-300" v-text="jumlah.pelanggaran"></p>
                     <p class="text-xs text-white/60">{{ __('pelanggaran') }}</p>
                 </div>
+                <button type="button" @click="bukaTulis"
+                    class="col-span-2 inline-flex items-center justify-center gap-2 rounded-2xl bg-emerald-500 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-black/10 hover:bg-emerald-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+                    {{ __('Tulis Catatan') }}
+                </button>
             </div>
         </x-slot:aksi>
     </x-header-admin>
@@ -254,6 +259,79 @@ $cepat = [
     </section>
 </div>
 
+{{-- ===== Modal: Tulis Catatan (admin ikut menulis, sama seperti asatid) ===== --}}
+<div v-if="tulis" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/40 p-4 sm:items-center" @mousedown.self="tulis = null">
+    <form class="w-full max-w-lg rounded-3xl bg-white shadow-xl" @submit.prevent="simpanTulis">
+        <div class="flex items-center justify-between border-b border-slate-100 px-6 py-4">
+            <div class="min-w-0">
+                <h3 class="text-base font-extrabold text-slate-800">{{ __('Tulis Catatan') }}</h3>
+                <p class="text-xs text-slate-500">{{ __('Pencapaian atau pelanggaran santri.') }}</p>
+            </div>
+            <button type="button" @click="tulis = null" class="w-8 h-8 rounded-xl text-slate-400 hover:bg-slate-100 flex items-center justify-center" aria-label="{{ __('Tutup') }}">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <div class="px-6 py-5 space-y-4">
+            {{-- 1. Santri --}}
+            <div>
+                <p class="flex items-center text-[11px] font-semibold text-slate-500">
+                    {{ __('Pilih santri (boleh beberapa)') }}
+                    <span v-if="tulis.dipilih.length" class="ml-auto rounded-full bg-[#0b332c] px-2.5 py-0.5 text-[11px] font-semibold text-white"><span v-text="tulis.dipilih.length"></span> {{ __('dipilih') }}</span>
+                </p>
+                <div v-if="tulis.dipilih.length" class="mt-2 flex flex-wrap gap-1.5">
+                    <button v-for="s in siswaDipilih" :key="s.siswa_id" type="button" @click="pilihSiswa(s)"
+                        class="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 pl-3 pr-1.5 py-1 text-xs font-semibold text-slate-700 ring-1 ring-emerald-200">
+                        <span v-text="s.siswa"></span>
+                        <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+                <input type="search" v-model="tulis.cari" placeholder="{{ __('Cari nama / nomor / kelas…') }}" class="mt-2 {{ $input }}">
+                <ul class="mt-1 max-h-56 overflow-y-auto divide-y divide-slate-100">
+                    <li v-for="s in siswaTampil" :key="s.siswa_id">
+                        <button type="button" @click="pilihSiswa(s)" class="w-full flex items-center gap-3 py-2 text-left">
+                            <span class="flex-1 min-w-0">
+                                <span class="block text-sm font-semibold text-slate-800 truncate" v-text="s.siswa"></span>
+                                <span class="block text-xs text-slate-400 truncate" v-text="[s.nomor, s.kelas].filter(Boolean).join(' · ')"></span>
+                            </span>
+                            <span class="w-5 h-5 shrink-0 rounded-full ring-2 flex items-center justify-center"
+                                :class="tulis.dipilih.includes(s.siswa_id) ? 'bg-emerald-600 ring-emerald-600 text-white' : 'ring-slate-200 text-transparent'">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                            </span>
+                        </button>
+                    </li>
+                </ul>
+                <p v-if="!siswaTersaring.length" class="py-3 text-center text-sm text-slate-400">{{ __('Santri tidak ditemukan.') }}</p>
+                <p v-else-if="siswaTersaring.length > siswaTampil.length" class="pt-1 text-center text-[11px] text-slate-400">{{ __('Ketik nama untuk mencari santri lainnya.') }}</p>
+            </div>
+            {{-- 2. Jenis --}}
+            <div class="grid grid-cols-2 gap-2">
+                <button type="button" @click="tulis.jenis = 'pencapaian'" class="py-2.5 rounded-xl text-sm font-bold ring-1"
+                    :class="tulis.jenis === 'pencapaian' ? 'bg-emerald-600 text-white ring-emerald-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'">{{ __('Pencapaian') }}</button>
+                <button type="button" @click="tulis.jenis = 'pelanggaran'" class="py-2.5 rounded-xl text-sm font-bold ring-1"
+                    :class="tulis.jenis === 'pelanggaran' ? 'bg-rose-600 text-white ring-rose-600' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'">{{ __('Pelanggaran') }}</button>
+            </div>
+            {{-- 3. Isi --}}
+            <label class="block"><span class="text-[11px] font-semibold text-slate-500">{{ __('Isi catatan') }}</span>
+                <textarea v-model="tulis.catatan" rows="4" maxlength="5000" class="mt-1 {{ $input }}"></textarea></label>
+            {{-- 4. Tanggal & jam --}}
+            <div class="grid grid-cols-2 gap-2">
+                <label class="block"><span class="text-[11px] font-semibold text-slate-500">{{ __('Tanggal') }}</span>
+                    <input type="date" v-model="tulis.tanggal" class="mt-1 {{ $input }}"></label>
+                <label class="block"><span class="text-[11px] font-semibold text-slate-500">{{ __('Jam') }}</span>
+                    <input type="time" v-model="tulis.jam" class="mt-1 {{ $input }}"></label>
+            </div>
+        </div>
+        <div class="border-t border-slate-100 px-6 py-4 flex justify-end gap-2">
+            <button type="button" @click="tulis = null" class="px-5 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Batal') }}</button>
+            <button :disabled="menyimpan" class="px-5 py-2.5 rounded-2xl text-white text-sm font-bold disabled:opacity-50"
+                :class="tulis.jenis === 'pelanggaran' ? 'bg-rose-600 hover:bg-rose-700' : 'bg-[#0b332c] hover:bg-[#135347]'">
+                <template v-if="menyimpan">{{ __('Menyimpan...') }}</template>
+                <template v-else>{{ __('Simpan Catatan') }}</template>
+            </button>
+        </div>
+    </form>
+</div>
+
 {{-- ===== Modal: Ubah Catatan (hanya catatan yang ditulis asatid / admin) ===== --}}
 <div v-if="ubah" class="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-gray-900/40 p-4 sm:items-center" @mousedown.self="ubah = null">
     <form class="w-full max-w-lg rounded-3xl bg-white shadow-xl" @submit.prevent="simpanUbah">
@@ -299,6 +377,8 @@ $cepat = [
     document.addEventListener('DOMContentLoaded', function () {
         const HAPUS = @json(route('admin.penilaian.catatan.hapus', ['catatan' => '__ID__']));
         const UBAH = @json(route('admin.penilaian.catatan.ubah', ['catatan' => '__ID__']));
+        const SIMPAN = @json(route('admin.penilaian.catatan.simpan'));
+        const dua = (n) => String(n).padStart(2, '0');
         const BULAN = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const kecil = (t) => (t || '').toString().toLowerCase();
         const PILIHAN = [
@@ -319,9 +399,19 @@ $cepat = [
                 batas: 50,
                 menghapus: null,
                 ubah: null,       // catatan yang sedang diubah (salinan isian)
+                siswa: @json($siswa), // pilihan santri untuk "Tulis Catatan"
+                tulis: null,      // isian "Tulis Catatan" (null = jendela tertutup)
                 menyimpan: false,
             }),
             computed: {
+                siswaTersaring() {
+                    if (!this.tulis) return [];
+                    const asli = this.tulis.cari.trim();
+                    const k = kecil(asli);
+                    return k ? this.siswa.filter((s) => kecil(s.siswa).includes(k) || kecil(s.nomor).includes(k) || kecil(s.kelas).includes(k) || (s.arab || '').includes(asli)) : this.siswa;
+                },
+                siswaTampil() { return this.siswaTersaring.slice(0, 40); },
+                siswaDipilih() { return this.tulis ? this.tulis.dipilih.map((id) => this.siswa.find((s) => s.siswa_id === id)).filter(Boolean) : []; },
                 jumlah() {
                     const p = this.baris.filter((b) => b.jenis === 'pelanggaran');
                     return {
@@ -386,6 +476,46 @@ $cepat = [
                     this.saring = { cari: '', sumber: '', oleh: '', siswa: r.siswa_id, siswaNama: r.siswa, siswaArab: r.arab };
                     this.tab = 'daftar';
                     window.scrollTo({ top: 0, behavior: 'smooth' });
+                },
+
+                /** Tombol "Tulis Catatan": tanggal & jam otomatis sekarang (bisa diubah) */
+                bukaTulis() {
+                    const d = new Date();
+                    this.tulis = {
+                        cari: '', dipilih: [], jenis: this.jenis || 'pencapaian', catatan: '',
+                        tanggal: `${d.getFullYear()}-${dua(d.getMonth() + 1)}-${dua(d.getDate())}`,
+                        jam: `${dua(d.getHours())}:${dua(d.getMinutes())}`,
+                    };
+                },
+                pilihSiswa(s) {
+                    const p = this.tulis.dipilih;
+                    const i = p.indexOf(s.siswa_id);
+                    i === -1 ? p.push(s.siswa_id) : p.splice(i, 1);
+                },
+                async simpanTulis() {
+                    const t = this.tulis;
+                    const ingat = (pesan) => (window.notifikasi ? window.notifikasi.peringatan(pesan) : alert(pesan));
+                    if (!t.dipilih.length) return ingat(@js(__('Pilih minimal satu santri.')));
+                    if (!t.catatan.trim()) return ingat(@js(__('Catatan wajib diisi.')));
+                    if (!t.tanggal) return ingat(@js(__('Tanggal wajib diisi.')));
+                    this.menyimpan = true;
+                    try {
+                        const res = await fetch(SIMPAN, {
+                            method: 'POST',
+                            headers: { Accept: 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': @json(csrf_token()) },
+                            body: JSON.stringify({ siswa: t.dipilih, jenis: t.jenis, catatan: t.catatan, tanggal: t.tanggal, jam: t.jam || null }),
+                        });
+                        const json = await res.json().catch(() => ({}));
+                        if (!res.ok) throw new Error((json.errors && Object.values(json.errors)[0][0]) || json.message || @js(__('Gagal menyimpan. Coba lagi.')));
+                        this.baris = [...json.baris, ...this.baris]
+                            .sort((a, b) => (b.tanggal + ' ' + (b.jam || '00:00')).localeCompare(a.tanggal + ' ' + (a.jam || '00:00')));
+                        this.tulis = null;
+                        window.notifikasi?.sukses(json.message);
+                    } catch (e) {
+                        window.notifikasi ? window.notifikasi.gagal(e.message) : alert(e.message);
+                    } finally {
+                        this.menyimpan = false;
+                    }
                 },
 
                 bukaUbah(b) {

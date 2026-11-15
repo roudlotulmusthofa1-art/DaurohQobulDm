@@ -11,7 +11,7 @@
 @section('content')
 @php
 $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]';
-$tab = fn ($kunci) => route('admin.absensi-kegiatan.index', ['saring' => $kunci]);
+$tab = fn ($kunci) => route('admin.absensi-kegiatan.index', array_filter(['saring' => $kunci, 'cari' => $cari]));
 $hariIni = now('Asia/Jakarta')->toDateString();
 @endphp
 
@@ -39,6 +39,17 @@ $hariIni = now('Asia/Jakarta')->toDateString();
         </a>
         @endforeach
     </div>
+
+    {{-- Cari nama kegiatan (tekan Enter) --}}
+    <form method="GET" class="flex gap-2">
+        <input type="hidden" name="saring" value="{{ $saring }}">
+        <input type="search" name="cari" value="{{ $cari }}" placeholder="{{ __('Cari nama kegiatan…') }}"
+            class="flex-1 sm:max-w-sm rounded-xl bg-white ring-1 ring-slate-200 border-0 px-4 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none">
+        <button class="shrink-0 px-5 py-2.5 rounded-xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347]">{{ __('Cari') }}</button>
+        @if ($cari !== '')
+        <a href="{{ route('admin.absensi-kegiatan.index', ['saring' => $saring]) }}" class="shrink-0 px-4 py-2.5 rounded-xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Hapus') }}</a>
+        @endif
+    </form>
 
     @if ($kegiatanList->isEmpty())
     <div class="rounded-2xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3 text-sm text-amber-800">
@@ -154,7 +165,11 @@ $hariIni = now('Asia/Jakarta')->toDateString();
         @endunless
         @empty
         <div class="md:col-span-2 xl:col-span-3 {{ $kartu }} py-16 px-6 text-center">
+            @if ($cari !== '')
+            <p class="font-bold text-slate-700">{{ __('Tidak ada kegiatan yang cocok dengan ":cari".', ['cari' => $cari]) }}</p>
+            @else
             <p class="font-bold text-slate-700">{{ $saring === 'selesai' ? __('Belum ada absensi kegiatan yang selesai') : __('Belum ada absensi kegiatan') }}</p>
+            @endif
             <p class="mt-1 text-sm text-slate-500">{{ __('Klik "Buat Absensi Kegiatan", isi nama kegiatan & waktunya, lalu aktifkan.') }}</p>
         </div>
         @endforelse

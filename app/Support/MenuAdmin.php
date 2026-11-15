@@ -74,7 +74,7 @@ class MenuAdmin
                 'label' => __('LAPORAN'),
                 'icon'  => 'bell',
                 'submenu' => [
-                    ['route' => 'admin.laporan-akademik.index', 'active' => 'admin.laporan-akademik.*', 'label' => __('Laporan Akademik'), 'icon' => 'chart-column'],
+                    ['route' => 'admin.laporan-nilai.index',    'active' => 'admin.laporan-nilai.*',    'label' => __('Laporan Nilai'), 'icon' => 'chart-column'],
                     ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => __('Laporan Keuangan'), 'icon' => 'chart-pie'],
                     ['route' => 'admin.laporan-absensi.index',   'active' => 'admin.laporan-absensi.*',   'label' => __('Laporan Absensi'), 'icon' => 'clipboard-check'],
                     ['route' => 'admin.laporan-dakwah.index',    'active' => 'admin.laporan-dakwah.*',    'label' => __('Laporan Dakwah'), 'icon' => 'megaphone'],

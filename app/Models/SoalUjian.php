@@ -11,7 +11,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * Soal ujian buatan asatid (Asatid > Penilaian > Buat Soal Ujian) untuk satu kelompok kitab di satu ujian + halaqoh yang dipilih.
  * Kelompok kitab (kitab_ids) mengikuti cara pembuatan soal dari admin (Ujian::kelompok): satu kitab, beberapa kitab, atau seluruh fan.
- * Kolom "kitab" = salinan nama kelompok saat dikirim (mis. "jurmiyyah + متممة" / "Seluruh fan Nahwu").
+ * Kolom "kitab" = salinan nama kelompok saat dikirim (mis. "jurmiyyah + متممة"; satu soal seluruh fan juga ditulis nama kitabnya).
  * Butir = [{pertanyaan, jawaban, nilai}]. Dikirim ke admin (status "menunggu"); admin mengedit lalu menyetujui
  * (status "disetujui" = terkirim kembali ke asatid). "butir_asli" menyimpan kiriman asatid,
  * supaya butir yang diubah admin bisa ditandai.

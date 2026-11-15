@@ -11,6 +11,7 @@ use App\Models\Kelas;
 use App\Models\Kitab;
 use App\Models\NilaiHarian;
 use App\Models\NilaiUjian;
+use App\Models\PendaftaranSiswa;
 use App\Models\SoalUjian;
 use App\Models\Ujian;
 use App\Models\NilaiUjianLisan;
@@ -19,6 +20,8 @@ use App\Support\DataCatatan;
 use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 /**
@@ -79,7 +82,7 @@ class PenilaianController extends Controller
                 ->tap(fn ($n) => NamaArab::untukUser($n->pluck('dinilai_oleh'))) // nama Arab penilai sekaligus
                 ->map(fn (NilaiUjianLisan $n) => $n->baris())->values(),
             'fanList'    => BidangIlmu::orderBy('urutan')->orderBy('nama')->get(['id', 'nama']),
-            'kitabFan'   => Kitab::orderBy('nama')->get(['id', 'nama', 'bidang_ilmu_id']),
+            'kitabFan'   => Kitab::orderBy('nama')->get(['id', 'nama', 'bidang_ilmu_id', 'tahun_ajaran_id', 'bulan_ke', 'is_active']), // tahun ajaran + bulan ke- : saringan kitab per bulan di Pengaturan Ujian
             'siswaList'  => DataCatatan::daftarSiswa(),
             // Ujian (tulis): pengaturan + nilai dari asatid + jumlah soal per kitab (lihat Admin\UjianController)
             'ujianTulis' => Ujian::daftar(),
@@ -92,7 +95,7 @@ class PenilaianController extends Controller
             'panelUjian' => $request->query('panel') === 'soal' ? 'soal' : 'nilai', // tab Ujian: panel Nilai | Soal Ujian
             // Bulan ajaran untuk Pengaturan Ujian (centang bulan) & saringan bulan, urut tahun ajaran lalu urutan bulan
             'bulanUjian' => BulanAjaran::with('tahunAjaran:id,nama')->orderBy('tahun_ajaran_id')->orderBy('urutan')->get()
-                ->map(fn ($b) => ['id' => $b->id, 'nama' => $b->nama, 'ta' => $b->tahunAjaran?->nama, 'aktif' => (bool) $b->is_active])->values(),
+                ->map(fn ($b) => ['id' => $b->id, 'nama' => $b->nama, 'ta' => $b->tahunAjaran?->nama, 'ta_id' => $b->tahun_ajaran_id, 'urutan' => (int) $b->urutan, 'aktif' => (bool) $b->is_active])->values(),
         ]);
     }
 
@@ -200,9 +203,47 @@ class PenilaianController extends Controller
 
         return view('admin.penilaian.catatan', [
             'baris'  => DataCatatan::semuaBaris($f['dari'] ?? null, $f['sampai'] ?? null),
+            'siswa'  => DataCatatan::daftarSiswa(), // pilihan santri untuk tombol "Tulis Catatan"
             'jenis'  => $jenis,
             'dari'   => $f['dari'] ?? null,
             'sampai' => $f['sampai'] ?? null,
+        ]);
+    }
+
+    /** POST /admin/penilaian/catatan — admin menulis satu catatan untuk satu atau beberapa santri sekaligus (sama seperti asatid) */
+    public function simpan(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'siswa'   => ['required', 'array', 'min:1', 'max:200'],
+            'siswa.*' => ['integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
+            'jenis'   => ['required', Rule::in(array_keys(CatatanSiswa::JENIS))],
+            'catatan' => ['required', 'string', 'max:5000'],
+            'tanggal' => ['required', 'date'],
+            'jam'     => ['nullable', 'date_format:H:i'],
+        ], [
+            'siswa.required'   => __('Pilih minimal satu santri.'),
+            'siswa.*.exists'   => __('Ada santri yang tidak ditemukan / belum diterima.'),
+            'jenis.required'   => __('Pilih jenisnya: Pencapaian atau Pelanggaran.'),
+            'catatan.required' => __('Catatan wajib diisi.'),
+            'tanggal.required' => __('Tanggal wajib diisi.'),
+        ]);
+
+        $baru = DB::transaction(fn () => collect(array_unique($data['siswa']))->map(fn ($id) => CatatanSiswa::create([
+            'pendaftaran_siswa_id' => $id,
+            'jenis'                => $data['jenis'],
+            'catatan'              => trim($data['catatan']),
+            'tanggal'              => $data['tanggal'],
+            'jam'                  => $data['jam'] ?? null,
+            'dicatat_oleh'         => Auth::id(),
+        ])));
+
+        $baru->each->load(['siswa.kelasMaster', 'pencatat:id,name']);
+
+        return response()->json([
+            'message' => __(':jumlah catatan :jenis tersimpan.', [
+                'jumlah' => $baru->count(), 'jenis' => strtolower(__(CatatanSiswa::JENIS[$data['jenis']])),
+            ]),
+            'baris' => $baru->map(fn ($c) => DataCatatan::baris($c))->values(),
         ]);
     }
 

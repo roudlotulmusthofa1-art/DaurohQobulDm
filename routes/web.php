@@ -94,6 +94,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::get('absensi-kegiatan/{absensi}/status', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'status'])->name('absensi-kegiatan.catat.status');
     Route::resource('absensi-kegiatan', \App\Http\Controllers\Admin\AbsensiKegiatanController::class)
         ->only(['index', 'store', 'update', 'destroy'])->parameters(['absensi-kegiatan' => 'absensi']);
+    Route::get('laporan-nilai', [\App\Http\Controllers\Admin\LaporanNilaiController::class, 'index'])->name('laporan-nilai.index'); // ringkasan nilai Kelas & Pelajaran per santri
     Route::get('laporan-absensi', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'index'])->name('laporan-absensi.index');
     Route::get('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'show'])->name('laporan-absensi.show');
     Route::put('laporan-absensi/{absensi}', [\App\Http\Controllers\Admin\LaporanAbsensiController::class, 'update'])->name('laporan-absensi.update'); // Ubah kehadiran
@@ -110,8 +111,18 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('nilai-lisan', 'simpanNilaiLisan')->name('nilai-lisan.simpan');
         Route::delete('nilai-lisan/{nilai}', 'hapusNilaiLisan')->whereNumber('nilai')->name('nilai-lisan.hapus');
         Route::get('catatan', 'catatan')->name('catatan.index');
+        Route::post('catatan', 'simpan')->name('catatan.simpan'); // admin ikut menulis catatan
         Route::put('catatan/{catatan}', 'ubah')->whereNumber('catatan')->name('catatan.ubah');
         Route::delete('catatan/{catatan}', 'hapus')->whereNumber('catatan')->name('catatan.hapus');
+    });
+    // Penilaian > Kelas & Pelajaran: admin ikut mengisi Nilai Harian & Nilai Ujian (halaman + simpan sama seperti asatid)
+    Route::prefix('penilaian/isi')->name('penilaian.isi.')->group(function () {
+        Route::get('harian', [\App\Http\Controllers\Admin\IsiNilaiController::class, 'harian'])->name('harian');
+        Route::get('harian/peserta', [\App\Http\Controllers\Asatid\PenilaianController::class, 'pesertaHarian'])->name('harian.peserta');
+        Route::post('harian', [\App\Http\Controllers\Asatid\PenilaianController::class, 'simpanHarian'])->name('harian.simpan');
+        Route::get('ujian', [\App\Http\Controllers\Admin\IsiNilaiController::class, 'ujian'])->name('ujian');
+        Route::get('ujian/peserta', [\App\Http\Controllers\Asatid\UjianController::class, 'peserta'])->name('ujian.peserta');
+        Route::post('ujian', [\App\Http\Controllers\Asatid\UjianController::class, 'simpanNilai'])->name('ujian.simpan');
     });
     // Penilaian > Ujian (tulis): pengaturan + nilai dari asatid (tab Ujian) + halaman Soal Ujian
     Route::controller(\App\Http\Controllers\Admin\UjianController::class)->prefix('penilaian')->name('penilaian.')->group(function () {

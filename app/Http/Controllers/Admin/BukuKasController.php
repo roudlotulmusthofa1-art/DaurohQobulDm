@@ -28,11 +28,13 @@ class BukuKasController extends Controller
         }
         $tipe = array_key_exists($request->tipe, KasTransaksi::TIPE) ? $request->tipe : null;
         $kategoriId = $request->integer('kategori') ?: null;
+        $cari = trim((string) $request->query('cari')); // cari di deskripsi / pihak
 
         $query = KasTransaksi::query()
             ->whereBetween('tanggal', [$mulai->toDateString(), $sampai->toDateString()])
             ->when($tipe, fn ($q) => $q->where('tipe', $tipe))
-            ->when($kategoriId, fn ($q) => $q->where('kas_kategori_id', $kategoriId));
+            ->when($kategoriId, fn ($q) => $q->where('kas_kategori_id', $kategoriId))
+            ->when($cari !== '', fn ($q) => $q->where(fn ($w) => $w->where('deskripsi', 'like', "%{$cari}%")->orWhere('pihak', 'like', "%{$cari}%")));
 
         $periode = KasTransaksi::total($query);
 
@@ -52,6 +54,7 @@ class BukuKasController extends Controller
                 'end_date'   => $sampai->toDateString(),
                 'tipe'       => $tipe ?? '',
                 'kategori'   => $kategoriId ? (string) $kategoriId : '',
+                'cari'       => $cari,
             ],
             'hariIni'   => $hariIni->toDateString(),
         ]);
@@ -169,7 +172,7 @@ class BukuKasController extends Controller
     {
         $filter = array_filter((array) $request->input('_filter', []), fn ($v) => is_string($v) && $v !== '');
 
-        return redirect()->route('admin.buku-kas.index', array_intersect_key($filter, array_flip(['start_date', 'end_date', 'tipe', 'kategori', 'page'])));
+        return redirect()->route('admin.buku-kas.index', array_intersect_key($filter, array_flip(['start_date', 'end_date', 'tipe', 'kategori', 'cari', 'page'])));
     }
 
     private function tanggal(?string $teks): ?Carbon

@@ -109,6 +109,11 @@ $isian = 'w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-
                 </select>
             </label>
         </div>
+        {{-- Cari deskripsi / pihak: tekan Enter atau klik Cari --}}
+        <div class="flex gap-2">
+            <input type="search" name="cari" v-model="filter.cari" @keydown.enter.prevent="terapkanFilter" placeholder="{{ __('Cari deskripsi / pihak…') }}" class="flex-1 {{ $isian }}">
+            <button type="button" @click="terapkanFilter" class="shrink-0 px-5 py-2.5 rounded-xl bg-[#0f6b5c] text-white text-sm font-bold hover:bg-[#0b332c]">{{ __('Cari') }}</button>
+        </div>
     </form>
 
     {{-- ===== HP (di bawah lg): satu transaksi = satu kartu ===== --}}

@@ -96,6 +96,11 @@ $info = $kegiatan
             @csrf @method('PUT')
             <div class="px-5 py-4 border-b border-slate-100 flex flex-wrap items-center gap-3">
                 <h2 class="flex-1 font-bold text-slate-800">{{ __('Daftar peserta') }} <span class="text-slate-400 font-semibold">({{ $detail->count() }})</span></h2>
+                {{-- Cari nama / nomor / kelas (menyaring langsung; isian status yang tersembunyi tetap ikut tersimpan) --}}
+                @if ($detail->count() > 1)
+                <input type="search" v-model="cari" @keydown.enter.prevent placeholder="{{ __('Cari nama / kelas…') }}"
+                    class="w-full sm:w-56 order-last sm:order-none rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-3 py-2 text-sm text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none">
+                @endif
                 @if ($detail->isNotEmpty())
                 <button v-if="!ubah" type="button" @click="ubah = true"
                     class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-emerald-700 ring-1 ring-emerald-200 hover:bg-emerald-50">
@@ -110,7 +115,7 @@ $info = $kegiatan
             </div>
             <div class="divide-y divide-slate-100">
                 @forelse ($detail as $d)
-                <div class="px-5 py-3.5 flex items-center gap-3">
+                <div class="px-5 py-3.5 flex items-center gap-3" v-show="cocokKe({{ $loop->index }})">
                     @if ($d->siswa?->foto_url)
                         <img data-perbesar="{{ $d->siswa->nama_lengkap }}" src="{{ $d->siswa->foto_url }}" alt="" class="w-11 h-11 rounded-2xl object-cover ring-1 ring-slate-200">
                     @else
@@ -141,6 +146,7 @@ $info = $kegiatan
                 @empty
                 <p class="px-5 py-10 text-center text-sm text-slate-400">{{ __('Belum ada peserta tercatat.') }}</p>
                 @endforelse
+                <p v-if="cari.trim() && !adaCocok" class="px-5 py-8 text-center text-sm text-slate-400">{{ __('Tidak ada peserta yang cocok.') }}</p>
             </div>
             <p v-if="ubah" class="px-5 py-3 border-t border-slate-100 text-xs text-slate-500">
                 {{ __('H = Hadir · T = Terlambat · S = Sakit · I = Izin · A = Alfa. Terlambat & Alfa otomatis ikut di Catatan > Pelanggaran.') }}
@@ -156,9 +162,19 @@ $info = $kegiatan
     // Aplikasi Vue halaman ini: konfirmasi hapus (metode dari partials/vue-metode.blade.php) + Ubah kehadiran
     document.addEventListener('DOMContentLoaded', () => {
         const AWAL = @json($detail->pluck('status', 'id'));
+        // Teks pencarian tiap peserta (nama, nama Arab, nomor, kelas)
+        @php
+            $teksCari = $detail->map(fn ($d) => mb_strtolower(implode(' ', array_filter([$d->siswa?->nama_lengkap, $d->siswa?->nama_lengkap_arab, $d->siswa?->nomor_pendaftaran, $d->siswa?->kelasMaster?->nama]))))->values();
+        @endphp
+        const TEKS = @json($teksCari);
         Vue.createApp({
-            data: () => ({ ubah: false, status: { ...AWAL } }),
+            data: () => ({ ubah: false, status: { ...AWAL }, cari: '' }),
+            computed: {
+                adaCocok() { return TEKS.some((t) => this.cocok(t)); },
+            },
             methods: {
+                cocok(teks) { const k = this.cari.trim().toLowerCase(); return !k || teks.includes(k); },
+                cocokKe(i) { return this.cocok(TEKS[i] || ''); },
                 ...metodeHalaman,
                 batalUbah() { this.status = { ...AWAL }; this.ubah = false; },
             },

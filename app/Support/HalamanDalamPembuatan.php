@@ -17,7 +17,6 @@ class HalamanDalamPembuatan
     public const DAFTAR = [
         'biaya-pendidikan.index'  => 'keuangan/biaya-pendidikan',
         'pembayaran.index'        => 'keuangan/pembayaran',
-        'laporan-akademik.index'  => 'laporan-akademik',
         'laporan-keuangan.index'  => 'laporan-keuangan',
         'landing-fitur.index'     => 'landing/fitur-unggulan',
         'landing-kurikulum.index' => 'landing/kurikulum',

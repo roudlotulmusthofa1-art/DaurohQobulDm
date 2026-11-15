@@ -172,15 +172,19 @@ $inputUs = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-
                 usSoalTampil() {
                     const k = kecil(this.usCari.trim());
                     return this.utSoal.filter((s) => (this.usStatus === 'semua' || s.status === this.usStatus)
-                        && (!this.utSaring.bulan || this.utIdUjianBulan.has(s.ujian_id))   // saringan bulan di atas
+                        && this.usCocokSaring(s)   // saringan Bulan & Ujian di atas
                         && (!k || [s.oleh, s.kitab, s.fan, s.nama_ujian, ...s.kelas].some((t) => kecil(t).includes(k))));
                 },
                 usTotalEdit() { return this.usEdit ? this.usEdit.butir.reduce((n, b) => n + (Number(b.nilai) || 0), 0) : 0; },
             },
             methods: {
-                // Jumlah per status, mengikuti saringan bulan
+                // Soal ini masuk saringan Bulan & Ujian (saringan bersama di atas panel)?
+                usCocokSaring(s) {
+                    return (!this.utSaring.bulan || this.utIdUjianBulan.has(s.ujian_id)) && (!this.utSaring.ujian || s.ujian_id === this.utSaring.ujian);
+                },
+                // Jumlah per status, mengikuti saringan Bulan & Ujian
                 usJumlah(st) {
-                    const d = this.utSoal.filter((s) => !this.utSaring.bulan || this.utIdUjianBulan.has(s.ujian_id));
+                    const d = this.utSoal.filter((s) => this.usCocokSaring(s));
                     return st === 'semua' ? d.length : d.filter((s) => s.status === st).length;
                 },
                 usBuka(s) {

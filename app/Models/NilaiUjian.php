@@ -86,7 +86,7 @@ class NilaiUjian extends Model
         ]);
 
         // Kitab yang dinilai harus sama persis dengan salah satu kelompok dari pengaturan admin (sama seperti soal)
-        $ujian = Ujian::with(['bidangIlmu:id,nama', 'kitab:kitab.id,kitab.nama'])->findOrFail($data['ujian_id']);
+        $ujian = Ujian::with(Ujian::MUAT)->findOrFail($data['ujian_id']);
         $kelompok = $ujian->cariKelompok($data['kitab_ids']);
         if (! $kelompok) {
             throw ValidationException::withMessages(['kitab_ids' => __('Pilihan kitab tidak sesuai pengaturan ujian dari admin.')]);
@@ -124,7 +124,7 @@ class NilaiUjian extends Model
                     'kitab_ids'    => $kelompok['kitab_ids'],
                     'kelas_id'     => $data['kelas_id'],
                     'nama_ujian'   => $ujian->nama,
-                    'fan'          => $ujian->bidangIlmu?->nama,
+                    'fan'          => $kelompok['fan'] ?: null,   // fan kitab yang dinilai (ujian boleh banyak fan)
                     'kitab'        => $kelompok['nama'],
                     'nilai'        => $v,
                     'nilai_maks'   => $maks,

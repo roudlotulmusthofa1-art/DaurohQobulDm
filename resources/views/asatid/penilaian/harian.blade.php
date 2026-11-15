@@ -7,10 +7,12 @@
     nilai kemarin langsung muncul dan tinggal diteruskan (bukan nilai baru tiap hari).
     Bisa dibuka dari tombol "Nilai Harian" di absensi kelas: ?kelas_id=&siswa_id=&kitab_id=&tanggal=
     Vue: #isi-nilai-harian.
+    Dipakai juga oleh admin (Admin\IsiNilaiController@harian): $tataLetak, $rute, $bungkus, $batangBawah, $kembaliAdmin.
 --}}
-@extends('layouts.asatid')
+@extends($tataLetak ?? 'layouts.asatid')
 
 @section('judul', __('Nilai Harian'))
+@section('title', __('Isi Nilai Harian'))
 @section('kembali', route('asatid.penilaian'))
 
 @section('content')
@@ -20,7 +22,13 @@ $input = 'w-full rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-4
 $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center justify-center';
 @endphp
 
-<div id="isi-nilai-harian" v-cloak class="space-y-5 pb-28">
+<div id="isi-nilai-harian" v-cloak class="space-y-5 pb-28 {{ $bungkus ?? '' }}">
+    @isset($kembaliAdmin)
+    <a href="{{ $kembaliAdmin }}" class="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-600 hover:text-slate-900">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
+        {{ __('Kembali ke Kelas & Pelajaran') }}
+    </a>
+    @endisset
     {{-- ===== Hero ===== --}}
     <section class="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white p-6">
         <div class="pointer-events-none absolute inset-0 opacity-60" style="background-image: radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px); background-size: 18px 18px;"></div>
@@ -174,7 +182,7 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
         <p v-if="galat" class="p-3.5 rounded-2xl bg-rose-50 ring-1 ring-rose-100 text-sm text-rose-700" v-text="galat"></p>
 
         {{-- Tombol simpan (menempel di bawah layar) --}}
-        <div class="fixed inset-x-0 bottom-0 z-30 bg-white/90 backdrop-blur border-t border-slate-200 px-4 py-3">
+        <div class="{{ $batangBawah ?? 'fixed inset-x-0 bottom-0 z-30 bg-white/90 backdrop-blur border-t border-slate-200 px-4 py-3' }}">
             <div class="mx-auto max-w-6xl flex items-center gap-3">
                 <button type="button" @click="tutup" class="shrink-0 px-4 py-3 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">{{ __('Kembali') }}</button>
                 <p class="flex-1 min-w-0 text-xs text-slate-500 truncate">{{ __('Total') }}: <b class="text-slate-800" v-text="total + ' / 100'"></b></p>
@@ -192,8 +200,8 @@ $nomor = 'w-6 h-6 rounded-full bg-[#0b332c] text-white text-xs flex items-center
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    const PESERTA = @json(route('asatid.penilaian.harian.peserta'));
-    const SIMPAN = @json(route('asatid.penilaian.harian.simpan'));
+    const PESERTA = @json($rute['peserta'] ?? route('asatid.penilaian.harian.peserta'));
+    const SIMPAN = @json($rute['simpan'] ?? route('asatid.penilaian.harian.simpan'));
     const CSRF = @json(csrf_token());
     const ASPEK = @json($aspek);
     const awal = @json($awal);

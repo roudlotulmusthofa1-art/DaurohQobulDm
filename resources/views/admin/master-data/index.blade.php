@@ -67,6 +67,19 @@
                         </button>
                     </div>
 
+                    {{-- ===== Pencarian (menyaring langsung; seret-urutkan dimatikan selama mencari) ===== --}}
+                    <div v-if="rows['{{ $key }}'].length" class="mb-4">
+                        <input type="search" v-model="cari" placeholder="{{ __('Cari :nama…', ['nama' => strtolower($t['singular'])]) }}"
+                            class="w-full sm:max-w-sm rounded-xl bg-white ring-1 ring-slate-200 border-0 px-4 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none">
+                        <p v-if="cari.trim()" class="mt-1.5 text-xs text-slate-500">
+                            <span v-text="jumlahCocok('{{ $key }}')"></span> {{ __('data cocok') }} · {{ __('seret-urutkan dimatikan selama mencari') }}
+                        </p>
+                    </div>
+                    <div v-if="rows['{{ $key }}'].length && cari.trim() && !jumlahCocok('{{ $key }}')"
+                        class="mb-4 rounded-2xl bg-white py-8 text-center text-sm text-slate-400 ring-1 ring-slate-200/80">
+                        {{ __('Tidak ada data yang cocok.') }}
+                    </div>
+
                     {{-- ===== HP (di bawah lg): satu data = satu kartu =====
                          Seret-urutkan hanya di laptop. Isi data tetap lewat v-text. --}}
                     @php $kolomUtama = $t['columns'][0]; @endphp
@@ -78,7 +91,7 @@
                             {{ __('Belum ada data :nama.', ['nama' => strtolower($t['singular'])]) }}
                         </div>
 
-                        <article v-for="(row, index) in rows['{{ $key }}']" :key="'hp' + row.id"
+                        <article v-for="(row, index) in rows['{{ $key }}']" :key="'hp' + row.id" v-show="cocok(row)"
                             class="rounded-2xl bg-white p-4 ring-1 ring-slate-200/80 shadow-[0_1px_2px_rgba(16,24,40,0.04)]"
                             :class="{ 'opacity-60': !row.is_active }">
                             {{-- baris atas: nomor urut, nama, status --}}
@@ -205,8 +218,8 @@
                                     </tr>
 
                                     {{-- Baris data --}}
-                                    <tr v-for="(row, index) in rows['{{ $key }}']" :key="row.id"
-                                        :draggable="drag.armedId === row.id"
+                                    <tr v-for="(row, index) in rows['{{ $key }}']" :key="row.id" v-show="cocok(row)"
+                                        :draggable="!cari.trim() && drag.armedId === row.id"
                                         class="border-b border-gray-100 transition-colors last:border-0 hover:bg-gray-50/70"
                                         :class="{ 'bg-[#22c55e]/10': drag.overIndex === index, 'opacity-60': !row.is_active }"
                                         @dragstart="dragStart(index, $event)" @dragenter.prevent="dragEnter(index)"
@@ -506,6 +519,13 @@
         createApp({
             setup() {
                 const activeKey = ref(@json($tab));
+                // Pencarian: cocok bila kata dicari ada di salah satu isi data (teks / angka)
+                const cari = ref('');
+                const cocok = (row) => {
+                    const k = cari.value.trim().toLowerCase();
+                    return !k || Object.values(row).some((v) => (typeof v === 'string' || typeof v === 'number') && String(v).toLowerCase().includes(k));
+                };
+                const jumlahCocok = (key) => rows[key].filter(cocok).length;
                 const rows = reactive(@json($data));
 
                 // ---------- Tampilan ----------
@@ -536,6 +556,7 @@
 
                 function selectTab(key) {
                     activeKey.value = key;
+                    cari.value = '';
                     const u = new URL(window.location.href);
                     u.searchParams.set('tab', key);
                     window.history.replaceState({}, '', u);
@@ -780,6 +801,9 @@
                 return {
                     TABS,
                     activeKey,
+                    cari,
+                    cocok,
+                    jumlahCocok,
                     rows,
                     modal,
                     confirm,
