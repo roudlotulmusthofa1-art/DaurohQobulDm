@@ -109,7 +109,7 @@ $label = 'block text-xs font-semibold text-slate-600 mb-1.5';
             </span>
             <p v-if="cari.trim()" class="mt-3 font-semibold text-slate-700">{{ __('Tidak ada pengumuman yang cocok.') }}</p>
             <p v-if="!cari.trim()" class="mt-3 font-semibold text-slate-700">{{ __('Belum ada pengumuman') }}</p>
-            <p v-if="!cari.trim()" class="mt-1 text-sm text-slate-500" v-text=""saring === 'semua' ? @js(__('Klik "Tambah Pengumuman" untuk membuat kabar pertama.')) : @js(__('Belum ada pengumuman untuk :tujuan.')).replace(':tujuan', tujuan[saring])"></p>
+            <p v-if="!cari.trim()" class="mt-1 text-sm text-slate-500" v-text="saring === 'semua' ? @js(__('Klik "Tambah Pengumuman" untuk membuat kabar pertama.')) : @js(__('Belum ada pengumuman untuk :tujuan.')).replace(':tujuan', tujuan[saring])"></p>
         </div>
 
         <ul v-else class="divide-y divide-slate-100">
