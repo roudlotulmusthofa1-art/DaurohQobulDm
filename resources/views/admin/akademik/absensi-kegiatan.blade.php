@@ -217,7 +217,7 @@ $hariIni = now('Asia/Jakarta')->toDateString();
 
         @unless ($selesai)
         <dialog id="dialog-kegiatan-{{ $a->id }}" ref="dialog-kegiatan-{{ $a->id }}" class="dialog-akademik" @click.self="tutupDialog">
-            @include('admin.akademik._form-absensi-kegiatan', ['aksi' => route('admin.absensi-kegiatan.update', $a), 'metode' => 'PUT', 'judul' => __('Ubah Absensi Kegiatan'), 'a' => $a])
+            @include('admin.akademik._form-absensi-kegiatan', ['aksi' => route('admin.absensi-kegiatan.update', $a), 'metode' => 'PUT', 'judul' => __('Ubah Absensi Kegiatan'), 'a' => $a, 'j' => null])
         </dialog>
         @endunless
         @empty
@@ -238,7 +238,7 @@ $hariIni = now('Asia/Jakarta')->toDateString();
 </div>
 
 <dialog id="dialog-kegiatan-baru" ref="dialog-kegiatan-baru" class="dialog-akademik" @click.self="tutupDialog">
-    @include('admin.akademik._form-absensi-kegiatan', ['aksi' => route('admin.absensi-kegiatan.store'), 'metode' => 'POST', 'judul' => __('Buat Absensi Kegiatan'), 'a' => null])
+    @include('admin.akademik._form-absensi-kegiatan', ['aksi' => route('admin.absensi-kegiatan.store'), 'metode' => 'POST', 'judul' => __('Buat Absensi Kegiatan'), 'a' => null, 'j' => null])
 </dialog>
 </div>
 @endsection
@@ -273,6 +273,21 @@ $hariIni = now('Asia/Jakarta')->toDateString();
                     const form = e.target.form;
                     if (!form) return;
                     form.querySelectorAll('input[name="hari[]"]').forEach((c) => { c.checked = daftar.includes(Number(c.value)); });
+                },
+
+                /** Pengulangan diganti: Sekali -> tanggal wajib; Berulang -> tanggal disembunyikan & tidak dikirim, pilihan hari muncul */
+                gantiPengulangan(e) {
+                    const form = e.target.form;
+                    if (!form) return;
+                    const berulang = e.target.value === 'berulang';
+                    const tanggal = form.querySelector('.blok-tanggal');
+                    const hari = form.querySelector('.blok-hari');
+                    if (tanggal) {
+                        tanggal.classList.toggle('hidden', berulang);
+                        const isian = tanggal.querySelector('input[name="tanggal"]');
+                        if (isian) { isian.disabled = berulang; isian.required = !berulang; }
+                    }
+                    if (hari) hari.classList.toggle('hidden', !berulang);
                 },
             },
             mounted() {

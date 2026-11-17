@@ -2,7 +2,8 @@
     Form buat/ubah absensi kegiatan (di dalam <dialog>). Variabel: $aksi, $metode, $judul, $a (null = baru), $kegiatanList,
     $j (opsional) = kegiatan BERULANG yang diubah (JadwalKegiatan).
     Formulir baru punya pilihan Pengulangan: Sekali (tanggal) | Berulang (tombol hari S S R K J S A, seperti alarm HP).
-    Bagian tanggal / hari ditampilkan-sembunyikan dengan CSS (group-has), tanpa Vue; tombol cepat hari = pilihHari (Vue halaman).
+    Bagian tanggal / hari ditampilkan-sembunyikan oleh gantiPengulangan (Vue halaman), bukan CSS :has (tidak jalan di HP lama);
+    tombol cepat hari = pilihHari (Vue halaman).
 --}}
 @php
 $j = $j ?? null;
@@ -45,7 +46,7 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 rin
         <div class="mt-1.5 grid grid-cols-2 gap-2">
             @foreach (['sekali' => __('Sekali (satu tanggal)'), 'berulang' => __('Berulang (pilih hari)')] as $kode => $nama)
             <label class="{{ $pilih }}">
-                <input type="radio" name="pengulangan" value="{{ $kode }}" class="sr-only {{ $kode === 'berulang' ? 'ulang-berulang' : '' }}" @checked($nilai('pengulangan', 'sekali') === $kode)>
+                <input type="radio" name="pengulangan" value="{{ $kode }}" class="sr-only" @change="gantiPengulangan" @checked($nilai('pengulangan', 'sekali') === $kode)>
                 {{ $nama }}
             </label>
             @endforeach
@@ -54,13 +55,17 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 rin
     @endif
 
     <div class="grid grid-cols-2 gap-3">
+        @php
+        // Formulir baru: tampil sesuai pilihan Pengulangan (diganti oleh gantiPengulangan di Vue, tanpa CSS :has supaya jalan di HP lama)
+        $awalBerulang = $modeUlang === 'pilih' && $nilai('pengulangan', 'sekali') === 'berulang';
+        @endphp
         @if ($modeUlang !== 'berulang')
-        <label class="col-span-2 {{ $modeUlang === 'pilih' ? 'group-has-[.ulang-berulang:checked]:hidden' : '' }}"><span class="{{ $label }}">{{ __('Tanggal *') }}</span>
-            <input type="date" name="tanggal" value="{{ $nilai('tanggal', $a?->tanggal?->toDateString() ?? now('Asia/Jakarta')->toDateString()) }}" class="{{ $input }}"></label>
+        <label class="blok-tanggal col-span-2 {{ $awalBerulang ? 'hidden' : '' }}"><span class="{{ $label }}">{{ __('Tanggal *') }}</span>
+            <input type="date" name="tanggal" value="{{ $nilai('tanggal', $a?->tanggal?->toDateString() ?? now('Asia/Jakarta')->toDateString()) }}" @required(! $awalBerulang) @disabled($awalBerulang) class="{{ $input }}"></label>
         @endif
         @if ($modeUlang !== 'sekali')
         @php $hariPilih = array_map('intval', (array) $nilai('hari', $j?->hari ?? [1, 2, 3, 4, 5, 6, 7])); @endphp
-        <div class="col-span-2 {{ $modeUlang === 'pilih' ? 'hidden group-has-[.ulang-berulang:checked]:block' : '' }}">
+        <div class="blok-hari col-span-2 {{ $modeUlang === 'pilih' && ! $awalBerulang ? 'hidden' : '' }}">
             <span class="{{ $label }}">{{ __('Ulangi setiap hari *') }}</span>
             <div class="mt-1.5 flex flex-wrap gap-1.5">
                 @foreach (\App\Models\JadwalKegiatan::HARI as $no => $huruf)
