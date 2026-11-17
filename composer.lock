@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "58e907a486619b7a52df3c5373baf2c6",
+    "content-hash": "3e40a9ab279b7e00d75db22c99d3189b",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6637,6 +6637,47 @@
             "time": "2026-08-05T16:47:22+00:00"
         },
         {
+            "name": "lokal/blade-ke-vscode",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "D:/laragon/www/paket/blade-ke-vscode",
+                "reference": "09fab21632e9bdb9f020ab893a96c5589a0b38a5"
+            },
+            "require": {
+                "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
+                "illuminate/view": "^10.0|^11.0|^12.0|^13.0",
+                "php": "^8.1"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "BladeKeVscode\\BladeKeVscodeServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BladeKeVscode\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "description": "Alat pengembang Laravel: tahan Alt di browser untuk melihat file Blade & barisnya, Alt + Klik untuk membukanya di VS Code (hanya APP_ENV=local).",
+            "keywords": [
+                "blade",
+                "developer-tools",
+                "laravel",
+                "open-in-editor",
+                "vscode"
+            ],
+            "transport-options": {
+                "relative": false
+            }
+        },
+        {
             "name": "mockery/mockery",
             "version": "1.6.12",
             "source": {
@@ -8442,7 +8483,9 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "lokal/blade-ke-vscode": 20
+    },
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {

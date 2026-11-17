@@ -255,5 +255,6 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 
 ### Alat pengembang: Alt + Klik → VS Code (2026-11-17, hanya lokal)
 - Di browser lokal: tahan **Alt** → area disorot + label `file.blade.php:baris`; **Alt + Klik** → VS Code membuka file Blade itu di barisnya (`vscode://file/...`).
-- `App\Support\PenandaSumber` (dipasang di `AppServiceProvider::boot`): saat Blade dikompilasi, tiap tag HTML diberi `data-sumber="resources/views/...:baris"` (dilewati: isi script/style/svg, `{{ }}`, `{!! !!}`, `@php`, komentar Blade, `<x-…>`). Skrip: `partials/alat-sumber.blade.php`, disisipkan sebelum `</body>` oleh `Middleware\SisipAlatSumber`.
-- Aktif hanya bila `APP_ENV=local` (server production tidak terpengaruh). Matikan: `.env` → `ALAT_SUMBER=false`. Setelah menyalakan/mematikan: `php artisan view:clear`.
+- Sekarang berupa **paket Composer** `lokal/blade-ke-vscode` di folder `D:/laragon/www/paket/blade-ke-vscode` (README berisi cara pasang di proyek lain). Di proyek ini dipasang `require-dev` lewat repositori `path` → server (`composer install --no-dev` di Dockerfile) tidak ikut memasang & tidak butuh folder paket (sudah diuji).
+- Cara kerja: saat Blade dikompilasi, tiap tag HTML di `resources/views` diberi `data-sumber="resources/views/...:baris"` (dilewati: isi script/style/svg, `{{ }}`, `{!! !!}`, `@php`, argumen direktif, komentar Blade, `<x-…>`); middleware grup web menyisipkan skrip sebelum `</body>`.
+- Aktif hanya bila `APP_ENV=local`. `.env`: `BLADE_KE_VSCODE=false` (matikan), `BLADE_KE_VSCODE_EDITOR=cursor|phpstorm|…`, `BLADE_KE_VSCODE_FOLDER=` (bila jalan di Docker). Setelah mengubah: `php artisan view:clear`.
