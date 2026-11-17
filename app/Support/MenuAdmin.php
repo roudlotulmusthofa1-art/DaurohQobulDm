@@ -46,6 +46,7 @@ class MenuAdmin
                     ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => __('Tahun & Bulan Ajaran'), 'icon' => 'calendar-range'],
                     ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => __('Kurikulum & Kitab'), 'icon' => 'book-open'],
                     ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => __('Jadwal Mengajar'), 'icon' => 'calendar-clock'],
+                    ['route' => 'admin.munaqosah.index',    'active' => 'admin.munaqosah.*',    'label' => __('Munaqosah'), 'icon' => 'scale'],
                     // Kelulusan disembunyikan sementara (akan diperbaiki). Halaman & datanya tetap ada:
                     // ['route' => 'admin.kelulusan.index', 'active' => 'admin.kelulusan.*', 'label' => __('Kelulusan'), 'icon' => 'award'],
                 ],

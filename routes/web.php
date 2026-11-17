@@ -81,6 +81,19 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::post('jadwal/{jadwal}/geser', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'geser'])->name('jadwal.geser');
     Route::post('jadwal/ganti-ustadz', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'gantiUstadz'])->name('jadwal.ganti-ustadz');
     Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalMengajarController::class)->only(['index', 'store', 'update', 'destroy']);
+    // Munaqosah: musyawarah asatid (Musyrifin Dauroh -> Lajnah Qobul Darul Musthofa)
+    Route::controller(\App\Http\Controllers\Admin\MunaqosahController::class)->prefix('munaqosah')->name('munaqosah.')->group(function () {
+        Route::get('/', 'index')->name('index');                            // ?tab=musyrifin|lajnah
+        Route::put('kolom/{bagian}', 'simpanKolom')->name('kolom');         // pengaturan ilmu / suluk / mandub
+        Route::get('{santri}', 'show')->whereNumber('santri')->name('show'); // halaman detail (tab baru)
+        Route::post('{santri}', 'simpan')->whereNumber('santri')->name('simpan');                   // Simpan -> pindah ke Lajnah
+        Route::get('{santri}/data', 'data')->whereNumber('santri')->name('data');                   // isi modal (JSON)
+        Route::get('{santri}/profil', 'profil')->whereNumber('santri')->name('profil');             // panel Detail Santri (HTML)
+        Route::post('{santri}/bagian/{bagian}', 'simpanBagian')->whereNumber('santri')->name('bagian'); // Simpan satu panel
+        Route::post('{santri}/kirim', 'kirim')->whereNumber('santri')->name('kirim');               // tombol Kirim ke Lajnah
+        Route::post('{santri}/kembalikan', 'kembalikan')->whereNumber('santri')->name('kembalikan');
+        Route::post('{santri}/keputusan', 'keputusan')->whereNumber('santri')->name('keputusan');   // lulus / tidak + catatan Lajnah
+    });
 
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');

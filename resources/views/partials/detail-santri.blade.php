@@ -7,6 +7,7 @@
     Dipakai juga di asatid/peserta-detail.blade.php -> ['admin' => false, 'judul' => 'Detail Peserta', 'rahasia' => true, 'sisipan' => 'siswa._persyaratan']
     $rahasia (opsional, bawaan false): sembunyikan email, catatan admin, dan berkas (untuk asatid).
     $sisipan: view tambahan yang ditaruh di akhir grid (form persyaratan admin / daftar persyaratan siswa).
+    $tanpaSyarat (opsional, bawaan false): sembunyikan angka "Syarat Terpenuhi" & cincin % syarat (dipakai Akademik > Munaqosah).
 --}}
 @php
 // Data yang ditampilkan per bagian: 'Label' => nilai.
@@ -74,6 +75,7 @@ $pondok = $p->riwayat_pondok ?? [];
 $kitab = $p->riwayat_kitab ?? [];
 
 // Angka untuk baris statistik & kartu ringkasan
+$tanpaSyarat = $tanpaSyarat ?? false;
 $totalSyarat = count($p::SYARAT);
 $persenSyarat = $totalSyarat ? round($p->syarat_terpenuhi / $totalSyarat * 100) : 0;
 $lokasi = collect([$p->kota, $p->provinsi])->filter()->implode(', ');
@@ -416,7 +418,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
         </div>
 
         {{-- Baris statistik --}}
-        <div class="relative grid grid-cols-3 border-t border-white/10 bg-black/10 divide-x divide-white/10">
+        <div class="relative grid {{ $tanpaSyarat ? 'grid-cols-2' : 'grid-cols-3' }} border-t border-white/10 bg-black/10 divide-x divide-white/10">
+            @unless ($tanpaSyarat)
             <div class="px-4 sm:px-6 py-4">
                 <p class="text-[11px] uppercase tracking-wider text-white/45">{{ __('Syarat Terpenuhi') }}</p>
                 <p class="mt-1 text-xl sm:text-2xl font-extrabold">{{ $p->syarat_terpenuhi }}<span class="text-sm font-medium text-white/40">/{{ $totalSyarat }}</span></p>
@@ -424,6 +427,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-lime-300" style="width: {{ $persenSyarat }}%"></div>
                 </div>
             </div>
+            @endunless
             <div class="px-4 sm:px-6 py-4 flex items-center gap-3">
                 <span class="hidden sm:flex w-11 h-11 shrink-0 rounded-2xl bg-amber-300/15 text-amber-200 items-center justify-center">{!! $svg('home') !!}</span>
                 <div>
@@ -445,6 +449,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
     <div class="grid sm:grid-cols-3 gap-4" v-pre>
         {{-- Status + cincin persentase syarat --}}
         <div class="{{ $kartu }} p-5 flex items-center gap-4">
+            @unless ($tanpaSyarat)
             <div class="relative w-20 h-20 shrink-0 rounded-full"
                 style="background: conic-gradient(#10b981 {{ $persenSyarat * 3.6 }}deg, #e7efeb 0deg);">
                 <div class="absolute inset-[7px] rounded-full bg-white flex flex-col items-center justify-center">
@@ -452,6 +457,7 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <span class="text-[9px] text-slate-400 mt-0.5">{{ __('syarat') }}</span>
                 </div>
             </div>
+            @endunless
             <div class="min-w-0">
                 <p class="text-xs font-medium text-slate-400">{{ __('Status Pendaftaran') }}</p>
                 <p class="mt-0.5 text-lg font-bold text-slate-800">{{ __($p->label_status) }}</p>
