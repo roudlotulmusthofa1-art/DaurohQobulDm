@@ -65,6 +65,18 @@ class NotifikasiAdmin
             'ikon' => 'chat',
             'warna' => 'amber',
         ],
+        'aktivitas_asatid' => [
+            'judul' => 'Aktivitas asatid',
+            'keterangan' => 'Asatid masuk/keluar, atau menyimpan, mengubah, dan menghapus data (24 jam terakhir).',
+            'ikon' => 'aktivitas',
+            'warna' => 'violet',
+        ],
+        'aktivitas_siswa' => [
+            'judul' => 'Aktivitas siswa',
+            'keterangan' => 'Siswa masuk/keluar, atau menyimpan, mengubah, dan menghapus data (24 jam terakhir).',
+            'ikon' => 'aktivitas',
+            'warna' => 'sky',
+        ],
         'syarat_belum_lengkap' => [
             'judul' => 'Persyaratan belum lengkap',
             'keterangan' => 'Santri sudah diterima, tapi ada persyaratan yang belum dicentang.',
@@ -98,6 +110,7 @@ class NotifikasiAdmin
         'clipboard' => 'M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25z',
         'cap' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342',
         'bed' => 'M3 7.5V18m18-6v6M3 15h18M3 12h18v-1.5A2.25 2.25 0 0018.75 8.25h-7.5V12M7.5 10.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z',
+        'aktivitas' => 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
         'home' => 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
     ];
 
@@ -227,6 +240,28 @@ class NotifikasiAdmin
                     $p->created_at, 'pesan_umum:' . $p->id);
             }
             $items[] = static::lainnya('pesan_umum', $n, $q, 'dan :n pesan pengunjung lainnya', route('admin.pesan-peserta.index', ['asal' => 'umum']));
+        }
+
+        // Aktivitas asatid & siswa 24 jam terakhir (AktivitasPengguna): satu baris per aktivitas (5 terbaru per peran)
+        foreach (['asatid' => 'Asatid', 'siswa' => 'Siswa'] as $peran => $label) {
+            if (! static::aktif('aktivitas_' . $peran)) {
+                continue;
+            }
+            try {
+                $q = \App\Models\AktivitasPengguna::where('peran', $peran)->where('created_at', '>=', now()->subDay());
+                $total += $n = (clone $q)->count();
+                $daftar = (clone $q)->terbaru()->take(5)->get();
+            } catch (\Throwable $e) {
+                continue; // tabel belum dimigrasi
+            }
+            $urlAktivitas = Route::has('admin.aktivitas.index') ? route('admin.aktivitas.index', ['peran' => $peran]) : null;
+            foreach ($daftar as $a) {
+                $items[] = static::item('aktivitas_' . $peran,
+                    '<b>' . \App\Support\TeksAman::e($a->nama ?? $label) . '</b> ' . \App\Support\TeksAman::e($a->aksi),
+                    $label . ' · ' . $a->created_at->timezone('Asia/Jakarta')->format('H:i'),
+                    $urlAktivitas, $a->created_at, 'aktivitas:' . $a->id);
+            }
+            $items[] = static::lainnya('aktivitas_' . $peran, $n, $q, 'dan :n aktivitas ' . strtolower($label) . ' lainnya (24 jam)', $urlAktivitas);
         }
 
         // 3-5. Ringkasan per jenis (satu baris berisi jumlah)

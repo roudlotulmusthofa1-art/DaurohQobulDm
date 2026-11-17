@@ -25,7 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
         // Peserta dikeluarkan bila sesi aktif berganti; admin & asatid tetap login
         // CekIzinAdmin: akun admin ber-role pengurus hanya membuka menu yang diizinkan (Sistem > Role & Permission)
         // JagaMasukSebagai: saat Super Admin "Masuk sebagai" asatid/siswa, mode hanya-lihat (tidak bisa menyimpan)
-        $middleware->web(append: [\App\Http\Middleware\PilihBahasa::class, \App\Http\Middleware\CekSesiLogin::class, \App\Http\Middleware\CekIzinAdmin::class, \App\Http\Middleware\JagaMasukSebagai::class]);
+        // CatatAktivitas: simpan/ubah/hapus oleh asatid & siswa dicatat untuk lonceng notifikasi admin
+        $middleware->web(append: [\App\Http\Middleware\PilihBahasa::class, \App\Http\Middleware\CekSesiLogin::class, \App\Http\Middleware\CekIzinAdmin::class, \App\Http\Middleware\JagaMasukSebagai::class, \App\Http\Middleware\CatatAktivitas::class]);
         $middleware->alias([
             'peran' => \App\Http\Middleware\PeranMiddleware::class,
         ]);

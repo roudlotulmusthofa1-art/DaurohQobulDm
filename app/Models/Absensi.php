@@ -87,11 +87,33 @@ class Absensi extends Model
         return $q->where('jenis', self::KEGIATAN)->where('dari_admin', true)->where('aktif', true)->whereNull('selesai_at');
     }
 
-    /** Asatid ini boleh mencatat: miliknya sendiri, atau kegiatan admin yang sedang terbuka */
+    /** Asatid ini boleh mencatat: miliknya sendiri, atau kegiatan admin yang sedang terbuka (dan sudah waktunya dibuka) */
     public function bolehDicatatOleh(?int $userId): bool
     {
         return (int) $this->user_id === (int) $userId
-            || ($this->dari_admin && $this->aktif && ! $this->selesai_at);
+            || ($this->dari_admin && $this->aktif && ! $this->selesai_at && $this->sudahDibuka());
+    }
+
+    /** Absensi kegiatan muncul di halaman asatid mulai sekian menit sebelum jam mulai */
+    public const MENIT_DIBUKA_SEBELUM = 60;
+
+    /** Jam (WIB) absensi kegiatan ini mulai muncul di halaman asatid; null = tanpa tanggal/jam */
+    public function waktuDibuka(): ?Carbon
+    {
+        if (! $this->tanggal || ! $this->jam_mulai) {
+            return null;
+        }
+
+        return Carbon::parse($this->tanggal->format('Y-m-d') . ' ' . substr((string) $this->jam_mulai, 0, 5), 'Asia/Jakarta')
+            ->subMinutes(self::MENIT_DIBUKA_SEBELUM);
+    }
+
+    /** Sudah masuk waktunya (1 jam sebelum jam mulai)? Absen sebelum jam mulai tetap dihitung Hadir. */
+    public function sudahDibuka(): bool
+    {
+        $buka = $this->waktuDibuka();
+
+        return ! $buka || now('Asia/Jakarta')->gte($buka);
     }
 
     public function scopeTerbaru(Builder $q): Builder

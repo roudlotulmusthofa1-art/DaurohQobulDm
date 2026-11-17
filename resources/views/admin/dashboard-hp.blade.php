@@ -1,7 +1,7 @@
 {{--
     Dashboard Admin versi HP — tampil otomatis saat dashboard dibuka dari HP (DashboardController@index).
     Data sama persis dengan dashboard laptop (admin/dashboard.blade.php), tampilan dibuat seperti aplikasi HP:
-    bilah atas, kartu angka yang bisa digeser, tombol pintas, daftar "Perlu tindakan", dan menu bawah.
+    bilah atas, kartu angka yang bisa digeser, tombol pintas, lembar Notifikasi (lonceng), pesan siswa & asatid, dan menu bawah.
     Bila dibuka di laptop (dipilih manual) tampil di dalam bingkai HP. Vue: tab bawah & lembar "Semua Menu".
 --}}
 @php
@@ -78,7 +78,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
             </a>
             {{-- Tombol ganti bahasa tampilan (versi kecil) --}}
             @include('partials.pilih-bahasa', ['kelas' => 'bg-white/90 !px-2.5', 'ringkas' => true])
-            <button type="button" @click="bukaLembar('tindakan')" class="relative w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center" aria-label="{{ __('Perlu tindakan') }}">
+            <button type="button" @click="bukaLembar('tindakan')" class="relative w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center" aria-label="{{ __('Notifikasi') }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
                 @if ($tindakan['total'])
                 <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 rounded-full bg-rose-500 text-[10px] font-bold flex items-center justify-center ring-2 ring-[#0b332c]">{{ $tindakan['total'] > 99 ? '99+' : $tindakan['total'] }}</span>
@@ -130,83 +130,33 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
             </div>
         </section>
 
-        {{-- ===== Perlu tindakan (3 teratas) ===== --}}
-        <section>
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="font-extrabold text-slate-800">{{ __('Perlu Tindakan') }}</h2>
-                @if (count($tindakan['items']) > 3)
-                <button type="button" @click="bukaLembar('tindakan')" class="text-xs font-semibold text-emerald-700">{{ __('Lihat semua (:jumlah)', ['jumlah' => $tindakan['total']]) }}</button>
-                @endif
-            </div>
-            <div class="space-y-2">
-                @forelse (array_slice($tindakan['items'], 0, 3) as $n)
-                <a href="{{ $n['url'] ?? '#' }}" class="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm active:scale-[.98] transition">
-                    <span class="w-10 h-10 shrink-0 rounded-xl ring-1 flex items-center justify-center {{ $n['warna'] }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $n['ikon'] }}"/></svg>
-                    </span>
-                    <span class="min-w-0 flex-1">
-                        <span class="block text-[13px] text-slate-700 leading-snug [&_b]:font-semibold [&_b]:text-slate-900">{!! $n['teks'] !!}</span>
-                        <span class="block text-[11px] text-slate-400">{{ collect([$n['keterangan'], $n['waktu']])->filter()->implode(' · ') }}</span>
-                    </span>
-                    <svg class="w-4 h-4 text-slate-300 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/></svg>
-                </a>
-                @empty
-                <p class="rounded-2xl bg-white py-6 text-center text-sm text-slate-400 shadow-sm">{{ __('Tidak ada yang perlu ditindaklanjuti. 🎉') }}</p>
-                @endforelse
-            </div>
-        </section>
-
         {{-- ===== Pergantian pelajaran (jadwal hari ini + tanda ganti pelajaran ke guru) ===== --}}
         @include('admin.partials.pergantian-pelajaran', ['kelasKartu' => 'bg-white rounded-2xl shadow-sm'])
-
-        {{-- ===== Pendaftar terbaru ===== --}}
-        <section>
-            <div class="flex items-center justify-between mb-2">
-                <h2 class="font-extrabold text-slate-800">{{ __('Pendaftar Terbaru') }}</h2>
-                <a href="{{ $rute('admin.data-masuk.index') }}" class="text-xs font-semibold text-emerald-700">{{ __('Semua') }}</a>
-            </div>
-            <div class="rounded-3xl bg-white shadow-sm divide-y divide-slate-100 overflow-hidden">
-                @forelse ($pendaftarBaru as $p)
-                <a href="{{ $rute('admin.pendaftaran.show', $p) }}" class="flex items-center gap-3 px-4 py-3 active:bg-slate-50">
-                    @if ($p->foto_url)
-                    <img src="{{ $p->foto_url }}" alt="" class="w-10 h-10 rounded-xl object-cover">
-                    @else
-                    <span class="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($p->nama_lengkap, 0, 1)) }}</span>
-                    @endif
-                    <span class="min-w-0 flex-1">
-                        <span class="block font-semibold text-slate-800 truncate">{{ $p->nama_lengkap }}</span>
-                        <x-nama-arab :teks="$p->nama_lengkap_arab" kelas="text-xs text-slate-500" />
-                        <span class="block text-[11px] text-slate-400">{{ $p->created_at->locale('id')->diffForHumans() }}</span>
-                    </span>
-                    <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold {{ $warnaStatus[$p->status] ?? 'bg-slate-100 text-slate-500' }}">{{ __($p->label_status) }}</span>
-                </a>
-                @empty
-                <p class="py-6 text-center text-sm text-slate-400">{{ __('Belum ada pendaftar.') }}</p>
-                @endforelse
-            </div>
-        </section>
 
         {{-- ===== Pesan peserta ===== --}}
         <section>
             <div class="flex items-center justify-between mb-2">
-                <h2 class="font-extrabold text-slate-800">{{ __('Pesan Peserta') }}</h2>
+                <h2 class="font-extrabold text-slate-800">{{ __('Pesan Siswa & Asatid') }}</h2>
                 <a href="{{ $rute('admin.pesan-peserta.index') }}" class="text-xs font-semibold text-emerald-700">{{ __('Semua') }}</a>
             </div>
             <div class="rounded-3xl bg-white shadow-sm divide-y divide-slate-100 overflow-hidden">
-                @forelse ($percakapan->take(4) as $c)
-                <a href="{{ $rute('admin.pesan-peserta.show', $c->peserta) }}" class="flex items-center gap-3 px-4 py-3 active:bg-slate-50">
-                    <span class="w-10 h-10 rounded-full bg-violet-100 text-violet-700 font-bold flex items-center justify-center shrink-0">{{ mb_strtoupper(mb_substr($c->peserta->nama_lengkap, 0, 1)) }}</span>
+                @forelse ($percakapan->take(5) as $c)
+                <a href="{{ $c->jenis === 'asatid' ? $rute('admin.pesan-peserta.asatid.show', $c->id) : $rute('admin.pesan-peserta.show', $c->id) }}" class="flex items-center gap-3 px-4 py-3 active:bg-slate-50">
+                    <span class="w-10 h-10 rounded-full {{ $c->jenis === 'asatid' ? 'bg-violet-100 text-violet-700' : 'bg-sky-100 text-sky-700' }} font-bold flex items-center justify-center shrink-0">{{ mb_strtoupper(mb_substr($c->nama, 0, 1)) }}</span>
                     <span class="min-w-0 flex-1">
-                        <span class="block font-semibold text-slate-800 truncate">{{ $c->peserta->nama_lengkap }}</span>
-                        <x-nama-arab :teks="$c->peserta->nama_lengkap_arab" kelas="text-xs text-slate-500" />
-                        <span class="block text-xs text-slate-500 truncate">{{ \Illuminate\Support\Str::limit($c->terakhir?->isi, 60) }}</span>
+                        <span class="flex items-center gap-1.5">
+                            <span class="font-semibold text-slate-800 truncate">{{ $c->nama }}</span>
+                            <span class="shrink-0 rounded-full px-1.5 text-[10px] font-bold ring-1 {{ $c->jenis === 'asatid' ? 'bg-violet-50 text-violet-700 ring-violet-100' : 'bg-sky-50 text-sky-700 ring-sky-100' }}">{{ $c->jenis === 'asatid' ? __('Asatid') : __('Siswa') }}</span>
+                        </span>
+                        <x-nama-arab :teks="$c->arab" kelas="text-xs text-slate-500" />
+                        <span class="block text-xs text-slate-500 truncate">{{ \Illuminate\Support\Str::limit($c->terakhir->teks, 60) }}</span>
                     </span>
                     @if ($c->belum)
                     <span class="shrink-0 min-w-5 h-5 px-1.5 rounded-full bg-emerald-500 text-white text-[10px] font-bold flex items-center justify-center">{{ $c->belum }}</span>
                     @endif
                 </a>
                 @empty
-                <p class="py-6 text-center text-sm text-slate-400">{{ __('Belum ada pesan dari peserta.') }}</p>
+                <p class="py-6 text-center text-sm text-slate-400">{{ __('Belum ada pesan dari siswa atau asatid.') }}</p>
                 @endforelse
             </div>
         </section>
@@ -276,12 +226,12 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         </div>
     </dialog>
 
-    {{-- ===== Lembar: Perlu Tindakan (semua) ===== --}}
+    {{-- ===== Lembar: Notifikasi (sama dengan lonceng: termasuk aktivitas asatid & siswa) ===== --}}
     <dialog ref="lembarTindakan" @click.self="tutupLembar" class="lembar m-0 mt-auto sm:m-auto w-full max-w-none sm:max-w-[420px] max-h-[85vh] overflow-y-auto p-0 rounded-t-[28px] sm:rounded-[28px] bg-white backdrop:bg-black/40">
         <div class="sticky top-0 bg-white px-5 pt-3 pb-2 border-b border-slate-100">
             <span class="mx-auto block w-12 h-1.5 rounded-full bg-slate-200"></span>
             <div class="mt-3 flex items-center justify-between">
-                <h2 class="font-extrabold text-slate-800">{{ __('Perlu Tindakan (:jumlah)', ['jumlah' => $tindakan['total']]) }}</h2>
+                <h2 class="font-extrabold text-slate-800">{{ __('Notifikasi (:jumlah)', ['jumlah' => $tindakan['total']]) }}</h2>
                 <button type="button" @click="tutupLembar" class="w-8 h-8 rounded-lg text-slate-400 hover:bg-slate-100">✕</button>
             </div>
         </div>
@@ -297,7 +247,7 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
                 </span>
             </a>
             @empty
-            <p class="py-8 text-center text-sm text-slate-400">{{ __('Tidak ada yang perlu ditindaklanjuti. 🎉') }}</p>
+            <p class="py-8 text-center text-sm text-slate-400">{{ __('Belum ada notifikasi.') }}</p>
             @endforelse
         </div>
     </dialog>

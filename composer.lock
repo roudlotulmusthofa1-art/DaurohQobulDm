@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2f1f83d474a965b132efa236da4c4d9a",
+    "content-hash": "58e907a486619b7a52df3c5373baf2c6",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -6103,6 +6103,54 @@
                 }
             ],
             "time": "2026-04-26T05:33:54+00:00"
+        },
+        {
+            "name": "zemmelmootez/phplocator",
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/zemmelmootez/phplocator.git",
+                "reference": "d8def285945d37195aae5b38dfd1943748ceb9f7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/zemmelmootez/phplocator/zipball/d8def285945d37195aae5b38dfd1943748ceb9f7",
+                "reference": "d8def285945d37195aae5b38dfd1943748ceb9f7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.0"
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "phplocator.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Mootez Zemmel",
+                    "email": "zemmel.mootez@gmail.com"
+                }
+            ],
+            "description": "Click-to-code for PHP: automatic source mapping for browser extensions like LocatorJS",
+            "homepage": "https://github.com/zemmelmootez/phplocator",
+            "keywords": [
+                "click-to-code",
+                "debugging",
+                "developer-tools",
+                "php",
+                "vscode"
+            ],
+            "support": {
+                "issues": "https://github.com/zemmelmootez/phplocator/issues",
+                "source": "https://github.com/zemmelmootez/phplocator"
+            },
+            "time": "2025-08-28T16:51:17+00:00"
         }
     ],
     "packages-dev": [

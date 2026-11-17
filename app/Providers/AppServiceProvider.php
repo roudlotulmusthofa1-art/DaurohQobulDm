@@ -29,6 +29,13 @@ class AppServiceProvider extends ServiceProvider
         // {{ $teks }} di Blade: escape biasa + "{{" di dalam data dipatahkan agar tidak dijalankan Vue
         \Illuminate\Support\Facades\Blade::setEchoFormat('\App\Support\TeksAman::e(%s)');
 
+        // Asatid & siswa keluar (logout) -> tercatat di lonceng notifikasi admin (masuk dicatat di LoginController)
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Auth\Events\Logout::class, function ($e) {
+            if ($e->user instanceof \App\Models\User) {
+                \App\Models\AktivitasPengguna::catat($e->user, 'keluar (logout)');
+            }
+        });
+
         // Permintaan web membaca database & folder file milik sesi aktif (perintah artisan tetap di database utama)
         if (! $this->app->runningInConsole()) {
             \App\Support\SesiAplikasi::terapkan();

@@ -1,8 +1,8 @@
 {{--
     Admin > Akademik > Munaqosah > detail satu santri (Admin\MunaqosahController@show), dibuka di tab baru.
     Panel: 1 Detail santri (tanpa persyaratan & catatan admin) · 2 Nilai Ilmu · 3 Nilai Harian/Lisan/Ujian · 4 Nilai Dakwah
-           5 Nilai Suluk · 6 Catatan Pencapaian & Pelanggaran · 7 Catatan Mandub · Simpan (-> tab Lajnah).
-    Status "lajnah": panel 2/5/7 hanya dibaca, lalu panel Lajnah Qobul Darul Musthofa (catatan khusus + Lulus/Tidak,
+           5 Nilai Suluk · 6 Detail Absensi · 7 Catatan Pencapaian & Pelanggaran · 8 Catatan Mandub · Simpan (-> tab Lajnah).
+    Status "lajnah": panel 2/5/8 hanya dibaca, lalu panel Lajnah Qobul Darul Musthofa (catatan khusus + Lulus/Tidak,
     Kembalikan ke Musyrifin selama belum diputuskan).
     Dua aplikasi Vue: #munaqosah-santri (panel 1, partials/detail-santri) dan #halaman-munaqosah-detail (panel lainnya).
 --}}
@@ -57,11 +57,14 @@ $nomorPanel = fn ($n) => '<span class="w-7 h-7 shrink-0 rounded-lg bg-[#0b332c] 
         {{-- ===== Panel 5: Nilai Suluk ===== --}}
         @include('admin.akademik.munaqosah._panel-isian', ['nomor' => 5, 'b' => 'suluk'])
 
-        {{-- ===== Panel 6: Catatan Pencapaian & Pelanggaran ===== --}}
+        {{-- ===== Panel 6: Detail Absensi ===== --}}
+        @include('admin.akademik.munaqosah._panel-absensi')
+
+        {{-- ===== Panel 7: Catatan Pencapaian & Pelanggaran ===== --}}
         @include('admin.akademik.munaqosah._panel-catatan')
 
-        {{-- ===== Panel 7: Catatan Mandub ===== --}}
-        @include('admin.akademik.munaqosah._panel-isian', ['nomor' => 7, 'b' => 'mandub'])
+        {{-- ===== Panel 8: Catatan Mandub ===== --}}
+        @include('admin.akademik.munaqosah._panel-isian', ['nomor' => 8, 'b' => 'mandub'])
 
         @if (! $lajnah)
         {{-- ===== Simpan (Musyrifin) ===== --}}
@@ -149,6 +152,7 @@ $nomorPanel = fn ($n) => '<span class="w-7 h-7 shrink-0 rounded-lg bg-[#0b332c] 
                     dakwah: @json($dakwah),
                     jenisDakwah: @json($jenisDakwah),
                     catatan: @json($catatan),
+                    absensi: @json($absensi),
                     menyimpan: false,
                     teks: {
                         simpan: @js(__('Simpan & kirim ke Lajnah')), menyimpan: @js(__('Menyimpan…')),

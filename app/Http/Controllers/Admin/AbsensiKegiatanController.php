@@ -34,9 +34,26 @@ class AbsensiKegiatanController extends Controller
 
         Absensi::tutupYangLewat(); // yang sudah lewat batas alfa ditutup otomatis (belum tercatat = Alfa)
 
+        // Kegiatan BERULANG: satu kartu per jadwal (tab Berjalan / Semua, halaman pertama),
+        // berisi absensi hari ini yang sedang berjalan + tautan ke hasil terakhir. Tab Selesai hanya absensi sekali.
+        $jadwalList = $saring === 'selesai' || $request->integer('page', 1) > 1 ? collect() :
+            JadwalKegiatan::with('kegiatan:id,nama,warna')
+                ->when($cari !== '', fn ($q) => $q->whereHas('kegiatan', fn ($k) => $k->where('nama', 'like', "%{$cari}%")))
+                ->orderBy('jam_mulai')->get();
+
+        $absensiBerulang = fn (bool $selesai) => Absensi::where('jenis', Absensi::KEGIATAN)
+            ->whereIn('jadwal_kegiatan_id', $jadwalList->pluck('id'))
+            ->when($selesai, fn ($q) => $q->whereNotNull('selesai_at'), fn ($q) => $q->whereNull('selesai_at'))
+            ->withCount(['detail as tercatat_count' => fn ($q) => $q->whereNotNull('dicatat_oleh')])
+            ->orderByDesc('tanggal')->orderByDesc('id')
+            ->get()->unique('jadwal_kegiatan_id')->keyBy('jadwal_kegiatan_id');
+        $berulangBerjalan = $absensiBerulang(false);
+        $berulangTerakhir = $absensiBerulang(true);
+
         $daftar = Absensi::with('kegiatan')
             ->where('jenis', Absensi::KEGIATAN)
             ->where('dari_admin', true)
+            ->whereNull('jadwal_kegiatan_id') // absensi dari kegiatan berulang tampil di kartu berulangnya
             ->when($saring === 'berjalan', fn ($q) => $q->whereNull('selesai_at'))
             ->when($saring === 'selesai', fn ($q) => $q->whereNotNull('selesai_at'))
             ->when($cari !== '', fn ($q) => $q->whereHas('kegiatan', fn ($k) => $k->where('nama', 'like', "%{$cari}%")))
@@ -48,7 +65,7 @@ class AbsensiKegiatanController extends Controller
             ->paginate(20)->withQueryString();
 
         // Nama asatid yang ikut mencatat tiap kegiatan (+ nama Arab, tampil di bawah nama)
-        $detailPencatat = AbsensiDetail::whereIn('absensi_id', $daftar->pluck('id'))
+        $detailPencatat = AbsensiDetail::whereIn('absensi_id', $daftar->pluck('id')->merge($berulangBerjalan->pluck('id')))
             ->whereNotNull('dicatat_oleh')
             ->with('pencatat:id,name')
             ->get(['absensi_id', 'dicatat_oleh']);
@@ -64,11 +81,14 @@ class AbsensiKegiatanController extends Controller
             'saring'       => $saring,
             'cari'         => $cari,
             'kegiatanList' => JenisKegiatan::where('is_active', true)->ordered()->get(['id', 'nama', 'warna']),
-            'jadwalList'   => JadwalKegiatan::with('kegiatan:id,nama,warna')->orderBy('jam_mulai')->get(),
+            'jadwalList'   => $jadwalList,
+            'berulangBerjalan' => $berulangBerjalan,
+            'berulangTerakhir' => $berulangTerakhir,
             'jumlahPeserta' => PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count(),
             'jumlah'       => [
-                'berjalan' => Absensi::where('jenis', Absensi::KEGIATAN)->where('dari_admin', true)->whereNull('selesai_at')->count(),
-                'selesai'  => Absensi::where('jenis', Absensi::KEGIATAN)->where('dari_admin', true)->whereNotNull('selesai_at')->count(),
+                'berjalan' => Absensi::where('jenis', Absensi::KEGIATAN)->where('dari_admin', true)->whereNull('jadwal_kegiatan_id')->whereNull('selesai_at')->count()
+                    + JadwalKegiatan::count(),
+                'selesai'  => Absensi::where('jenis', Absensi::KEGIATAN)->where('dari_admin', true)->whereNull('jadwal_kegiatan_id')->whereNotNull('selesai_at')->count(),
             ],
         ]);
     }

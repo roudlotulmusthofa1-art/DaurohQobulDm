@@ -1,11 +1,11 @@
 {{--
-    Munaqosah: Panel 6: Catatan Pencapaian & Pelanggaran (hanya dibaca). Data Vue: catatan, saringCatatan, tp (mixin MUNAQOSAH_PANEL).
+    Munaqosah: Panel 7: Catatan Pencapaian & Pelanggaran (hanya dibaca). Data Vue: catatan, saringCatatan, tp (mixin MUNAQOSAH_PANEL).
     Dipakai di halaman detail (Lajnah) dan modal panel di halaman Munaqosah (Musyrifin).
     Butuh variabel Blade $kartu dan $nomorPanel.
 --}}
 <section class="{{ $kartu }} p-5 sm:p-6">
     <div class="flex flex-col sm:flex-row sm:items-center gap-3">
-        <h2 class="flex-1 flex items-center gap-2 text-lg font-extrabold text-slate-800">{!! $nomorPanel(6) !!} {{ __('Catatan Pencapaian & Pelanggaran') }}</h2>
+        <h2 class="flex-1 flex items-center gap-2 text-lg font-extrabold text-slate-800">{!! $nomorPanel(7) !!} {{ __('Catatan Pencapaian & Pelanggaran') }}</h2>
         <div class="grid grid-cols-3 gap-1 rounded-2xl bg-slate-100 p-1 sm:w-96">
             <button v-for="s in SARING_CATATAN" :key="s.kunci" type="button" @click="saringCatatan = s.kunci" class="py-1.5 rounded-xl text-xs font-bold transition"
                 :class="saringCatatan === s.kunci ? 'bg-white text-[#0b332c] shadow-sm' : 'text-slate-500 hover:text-slate-700'"

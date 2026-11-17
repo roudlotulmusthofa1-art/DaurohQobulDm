@@ -1,7 +1,9 @@
 {{--
     Admin > Dashboard
     Semua angka & daftar diambil dari data sesi aktif (DashboardController); tiap kartu menuju menunya.
-    Kotak "Pesan Peserta": pilih percakapan di kiri (?pesan=id), baca & balas di kanan.
+    Kotak "Pesan Siswa & Asatid": daftar percakapan siswa + asatid di kiri, percakapan teratas langsung terbuka di kanan
+    (atau yang diklik: ?pesan={id peserta} / ?asatid={user id}), baca & balas di tempat.
+    Perlu Tindakan & Pendaftar Terbaru dihapus (2026-11-17); aktivitas asatid & siswa masuk ke lonceng notifikasi.
 --}}
 @extends('layouts.admin')
 
@@ -94,158 +96,9 @@ $statKartu = [
         @endforeach
     </div>
 
-    {{-- ===== Pesan Peserta (baca & balas) ===== --}}
-    <section id="pesan-peserta" class="{{ $kartu }} overflow-hidden scroll-mt-24">
-        <div class="flex flex-wrap items-center gap-3 px-5 sm:px-6 py-4 border-b border-slate-100">
-            <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/></svg>
-            </span>
-            <div class="flex-1 min-w-0">
-                <h2 class="font-bold text-slate-800">{{ __('Pesan Peserta') }}</h2>
-                <p class="text-xs text-slate-500">{{ $pesanBelum ? __(':jumlah pesan belum dibaca', ['jumlah' => $pesanBelum]) : __('Semua pesan sudah dibaca') }} · {{ __('dari menu "Pesan untuk Admin" di dasbor siswa') }}</p>
-            </div>
-            <a href="{{ $rute('admin.pesan-peserta.index') }}" class="rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Semua pesan & kirim pesan baru') }}</a>
-        </div>
-
-        <div class="grid lg:grid-cols-5 min-h-[420px]">
-            {{-- Daftar percakapan --}}
-            <div class="lg:col-span-2 lg:border-r border-slate-100 max-h-[520px] overflow-y-auto">
-                @forelse ($percakapan as $c)
-                @php $aktif = $dibuka && $dibuka->id === $c->peserta->id; @endphp
-                <a href="{{ route('admin.dashboard', ['pesan' => $c->peserta->id]) }}#pesan-peserta"
-                    class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 transition-colors {{ $aktif ? 'bg-emerald-50 border-l-4 border-l-emerald-500' : 'hover:bg-[#f8fbfa]' }}">
-                    @if ($c->peserta->foto_url)
-                    <img data-perbesar="{{ $c->peserta->nama_lengkap }}" src="{{ $c->peserta->foto_url }}" alt="" class="w-10 h-10 shrink-0 rounded-xl object-cover">
-                    @else
-                    <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white font-bold flex items-center justify-center">{{ $inisial($c->peserta->nama_lengkap) }}</span>
-                    @endif
-                    <div class="min-w-0 flex-1">
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="truncate text-sm {{ $c->belum ? 'font-extrabold text-slate-900' : 'font-semibold text-slate-700' }}">{{ $c->peserta->nama_lengkap }}</p>
-                            <span class="shrink-0 text-[10px] text-slate-400">{{ $c->terakhir ? $waktuPesan($c->terakhir->created_at) : '' }}</span>
-                        </div>
-                        <x-nama-arab :teks="$c->peserta->nama_lengkap_arab" kelas="text-xs text-slate-500" />
-                        <div class="flex items-center justify-between gap-2">
-                            <p class="truncate text-xs {{ $c->belum ? 'text-slate-700' : 'text-slate-400' }}">
-                                @if ($c->terakhir?->dari === PesanPeserta::DARI_ADMIN)<span class="text-sky-600">{{ __('Anda:') }}</span>@endif
-                                {{ $c->terakhir?->judul ?: $c->terakhir?->isi }}
-                            </p>
-                            @if ($c->belum)<span class="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-5 text-center">{{ $c->belum }}</span>@endif
-                        </div>
-                    </div>
-                </a>
-                @empty
-                <div class="p-8 text-center">
-                    <p class="text-sm font-semibold text-slate-600">{{ __('Belum ada pesan') }}</p>
-                    <p class="mt-1 text-xs text-slate-400">{{ __('Pesan dari peserta akan muncul di sini.') }}</p>
-                </div>
-                @endforelse
-            </div>
-
-            {{-- Percakapan terbuka --}}
-            <div class="lg:col-span-3 flex flex-col bg-[#f6f9f8]">
-                @if ($dibuka)
-                <div class="flex items-center gap-3 px-5 py-3 bg-white border-b border-slate-100">
-                    <div class="min-w-0 flex-1">
-                        <p class="font-bold text-slate-800 truncate">{{ $dibuka->nama_lengkap }}</p>
-                        <x-nama-arab :teks="$dibuka->nama_lengkap_arab" />
-                        <p class="text-[11px] text-slate-500"><span class="rounded-full px-1.5 ring-1 {{ $warnaStatus[$dibuka->status] ?? '' }}">{{ __($dibuka->label_status) }}</span></p>
-                    </div>
-                    <a href="{{ route('admin.pendaftaran.show', $dibuka) }}" class="shrink-0 text-xs font-semibold text-emerald-700 hover:underline">{{ __('Detail') }}</a>
-                    <a href="{{ route('admin.pesan-peserta.show', $dibuka) }}" class="shrink-0 text-xs font-semibold text-slate-500 hover:underline">{{ __('Buka penuh') }}</a>
-                </div>
-                <div class="flex-1 max-h-[360px] overflow-y-auto px-5 py-4 space-y-3" ref="isiPercakapan">
-                    @foreach ($isiPercakapan as $p)
-                    @php $dariAdmin = $p->dari === PesanPeserta::DARI_ADMIN; @endphp
-                    <div class="flex {{ $dariAdmin ? 'justify-end' : 'justify-start' }}">
-                        <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-sm {{ $dariAdmin ? 'rounded-tr-sm bg-[#d9fdd3]' : 'rounded-tl-sm bg-white ring-1 ring-slate-100' }}">
-                            @if ($p->judul)<p class="text-[13px] font-bold text-slate-800">{{ $p->judul }}</p>@endif
-                            <p class="text-[13px] text-slate-700 whitespace-pre-line break-words">{{ $p->isi }}</p>
-                            <p class="mt-1 text-right text-[10px] text-slate-400">
-                                {{ $dariAdmin ? __('Admin') . ($p->pengirim ? ' · ' . $p->pengirim->name : '') . ' · ' : '' }}{{ $p->created_at->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M, H:i') }}
-                                @if ($dariAdmin) · {{ $p->dibaca_at ? __('dibaca') : __('terkirim') }} @endif
-                            </p>
-                            @if ($dariAdmin)<x-nama-arab :teks="NamaArab::user($p->user_id)" kelas="text-[11px] text-slate-400" />@endif
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-                <form method="POST" action="{{ route('admin.pesan-peserta.balas', $dibuka) }}" class="flex items-end gap-2 p-3 bg-white border-t border-slate-100">
-                    @csrf
-                    <input type="hidden" name="kembali" value="dashboard">
-                    <textarea name="isi" rows="2" required maxlength="3000" placeholder="{{ __('Tulis balasan untuk :nama…', ['nama' => $dibuka->nama_lengkap]) }}" @keydown.ctrl.enter.prevent="kirimBalasan" @keydown.meta.enter.prevent="kirimBalasan"
-                        class="flex-1 resize-none rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
-                    <button class="shrink-0 w-11 h-11 rounded-2xl bg-[#0b332c] text-white flex items-center justify-center hover:bg-[#135347]" title="{{ __('Kirim (Ctrl+Enter)') }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
-                    </button>
-                </form>
-                @else
-                <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
-                    <span class="w-14 h-14 rounded-2xl bg-white ring-1 ring-slate-200 text-slate-300 flex items-center justify-center">
-                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
-                    </span>
-                    <p class="mt-3 text-sm font-semibold text-slate-600">{{ __('Pilih percakapan di sebelah kiri') }}</p>
-                    <p class="mt-1 text-xs text-slate-400">{{ __('untuk membaca dan membalas pesan peserta.') }}</p>
-                </div>
-                @endif
-            </div>
-        </div>
-    </section>
-
-    <div class="grid xl:grid-cols-3 gap-6">
-        {{-- ===== Perlu tindakan ===== --}}
-        <section class="{{ $kartu }} p-5 sm:p-6">
-            <div class="flex items-center justify-between">
-                <h2 class="font-bold text-slate-800">{{ __('Perlu Tindakan') }}</h2>
-                <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-600 ring-1 ring-rose-100">{{ $tindakan['total'] }}</span>
-            </div>
-            <div class="mt-3 space-y-1 max-h-[340px] overflow-y-auto">
-                @forelse ($tindakan['items'] as $n)
-                <a href="{{ $n['url'] ?? '#' }}" class="flex items-start gap-3 rounded-2xl px-2 py-2.5 hover:bg-[#f5f9f7]">
-                    <span class="w-9 h-9 shrink-0 rounded-xl ring-1 flex items-center justify-center {{ $n['warna'] }}">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="{{ $n['ikon'] }}"/></svg>
-                    </span>
-                    <span class="min-w-0">
-                        {{-- teks sudah di-escape di NotifikasiAdmin --}}
-                        <span class="block text-[13px] text-slate-700 leading-snug [&_b]:font-semibold [&_b]:text-slate-900">{!! $n['teks'] !!}</span>
-                        <span class="block text-[11px] text-slate-400">{{ collect([$n['keterangan'], $n['waktu']])->filter()->implode(' · ') }}</span>
-                    </span>
-                </a>
-                @empty
-                <p class="py-8 text-center text-sm text-slate-400">{{ __('Tidak ada yang perlu ditindaklanjuti. 🎉') }}</p>
-                @endforelse
-            </div>
-        </section>
-
+    <div class="grid gap-6">
         {{-- ===== Pergantian pelajaran (jadwal hari ini + tanda ganti pelajaran ke guru) ===== --}}
         @include('admin.partials.pergantian-pelajaran', ['kelasKartu' => $kartu])
-
-        {{-- ===== Pendaftar terbaru ===== --}}
-        <section class="{{ $kartu }} p-5 sm:p-6">
-            <div class="flex items-center justify-between">
-                <h2 class="font-bold text-slate-800">{{ __('Pendaftar Terbaru') }}</h2>
-                <a href="{{ $rute('admin.data-masuk.index') }}" class="text-xs font-semibold text-emerald-700 hover:underline">{{ __('Data Masuk') }}</a>
-            </div>
-            <div class="mt-3 divide-y divide-slate-100">
-                @forelse ($pendaftarBaru as $p)
-                <a href="{{ route('admin.pendaftaran.show', $p) }}" class="flex items-center gap-3 py-2.5 hover:bg-[#f8fbfa] rounded-xl px-1">
-                    @if ($p->foto_url)
-                    <img data-perbesar="{{ $p->nama_lengkap }}" src="{{ $p->foto_url }}" alt="" class="w-9 h-9 shrink-0 rounded-xl object-cover">
-                    @else
-                    <span class="w-9 h-9 shrink-0 rounded-xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center">{{ $inisial($p->nama_lengkap) }}</span>
-                    @endif
-                    <div class="min-w-0 flex-1">
-                        <p class="truncate text-sm font-semibold text-slate-800">{{ $p->nama_lengkap }}</p>
-                        <x-nama-arab :teks="$p->nama_lengkap_arab" kelas="text-xs text-slate-500" />
-                        <p class="text-[11px] text-slate-400">{{ $p->created_at->locale('id')->diffForHumans() }}</p>
-                    </div>
-                    <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1 {{ $warnaStatus[$p->status] ?? '' }}">{{ __($p->label_status) }}</span>
-                </a>
-                @empty
-                <p class="py-8 text-center text-sm text-slate-400">{{ __('Belum ada pendaftar.') }}</p>
-                @endforelse
-            </div>
-        </section>
     </div>
 
     <div class="grid xl:grid-cols-2 gap-6">
@@ -305,6 +158,115 @@ $statKartu = [
             </div>
         </section>
     </div>
+
+    {{-- ===== Pesan Peserta (baca & balas) ===== --}}
+    <section id="pesan-peserta" class="{{ $kartu }} overflow-hidden scroll-mt-24">
+        <div class="flex flex-wrap items-center gap-3 px-5 sm:px-6 py-4 border-b border-slate-100">
+            <span class="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 text-white flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M20.25 8.511c.884.284 1.5 1.128 1.5 2.097v4.286c0 1.136-.847 2.1-1.98 2.193-.34.027-.68.052-1.02.072v3.091l-3-3c-1.354 0-2.694-.055-4.02-.163a2.115 2.115 0 01-.825-.242m9.345-8.334a2.126 2.126 0 00-.476-.095 48.64 48.64 0 00-8.048 0c-1.131.094-1.976 1.057-1.976 2.192v4.286c0 .837.46 1.58 1.155 1.951m9.345-8.334V6.637c0-1.621-1.152-3.026-2.76-3.235A48.455 48.455 0 0011.25 3c-2.115 0-4.198.137-6.24.402-1.608.209-2.76 1.614-2.76 3.235v6.226c0 1.621 1.152 3.026 2.76 3.235.577.075 1.157.14 1.74.194V21l4.155-4.155"/></svg>
+            </span>
+            <div class="flex-1 min-w-0">
+                <h2 class="font-bold text-slate-800">{{ __('Pesan Siswa & Asatid') }}</h2>
+                <p class="text-xs text-slate-500">{{ $pesanBelum ? __(':jumlah pesan belum dibaca', ['jumlah' => $pesanBelum]) : __('Semua pesan sudah dibaca') }} · {{ __('dari menu "Pesan untuk Admin" di dasbor siswa & asatid') }}</p>
+            </div>
+            <a href="{{ $rute('admin.pesan-peserta.index') }}" class="rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Semua pesan & kirim pesan baru') }}</a>
+        </div>
+
+        <div class="grid lg:grid-cols-5 min-h-[420px]">
+            {{-- Daftar percakapan --}}
+            <div class="lg:col-span-2 lg:border-r border-slate-100 max-h-[520px] overflow-y-auto">
+                @forelse ($percakapan as $c)
+                @php $aktif = $dibuka && $dibuka->jenis === $c->jenis && $dibuka->id === $c->id; @endphp
+                <a href="{{ route('admin.dashboard', [$c->jenis === 'asatid' ? 'asatid' : 'pesan' => $c->id]) }}#pesan-peserta"
+                    class="flex items-center gap-3 px-4 py-3 border-b border-slate-50 transition-colors {{ $aktif ? 'bg-emerald-50 border-l-4 border-l-emerald-500' : 'hover:bg-[#f8fbfa]' }}">
+                    @if ($c->foto)
+                    <img data-perbesar="{{ $c->nama }}" src="{{ $c->foto }}" alt="" class="w-10 h-10 shrink-0 rounded-xl object-cover">
+                    @else
+                    <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br {{ $c->jenis === 'asatid' ? 'from-violet-400 to-purple-600' : 'from-emerald-400 to-teal-600' }} text-white font-bold flex items-center justify-center">{{ $inisial($c->nama) }}</span>
+                    @endif
+                    <div class="min-w-0 flex-1">
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="truncate text-sm {{ $c->belum ? 'font-extrabold text-slate-900' : 'font-semibold text-slate-700' }}">{{ $c->nama }}</p>
+                            <span class="shrink-0 text-[10px] text-slate-400">{{ $waktuPesan($c->terakhir->waktu) }}</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <span class="shrink-0 rounded-full px-1.5 text-[10px] font-bold ring-1 {{ $c->jenis === 'asatid' ? 'bg-violet-50 text-violet-700 ring-violet-100' : 'bg-sky-50 text-sky-700 ring-sky-100' }}">{{ $c->jenis === 'asatid' ? __('Asatid') : __('Siswa') }}</span>
+                            <x-nama-arab :teks="$c->arab" kelas="truncate text-xs text-slate-500" />
+                        </div>
+                        <div class="flex items-center justify-between gap-2">
+                            <p class="truncate text-xs {{ $c->belum ? 'text-slate-700' : 'text-slate-400' }}">
+                                @if ($c->terakhir->dari_admin)<span class="text-sky-600">{{ __('Anda:') }}</span>@endif
+                                {{ $c->terakhir->teks }}
+                            </p>
+                            @if ($c->belum)<span class="shrink-0 min-w-[20px] h-5 px-1.5 rounded-full bg-rose-500 text-white text-[10px] font-bold leading-5 text-center">{{ $c->belum }}</span>@endif
+                        </div>
+                    </div>
+                </a>
+                @empty
+                <div class="p-8 text-center">
+                    <p class="text-sm font-semibold text-slate-600">{{ __('Belum ada pesan') }}</p>
+                    <p class="mt-1 text-xs text-slate-400">{{ __('Pesan dari siswa dan asatid akan muncul di sini.') }}</p>
+                </div>
+                @endforelse
+            </div>
+
+            {{-- Percakapan terbuka --}}
+            <div class="lg:col-span-3 flex flex-col bg-[#f6f9f8]">
+                @if ($dibuka)
+                @php $siswaDibuka = $dibuka->jenis === 'siswa'; @endphp
+                <div class="flex items-center gap-3 px-5 py-3 bg-white border-b border-slate-100">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-bold text-slate-800 truncate">{{ $dibuka->nama }}</p>
+                        <x-nama-arab :teks="$dibuka->arab" />
+                        <p class="text-[11px] text-slate-500">
+                            @if ($siswaDibuka)
+                            <span class="rounded-full px-1.5 ring-1 {{ $warnaStatus[$dibuka->status] ?? '' }}">{{ __($dibuka->label_status) }}</span>
+                            @else
+                            <span class="rounded-full px-1.5 ring-1 bg-violet-50 text-violet-700 ring-violet-100">{{ __('Asatid') }}</span>
+                            @endif
+                        </p>
+                    </div>
+                    @if ($siswaDibuka)
+                    <a href="{{ route('admin.pendaftaran.show', $dibuka->id) }}" class="shrink-0 text-xs font-semibold text-emerald-700 hover:underline">{{ __('Detail') }}</a>
+                    @endif
+                    <a href="{{ $siswaDibuka ? route('admin.pesan-peserta.show', $dibuka->id) : route('admin.pesan-peserta.asatid.show', $dibuka->id) }}" class="shrink-0 text-xs font-semibold text-slate-500 hover:underline">{{ __('Buka penuh') }}</a>
+                </div>
+                <div class="flex-1 max-h-[360px] overflow-y-auto px-5 py-4 space-y-3" ref="isiPercakapan">
+                    @foreach ($isiPercakapan as $p)
+                    <div class="flex {{ $p->dari_admin ? 'justify-end' : 'justify-start' }}">
+                        <div class="max-w-[85%] rounded-2xl px-3.5 py-2.5 shadow-sm {{ $p->dari_admin ? 'rounded-tr-sm bg-[#d9fdd3]' : 'rounded-tl-sm bg-white ring-1 ring-slate-100' }}">
+                            @if ($p->judul)<p class="text-[13px] font-bold text-slate-800">{{ $p->judul }}</p>@endif
+                            <p class="text-[13px] text-slate-700 whitespace-pre-line break-words">{{ $p->isi }}</p>
+                            <p class="mt-1 text-right text-[10px] text-slate-400">
+                                {{ $p->dari_admin ? __('Admin') . ($p->pengirim ? ' · ' . $p->pengirim : '') . ' · ' : '' }}{{ $p->waktu->timezone('Asia/Jakarta')->locale('id')->translatedFormat('d M, H:i') }}
+                                @if ($p->dari_admin) · {{ $p->dibaca ? __('dibaca') : __('terkirim') }} @endif
+                            </p>
+                            @if ($p->dari_admin)<x-nama-arab :teks="NamaArab::user($p->pengirim_id)" kelas="text-[11px] text-slate-400" />@endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                <form method="POST" action="{{ $siswaDibuka ? route('admin.pesan-peserta.balas', $dibuka->id) : route('admin.pesan-peserta.asatid.balas', $dibuka->id) }}" class="flex items-end gap-2 p-3 bg-white border-t border-slate-100">
+                    @csrf
+                    <input type="hidden" name="kembali" value="dashboard">
+                    <textarea name="isi" rows="2" required maxlength="3000" placeholder="{{ __('Tulis balasan untuk :nama…', ['nama' => $dibuka->nama]) }}" @keydown.ctrl.enter.prevent="kirimBalasan" @keydown.meta.enter.prevent="kirimBalasan"
+                        class="flex-1 resize-none rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-4 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                    <button class="shrink-0 w-11 h-11 rounded-2xl bg-[#0b332c] text-white flex items-center justify-center hover:bg-[#135347]" title="{{ __('Kirim (Ctrl+Enter)') }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                    </button>
+                </form>
+                @else
+                <div class="flex-1 flex flex-col items-center justify-center p-8 text-center">
+                    <span class="w-14 h-14 rounded-2xl bg-white ring-1 ring-slate-200 text-slate-300 flex items-center justify-center">
+                        <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z"/></svg>
+                    </span>
+                    <p class="mt-3 text-sm font-semibold text-slate-600">{{ __('Belum ada percakapan') }}</p>
+                    <p class="mt-1 text-xs text-slate-400">{{ __('Pesan dari siswa dan asatid akan langsung terbuka di sini.') }}</p>
+                </div>
+                @endif
+            </div>
+        </div>
+    </section>
 </div>
 @endsection
 

@@ -79,6 +79,7 @@ $ikonBuku = 'M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.9
                 <span v-else class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-teal-400 to-[#0b332c] text-white font-extrabold flex items-center justify-center" v-text="inisial(s.nama)"></span>
                 <span class="min-w-0 flex-1">
                     <span class="block text-sm font-bold text-slate-800 truncate" v-text="s.nama"></span>
+                    <x-nama-arab vue="s.arab" />
                     <span class="block text-[11px] text-slate-400 truncate" v-text="s.nomor"></span>
                 </span>
                 <span v-if="jumlahHafal(s)" class="shrink-0 rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-bold text-white" v-text="'✓ ' + jumlahHafal(s)"></span>

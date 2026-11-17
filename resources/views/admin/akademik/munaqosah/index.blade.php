@@ -2,11 +2,11 @@
     Admin > Akademik > Munaqosah (Admin\MunaqosahController@index).
     Musyawarah para asatid: santri lulus / diterima atau tidak. Dua tab (alamat ?tab=musyrifin|lajnah):
     1. Musyrifin Dauroh : 3 tombol pengaturan kolom (Nilai Ilmu, Suluk, Catatan Mandub) + kartu santri yang belum dikirim.
-       Tiap kartu punya 7 tombol panel -> MODAL di halaman ini (data dari admin.munaqosah.data / .profil);
+       Tiap kartu punya 8 tombol panel -> MODAL di halaman ini (data dari admin.munaqosah.data / .profil);
        Nilai Ilmu / Suluk / Mandub disimpan per panel (admin.munaqosah.bagian), lalu tombol "Kirim ke Lajnah" (admin.munaqosah.kirim).
     2. Lajnah Qobul Darul Musthofa : kartu santri yang sudah dikirim + tanda keputusan.
        Kartu dibuka di TAB BARU (admin/munaqosah/{santri}); saat kembali ke tab ini halaman dimuat ulang supaya kartu pindah.
-    Tampilan panel bersama: _panel-isian, _panel-nilai, _panel-dakwah, _panel-catatan + _skrip-panel (mixin MUNAQOSAH_PANEL).
+    Tampilan panel bersama: _panel-isian, _panel-nilai, _panel-dakwah, _panel-absensi, _panel-catatan + _skrip-panel (mixin MUNAQOSAH_PANEL).
     Vue: #halaman-munaqosah.
 --}}
 @extends('layouts.admin')
@@ -55,7 +55,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
             <button v-for="s in SARING" :key="s.kunci" type="button" @click="saring = s.kunci" class="py-2 rounded-xl text-xs sm:text-sm font-bold transition"
                 :class="saring === s.kunci ? 'bg-white text-[#0b332c] shadow-sm' : 'text-slate-500 hover:text-slate-700'" v-text="s.label"></button>
         </div>
-        {{-- Pilihan tampilan kartu tab Lajnah: Ringkas (kartu biasa) | Panel (7 tombol seperti Musyrifin) --}}
+        {{-- Pilihan tampilan kartu tab Lajnah: Ringkas (kartu biasa) | Panel (8 tombol seperti Musyrifin) --}}
         <div v-if="tab === 'lajnah'" class="lg:shrink-0">
             <span class="text-xs font-semibold text-slate-500">{{ __('Tampilan') }}</span>
             <div class="mt-1 grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100 p-1.5 lg:w-56">
@@ -91,13 +91,13 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
             <p v-if="tab === 'lajnah'" class="relative mt-2 text-[11px] text-slate-400"
                 v-text="s.keputusan ? teks.diputuskan + ' ' + waktu(s.diputuskan) : teks.dikirim + ' ' + waktu(s.dikirim)"></p>
 
-            {{-- Tab Musyrifin, atau tab Lajnah tampilan Panel: 7 tombol panel (dibuka di modal).
+            {{-- Tab Musyrifin, atau tab Lajnah tampilan Panel: 8 tombol panel (dibuka di modal).
                  Musyrifin: + Kirim ke Lajnah. Lajnah: isian hanya dibaca + Buka & putuskan (tab baru). --}}
             <template v-if="tab === 'musyrifin' || tampilan === 'panel'">
                 <div class="relative mt-4 grid grid-cols-2 gap-1.5">
                     <button v-for="(p, i) in PANEL" :key="p.kunci" type="button" @click="bukaPanel(s, p.kunci)"
                         class="flex items-center gap-2 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 px-2.5 py-2 text-left text-xs font-semibold text-slate-600 hover:ring-emerald-400 hover:bg-emerald-50/60 hover:text-[#0b332c] transition"
-                        :class="i === PANEL.length - 1 ? 'col-span-2' : ''">
+                        :class="PANEL.length % 2 && i === PANEL.length - 1 ? 'col-span-2' : ''">
                         <span class="w-5 h-5 shrink-0 rounded-md bg-[#0b332c] text-white text-[10px] font-extrabold flex items-center justify-center" v-text="i + 1"></span>
                         <span class="min-w-0 flex-1 leading-tight" v-text="p.label"></span>
                         <span v-if="p.isian && s.isi[p.kunci]" class="w-4 h-4 shrink-0 rounded-full bg-emerald-500 text-white flex items-center justify-center" :title="teks.sudahDiisi">
@@ -145,8 +145,9 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                 <div v-else-if="modal.panel === 'nilai'">@include('admin.akademik.munaqosah._panel-nilai')</div>
                 <div v-else-if="modal.panel === 'dakwah'">@include('admin.akademik.munaqosah._panel-dakwah')</div>
                 <div v-else-if="modal.panel === 'suluk'">@include('admin.akademik.munaqosah._panel-isian', ['nomor' => 5, 'b' => 'suluk'])</div>
+                <div v-else-if="modal.panel === 'absensi'">@include('admin.akademik.munaqosah._panel-absensi')</div>
                 <div v-else-if="modal.panel === 'catatan'">@include('admin.akademik.munaqosah._panel-catatan')</div>
-                <div v-else-if="modal.panel === 'mandub'">@include('admin.akademik.munaqosah._panel-isian', ['nomor' => 7, 'b' => 'mandub'])</div>
+                <div v-else-if="modal.panel === 'mandub'">@include('admin.akademik.munaqosah._panel-isian', ['nomor' => 8, 'b' => 'mandub'])</div>
             </template>
         </div>
 
@@ -247,13 +248,14 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
         Vue.createApp({
             mixins: [window.MUNAQOSAH_PANEL], // data & fungsi panel bersama (_skrip-panel)
             data: () => ({
-                // 7 tombol di kartu tab Musyrifin; isian = panel yang diisi & punya tombol Simpan
+                // 8 tombol di kartu tab Musyrifin (& Lajnah tampilan Panel); isian = panel yang diisi & punya tombol Simpan
                 PANEL: [
                     { kunci: 'santri', label: @js(__('Detail Santri')) },
                     { kunci: 'ilmu', label: @js(__('Nilai Ilmu')), isian: true },
                     { kunci: 'nilai', label: @js(__('Nilai Pelajaran')) },
                     { kunci: 'dakwah', label: @js(__('Nilai Dakwah')) },
                     { kunci: 'suluk', label: @js(__('Nilai Suluk')), isian: true },
+                    { kunci: 'absensi', label: @js(__('Detail Absensi')) },
                     { kunci: 'catatan', label: @js(__('Catatan Santri')) },
                     { kunci: 'mandub', label: @js(__('Catatan Mandub')), isian: true },
                 ],
@@ -365,7 +367,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                     this.tampilan = t;
                     try { localStorage.setItem('tampilan_lajnah', t); } catch (e) {}
                 },
-                // ===== Modal 7 panel (tab Musyrifin, dan tab Lajnah tampilan Panel = hanya dibaca) =====
+                // ===== Modal 8 panel (tab Musyrifin, dan tab Lajnah tampilan Panel = hanya dibaca) =====
                 async bukaPanel(s, panel) {
                     const santriBaru = !this.modal || this.modal.santri.id !== s.id;
                     this.lajnah = s.status === 'lajnah'; // panel isian jadi hanya dibaca (_panel-isian)
@@ -377,13 +379,14 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                     this.memuat = true;
                     this.profilHtml = '';
                     this.saringCatatan = '';
+                    this.saringAbsensi = '';
                     try {
                         const json = await kirimJson(alamat(RUTE.data, s.id), 'GET');
                         if (!this.modal || this.modal.santri.id !== s.id) return;
                         this.kolom = json.kolom;
                         Object.assign(this, {
                             nilai: json.nilai, aspek: json.aspek, dakwah: json.dakwah,
-                            jenisDakwah: json.jenisDakwah, catatan: json.catatan, tersimpan: json.tersimpan || {},
+                            jenisDakwah: json.jenisDakwah, catatan: json.catatan, absensi: json.absensi || [], tersimpan: json.tersimpan || {},
                         });
                         this.isian = this.isianDari(this.kolom, this.tersimpan);
                         this.asli = Object.fromEntries(Object.keys(this.isian).map((b) => [b, JSON.stringify(this.isian[b])]));

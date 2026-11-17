@@ -305,13 +305,15 @@ class AbsensiController extends Controller
         abort_unless($absensi->bolehDicatatOleh(Auth::id()) || ($absensi->dari_admin && $absensi->selesai_at), 404);
     }
 
-    /** Daftar absensi kegiatan dari admin yang sedang terbuka (urut tanggal & jam) */
+    /** Daftar absensi kegiatan dari admin yang sedang terbuka & sudah waktunya (mulai 1 jam sebelum jam mulai) */
     private function kegiatanAdmin()
     {
         return Absensi::kegiatanTerbuka()->with('kegiatan')
             ->withCount('detail')
             ->orderBy('tanggal')->orderBy('jam_mulai')
-            ->get();
+            ->get()
+            ->filter->sudahDibuka()
+            ->values();
     }
 
     private function pastikanMilik(Absensi $absensi, ?string $jenis = null): void

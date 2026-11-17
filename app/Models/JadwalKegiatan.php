@@ -49,12 +49,58 @@ class JadwalKegiatan extends Model
         };
     }
 
+    /**
+     * Absensi otomatis yang masih berjalan tapi BELUM ADA satu pun peserta tercatat, disesuaikan dengan jadwalnya sekarang:
+     * - jadwal dimatikan (OFF) atau harinya sudah tidak termasuk -> absensi itu dibuang (tidak tampil di asatid, tidak jadi Alfa);
+     * - masih berlaku -> jam & cara absennya mengikuti jadwal terbaru.
+     * Absensi yang sudah ada catatannya dibiarkan (admin bisa menutup / menghapusnya sendiri).
+     */
+    public static function sesuaikanYangSudahDibuat(): void
+    {
+        try {
+            $daftar = Absensi::where('jenis', Absensi::KEGIATAN)
+                ->whereNotNull('jadwal_kegiatan_id')
+                ->whereNull('selesai_at')
+                ->whereDoesntHave('detail')
+                ->get();
+        } catch (QueryException $e) {
+            return; // sesi lama yang belum menjalankan sesi:migrate
+        }
+
+        foreach ($daftar as $a) {
+            $j = static::find($a->jadwal_kegiatan_id);
+            if (! $j) {
+                continue;
+            }
+            $berlaku = $j->nyala && in_array($a->tanggal->dayOfWeekIso, array_map('intval', $j->hari ?? []), true);
+
+            if (! $berlaku) {
+                $a->delete();
+                // Supaya bisa dibuat lagi hari ini kalau jadwalnya dinyalakan / harinya ditambahkan kembali
+                if ($j->terakhir_dibuat && $j->terakhir_dibuat->toDateString() === $a->tanggal->toDateString()) {
+                    $j->update(['terakhir_dibuat' => null]);
+                }
+                continue;
+            }
+
+            $a->update([
+                'jenis_kegiatan_id' => $j->jenis_kegiatan_id,
+                'jam_mulai'         => substr((string) $j->jam_mulai, 0, 5),
+                'batas_terlambat'   => substr((string) $j->batas_terlambat, 0, 5),
+                'batas_alfa'        => substr((string) $j->batas_alfa, 0, 5),
+                'metode'            => $j->metode,
+            ]);
+        }
+    }
+
     /** Buat absensi kegiatan hari ini dari semua jadwal yang menyala & harinya cocok (paling banyak sekali per hari). */
     public static function buatHariIni(): void
     {
         $sekarang = now('Asia/Jakarta');
         $tanggal = $sekarang->toDateString();
         $jam = $sekarang->format('H:i');
+
+        static::sesuaikanYangSudahDibuat();
 
         try {
             $jadwal = static::where('nyala', true)

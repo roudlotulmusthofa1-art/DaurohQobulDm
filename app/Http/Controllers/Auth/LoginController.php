@@ -56,6 +56,9 @@ class LoginController extends Controller
 
             $request->session()->regenerate();
 
+            // Asatid & siswa: tercatat di lonceng notifikasi admin
+            \App\Models\AktivitasPengguna::catat($user, 'masuk (login)');
+
             // Admin boleh kembali ke halaman yang tadi dituju; role lain langsung ke halamannya sendiri
             return $user->role === 'admin'
                 ? redirect()->intended($user->halamanAwal())

@@ -91,6 +91,8 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                     <tr v-for="s in rekapTampil" :key="s.id">
                         <td class="px-5 py-3 sticky left-0 bg-white">
                             <span class="block font-bold text-slate-800 whitespace-nowrap" v-text="s.nama"></span>
+                            <x-nama-arab vue="s.arab" />
+
                             <span class="block text-[11px] text-slate-400 whitespace-nowrap" v-text="[s.kelas, s.nomor].filter(Boolean).join(' · ')"></span>
                         </td>
                         <td v-for="k in kolomKitab" :key="k.id" class="px-3 py-3 align-top">
@@ -133,6 +135,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                         <td class="px-5 py-3 whitespace-nowrap text-slate-600" v-text="tanggal(h.tanggal)"></td>
                         <td class="px-3 py-3">
                             <span class="block font-bold text-slate-800 whitespace-nowrap" v-text="h.siswa"></span>
+                            <x-nama-arab vue="h.arab" />
                             <span class="block text-[11px] text-slate-400 whitespace-nowrap" v-text="h.kelas || '–'"></span>
                         </td>
                         <td class="px-3 py-3 text-slate-700 whitespace-nowrap">

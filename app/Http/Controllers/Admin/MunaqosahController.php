@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Absensi;
+use App\Models\AbsensiDetail;
 use App\Models\Munaqosah;
 use App\Models\MunaqosahKolom;
 use App\Models\NilaiDakwah;
@@ -21,7 +23,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * Akademik > Munaqosah: musyawarah para asatid, apakah santri lulus / diterima atau tidak.
  * Tab 1 Musyrifin Dauroh : 3 pengaturan kolom (Nilai Ilmu, Suluk, Catatan Mandub) + kartu santri yang belum dikirim.
- *                          Halaman detail (tab baru) berisi 7 panel; Simpan = kartu pindah ke tab Lajnah.
+ *                          Halaman detail (tab baru) berisi 8 panel (6 = Detail Absensi); Simpan = kartu pindah ke tab Lajnah.
  * Tab 2 Lajnah Qobul Darul Musthofa : kartu yang sudah dikirim; detail hanya dibaca + catatan khusus Lajnah
  *                          + keputusan Lulus/Diterima atau Tidak (boleh diubah). Belum diputuskan = boleh dikembalikan.
  */
@@ -322,10 +324,11 @@ class MunaqosahController extends Controller
         ];
     }
 
-    /** Data panel 3, 4, 6 (nilai pelajaran, dakwah, catatan) satu santri: dipakai halaman detail & modal */
+    /** Data panel 3, 4, 6, 7 (nilai pelajaran, dakwah, absensi, catatan) satu santri: dipakai halaman detail & modal */
     private function dataPanel(PendaftaranSiswa $santri): array
     {
         return [
+            'absensi' => $this->absensiSantri($santri),
             'nilai'   => $this->nilaiPelajaran($santri),
             'aspek'   => NilaiHarian::daftarAspek(),
             'dakwah'  => NilaiDakwah::lengkap()->where('pendaftaran_siswa_id', $santri->id)
@@ -335,6 +338,35 @@ class MunaqosahController extends Controller
             'jenisDakwah' => collect(NilaiDakwah::JENIS)->map(fn ($l) => __($l))->all(),
             'catatan' => DataCatatan::semuaBaris()->where('siswa_id', $santri->id)->values(),
         ];
+    }
+
+    /** Panel 6 Detail Absensi: semua absensi kelas & kegiatan santri ini (terbaru dulu), hanya dibaca */
+    private function absensiSantri(PendaftaranSiswa $santri): array
+    {
+        return AbsensiDetail::where('pendaftaran_siswa_id', $santri->id)
+            ->with(['absensi.kelas', 'absensi.pelajaran', 'absensi.kitab', 'absensi.kegiatan', 'absensi.waktuPelajaran', 'absensi.pengabsen:id,name', 'pencatat:id,name'])
+            ->get()
+            ->filter(fn ($d) => $d->absensi && $d->absensi->tanggal)
+            ->sortByDesc(fn ($d) => $d->absensi->tanggal->format('Y-m-d') . ' ' . ($d->absensi->jam_mulai ?? $d->absensi->waktuPelajaran?->jam_mulai ?? '') . sprintf('%010d', $d->id))
+            ->map(function (AbsensiDetail $d) {
+                $a = $d->absensi;
+                $kegiatan = $a->jenis === Absensi::KEGIATAN;
+                $jam = $d->waktu ?: ($kegiatan ? $a->jam_mulai : $a->waktuPelajaran?->jam_mulai);
+
+                return [
+                    'id'      => $d->id,
+                    'status'  => $d->status,
+                    'jenis'   => $kegiatan ? __('Absensi kegiatan') : __('Absensi kelas'),
+                    'judul'   => $a->judul,
+                    'tanggal' => $a->tanggal->toDateString(),
+                    'hari'    => __($a->tanggal->locale('id')->translatedFormat('l')),
+                    'jam'     => $jam ? substr((string) $jam, 0, 5) : null,
+                    'catatan' => $d->catatan,
+                    'oleh'    => $d->pencatat?->name ?? $a->pengabsen?->name,
+                ];
+            })
+            ->values()
+            ->all();
     }
 
     /**

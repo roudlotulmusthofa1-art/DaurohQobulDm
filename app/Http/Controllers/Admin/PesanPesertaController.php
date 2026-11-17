@@ -225,6 +225,12 @@ class PesanPesertaController extends Controller
             'isi' => $data['isi'],
         ]);
 
+        // Dibalas dari kotak pesan di Dashboard -> kembali ke Dashboard dengan percakapan yang sama
+        if ($request->input('kembali') === 'dashboard') {
+            return redirect()->route('admin.dashboard', ['asatid' => $user])->withFragment('pesan-peserta')
+                ->with('success', 'Balasan terkirim ke dasbor asatid.');
+        }
+
         return redirect()->route('admin.pesan-peserta.asatid.show', $user)->with('success', 'Balasan terkirim ke dasbor asatid.');
     }
 

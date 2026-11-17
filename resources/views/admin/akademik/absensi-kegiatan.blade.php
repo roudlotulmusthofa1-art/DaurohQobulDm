@@ -3,8 +3,9 @@
     Admin membuat absensi kegiatan (nama dari Master Data > Jenis Kegiatan + tanggal + jam), lalu mengaktifkannya.
     Yang AKTIF tampil di dasbor semua asatid dan dicatat bersama-sama. Tutup = peserta yang belum tercatat jadi Alfa.
     Form tambah/ubah memakai <dialog> (lihat _form-absensi-kegiatan). Vue: #halaman-absensi-kegiatan (metodeHalaman).
-    Kegiatan BERULANG (seperti alarm HP, JadwalKegiatan): kartu jam + hari + saklar ON/OFF di atas daftar;
-    pada hari yang dipilih absensinya dibuat otomatis (lencana "Berulang" di kartu absensi).
+    Kegiatan BERULANG (seperti alarm HP, JadwalKegiatan): satu kartu per jadwal di depan daftar (tab Berjalan / Semua),
+    bergaya sama dengan kartu absensi; berisi hari + saklar ON/OFF + absensi hari ini (Absen / Tutup) + Hasil terakhir.
+    Tab Selesai hanya absensi sekali; hasil kegiatan berulang dilihat di kartunya / Laporan Absensi.
 --}}
 @extends('layouts.admin')
 
@@ -60,62 +61,125 @@ $hariIni = now('Asia/Jakarta')->toDateString();
     </div>
     @endif
 
-    {{-- ===== Kegiatan berulang (seperti alarm HP) ===== --}}
-    @if ($jadwalList->isNotEmpty())
-    <section>
-        <h2 class="mb-2 flex items-center gap-2 text-sm font-extrabold uppercase tracking-wider text-emerald-700">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
-            {{ __('Kegiatan berulang') }}
-        </h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
-            @foreach ($jadwalList as $j)
-            @php $hariJ = array_map('intval', $j->hari ?? []); @endphp
-            <article class="rounded-3xl bg-white ring-1 px-5 py-4 {{ $j->nyala ? 'ring-emerald-200' : 'ring-slate-200/80' }}">
-                <div class="flex items-center gap-3">
-                    <div class="min-w-0 flex-1" v-pre>
-                        <p class="text-3xl font-extrabold tabular-nums leading-none {{ $j->nyala ? 'text-slate-800' : 'text-slate-300' }}">{{ substr((string) $j->jam_mulai, 0, 5) }}</p>
-                        <p class="mt-1 font-bold truncate {{ $j->nyala ? 'text-slate-700' : 'text-slate-400' }}">{{ $j->kegiatan?->nama ?? __('Kegiatan') }}</p>
-                        <p class="text-[11px] text-slate-400">{{ $j->label_hari }} · {{ __('terlambat') }} {{ substr((string) $j->batas_terlambat, 0, 5) }} · {{ __('alfa') }} {{ substr((string) $j->batas_alfa, 0, 5) }}</p>
-                    </div>
-                    {{-- Saklar ON / OFF --}}
-                    <form method="POST" action="{{ route('admin.absensi-kegiatan.jadwal.nyala', $j) }}">
-                        @csrf
-                        <button title="{{ $j->nyala ? __('Matikan') : __('Nyalakan') }}" aria-label="{{ $j->nyala ? __('Matikan') : __('Nyalakan') }}"
-                            class="relative block w-12 h-7 rounded-full transition-colors {{ $j->nyala ? 'bg-emerald-500' : 'bg-slate-200' }}">
-                            <span class="absolute top-0.5 left-0.5 w-6 h-6 rounded-full bg-white shadow transition-transform {{ $j->nyala ? 'translate-x-5' : '' }}"></span>
-                        </button>
-                    </form>
-                </div>
-                <div class="mt-3 flex items-center gap-1">
-                    @foreach (\App\Models\JadwalKegiatan::HARI as $no => $huruf)
-                    <span title="{{ __(\App\Models\JadwalKegiatan::NAMA_HARI[$no]) }}"
-                        class="w-7 h-7 rounded-full text-[11px] font-bold flex items-center justify-center {{ in_array($no, $hariJ, true) ? ($j->nyala ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-white') : 'text-slate-300' }}">{{ $huruf }}</span>
-                    @endforeach
-                    <span class="ml-auto flex items-center gap-1">
-                        <button type="button" @click="bukaDialog('dialog-jadwal-{{ $j->id }}')" title="{{ __('Ubah') }}" aria-label="{{ __('Ubah') }}"
-                            class="rounded-lg p-2 text-slate-500 hover:bg-slate-100">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
-                        </button>
-                        <form method="POST" action="{{ route('admin.absensi-kegiatan.jadwal.hapus', $j) }}" @submit="konfirmasi"
-                            data-konfirmasi="{{ __('Hapus kegiatan berulang ini? Absensi yang sudah dibuat sebelumnya tetap ada.') }}">
-                            @csrf @method('DELETE')
-                            <button title="{{ __('Hapus') }}" aria-label="{{ __('Hapus') }}" class="rounded-lg p-2 text-rose-500 hover:bg-rose-50">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
-                            </button>
-                        </form>
-                    </span>
-                </div>
-            </article>
-            <dialog id="dialog-jadwal-{{ $j->id }}" ref="dialog-jadwal-{{ $j->id }}" class="dialog-akademik" @click.self="tutupDialog">
-                @include('admin.akademik._form-absensi-kegiatan', ['aksi' => route('admin.absensi-kegiatan.jadwal.ubah', $j), 'metode' => 'PUT', 'judul' => __('Ubah Kegiatan Berulang'), 'a' => null, 'j' => $j])
-            </dialog>
-            @endforeach
-        </div>
-    </section>
-    @endif
-
-    {{-- ===== Daftar ===== --}}
+    {{-- ===== Daftar (kartu kegiatan berulang di depan, lalu absensi sekali) ===== --}}
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        @foreach ($jadwalList as $j)
+        @php
+            $hariJ = array_map('intval', $j->hari ?? []);
+            $absenJ = $berulangBerjalan[$j->id] ?? null;      // absensi hari ini yang sedang berjalan
+            $hasilJ = $berulangTerakhir[$j->id] ?? null;      // absensi terakhir yang sudah ditutup
+            $tercatatJ = $absenJ?->tercatat_count ?? 0;
+            $persenJ = $jumlahPeserta ? min(100, round($tercatatJ / $jumlahPeserta * 100)) : 0;
+            $namaPencatatJ = $absenJ ? ($pencatat[$absenJ->id] ?? collect()) : collect();
+            [$labelStatusJ, $gayaStatusJ] = ! $j->nyala
+                ? [__('OFF'), 'bg-slate-100 text-slate-500 ring-slate-200']
+                : ($absenJ
+                    ? ($absenJ->sudahDibuka() ? [__('Aktif'), 'bg-emerald-50 text-emerald-700 ring-emerald-200'] : [__('Belum waktunya'), 'bg-amber-50 text-amber-700 ring-amber-200'])
+                    : [__('ON'), 'bg-emerald-50 text-emerald-700 ring-emerald-200']);
+        @endphp
+        <article class="flex flex-col rounded-3xl bg-white ring-1 overflow-hidden shadow-[0_1px_2px_rgba(16,24,40,0.04)] {{ $absenJ && $j->nyala ? 'ring-emerald-300' : 'ring-slate-200/80' }}">
+            <div class="h-1.5 {{ $j->kegiatan?->warna ?: 'bg-emerald-400' }}"></div>
+            <div class="flex-1 p-5">
+                <div class="flex items-start gap-3">
+                    <span class="shrink-0 w-11 h-11 rounded-2xl bg-sky-50 text-sky-600 ring-1 ring-sky-100 flex items-center justify-center">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99"/></svg>
+                    </span>
+                    <div class="min-w-0 flex-1" v-pre>
+                        <h3 class="font-bold text-slate-800 truncate">{{ $j->kegiatan?->nama ?? __('Kegiatan') }}</h3>
+                        <p class="text-xs text-slate-500">↻ {{ __('Berulang') }} · {{ $j->label_hari }}</p>
+                        <div class="mt-1.5 flex items-center gap-1">
+                            @foreach (\App\Models\JadwalKegiatan::HARI as $no => $huruf)
+                            <span title="{{ __(\App\Models\JadwalKegiatan::NAMA_HARI[$no]) }}"
+                                class="w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center {{ in_array($no, $hariJ, true) ? ($j->nyala ? 'bg-emerald-600 text-white' : 'bg-slate-300 text-white') : 'text-slate-300' }}">{{ $huruf }}</span>
+                            @endforeach
+                        </div>
+                    </div>
+                    <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ring-1 {{ $gayaStatusJ }}">{{ $labelStatusJ }}</span>
+                </div>
+
+                {{-- Waktu --}}
+                <div class="mt-4 grid grid-cols-3 gap-2 text-center">
+                    @foreach ([[__('Mulai'), $j->jam_mulai, 'bg-emerald-50 text-emerald-700'], [__('Terlambat'), $j->batas_terlambat, 'bg-amber-50 text-amber-700'], [__('Alfa'), $j->batas_alfa, 'bg-rose-50 text-rose-700']] as [$lbl, $jam, $gaya])
+                    <div class="rounded-2xl px-2 py-2 {{ $gaya }}">
+                        <p class="text-[10px] font-semibold uppercase tracking-wider opacity-70">{{ $lbl }}</p>
+                        <p class="text-sm font-extrabold tabular-nums">{{ substr((string) $jam, 0, 5) }}</p>
+                    </div>
+                    @endforeach
+                </div>
+
+                {{-- Absensi hari ini --}}
+                <div class="mt-4">
+                    @if ($absenJ)
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="font-semibold text-slate-600">{{ __('Hari ini:') }} {{ __(':n dari :total peserta tercatat', ['n' => $tercatatJ, 'total' => $jumlahPeserta]) }}</span>
+                        <span class="text-slate-400">{{ $j->metode === 'qr' ? __('Pindai QR') : __('Manual') }}</span>
+                    </div>
+                    <div class="mt-1.5 h-2 rounded-full bg-slate-100 overflow-hidden"><div class="h-full rounded-full bg-gradient-to-r from-emerald-400 to-teal-500" style="width: {{ $persenJ }}%"></div></div>
+                    @unless ($absenJ->sudahDibuka())
+                    <p class="mt-1.5 text-[11px] text-amber-700">{{ __('Tampil di dasbor asatid mulai pukul :jam.', ['jam' => $absenJ->waktuDibuka()->format('H:i')]) }}</p>
+                    @endunless
+                    @if ($namaPencatatJ->isNotEmpty())
+                    <div class="mt-2 text-[11px] text-slate-500" v-pre>{{ __('Dicatat oleh:') }}
+                        <div class="mt-1 flex flex-wrap gap-x-4 gap-y-1">
+                            @foreach ($namaPencatatJ as $orangPencatat)
+                            <span class="min-w-0"><span class="block font-semibold text-slate-700">{{ $orangPencatat['nama'] }}</span><x-nama-arab :teks="$orangPencatat['arab']" kelas="text-xs text-slate-400" /></span>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+                    @elseif (! $j->nyala)
+                    <p class="text-xs text-slate-400">{{ __('Saklar OFF: absensi tidak dibuat sampai dinyalakan.') }}</p>
+                    @elseif (! in_array(now('Asia/Jakarta')->dayOfWeekIso, $hariJ, true))
+                    <p class="text-xs text-slate-400">{{ __('Hari ini tidak ada jadwal kegiatan ini.') }}</p>
+                    @else
+                    <p class="text-xs text-slate-400">{{ __('Absensi hari ini sudah selesai (atau waktunya sudah lewat).') }}</p>
+                    @endif
+                </div>
+            </div>
+
+            {{-- Tombol --}}
+            <div class="flex flex-wrap gap-2 border-t border-slate-100 p-3">
+                @if ($absenJ)
+                <a href="{{ route('admin.absensi-kegiatan.catat', $absenJ) }}"
+                    class="basis-full sm:basis-auto sm:flex-1 inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#0b332c] py-2 px-3 text-sm font-bold text-white hover:bg-[#135347] transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/></svg>
+                    {{ __('Absen') }}
+                </a>
+                @endif
+                {{-- Saklar ON / OFF --}}
+                <form method="POST" action="{{ route('admin.absensi-kegiatan.jadwal.nyala', $j) }}" class="flex-1">
+                    @csrf
+                    <button class="w-full rounded-xl py-2 text-sm font-semibold transition-colors {{ $j->nyala ? 'bg-amber-50 text-amber-700 hover:bg-amber-100' : 'bg-emerald-600 text-white hover:bg-emerald-500' }}">
+                        {{ $j->nyala ? __('Matikan (OFF)') : __('Nyalakan (ON)') }}
+                    </button>
+                </form>
+                @if ($absenJ)
+                <form method="POST" action="{{ route('admin.absensi-kegiatan.tutup', $absenJ) }}" class="flex-1" @submit="konfirmasi"
+                    data-konfirmasi="{{ __('Tutup absensi ini? Peserta yang belum tercatat akan dihitung Alfa, dan asatid tidak bisa mencatat lagi.') }}">
+                    @csrf
+                    <button class="w-full rounded-xl bg-sky-50 py-2 text-sm font-semibold text-sky-700 hover:bg-sky-100 transition-colors">{{ __('Tutup') }}</button>
+                </form>
+                @elseif ($hasilJ)
+                <a href="{{ route('admin.laporan-absensi.show', $hasilJ) }}" class="flex-1 rounded-xl bg-teal-50 py-2 text-center text-sm font-semibold text-teal-700 hover:bg-teal-100 transition-colors">{{ __('Hasil terakhir') }}</a>
+                @endif
+                <button type="button" @click="bukaDialog('dialog-jadwal-{{ $j->id }}')" title="{{ __('Ubah') }}" aria-label="{{ __('Ubah') }}"
+                    class="rounded-xl bg-slate-50 px-3 text-slate-600 hover:bg-slate-100 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931z"/></svg>
+                </button>
+                <form method="POST" action="{{ route('admin.absensi-kegiatan.jadwal.hapus', $j) }}" @submit="konfirmasi"
+                    data-konfirmasi="{{ __('Hapus kegiatan berulang ini? Absensi yang sudah dibuat sebelumnya tetap ada.') }}">
+                    @csrf @method('DELETE')
+                    <button title="{{ __('Hapus') }}" aria-label="{{ __('Hapus') }}" class="h-full rounded-xl bg-rose-50 px-3 text-rose-600 hover:bg-rose-100 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+                    </button>
+                </form>
+            </div>
+        </article>
+        <dialog id="dialog-jadwal-{{ $j->id }}" ref="dialog-jadwal-{{ $j->id }}" class="dialog-akademik" @click.self="tutupDialog">
+            @include('admin.akademik._form-absensi-kegiatan', ['aksi' => route('admin.absensi-kegiatan.jadwal.ubah', $j), 'metode' => 'PUT', 'judul' => __('Ubah Kegiatan Berulang'), 'a' => null, 'j' => $j])
+        </dialog>
+        @endforeach
+
         @forelse ($daftar as $a)
         @php
             $selesai = (bool) $a->selesai_at;
@@ -221,6 +285,7 @@ $hariIni = now('Asia/Jakarta')->toDateString();
         </dialog>
         @endunless
         @empty
+        @if ($jadwalList->isEmpty())
         <div class="md:col-span-2 xl:col-span-3 {{ $kartu }} py-16 px-6 text-center">
             @if ($cari !== '')
             <p class="font-bold text-slate-700">{{ __('Tidak ada kegiatan yang cocok dengan ":cari".', ['cari' => $cari]) }}</p>
@@ -229,6 +294,7 @@ $hariIni = now('Asia/Jakarta')->toDateString();
             @endif
             <p class="mt-1 text-sm text-slate-500">{{ __('Klik "Buat Absensi Kegiatan", isi nama kegiatan & waktunya, lalu aktifkan.') }}</p>
         </div>
+        @endif
         @endforelse
     </div>
 

@@ -118,6 +118,7 @@ class MenuAdmin
                 'submenu' => [
                     ['route' => 'admin.role.index', 'active' => 'admin.role.*', 'label' => __('Role & Permission'), 'icon' => 'shield-check'],
                     ['route' => 'admin.akun.index', 'active' => 'admin.akun.*', 'label' => __('Daftar User'), 'icon' => 'users'],
+                    ['route' => 'admin.aktivitas.index', 'active' => 'admin.aktivitas.*', 'label' => __('Aktivitas Pengguna'), 'icon' => 'activity'],
                     ['route' => 'admin.master-data.index', 'active' => 'admin.master-data.*', 'label' => __('Master Data'), 'icon' => 'database'],
                     ['route' => 'admin.pengaturan.index', 'active' => 'admin.pengaturan.*', 'label' => __('Pengaturan'), 'icon' => 'sliders-horizontal'],
                 ],
