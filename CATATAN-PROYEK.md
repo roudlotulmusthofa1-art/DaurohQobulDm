@@ -252,3 +252,8 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Foto 404 di server:** file fotonya tidak ada di server. Ini bukan penyebab gagal simpan.
 - **Semua halaman admin versi HP:** Tahap 1–3 selesai (2026-11-05). Sisa kecil: hapus/geser jadwal di tampilan per hari Jadwal (HP) belum ada; beberapa kata baru belum diterjemahkan Arab ("Pilih semua", "Diubah", "Nonaktif").
 - **Admin ikut mengabsen kegiatan (2026-11-14):** Penilaian > Absensi Kegiatan (menu dipindah dari AKADEMIK ke PENILAIAN; alamat tetap `admin/absensi-kegiatan`). Kartu kegiatan yang **aktif** punya tombol **Absen** → `admin.absensi-kegiatan.catat` (`AbsensiKegiatanController@catat/simpanCatatan/status`). Halaman catat (pindai QR / cari nama) dipakai bersama asatid & admin: tampilan `absensi/partials/catat-kegiatan.blade.php` (variabel `$rute` simpan/status/selesai), aturan simpan `App\Support\CatatKegiatan`. Catatan admin & asatid saling terlihat (pembaruan 10 detik); kegiatan nonaktif/ditutup ditolak.
+
+### Alat pengembang: Alt + Klik → VS Code (2026-11-17, hanya lokal)
+- Di browser lokal: tahan **Alt** → area disorot + label `file.blade.php:baris`; **Alt + Klik** → VS Code membuka file Blade itu di barisnya (`vscode://file/...`).
+- `App\Support\PenandaSumber` (dipasang di `AppServiceProvider::boot`): saat Blade dikompilasi, tiap tag HTML diberi `data-sumber="resources/views/...:baris"` (dilewati: isi script/style/svg, `{{ }}`, `{!! !!}`, `@php`, komentar Blade, `<x-…>`). Skrip: `partials/alat-sumber.blade.php`, disisipkan sebelum `</body>` oleh `Middleware\SisipAlatSumber`.
+- Aktif hanya bila `APP_ENV=local` (server production tidak terpengaruh). Matikan: `.env` → `ALAT_SUMBER=false`. Setelah menyalakan/mematikan: `php artisan view:clear`.
