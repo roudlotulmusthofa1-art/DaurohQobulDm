@@ -27,9 +27,11 @@ $kartuMenu = [
         'url'   => route('siswa.kelulusan'),
         'warna' => 'from-amber-400 to-orange-500',
         'cahaya'=> 'bg-amber-400/30',
-        // Kelulusan akhir: tampil setelah admin mengumumkan
+        // Kelulusan akhir: hasil Istimaroh setelah santri diberitahu (Laporan Kelulusan); cadangan: Kelulusan lama setelah diumumkan
         'lencana' => match (true) {
             $siswa->status !== PendaftaranSiswa::DITERIMA => [__('Khusus peserta'), 'bg-slate-100 text-slate-500 ring-slate-200'],
+            $istimaroh?->keputusan === \App\Models\Munaqosah::LULUS => [__('Lulus / Diterima'), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
+            (bool) $istimaroh => [__('Belum lulus'), 'bg-rose-50 text-rose-700 ring-rose-100'],
             ! $diumumkan => [__('Belum diumumkan'), 'bg-amber-50 text-amber-700 ring-amber-100'],
             $siswa->status_kelulusan === PendaftaranSiswa::LULUS => [__('Lulus') . ($siswa->predikat_kelulusan ? ' · ' . $siswa->predikat_kelulusan : ''), 'bg-emerald-50 text-emerald-700 ring-emerald-100'],
             $siswa->status_kelulusan === PendaftaranSiswa::TIDAK_LULUS => [__('Belum lulus'), 'bg-rose-50 text-rose-700 ring-rose-100'],

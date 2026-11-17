@@ -1,6 +1,8 @@
 {{--
     Akun Siswa > Pengumuman Kelulusan: hasil KELULUSAN AKHIR dauroh (bukan hasil seleksi pendaftaran).
-    Diisi admin di Akademik > Kelulusan dan baru terlihat setelah admin menekan "Umumkan" ($diumumkan).
+    Utama: hasil Istimaroh ($istimaroh, App\Models\Munaqosah) yang tampil setelah admin memberitahu santri
+    di Laporan > Laporan Kelulusan (Fonnte / WA). Hanya pemberitahuan lulus / tidak, tanpa isi pesan WhatsApp.
+    Cadangan bila belum ada hasil Istimaroh: data lama Akademik > Kelulusan, setelah admin menekan "Umumkan" ($diumumkan).
 --}}
 @extends('layouts.siswa')
 
@@ -19,6 +21,18 @@ $hasil = match (true) {
         'teks' => __('Pengumuman kelulusan hanya untuk peserta dauroh. Status pendaftaran Anda: :status.', ['status' => __($s->label_status)]),
         'latar' => 'from-slate-500 via-slate-600 to-slate-700',
         'ikon' => 'M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z',
+    ],
+    $istimaroh?->keputusan === \App\Models\Munaqosah::LULUS => [
+        'judul' => __('SELAMAT, ANDA LULUS / DITERIMA'),
+        'teks' => __('Alhamdulillah, berdasarkan hasil musyawarah para asatid (Istimaroh), Anda dinyatakan lulus / diterima. Semoga ilmu yang didapat berkah dan bermanfaat.'),
+        'latar' => 'from-emerald-500 via-emerald-600 to-teal-700',
+        'ikon' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342',
+    ],
+    (bool) $istimaroh => [
+        'judul' => __('MOHON MAAF, ANDA BELUM LULUS / TIDAK DITERIMA'),
+        'teks' => __('Berdasarkan hasil musyawarah para asatid (Istimaroh). Tetap semangat dalam menuntut ilmu. Silakan hubungi admin untuk penjelasan dan langkah selanjutnya.'),
+        'latar' => 'from-rose-500 via-rose-600 to-pink-700',
+        'ikon' => 'M15.182 16.318A4.486 4.486 0 0012.016 15a4.486 4.486 0 00-3.198 1.318M21 12a9 9 0 11-18 0 9 9 0 0118 0zM9.75 9.75c0 .414-.168.75-.375.75S9 10.164 9 9.75 9.168 9 9.375 9s.375.336.375.75zm-.375 0h.008v.015h-.008V9.75zm5.625 0c0 .414-.168.75-.375.75s-.375-.336-.375-.75.168-.75.375-.75.375.336.375.75zm-.375 0h.008v.015h-.008V9.75z',
     ],
     ! $diumumkan => [
         'judul' => __('BELUM DIUMUMKAN'),
@@ -45,7 +59,9 @@ $hasil = match (true) {
         'ikon' => 'M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z',
     ],
 };
-$tampilHasil = $peserta && $diumumkan;
+$tampilHasil = $peserta && ($istimaroh || $diumumkan);
+// Tanggal diumumkan: Istimaroh = saat santri diberitahu (disimpan sebagai jam WIB); lama = tombol "Umumkan"
+$tanggalUmum = $istimaroh ? $istimaroh->diberitahu_pada : $diumumkan?->timezone('Asia/Jakarta');
 $langkah = [
     [__('Diterima jadi peserta'), $peserta],
     [__('Masa belajar dauroh'), $peserta],
@@ -66,7 +82,7 @@ $langkah = [
             <h2 class="mt-1 text-2xl sm:text-4xl font-extrabold tracking-tight">{{ $hasil['judul'] }}</h2>
             <p class="mt-1 text-lg font-bold text-white/90">{{ $s->nama_lengkap }}</p>
 
-            @if ($tampilHasil && $s->status_kelulusan === PendaftaranSiswa::LULUS && $s->predikat_kelulusan)
+            @if ($tampilHasil && ! $istimaroh && $s->status_kelulusan === PendaftaranSiswa::LULUS && $s->predikat_kelulusan)
             <p class="mt-4 inline-flex items-center gap-2 rounded-full bg-white/20 ring-1 ring-white/30 px-4 py-1.5 text-sm font-bold">
                 <svg class="w-4 h-4 text-amber-200" fill="currentColor" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
                 {{ __('Predikat:') }} {{ $s->predikat_kelulusan }}
@@ -75,13 +91,13 @@ $langkah = [
 
             <p class="mx-auto mt-3 max-w-xl text-sm text-white/80">{{ $hasil['teks'] }}</p>
             @if ($tampilHasil)
-            <p class="mt-3 text-xs text-white/70">{{ __('Diumumkan') }} {{ $diumumkan->timezone('Asia/Jakarta')->locale('id')->translatedFormat('l, d F Y') }}</p>
+            <p class="mt-3 text-xs text-white/70">{{ __('Diumumkan') }} {{ $tanggalUmum->locale('id')->translatedFormat('l, d F Y') }}</p>
             @endif
         </div>
     </section>
 
-    {{-- ===== Catatan dari admin (bila ada) ===== --}}
-    @if ($tampilHasil && $s->catatan_kelulusan)
+    {{-- ===== Catatan dari admin (data Kelulusan lama, bila ada) ===== --}}
+    @if ($tampilHasil && ! $istimaroh && $s->catatan_kelulusan)
     <section class="{{ $kartu }} p-5 sm:p-6">
         <h3 class="flex items-center gap-2.5 font-bold text-slate-800"><span class="w-2 h-6 rounded-full bg-gradient-to-b from-sky-400 to-blue-600"></span>{{ __('Catatan dari Admin') }}</h3>
         <p dir="auto" class="mt-3 text-[15px] leading-relaxed text-slate-700 whitespace-pre-line">{{ $s->catatan_kelulusan }}</p>

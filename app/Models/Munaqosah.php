@@ -30,13 +30,41 @@ class Munaqosah extends Model
     protected $fillable = [
         'pendaftaran_siswa_id', 'isian', 'status', 'disimpan_oleh', 'dikirim_pada',
         'keputusan', 'catatan_lajnah', 'diputuskan_oleh', 'diputuskan_pada',
+        'diberitahu_pada', 'diberitahu_lewat', 'diberitahu_keputusan', // Laporan Kelulusan (pesan WhatsApp)
     ];
 
     protected $casts = [
         'isian'           => 'array',
         'dikirim_pada'    => 'datetime',
         'diputuskan_pada' => 'datetime',
+        'diberitahu_pada' => 'datetime',
     ];
+
+    /** Sudah diberitahu hasil keputusan yang SEKARANG (keputusan diubah sesudahnya = belum) */
+    public function sudahDiberitahu(): bool
+    {
+        return $this->diberitahu_pada !== null && $this->diberitahu_keputusan === $this->keputusan;
+    }
+
+    /**
+     * Hasil Istimaroh yang sudah diumumkan ke santri ini (dasbor siswa > Pengumuman Kelulusan).
+     * Diumumkan = sudah diputuskan Lajnah DAN sudah diberitahu lewat Laporan Kelulusan (Fonnte / WA).
+     * null = belum diumumkan (atau tabel belum ada di sesi ini).
+     */
+    public static function pengumumanUntuk(?PendaftaranSiswa $s): ?self
+    {
+        if (! $s) {
+            return null;
+        }
+        try {
+            $m = static::with('siswa.kelasMaster:id,nama')->where('pendaftaran_siswa_id', $s->id)
+                ->where('status', self::LAJNAH)->whereIn('keputusan', [self::LULUS, self::TIDAK])->first();
+        } catch (\Illuminate\Database\QueryException $e) {
+            return null; // sesi lama yang belum menjalankan sesi:migrate
+        }
+
+        return $m?->sudahDiberitahu() ? $m : null;
+    }
 
     public function siswa(): BelongsTo
     {

@@ -21,7 +21,7 @@
     {{-- Tahap Musyrifin: diisi --}}
     <template v-else>
         <p v-if="!kolom['{{ $b }}'].length" class="mt-3 rounded-2xl border border-dashed border-slate-200 py-6 text-center text-sm text-slate-400">
-            {{ __('Belum ada kolom. Atur dulu lewat tombol Pengaturan di halaman Munaqosah.') }}</p>
+            {{ __('Belum ada kolom. Atur dulu lewat tombol Pengaturan di halaman Istimaroh.') }}</p>
         <div v-else class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div v-for="k in kolom['{{ $b }}']" :key="k.id" :class="k.jenis === 'teks_panjang' || k.jenis === 'centang' ? 'md:col-span-2' : ''">
                 <label :for="'mq-{{ $b }}-' + k.id" class="text-xs font-semibold text-slate-500" v-text="k.label"></label>

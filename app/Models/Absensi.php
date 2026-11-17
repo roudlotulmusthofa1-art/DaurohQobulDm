@@ -35,6 +35,7 @@ class Absensi extends Model
         'kelas_id', 'bidang_ilmu_id', 'kitab_id', 'waktu_pelajaran_id',
         'jenis_kegiatan_id', 'jam_mulai', 'batas_terlambat', 'batas_alfa', 'metode', 'selesai_at',
         'dari_admin', 'aktif', // absensi kegiatan dibuat admin & dicatat bersama semua asatid
+        'jadwal_kegiatan_id',  // dibuat otomatis dari kegiatan berulang (JadwalKegiatan)
     ];
 
     protected $casts = [
@@ -184,6 +185,9 @@ class Absensi extends Model
     /** Tutup semua absensi kegiatan yang sudah lewat batas alfa (dipanggil saat halaman absensi dibuka) */
     public static function tutupYangLewat(): void
     {
+        // Sekalian buat absensi kegiatan BERULANG untuk hari ini (seperti alarm, lihat JadwalKegiatan)
+        JadwalKegiatan::buatHariIni();
+
         static::where('jenis', self::KEGIATAN)
             ->whereNull('selesai_at')
             ->whereNotNull('batas_alfa')

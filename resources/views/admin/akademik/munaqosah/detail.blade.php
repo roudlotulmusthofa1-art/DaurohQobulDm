@@ -8,7 +8,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', __('Munaqosah') . ' · ' . $siswa->nama_lengkap)
+@section('title', __('Istimaroh') . ' · ' . $siswa->nama_lengkap)
 
 @section('content')
 @include('admin.akademik.munaqosah._skrip-panel')
@@ -26,7 +26,7 @@ $nomorPanel = fn ($n) => '<span class="w-7 h-7 shrink-0 rounded-lg bg-[#0b332c] 
         <span class="w-8 h-8 rounded-xl bg-white ring-1 ring-slate-200/70 flex items-center justify-center">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/></svg>
         </span>
-        {{ __('Kembali ke Munaqosah') }}
+        {{ __('Kembali ke Istimaroh') }}
     </a>
 
     {{-- Pita status --}}
@@ -41,7 +41,7 @@ $nomorPanel = fn ($n) => '<span class="w-7 h-7 shrink-0 rounded-lg bg-[#0b332c] 
     {{-- ===== Panel 1: Detail santri ===== --}}
     <h2 class="flex items-center gap-2 text-lg font-extrabold text-slate-800">{!! $nomorPanel(1) !!} {{ __('Detail santri') }}</h2>
     <div id="munaqosah-santri" class="space-y-6">
-        @include('partials.detail-santri', ['admin' => false, 'judul' => __('Munaqosah'), 'rahasia' => true, 'tanpaSyarat' => true])
+        @include('partials.detail-santri', ['admin' => false, 'judul' => __('Istimaroh'), 'rahasia' => true, 'tanpaSyarat' => true])
     </div>
 
     <div id="halaman-munaqosah-detail" v-cloak class="space-y-6">

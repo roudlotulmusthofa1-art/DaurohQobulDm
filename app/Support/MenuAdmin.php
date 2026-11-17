@@ -46,7 +46,8 @@ class MenuAdmin
                     ['route' => 'admin.tahun-ajaran.index', 'active' => ['admin.tahun-ajaran.*', 'admin.bulan-ajaran.*'], 'label' => __('Tahun & Bulan Ajaran'), 'icon' => 'calendar-range'],
                     ['route' => 'admin.kurikulum.index',    'active' => 'admin.kurikulum.*',    'label' => __('Kurikulum & Kitab'), 'icon' => 'book-open'],
                     ['route' => 'admin.jadwal.index',       'active' => 'admin.jadwal.*',       'label' => __('Jadwal Mengajar'), 'icon' => 'calendar-clock'],
-                    ['route' => 'admin.munaqosah.index',    'active' => 'admin.munaqosah.*',    'label' => __('Munaqosah'), 'icon' => 'scale'],
+                    ['route' => 'admin.munaqosah.index',    'active' => 'admin.munaqosah.*',    'label' => __('Istimaroh'), 'icon' => 'scale'],
+                    ['route' => 'admin.hafalan.index',      'active' => 'admin.hafalan.*',      'label' => __('Hafalan'), 'icon' => 'book-heart'],
                     // Kelulusan disembunyikan sementara (akan diperbaiki). Halaman & datanya tetap ada:
                     // ['route' => 'admin.kelulusan.index', 'active' => 'admin.kelulusan.*', 'label' => __('Kelulusan'), 'icon' => 'award'],
                 ],
@@ -79,6 +80,7 @@ class MenuAdmin
                     ['route' => 'admin.laporan-keuangan.index',  'active' => 'admin.laporan-keuangan.*',  'label' => __('Laporan Keuangan'), 'icon' => 'chart-pie'],
                     ['route' => 'admin.laporan-absensi.index',   'active' => 'admin.laporan-absensi.*',   'label' => __('Laporan Absensi'), 'icon' => 'clipboard-check'],
                     ['route' => 'admin.laporan-dakwah.index',    'active' => 'admin.laporan-dakwah.*',    'label' => __('Laporan Dakwah'), 'icon' => 'megaphone'],
+                    ['route' => 'admin.laporan-kelulusan.index', 'active' => 'admin.laporan-kelulusan.*', 'label' => __('Laporan Kelulusan'), 'icon' => 'award'],
                 ],
             ],
             [

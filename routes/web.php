@@ -94,11 +94,26 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('{santri}/kembalikan', 'kembalikan')->whereNumber('santri')->name('kembalikan');
         Route::post('{santri}/keputusan', 'keputusan')->whereNumber('santri')->name('keputusan');   // lulus / tidak + catatan Lajnah
     });
+    // Hafalan: laporan setoran hafalan dari asatid + pengaturan (kitab, pilihan nilai) + admin ikut menilai
+    Route::controller(\App\Http\Controllers\Admin\HafalanController::class)->prefix('hafalan')->name('hafalan.')->group(function () {
+        Route::get('/', 'index')->name('index');                  // ?tab=rekap|setoran
+        Route::put('pengaturan', 'pengaturan')->name('pengaturan');
+        Route::get('nilai', 'nilai')->name('nilai');              // halaman isi (sama dengan asatid)
+        Route::get('peserta', 'peserta')->name('peserta');        // JSON
+        Route::get('riwayat', 'riwayat')->name('riwayat');        // JSON
+        Route::post('/', 'simpan')->name('simpan');
+        Route::post('selesai', 'selesai')->name('selesai');       // tandai / batalkan hafal seluruh kitab
+        Route::delete('{hafalan}', 'hapus')->whereNumber('hafalan')->name('hapus');
+    });
 
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');
     // Laporan > Laporan Absensi (hasil absensi kelas & kegiatan dari asatid)
     // Absensi kegiatan dibuat admin, dicatat bersama semua asatid
+    // Kegiatan berulang (seperti alarm): ubah, saklar ON/OFF, hapus (dibuat lewat store dengan pengulangan=berulang)
+    Route::put('absensi-kegiatan/jadwal/{jadwal}', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'ubahJadwal'])->whereNumber('jadwal')->name('absensi-kegiatan.jadwal.ubah');
+    Route::post('absensi-kegiatan/jadwal/{jadwal}/nyala', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'nyalaJadwal'])->whereNumber('jadwal')->name('absensi-kegiatan.jadwal.nyala');
+    Route::delete('absensi-kegiatan/jadwal/{jadwal}', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'hapusJadwal'])->whereNumber('jadwal')->name('absensi-kegiatan.jadwal.hapus');
     Route::post('absensi-kegiatan/{absensi}/aktif', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'aktif'])->name('absensi-kegiatan.aktif');
     Route::post('absensi-kegiatan/{absensi}/tutup', [\App\Http\Controllers\Admin\AbsensiKegiatanController::class, 'tutup'])->name('absensi-kegiatan.tutup');
     // Admin ikut mengabsen (halaman catat sama dengan asatid)
@@ -157,6 +172,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::put('penilaian/dakwah/nilai/{nilai}', 'ubahNilai')->whereNumber('nilai')->name('penilaian.dakwah.nilai.ubah');
         Route::delete('penilaian/dakwah/nilai/{nilai}', 'hapusNilai')->whereNumber('nilai')->name('penilaian.dakwah.nilai.hapus');
         Route::get('laporan-dakwah', 'laporan')->name('laporan-dakwah.index');
+    });
+    // Laporan Kelulusan: hasil keputusan Lajnah (Istimaroh) + pemberitahuan WhatsApp ke santri
+    Route::controller(\App\Http\Controllers\Admin\LaporanKelulusanController::class)->prefix('laporan-kelulusan')->name('laporan-kelulusan.')->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::put('pesan/{jenis}', 'simpanPesan')->whereIn('jenis', ['lulus', 'tidak'])->name('pesan');
+        Route::post('{santri}/fonnte', 'kirimFonnte')->whereNumber('santri')->name('fonnte');
+        Route::post('{santri}/wa', 'tandaiWa')->whereNumber('santri')->name('wa');
     });
     // Perizinan santri (yang terlambat kembali otomatis masuk catatan pelanggaran)
     Route::controller(\App\Http\Controllers\Admin\PerizinanController::class)->prefix('penilaian/perizinan')->name('penilaian.perizinan.')->group(function () {

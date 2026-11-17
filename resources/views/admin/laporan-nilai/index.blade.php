@@ -1,7 +1,7 @@
 {{--
     Admin > Laporan > Laporan Nilai (Admin\LaporanNilaiController@index).
     Ringkasan nilai Kelas & Pelajaran per santri: Harian %, Lisan %, Ujian %, Nilai Akhir % (rata-rata bagian yang ada),
-    predikat, dan ranking (dihitung ulang kalau satu kelas dipilih).
+    warna nilai (tulisan predikat Mumtaz/Jayyid dihapus atas permintaan), dan ranking (dihitung ulang kalau satu kelas dipilih).
     Dua tampilan: Kartu Siswa (klik = rincian semua nilai) | Semua Siswa (tabel + ranking).
     Semua data dikirim sekali ($santri), saringan & ranking dihitung Vue: #halaman-laporan-nilai.
 --}}
@@ -37,7 +37,6 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
         <div class="{{ $kartu }} p-4 sm:p-5">
             <p class="text-xs font-semibold text-slate-500">{{ __('Rata-rata nilai akhir') }}</p>
             <p class="mt-1 text-3xl font-extrabold tabular-nums" :class="predikat(ringkas.rata).teks" v-text="persen(ringkas.rata)"></p>
-            <p class="mt-1 text-[11px] text-slate-400" v-text="predikat(ringkas.rata).nama"></p>
         </div>
         <div class="{{ $kartu }} p-4 sm:p-5 min-w-0">
             <p class="text-xs font-semibold text-slate-500">{{ __('Nilai tertinggi') }}</p>
@@ -117,8 +116,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                 </span>
             </div>
 
-            <div class="relative mt-4 flex items-center justify-between">
-                <span class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1" :class="predikat(s.akhir).lencana" v-text="predikat(s.akhir).nama"></span>
+            <div class="relative mt-4 flex items-center justify-end">
                 <span class="text-xs font-semibold text-emerald-700 opacity-0 group-hover:opacity-100 transition">{{ __('Lihat rincian') }} &rsaquo;</span>
             </div>
         </button>
@@ -135,7 +133,6 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                         <th class="py-2.5 px-2">{{ __('Kelas') }}</th>
                         <th v-for="b in BAGIAN" :key="b.kunci" class="py-2.5 px-2 text-center" v-text="b.label + ' %'"></th>
                         <th class="py-2.5 px-2 text-center">{{ __('Nilai Akhir') }}</th>
-                        <th class="py-2.5 pl-2">{{ __('Predikat') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -155,9 +152,6 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                         </td>
                         <td class="py-2.5 px-2 text-center">
                             <span class="text-base font-extrabold tabular-nums" :class="s.akhir === null ? 'text-slate-300' : predikat(s.akhir).teks" v-text="persen(s.akhir)"></span>
-                        </td>
-                        <td class="py-2.5 pl-2 whitespace-nowrap">
-                            <span class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1" :class="predikat(s.akhir).lencana" v-text="predikat(s.akhir).nama"></span>
                         </td>
                     </tr>
                 </tbody>
@@ -184,8 +178,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                 <div class="shrink-0 text-right">
                     <p class="text-3xl font-extrabold tabular-nums" v-text="persen(dipilih.akhir)"></p>
                     <p class="text-[11px] text-white/60">
-                        <template v-if="dipilih.rank">{{ __('Ranking') }} <b class="text-amber-300" v-text="'#' + dipilih.rank"></b> · </template>
-                        <span v-text="predikat(dipilih.akhir).nama"></span>
+                        <template v-if="dipilih.rank">{{ __('Ranking') }} <b class="text-amber-300" v-text="'#' + dipilih.rank"></b></template>
                     </p>
                 </div>
             </div>

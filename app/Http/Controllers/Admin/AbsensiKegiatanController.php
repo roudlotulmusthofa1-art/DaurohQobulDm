@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Absensi;
 use App\Models\AbsensiDetail;
+use App\Models\JadwalKegiatan;
 use App\Models\JenisKegiatan;
 use App\Models\PendaftaranSiswa;
 use App\Support\CatatKegiatan;
@@ -20,6 +21,8 @@ use Illuminate\Validation\Rule;
  * Admin membuat absensi kegiatan (nama kegiatan + tanggal + jam), lalu mengaktifkannya.
  * Kegiatan yang AKTIF tampil di dasbor SEMUA asatid dan bisa dicatat bersama-sama
  * (lihat Asatid\AbsensiController). Admin menutupnya bila selesai: peserta yang belum tercatat = Alfa.
+ * Pengulangan: "Sekali" (satu tanggal) atau "Berulang" (pilih hari, seperti alarm HP) -> JadwalKegiatan;
+ * pada hari itu absensinya dibuat otomatis & langsung aktif (JadwalKegiatan::buatHariIni).
  */
 class AbsensiKegiatanController extends Controller
 {
@@ -61,6 +64,7 @@ class AbsensiKegiatanController extends Controller
             'saring'       => $saring,
             'cari'         => $cari,
             'kegiatanList' => JenisKegiatan::where('is_active', true)->ordered()->get(['id', 'nama', 'warna']),
+            'jadwalList'   => JadwalKegiatan::with('kegiatan:id,nama,warna')->orderBy('jam_mulai')->get(),
             'jumlahPeserta' => PendaftaranSiswa::where('status', PendaftaranSiswa::DITERIMA)->count(),
             'jumlah'       => [
                 'berjalan' => Absensi::where('jenis', Absensi::KEGIATAN)->where('dari_admin', true)->whereNull('selesai_at')->count(),
@@ -69,9 +73,21 @@ class AbsensiKegiatanController extends Controller
         ]);
     }
 
-    /** POST /admin/absensi-kegiatan — buat absensi kegiatan baru */
+    /** POST /admin/absensi-kegiatan — buat absensi kegiatan baru (sekali), atau kegiatan berulang (pengulangan=berulang) */
     public function store(Request $request)
     {
+        if ($request->input('pengulangan') === 'berulang') {
+            JadwalKegiatan::create($this->validasi($request, true) + [
+                'nyala'   => $request->boolean('aktif'),
+                'user_id' => Auth::id(),
+            ]);
+            JadwalKegiatan::buatHariIni(); // hari ini termasuk & belum lewat batas alfa -> langsung muncul
+
+            return back()->with('success', $request->boolean('aktif')
+                ? 'Kegiatan berulang dibuat. Pada hari yang dipilih, absensinya otomatis muncul di dasbor semua asatid.'
+                : 'Kegiatan berulang dibuat dalam keadaan OFF. Nyalakan saklarnya agar mulai berjalan.');
+        }
+
         $data = $this->validasi($request);
 
         Absensi::create($data + [
@@ -132,11 +148,46 @@ class AbsensiKegiatanController extends Controller
         return back()->with('success', 'Absensi kegiatan dihapus.');
     }
 
-    private function validasi(Request $request): array
+    /* ---------------- Kegiatan berulang (seperti alarm) ---------------- */
+
+    /** PUT /admin/absensi-kegiatan/jadwal/{jadwal} — ubah kegiatan berulang (berlaku mulai absensi berikutnya) */
+    public function ubahJadwal(Request $request, JadwalKegiatan $jadwal)
     {
-        return $request->validate([
+        $jadwal->update($this->validasi($request, true));
+        JadwalKegiatan::buatHariIni();
+
+        return back()->with('success', 'Kegiatan berulang diperbarui. Berlaku mulai absensi berikutnya.');
+    }
+
+    /** POST /admin/absensi-kegiatan/jadwal/{jadwal}/nyala — saklar ON / OFF */
+    public function nyalaJadwal(JadwalKegiatan $jadwal)
+    {
+        $jadwal->update(['nyala' => ! $jadwal->nyala]);
+        if ($jadwal->nyala) {
+            JadwalKegiatan::buatHariIni();
+        }
+
+        return back()->with('success', $jadwal->nyala
+            ? 'Kegiatan berulang dinyalakan (ON).'
+            : 'Kegiatan berulang dimatikan (OFF). Absensinya tidak dibuat lagi sampai dinyalakan.');
+    }
+
+    /** DELETE /admin/absensi-kegiatan/jadwal/{jadwal} — absensi yang sudah dibuat tetap ada */
+    public function hapusJadwal(JadwalKegiatan $jadwal)
+    {
+        $jadwal->delete();
+
+        return back()->with('success', 'Kegiatan berulang dihapus. Absensi yang sudah dibuat sebelumnya tetap ada.');
+    }
+
+    /** $berulang = true: pilih hari (1=Senin..7=Ahad) sebagai ganti tanggal */
+    private function validasi(Request $request, bool $berulang = false): array
+    {
+        $data = $request->validate([
             'jenis_kegiatan_id' => ['required', Rule::exists('jenis_kegiatan', 'id')->where('is_active', true)],
-            'tanggal'           => ['required', 'date'],
+            'tanggal'           => $berulang ? ['nullable'] : ['required', 'date'],
+            'hari'              => $berulang ? ['required', 'array', 'min:1'] : ['nullable'],
+            'hari.*'            => ['integer', 'between:1,7'],
             'jam_mulai'         => ['required', 'date_format:H:i'],
             'batas_terlambat'   => ['required', 'date_format:H:i', 'after_or_equal:jam_mulai'],
             'batas_alfa'        => ['required', 'date_format:H:i', 'after:batas_terlambat'],
@@ -145,6 +196,8 @@ class AbsensiKegiatanController extends Controller
             'jenis_kegiatan_id.required' => 'Pilih nama kegiatan terlebih dahulu.',
             'jenis_kegiatan_id.exists'   => 'Nama kegiatan tidak ditemukan / sudah nonaktif.',
             'tanggal.required'           => 'Tanggal wajib diisi.',
+            'hari.required'              => 'Pilih minimal satu hari untuk kegiatan berulang.',
+            'hari.min'                   => 'Pilih minimal satu hari untuk kegiatan berulang.',
             'jam_mulai.required'         => 'Jam mulai wajib diisi.',
             'batas_terlambat.required'   => 'Batas terlambat wajib diisi.',
             'batas_alfa.required'        => 'Batas alfa wajib diisi.',
@@ -152,6 +205,15 @@ class AbsensiKegiatanController extends Controller
             'batas_alfa.after'           => 'Batas alfa harus setelah batas terlambat.',
             '*.date_format'              => 'Format jam harus JJ:MM, mis. 20:00.',
         ]);
+
+        if ($berulang) {
+            unset($data['tanggal']);
+            $data['hari'] = collect($data['hari'])->map(fn ($h) => (int) $h)->unique()->sort()->values()->all();
+        } else {
+            unset($data['hari']);
+        }
+
+        return $data;
     }
 
     /** GET /admin/absensi-kegiatan/{absensi}/catat — admin ikut mengabsen (pindai QR / cari nama) */

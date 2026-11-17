@@ -11,7 +11,7 @@
 --}}
 @extends('layouts.admin')
 
-@section('title', __('Munaqosah'))
+@section('title', __('Istimaroh'))
 
 @section('content')
 @include('admin.akademik.munaqosah._skrip-panel')
@@ -24,7 +24,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
 
 <div id="halaman-munaqosah" v-cloak>
 <div class="space-y-6 mx-4 md:mx-10 lg:mx-20 mt-8 pb-6">
-    <x-header-admin :label="__('Akademik')" :judul="__('Munaqosah')"
+    <x-header-admin :label="__('Akademik')" :judul="__('Istimaroh')"
         :keterangan="__('Musyawarah para asatid untuk menentukan santri lulus / diterima atau tidak.')" />
 
     {{-- ===== Tab ===== --}}
@@ -37,30 +37,31 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
         </button>
     </div>
 
-    {{-- ===== Tab 1: tombol pengaturan ===== --}}
-    <div v-if="tab === 'musyrifin'" class="{{ $kartu }} p-4 sm:p-5">
-        <p class="text-xs font-semibold text-slate-500">{{ __('Pengaturan kolom penilaian') }}</p>
-        <div class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
-            <button v-for="(label, b) in bagian" :key="b" type="button" @click="bukaPengaturan(b)"
-                class="flex items-center gap-3 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-200/80 px-4 py-3 text-left hover:ring-emerald-400 hover:bg-emerald-50/50 transition">
-                <span class="w-10 h-10 shrink-0 rounded-xl bg-gradient-to-br from-emerald-500 to-[#0b332c] text-white flex items-center justify-center">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
-                </span>
-                <span class="min-w-0">
-                    <span class="block font-bold text-slate-800" v-text="teks.pengaturan + ' ' + label"></span>
-                    <span class="block text-xs text-slate-400" v-text="kolom[b].length + ' ' + teks.kolom"></span>
-                </span>
-            </button>
-        </div>
-    </div>
-
-    {{-- ===== Saringan ===== --}}
+    {{-- ===== Saringan (+ tab Musyrifin: tombol kecil pengaturan kolom Nilai Ilmu / Suluk / Catatan Mandub) ===== --}}
     <div class="{{ $kartu }} p-4 sm:p-5 flex flex-col lg:flex-row lg:items-end gap-3">
         <label class="block flex-1 min-w-48"><span class="text-xs font-semibold text-slate-500">{{ __('Cari') }}</span>
             <input type="search" v-model="cari" placeholder="{{ __('Cari nama / nomor santri…') }}" class="mt-1 {{ $input }}"></label>
+        <div v-if="tab === 'musyrifin'" class="lg:shrink-0">
+            <span class="text-xs font-semibold text-slate-500">{{ __('Pengaturan kolom penilaian') }}</span>
+            <div class="mt-1 flex flex-wrap gap-1.5">
+                <button v-for="(label, b) in bagian" :key="b" type="button" @click="bukaPengaturan(b)" :title="teks.pengaturan + ' ' + label"
+                    class="inline-flex items-center gap-1.5 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 px-3 py-2.5 text-xs font-bold text-slate-600 hover:ring-emerald-400 hover:text-[#0b332c] transition">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                    <span v-text="label + ' (' + kolom[b].length + ')'"></span>
+                </button>
+            </div>
+        </div>
         <div v-if="tab === 'lajnah'" class="grid grid-cols-4 gap-1.5 rounded-2xl bg-slate-100 p-1.5 lg:w-96 lg:shrink-0">
             <button v-for="s in SARING" :key="s.kunci" type="button" @click="saring = s.kunci" class="py-2 rounded-xl text-xs sm:text-sm font-bold transition"
                 :class="saring === s.kunci ? 'bg-white text-[#0b332c] shadow-sm' : 'text-slate-500 hover:text-slate-700'" v-text="s.label"></button>
+        </div>
+        {{-- Pilihan tampilan kartu tab Lajnah: Ringkas (kartu biasa) | Panel (7 tombol seperti Musyrifin) --}}
+        <div v-if="tab === 'lajnah'" class="lg:shrink-0">
+            <span class="text-xs font-semibold text-slate-500">{{ __('Tampilan') }}</span>
+            <div class="mt-1 grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100 p-1.5 lg:w-56">
+                <button v-for="t in TAMPILAN" :key="t.kunci" type="button" @click="pilihTampilan(t.kunci)" class="py-2 rounded-xl text-xs sm:text-sm font-bold transition"
+                    :class="tampilan === t.kunci ? 'bg-white text-[#0b332c] shadow-sm' : 'text-slate-500 hover:text-slate-700'" v-text="t.label"></button>
+            </div>
         </div>
     </div>
 
@@ -84,14 +85,15 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
 
             <div class="relative mt-4 flex items-center justify-between gap-2">
                 <span class="rounded-full px-2.5 py-1 text-[11px] font-bold ring-1" :class="tanda(s).lencana" v-text="tanda(s).nama"></span>
-                <a v-if="tab === 'lajnah'" :href="s.url" target="_blank" rel="noopener" @click="dibuka = true"
+                <a v-if="tab === 'lajnah' && tampilan === 'ringkas'" :href="s.url" target="_blank" rel="noopener" @click="dibuka = true"
                     class="text-xs font-semibold text-emerald-700 hover:underline whitespace-nowrap">{{ __('Buka') }} &#8599;</a>
             </div>
             <p v-if="tab === 'lajnah'" class="relative mt-2 text-[11px] text-slate-400"
                 v-text="s.keputusan ? teks.diputuskan + ' ' + waktu(s.diputuskan) : teks.dikirim + ' ' + waktu(s.dikirim)"></p>
 
-            {{-- Tab Musyrifin: 7 tombol panel (dibuka di modal) + Kirim ke Lajnah --}}
-            <template v-else>
+            {{-- Tab Musyrifin, atau tab Lajnah tampilan Panel: 7 tombol panel (dibuka di modal).
+                 Musyrifin: + Kirim ke Lajnah. Lajnah: isian hanya dibaca + Buka & putuskan (tab baru). --}}
+            <template v-if="tab === 'musyrifin' || tampilan === 'panel'">
                 <div class="relative mt-4 grid grid-cols-2 gap-1.5">
                     <button v-for="(p, i) in PANEL" :key="p.kunci" type="button" @click="bukaPanel(s, p.kunci)"
                         class="flex items-center gap-2 rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 px-2.5 py-2 text-left text-xs font-semibold text-slate-600 hover:ring-emerald-400 hover:bg-emerald-50/60 hover:text-[#0b332c] transition"
@@ -103,9 +105,11 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                         </span>
                     </button>
                 </div>
-                <button type="button" @click="kirim(s)" :disabled="mengirim === s.id"
+                <button v-if="tab === 'musyrifin'" type="button" @click="kirim(s)" :disabled="mengirim === s.id"
                     class="relative mt-3 w-full rounded-2xl bg-[#0b332c] py-2.5 text-sm font-bold text-white hover:bg-[#135347] disabled:opacity-50"
                     v-text="mengirim === s.id ? teks.mengirim : teks.kirim"></button>
+                <a v-else :href="s.url" target="_blank" rel="noopener" @click="dibuka = true"
+                    class="relative mt-3 block w-full rounded-2xl bg-[#0b332c] py-2.5 text-center text-sm font-bold text-white hover:bg-[#135347]">{{ __('Buka & putuskan') }} &#8599;</a>
             </template>
         </div>
     </div>
@@ -116,7 +120,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
     <div class="w-full max-w-5xl rounded-3xl bg-[#f4f7f6] shadow-xl overflow-hidden">
         <div class="relative bg-gradient-to-br from-[#135347] via-[#0b332c] to-[#071f1a] text-white px-5 sm:px-6 pt-5 pb-3">
             <button type="button" @click="tutupModal" class="absolute top-4 right-4 w-8 h-8 rounded-xl bg-white/10 hover:bg-white/20 flex items-center justify-center" aria-label="{{ __('Tutup') }}">{!! $tutup !!}</button>
-            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80">{{ __('Musyrifin Dauroh') }}</p>
+            <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-200/80" v-text="lajnah ? teks.judulLajnah : teks.judulMusyrifin"></p>
             <h3 class="mt-1 pr-10 text-xl font-extrabold truncate" v-text="modal.santri.siswa"></h3>
             <x-nama-arab vue="modal.santri.arab" kelas="text-sm text-white/70" />
             {{-- Pindah panel tanpa menutup modal --}}
@@ -147,9 +151,9 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
         </div>
 
         <div class="border-t border-slate-200 bg-white px-5 sm:px-6 py-4 flex flex-wrap items-center justify-end gap-2">
-            <p v-if="panelIsian && berubah(modal.panel)" class="mr-auto text-xs font-semibold text-amber-600" v-text="teks.belumDisimpan"></p>
+            <p v-if="panelIsian && !lajnah && berubah(modal.panel)" class="mr-auto text-xs font-semibold text-amber-600" v-text="teks.belumDisimpan"></p>
             <button type="button" @click="tutupModal" class="px-5 py-2.5 rounded-2xl ring-1 ring-slate-200 text-sm font-bold text-slate-600 hover:bg-slate-50">{{ __('Tutup') }}</button>
-            <button v-if="panelIsian && !memuat" type="button" @click="simpanPanel" :disabled="menyimpanPanel || !kolom[modal.panel].length"
+            <button v-if="panelIsian && !lajnah && !memuat" type="button" @click="simpanPanel" :disabled="menyimpanPanel || !kolom[modal.panel].length"
                 class="px-5 py-2.5 rounded-2xl bg-[#0b332c] text-white text-sm font-bold hover:bg-[#135347] disabled:opacity-50"
                 v-text="menyimpanPanel ? teks.menyimpan : teks.simpanPanel + ' ' + bagian[modal.panel]"></button>
         </div>
@@ -298,7 +302,14 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                     yakinKirim: @js(__('Kirim :nama ke Lajnah Qobul Darul Musthofa?')),
                     masihKosong: @js(__('Masih kosong:')),
                     gagalMuat: @js(__('Gagal memuat data. Coba lagi.')),
+                    judulMusyrifin: @js(__('Musyrifin Dauroh')),
+                    judulLajnah: @js(__('Lajnah Qobul Darul Musthofa')),
                 },
+                TAMPILAN: [
+                    { kunci: 'ringkas', label: @js(__('Ringkas')) },
+                    { kunci: 'panel', label: @js(__('Panel')) },
+                ],
+                tampilan: 'ringkas', // tampilan kartu tab Lajnah, diingat per perangkat (localStorage)
                 TANDA: {
                     belum: { nama: @js(__('Belum diisi')), lencana: 'bg-slate-50 text-slate-500 ring-slate-200', cahaya: 'bg-slate-100' },
                     kembali: { nama: @js(__('Dikembalikan Lajnah')), lencana: 'bg-sky-50 text-sky-700 ring-sky-200', cahaya: 'bg-sky-200' },
@@ -327,6 +338,7 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                 },
             },
             mounted() {
+                try { if (localStorage.getItem('tampilan_lajnah') === 'panel') this.tampilan = 'panel'; } catch (e) {}
                 // Kembali dari tab detail -> muat ulang supaya kartu yang sudah disimpan / diputuskan pindah
                 window.addEventListener('focus', () => { if (this.dibuka && !this.atur && !this.modal) location.reload(); });
                 window.addEventListener('keydown', (e) => {
@@ -349,9 +361,14 @@ $tutup = '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2
                     url.searchParams.set('tab', t);
                     history.replaceState(null, '', url);
                 },
-                // ===== Modal 7 panel (tab Musyrifin) =====
+                pilihTampilan(t) {
+                    this.tampilan = t;
+                    try { localStorage.setItem('tampilan_lajnah', t); } catch (e) {}
+                },
+                // ===== Modal 7 panel (tab Musyrifin, dan tab Lajnah tampilan Panel = hanya dibaca) =====
                 async bukaPanel(s, panel) {
                     const santriBaru = !this.modal || this.modal.santri.id !== s.id;
+                    this.lajnah = s.status === 'lajnah'; // panel isian jadi hanya dibaca (_panel-isian)
                     this.modal = { santri: s, panel };
                     if (santriBaru) await this.muatSantri(s);
                     if (panel === 'santri') this.muatProfil();

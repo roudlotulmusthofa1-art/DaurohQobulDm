@@ -49,6 +49,15 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     });
     // Soal Ujian (menu di beranda): tab Buat Soal + tab Soal Disetujui (?tab=buat|disetujui)
     Route::get('/soal-ujian', [\App\Http\Controllers\Asatid\UjianController::class, 'soal'])->name('soal-ujian');
+    // Hafalan: setoran hafalan santri per kitab (hasilnya masuk ke Admin > Akademik > Hafalan)
+    Route::controller(\App\Http\Controllers\Asatid\HafalanController::class)->prefix('hafalan')->name('hafalan')->group(function () {
+        Route::get('/', 'index');                                                    // asatid.hafalan
+        Route::get('/peserta', 'peserta')->name('.peserta');                         // JSON
+        Route::get('/riwayat', 'riwayat')->name('.riwayat');                         // JSON
+        Route::post('/', 'simpan')->middleware('throttle:120,1')->name('.simpan');
+        Route::post('/selesai', 'selesai')->middleware('throttle:60,1')->name('.selesai');
+        Route::delete('/{hafalan}', 'hapus')->whereNumber('hafalan')->name('.hapus');
+    });
     Route::get('/pesan', [AsatidDashboardController::class, 'pesan'])->name('pesan'); // Pesan dari Admin
     Route::get('/pesan-saya', [AsatidDashboardController::class, 'pesanSaya'])->name('pesan-saya'); // Pesan untuk Admin
     Route::post('/pesan-saya', [AsatidDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');

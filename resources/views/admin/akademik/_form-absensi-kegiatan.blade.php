@@ -1,8 +1,16 @@
-{{-- Form buat/ubah absensi kegiatan (di dalam <dialog>). Variabel: $aksi, $metode, $judul, $a (null = baru), $kegiatanList --}}
+{{--
+    Form buat/ubah absensi kegiatan (di dalam <dialog>). Variabel: $aksi, $metode, $judul, $a (null = baru), $kegiatanList,
+    $j (opsional) = kegiatan BERULANG yang diubah (JadwalKegiatan).
+    Formulir baru punya pilihan Pengulangan: Sekali (tanggal) | Berulang (tombol hari S S R K J S A, seperti alarm HP).
+    Bagian tanggal / hari ditampilkan-sembunyikan dengan CSS (group-has), tanpa Vue; tombol cepat hari = pilihHari (Vue halaman).
+--}}
 @php
+$j = $j ?? null;
+$modeUlang = $j ? 'berulang' : ($a ? 'sekali' : 'pilih'); // pilih = formulir baru (keduanya)
+$sumber = $j ?? $a;
 $input = 'mt-1 w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200 border-0 px-3 py-2.5 text-sm text-slate-800 focus:ring-2 focus:ring-emerald-500 outline-none';
 $label = 'block text-xs font-semibold text-slate-600';
-$baru = ! $a;
+$baru = ! $a && ! $j;
 // Isian lama dipakai lagi hanya untuk form yang tadi dikirim
 $nilai = fn ($kolom, $bawaan) => $baru && old('_form') === 'baru' ? old($kolom, $bawaan) : $bawaan;
 $jam = fn ($v) => $v ? substr((string) $v, 0, 5) : null;
@@ -11,10 +19,10 @@ $sekarang = now('Asia/Jakarta');
 $bawaan = fn ($menit) => $sekarang->copy()->addMinutes($menit)->isSameDay($sekarang) ? $sekarang->copy()->addMinutes($menit)->format('H:i') : '23:59';
 $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 ring-slate-200 bg-white text-slate-600 text-center has-[:checked]:bg-emerald-600 has-[:checked]:text-white has-[:checked]:ring-emerald-600 transition-colors';
 @endphp
-<form method="POST" action="{{ $aksi }}" class="p-5 sm:p-6 space-y-4 max-h-[85vh] overflow-y-auto">
+<form method="POST" action="{{ $aksi }}" class="group p-5 sm:p-6 space-y-4 max-h-[85vh] overflow-y-auto">
     @csrf
     @if ($metode !== 'POST') @method($metode) @endif
-    <input type="hidden" name="_form" value="{{ $baru ? 'baru' : $a->id }}">
+    <input type="hidden" name="_form" value="{{ $baru ? 'baru' : ($j ? 'jadwal-' . $j->id : $a->id) }}">
 
     <div class="flex items-center justify-between">
         <h2 class="text-lg font-extrabold text-slate-800">{{ $judul }}</h2>
@@ -25,21 +33,58 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 rin
         <select name="jenis_kegiatan_id" required class="{{ $input }}">
             <option value="">{{ __('Pilih kegiatan…') }}</option>
             @foreach ($kegiatanList as $k)
-            <option value="{{ $k->id }}" @selected((string) $nilai('jenis_kegiatan_id', $a?->jenis_kegiatan_id) === (string) $k->id)>{{ $k->nama }}</option>
+            <option value="{{ $k->id }}" @selected((string) $nilai('jenis_kegiatan_id', $sumber?->jenis_kegiatan_id) === (string) $k->id)>{{ $k->nama }}</option>
             @endforeach
         </select>
         <span class="mt-1 block text-[11px] text-slate-400">{{ __('Daftar nama diatur di Master Data › Jenis Kegiatan.') }}</span>
     </label>
 
+    {{-- Pengulangan (hanya formulir baru) --}}
+    @if ($modeUlang === 'pilih')
+    <div><span class="{{ $label }}">{{ __('Pengulangan *') }}</span>
+        <div class="mt-1.5 grid grid-cols-2 gap-2">
+            @foreach (['sekali' => __('Sekali (satu tanggal)'), 'berulang' => __('Berulang (pilih hari)')] as $kode => $nama)
+            <label class="{{ $pilih }}">
+                <input type="radio" name="pengulangan" value="{{ $kode }}" class="sr-only {{ $kode === 'berulang' ? 'ulang-berulang' : '' }}" @checked($nilai('pengulangan', 'sekali') === $kode)>
+                {{ $nama }}
+            </label>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
     <div class="grid grid-cols-2 gap-3">
-        <label class="col-span-2"><span class="{{ $label }}">{{ __('Tanggal *') }}</span>
-            <input type="date" name="tanggal" required value="{{ $nilai('tanggal', $a?->tanggal?->toDateString() ?? now('Asia/Jakarta')->toDateString()) }}" class="{{ $input }}"></label>
+        @if ($modeUlang !== 'berulang')
+        <label class="col-span-2 {{ $modeUlang === 'pilih' ? 'group-has-[.ulang-berulang:checked]:hidden' : '' }}"><span class="{{ $label }}">{{ __('Tanggal *') }}</span>
+            <input type="date" name="tanggal" value="{{ $nilai('tanggal', $a?->tanggal?->toDateString() ?? now('Asia/Jakarta')->toDateString()) }}" class="{{ $input }}"></label>
+        @endif
+        @if ($modeUlang !== 'sekali')
+        @php $hariPilih = array_map('intval', (array) $nilai('hari', $j?->hari ?? [1, 2, 3, 4, 5, 6, 7])); @endphp
+        <div class="col-span-2 {{ $modeUlang === 'pilih' ? 'hidden group-has-[.ulang-berulang:checked]:block' : '' }}">
+            <span class="{{ $label }}">{{ __('Ulangi setiap hari *') }}</span>
+            <div class="mt-1.5 flex flex-wrap gap-1.5">
+                @foreach (\App\Models\JadwalKegiatan::HARI as $no => $huruf)
+                <label title="{{ __(\App\Models\JadwalKegiatan::NAMA_HARI[$no]) }}"
+                    class="w-10 h-10 cursor-pointer rounded-full ring-1 ring-slate-200 bg-white text-sm font-bold text-slate-500 flex items-center justify-center transition-colors has-[:checked]:bg-emerald-600 has-[:checked]:text-white has-[:checked]:ring-emerald-600">
+                    <input type="checkbox" name="hari[]" value="{{ $no }}" class="sr-only" @checked(in_array($no, $hariPilih, true))>
+                    {{ $huruf }}
+                </label>
+                @endforeach
+            </div>
+            <div class="mt-2 flex flex-wrap gap-3 text-[11px] font-semibold">
+                <button type="button" @click="pilihHari($event, [1, 2, 3, 4, 5, 6, 7])" class="text-emerald-700 hover:underline">{{ __('Setiap hari') }}</button>
+                <button type="button" @click="pilihHari($event, [1, 2, 3, 4, 5])" class="text-emerald-700 hover:underline">{{ __('Senin–Jumat') }}</button>
+                <button type="button" @click="pilihHari($event, [6, 7])" class="text-emerald-700 hover:underline">{{ __('Sabtu & Ahad') }}</button>
+            </div>
+            <span class="mt-1 block text-[11px] text-slate-400">{{ __('Pada hari yang dipilih, absensi kegiatan ini otomatis dibuat dan langsung aktif di dasbor semua asatid.') }}</span>
+        </div>
+        @endif
         <label><span class="{{ $label }}">{{ __('Jam mulai *') }}</span>
-            <input type="time" name="jam_mulai" required value="{{ $nilai('jam_mulai', $jam($a?->jam_mulai) ?? $bawaan(0)) }}" @change="geserBatas" class="{{ $input }}"></label>
+            <input type="time" name="jam_mulai" required value="{{ $nilai('jam_mulai', $jam($sumber?->jam_mulai) ?? $bawaan(0)) }}" @change="geserBatas" class="{{ $input }}"></label>
         <label><span class="{{ $label }}">{{ __('Batas terlambat *') }}</span>
-            <input type="time" name="batas_terlambat" required value="{{ $nilai('batas_terlambat', $jam($a?->batas_terlambat) ?? $bawaan(15)) }}" class="{{ $input }}"></label>
+            <input type="time" name="batas_terlambat" required value="{{ $nilai('batas_terlambat', $jam($sumber?->batas_terlambat) ?? $bawaan(15)) }}" class="{{ $input }}"></label>
         <label class="col-span-2"><span class="{{ $label }}">{{ __('Batas alfa *') }}</span>
-            <input type="time" name="batas_alfa" required value="{{ $nilai('batas_alfa', $jam($a?->batas_alfa) ?? $bawaan(45)) }}" class="{{ $input }}">
+            <input type="time" name="batas_alfa" required value="{{ $nilai('batas_alfa', $jam($sumber?->batas_alfa) ?? $bawaan(45)) }}" class="{{ $input }}">
             <span class="mt-1 block text-[11px] text-slate-400">{{ __('Sebelum batas terlambat = Hadir · sampai batas alfa = Terlambat · setelahnya = Alfa.') }}</span>
             <span class="mt-0.5 block text-[11px] text-slate-400">{{ __('Saat jam mulai diganti, batas terlambat (+15 menit) dan batas alfa (+45 menit) ikut menyesuaikan. Absensi ditutup otomatis saat batas alfa lewat.') }}</span></label>
     </div>
@@ -48,7 +93,7 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 rin
         <div class="mt-1.5 grid grid-cols-2 gap-2">
             @foreach (['qr' => __('Pindai kartu QR'), 'manual' => __('Manual (cari nama)')] as $kode => $nama)
             <label class="{{ $pilih }}">
-                <input type="radio" name="metode" value="{{ $kode }}" class="sr-only" @checked($nilai('metode', $a?->metode ?? 'qr') === $kode)>
+                <input type="radio" name="metode" value="{{ $kode }}" class="sr-only" @checked($nilai('metode', $sumber?->metode ?? 'qr') === $kode)>
                 {{ $nama }}
             </label>
             @endforeach
@@ -61,6 +106,7 @@ $pilih = 'cursor-pointer rounded-xl px-3 py-2.5 text-sm font-semibold ring-1 rin
         <span class="text-sm">
             <span class="block font-semibold text-emerald-800">{{ __('Langsung aktifkan') }}</span>
             <span class="block text-xs text-emerald-700/80">{{ __('Tampil di dasbor semua asatid, sehingga bisa langsung diabsen bersama.') }}</span>
+            <span class="block text-xs text-emerald-700/80">{{ __('Untuk kegiatan berulang: saklar langsung ON.') }}</span>
         </span>
     </label>
     @endif

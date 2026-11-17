@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Controller;
+use App\Models\Munaqosah;
 use App\Models\PendaftaranSiswa;
 use App\Models\PesanPeserta;
 use Illuminate\Http\RedirectResponse;
@@ -107,16 +108,19 @@ class SiswaDashboardController extends Controller
     private function tampil(string $view, array $data = []): View
     {
         $siswa = $data['siswa'] ?? $this->siswa();
+        // Hasil Istimaroh yang sudah diumumkan (lewat Laporan Kelulusan); dipakai kartu beranda, halaman kelulusan & lonceng
+        $istimaroh = $siswa->status === PendaftaranSiswa::DITERIMA ? Munaqosah::pengumumanUntuk($siswa) : null;
 
         return view($view, $data + [
             'siswa' => $siswa,
             'user' => Auth::user(),
-            'notif' => $this->notifikasi($siswa),
+            'istimaroh' => $istimaroh,
+            'notif' => $this->notifikasi($siswa, $istimaroh),
         ]);
     }
 
     /** Lonceng: pesan admin yang belum dibaca + balasan admin + status kelulusan */
-    private function notifikasi(PendaftaranSiswa $siswa): array
+    private function notifikasi(PendaftaranSiswa $siswa, ?Munaqosah $istimaroh = null): array
     {
         $items = [];
         foreach ($siswa->pesan()->dariAdmin()->belumDibaca()->latest()->take(5)->get() as $p) {
@@ -129,6 +133,26 @@ class SiswaDashboardController extends Controller
                 'ikon' => 'M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75',
             ];
         }
+        // Hasil Istimaroh baru diumumkan (14 hari terakhir). Bila ada, menggantikan pengumuman Kelulusan lama.
+        $ikonToga = 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342';
+        if ($istimaroh) {
+            // diberitahu_pada disimpan sebagai jam WIB apa adanya -> bandingkan dengan jam WIB juga
+            $waktu = $istimaroh->diberitahu_pada;
+            if ($waktu?->gt(\Illuminate\Support\Carbon::parse(now('Asia/Jakarta')->format('Y-m-d H:i:s'))->subDays(14))) {
+                $lulus = $istimaroh->keputusan === Munaqosah::LULUS;
+                $items[] = [
+                    'kunci' => 'istimaroh:' . $istimaroh->keputusan . ':' . $waktu->timestamp,
+                    'teks' => 'Pengumuman kelulusan sudah dibuka: <b>' . ($lulus ? 'LULUS / DITERIMA' : 'BELUM LULUS') . '</b>',
+                    'ket' => $waktu->locale('id')->translatedFormat('d M Y, H:i') . ' WIB',
+                    'url' => route('siswa.kelulusan'),
+                    'warna' => $lulus ? 'bg-emerald-50 text-emerald-600 ring-emerald-100' : 'bg-amber-50 text-amber-600 ring-amber-100',
+                    'ikon' => $ikonToga,
+                ];
+            }
+
+            return $items;
+        }
+
         // Kelulusan akhir dauroh baru diumumkan (14 hari terakhir)
         $diumumkan = PendaftaranSiswa::kelulusanDiumumkan();
         if ($siswa->status === PendaftaranSiswa::DITERIMA && $diumumkan?->gt(now()->subDays(14))) {
