@@ -128,74 +128,102 @@ $menuNavbar = [
     </transition>
 
     {{-- ===== Lembar menu HP (muncul dari bawah) ===== --}}
+    {{-- Susunan: kepala (logo + tutup) | daftar menu (bisa digulir) | tombol Masuk & Daftar (selalu terlihat di bawah) --}}
     <transition name="slide-up">
         <div v-show="mobileOpen" v-cloak
-            class="fixed bottom-0 left-0 right-0 z-70 lg:hidden bg-white rounded-t-[28px] shadow-2xl px-4 pt-3 pb-[max(1.25rem,env(safe-area-inset-bottom))]">
+            class="fixed bottom-0 left-0 right-0 z-70 lg:hidden flex flex-col max-h-[90vh] max-h-[90dvh] bg-white rounded-t-[32px] shadow-[0_-20px_60px_-15px_rgba(11,51,44,0.45)]">
 
-            <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-3"></div>
-
-            <div class="flex items-center justify-between px-2 pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-2.5">
-                    <span class="w-10 h-10 rounded-xl bg-white ring-1 ring-slate-900/5 shadow-sm flex items-center justify-center overflow-hidden">
-                        <img src="{{ asset('images/Logo dar4.png') }}" alt="" class="w-full h-full object-contain p-0.5">
-                    </span>
-                    <span class="leading-tight">
-                        <span class="block text-[15px] font-extrabold text-[#0b332c]">{{ __('Dauroh Qobul') }}</span>
-                        <span class="block text-[11px] text-teal-700/80">{{ __('Darul Musthofa Tarim') }}</span>
-                    </span>
-                </div>
-                <button type="button" @click="mobileOpen = false" aria-label="{{ __('Tutup menu') }}"
-                    class="w-9 h-9 flex items-center justify-center rounded-full text-slate-500 bg-slate-100 hover:bg-slate-200 transition">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-
-            <div class="py-3 max-h-[62vh] overflow-y-auto space-y-1">
-                <a href="{{ route('landing') }}" @click="mobileOpen = false"
-                    class="flex items-center gap-3 px-2 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 transition">
-                    <span class="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center"><i data-lucide="house" class="w-5 h-5"></i></span>
-                    <span class="text-[15px] font-semibold">{{ __('Beranda') }}</span>
-                </a>
-
-                @foreach ($menuNavbar as $kunci => $menu)
-                <div>
-                    <button type="button" @click="toggleMenu('{{ $kunci }}')"
-                        class="w-full flex items-center justify-between px-2 py-2.5 rounded-2xl text-slate-700 hover:bg-slate-50 transition"
-                        :class="openMenu === '{{ $kunci }}' ? 'bg-slate-50' : ''">
-                        <span class="flex items-center gap-3">
-                            <span class="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center"><i data-lucide="{{ $menu['ikon'] }}" class="w-5 h-5"></i></span>
-                            <span class="text-[15px] font-semibold">{{ $menu['label'] }}</span>
+            {{-- Kepala --}}
+            <div class="shrink-0 px-5 pt-3">
+                <div class="w-12 h-1.5 bg-slate-200 rounded-full mx-auto mb-4"></div>
+                <div class="flex items-center justify-between gap-3 pb-4">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="w-12 h-12 shrink-0 rounded-2xl bg-white ring-1 ring-slate-900/5 shadow-md flex items-center justify-center overflow-hidden">
+                            <img src="{{ asset('images/Logo dar4.png') }}" alt="" class="w-full h-full object-contain p-1">
                         </span>
-                        <svg class="w-5 h-5 text-slate-400 transition-transform duration-300" :class="{ 'rotate-180': openMenu === '{{ $kunci }}' }" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.084l3.71-3.855a.75.75 0 011.08 1.04l-4.24 4.41a.75.75 0 01-1.08 0l-4.24-4.41a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                    <div v-show="openMenu === '{{ $kunci }}'" v-cloak class="ml-[3.25rem] mr-1 mt-1 mb-2 space-y-0.5">
-                        @foreach ($menu['isi'] as $item)
-                        <a href="{{ $item['url'] }}" @click="mobileOpen = false"
-                            class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-600 hover:bg-teal-50 hover:text-teal-800 transition">
-                            <i data-lucide="{{ $item['ikon'] }}" class="w-4 h-4 text-teal-600 shrink-0"></i>
-                            <span class="min-w-0">
-                                <span class="block text-sm font-semibold">{{ $item['title'] }}</span>
-                                <span class="block text-[11px] text-slate-400">{{ $item['ket'] }}</span>
-                            </span>
-                        </a>
-                        @endforeach
+                        <span class="leading-tight min-w-0">
+                            <span class="block text-base font-extrabold text-[#0b332c] truncate">{{ __('Dauroh Qobul') }}</span>
+                            <span class="block text-xs font-medium text-teal-700/80 truncate">{{ __('Darul Musthofa Tarim') }}</span>
+                        </span>
                     </div>
+                    <button type="button" @click="mobileOpen = false" aria-label="{{ __('Tutup menu') }}"
+                        class="w-11 h-11 shrink-0 flex items-center justify-center rounded-full text-slate-600 bg-slate-100 hover:bg-slate-200 active:scale-95 transition">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
                 </div>
-                @endforeach
             </div>
 
-            <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100">
+            {{-- Daftar menu --}}
+            <nav class="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pb-4">
+                <div class="rounded-3xl bg-slate-50/80 ring-1 ring-slate-100 p-1.5 space-y-1">
+
+                    <a href="{{ route('landing') }}" @click="mobileOpen = false"
+                        class="flex items-center gap-3 min-h-14 px-3 py-2 rounded-2xl transition active:scale-[0.98] {{ request()->routeIs('landing') ? 'bg-white shadow-sm ring-1 ring-teal-100 text-teal-800' : 'text-slate-700 hover:bg-white' }}">
+                        <span class="w-10 h-10 shrink-0 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-sm shadow-teal-600/30"><i data-lucide="house" class="w-5 h-5"></i></span>
+                        <span class="flex-1 text-[15px] font-bold">{{ __('Beranda') }}</span>
+                        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+                    </a>
+
+                    @foreach ($menuNavbar as $kunci => $menu)
+                    <div class="rounded-2xl transition-colors duration-300"
+                        :class="openMenu === '{{ $kunci }}' ? 'bg-white shadow-sm ring-1 ring-teal-100' : ''">
+                        <button type="button" @click="toggleMenu('{{ $kunci }}')"
+                            :aria-expanded="openMenu === '{{ $kunci }}' ? 'true' : 'false'"
+                            class="w-full flex items-center gap-3 min-h-14 px-3 py-2 rounded-2xl text-left transition active:scale-[0.98]"
+                            :class="openMenu === '{{ $kunci }}' ? 'text-teal-800' : 'text-slate-700 hover:bg-white'">
+                            <span class="w-10 h-10 shrink-0 rounded-xl flex items-center justify-center transition-colors duration-300"
+                                :class="openMenu === '{{ $kunci }}' ? 'bg-teal-600 text-white shadow-sm shadow-teal-600/30' : 'bg-teal-50 text-teal-700'">
+                                <i data-lucide="{{ $menu['ikon'] }}" class="w-5 h-5"></i>
+                            </span>
+                            <span class="flex-1 text-[15px] font-bold">{{ $menu['label'] }}</span>
+                            <svg class="w-5 h-5 shrink-0 transition-transform duration-300" :class="openMenu === '{{ $kunci }}' ? 'rotate-180 text-teal-600' : 'text-slate-400'" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.084l3.71-3.855a.75.75 0 011.08 1.04l-4.24 4.41a.75.75 0 01-1.08 0l-4.24-4.41a.75.75 0 01.02-1.06z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+
+                        {{-- Submenu: membuka/menutup dengan animasi tinggi (grid-rows 0fr -> 1fr) --}}
+                        <div class="grid transition-[grid-template-rows] duration-300 ease-out"
+                            :class="openMenu === '{{ $kunci }}' ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'">
+                            <div class="overflow-hidden">
+                                <div class="px-2 pb-2 pt-0.5 space-y-1">
+                                    @foreach ($menu['isi'] as $item)
+                                    <a href="{{ $item['url'] }}" @click="mobileOpen = false"
+                                        class="flex items-center gap-3 min-h-12 px-3 py-2 rounded-xl text-slate-600 hover:bg-teal-50 hover:text-teal-800 active:bg-teal-100 transition">
+                                        <span class="w-8 h-8 shrink-0 rounded-lg bg-slate-100 text-teal-700 flex items-center justify-center">
+                                            <i data-lucide="{{ $item['ikon'] }}" class="w-4 h-4"></i>
+                                        </span>
+                                        <span class="flex-1 min-w-0">
+                                            <span class="block text-sm font-semibold text-slate-800">{{ $item['title'] }}</span>
+                                            <span class="block text-xs text-slate-400 truncate">{{ $item['ket'] }}</span>
+                                        </span>
+                                        <i data-lucide="arrow-up-right" class="w-4 h-4 shrink-0 text-slate-300"></i>
+                                    </a>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </nav>
+
+            {{-- Tombol Masuk & Daftar: selalu terlihat di bawah, mudah dijangkau jempol --}}
+            <div class="shrink-0 px-4 pt-3 pb-[max(1rem,env(safe-area-inset-bottom))] border-t border-slate-100 bg-white space-y-5">
                 <a href="{{ route('login') }}" @click="mobileOpen = false"
-                    class="flex items-center justify-center gap-2 px-4 py-3 rounded-full ring-1 ring-slate-200 text-slate-700 text-sm font-bold hover:bg-slate-50 transition">
-                    <i data-lucide="log-in" class="w-4 h-4"></i>
-                    {{ __('Masuk') }}
+                    class="group flex items-center gap-3 w-full min-h-16 px-4 py-3 rounded-2xl bg-gradient-to-r from-[#0b332c] to-teal-700 text-white shadow-lg shadow-teal-900/30 active:scale-[0.98] transition">
+                    <span class="w-10 h-10 shrink-0 rounded-xl bg-white/15 ring-1 ring-white/20 flex items-center justify-center">
+                        <i data-lucide="log-in" class="w-5 h-5"></i>
+                    </span>
+                    <span class="flex-1 min-w-0 leading-tight">
+                        <span class="block text-base font-extrabold">{{ __('Masuk ke Akun') }}</span>
+                        <span class="block text-xs text-emerald-100/80">{{ __('Santri, wali & pengurus') }}</span>
+                    </span>
+                    <i data-lucide="arrow-right" class="w-5 h-5 shrink-0 transition-transform group-hover:translate-x-0.5"></i>
                 </a>
                 <a href="/psb/daftar" @click="mobileOpen = false"
-                    class="flex items-center justify-center gap-2 px-4 py-3 rounded-full bg-teal-700 text-white text-sm font-bold shadow-lg shadow-teal-700/25 hover:bg-teal-800 transition">
-                    <i data-lucide="user-plus" class="w-4 h-4"></i>
-                    {{ __('Daftar') }}
+                    class="flex items-center justify-center gap-2 w-full min-h-12 px-4 py-3 rounded-2xl bg-emerald-50 ring-1 ring-teal-200 text-teal-800 text-[15px] font-bold hover:bg-emerald-100 active:scale-[0.98] transition">
+                    <i data-lucide="user-plus" class="w-5 h-5"></i>
+                    {{ __('Daftar Dauroh Sekarang') }}
                 </a>
             </div>
         </div>

@@ -41,8 +41,6 @@
 
     @include('partials.footer')
 
-    @include('partials.floating-widgets')
-
     {{-- Status koneksi internet + tombol muat ulang (pojok kanan bawah) --}}
     @include('partials.status-koneksi')
     {{-- Notifikasi pojok kanan bawah (pesan sukses/error, menutup sendiri) --}}

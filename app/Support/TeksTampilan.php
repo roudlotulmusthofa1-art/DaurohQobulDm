@@ -47,7 +47,7 @@ class TeksTampilan
         'login'           => ['Halaman Login', ['resources/views/auth/']],
         'berita'          => ['Berita (landing page, halaman berita, formulir Tulis Berita)', ['resources/views/berita/', 'app/Http/Controllers/BeritaController.php', 'app/Http/Controllers/Concerns/BeritaSaya.php', 'app/Support/TulisBerita.php', 'app/Models/Berita']],
         'galeri'          => ['Galeri Foto (halaman publik & bagian landing page)', ['resources/views/galeri/', 'app/Support/Galeri.php']],
-        'beranda'         => ['Beranda publik', ['resources/views/landing', 'resources/views/layouts/app', 'resources/views/partials/navbar', 'resources/views/partials/footer', 'resources/views/partials/floating-widgets']],
+        'beranda'         => ['Beranda publik', ['resources/views/landing', 'resources/views/layouts/app', 'resources/views/partials/navbar', 'resources/views/partials/footer']],
         'bersama'         => ['Bagian bersama (lonceng, pita, tombol, dialog)', ['resources/views/']],
         'sistem'          => ['Pesan dari sistem (notifikasi, peringatan, dll.)', ['app/']],
     ];
