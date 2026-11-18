@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Asatid;
 
 use App\Http\Controllers\Concerns\BeritaSaya;
+use App\Http\Controllers\Concerns\FotoSaya;
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\PendaftaranAsatid;
@@ -24,6 +25,7 @@ use Illuminate\Support\Facades\Auth;
 class AsatidDashboardController extends Controller
 {
     use BeritaSaya; // menu Tulis Berita (berita/tulis.blade.php)
+    use FotoSaya;   // menu Kirim Foto (galeri/kirim.blade.php)
 
     /** Beranda: kartu menu */
     public function index()

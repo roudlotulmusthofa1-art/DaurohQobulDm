@@ -71,6 +71,12 @@ class NotifikasiAdmin
             'ikon' => 'koran',
             'warna' => 'emerald',
         ],
+        'foto_baru' => [
+            'judul' => 'Foto menunggu diperiksa',
+            'keterangan' => 'Asatid atau siswa mengirim foto yang menunggu ditampilkan di Galeri Foto.',
+            'ikon' => 'foto',
+            'warna' => 'rose',
+        ],
         'aktivitas_asatid' => [
             'judul' => 'Aktivitas asatid',
             'keterangan' => 'Asatid masuk/keluar, atau menyimpan, mengubah, dan menghapus data (24 jam terakhir).',
@@ -118,6 +124,7 @@ class NotifikasiAdmin
         'bed' => 'M3 7.5V18m18-6v6M3 15h18M3 12h18v-1.5A2.25 2.25 0 0018.75 8.25h-7.5V12M7.5 10.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z',
         'aktivitas' => 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
         'koran' => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z',
+        'foto' => 'M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z',
         'home' => 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
     ];
 
@@ -261,6 +268,21 @@ class NotifikasiAdmin
                     $b->created_at, 'berita_baru:' . $b->id);
             }
             $items[] = static::lainnya('berita_baru', $n, $q, 'dan :n berita lainnya menunggu diperiksa', route('admin.berita.index', ['tab' => 'menunggu']));
+        }
+
+        // Foto (album) asatid & siswa yang menunggu diperiksa (Landing Page > Galeri Foto > Kotak Masuk)
+        if (static::aktif('foto_baru') && \Illuminate\Support\Facades\Schema::connection('pusat')->hasTable('galeri_kiriman')) {
+            $q = \App\Models\GaleriKiriman::where('status', \App\Models\GaleriKiriman::MENUNGGU);
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->withCount('foto')->latest('id')->take(5)->get() as $a) {
+                $items[] = static::item('foto_baru',
+                    '<b>' . \App\Support\TeksAman::e($a->penulis_nama) . '</b> (' . \App\Support\TeksAman::e(mb_strtolower(\App\Models\Berita::labelPeran($a->penulis_peran))) . ') mengirim ' . (int) $a->foto_count . ' foto'
+                        . ($a->keterangan ? ': ' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($a->keterangan, 40)) : ''),
+                    'Buka Landing Page › Galeri Foto › Kotak Masuk',
+                    route('admin.galeri.index', ['tab' => 'masuk']),
+                    $a->created_at, 'foto_baru:' . $a->id);
+            }
+            $items[] = static::lainnya('foto_baru', $n, $q, 'dan :n kiriman foto lainnya menunggu diperiksa', route('admin.galeri.index', ['tab' => 'masuk']));
         }
 
         // Aktivitas asatid & siswa 24 jam terakhir (AktivitasPengguna): satu baris per aktivitas (5 terbaru per peran)

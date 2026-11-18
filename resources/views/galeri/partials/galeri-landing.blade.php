@@ -1,7 +1,7 @@
 {{--
     Landing page > Galeri Foto (setelah Berita Terkini, di atas Kontak).
     Slider satu baris: 4 foto di laptop, 2 di HP. Tombol ‹ ›, titik halaman, geser sendiri tiap 4,5 detik
-    (berhenti saat disentuh / kursor di atasnya). Klik foto = diperbesar. Tidak tampil bila belum ada foto.
+    (berhenti saat disentuh / kursor di atasnya). Klik foto = diperbesar (album: tombol ke halaman album). Tidak tampil bila belum ada foto.
     Variabel: $foto (koleksi baris App\Support\Galeri). Vue #galeri-landing; teks dari database lewat v-text.
 --}}
 @if ($foto->isNotEmpty())
@@ -27,6 +27,7 @@
                         class="group relative shrink-0 w-[calc(50%-6px)] sm:w-[calc(25%-9px)] aspect-[4/3] snap-start rounded-2xl overflow-hidden bg-slate-200 shadow-sm hover:shadow-xl transition-shadow">
                         <img :src="f.url" :alt="f.keterangan || ''" loading="lazy" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                         <span class="absolute inset-0 bg-linear-to-t from-black/70 via-black/0 to-black/0 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                        <span v-if="f.jumlah_foto > 1" class="absolute right-2 top-2 px-2 py-0.5 rounded-full bg-black/55 text-white text-[11px] font-bold" v-text="'▦ ' + f.jumlah_foto"></span>
                         <span v-if="f.keterangan" class="absolute inset-x-0 bottom-0 p-3 text-left text-xs sm:text-sm font-semibold text-white line-clamp-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all" v-text="f.keterangan"></span>
                     </button>
                 </div>
@@ -59,6 +60,10 @@
                     <p class="text-xs text-white/60" v-text="foto[aktif].tanggal_teks"></p>
                     <a v-if="foto[aktif].berita_url" :href="foto[aktif].berita_url"
                         class="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/15 text-xs font-bold hover:bg-white/25">{{ __('Baca berita') }} &rarr;</a>
+                    {{-- Album: buka halaman album (semua foto + suka, komentar, bagikan) --}}
+                    <a v-if="foto[aktif].album_url" :href="foto[aktif].album_url"
+                        class="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/15 text-xs font-bold hover:bg-white/25"
+                        v-text="(foto[aktif].jumlah_foto > 1 ? @js(__('Lihat album (:n foto)')).replace(':n', foto[aktif].jumlah_foto) : @js(__('Suka, komentar & bagikan'))) + ' →'"></a>
                 </div>
                 <button type="button" @click="aktif = null" aria-label="{{ __('Tutup') }}" class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 text-white text-2xl leading-none hover:bg-white/25">&times;</button>
                 <template v-if="foto.length > 1">
@@ -78,7 +83,7 @@
 </section>
 
 @php
-    $fotoSlider = $foto->map(fn ($f) => \Illuminate\Support\Arr::only($f, ['kunci', 'url', 'keterangan', 'tanggal_teks', 'berita_url']))->values();
+    $fotoSlider = $foto->map(fn ($f) => \Illuminate\Support\Arr::only($f, ['kunci', 'url', 'keterangan', 'tanggal_teks', 'berita_url', 'album_url', 'jumlah_foto']))->values();
 @endphp
 <script>
     document.addEventListener('DOMContentLoaded', () => {

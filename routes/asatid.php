@@ -65,6 +65,11 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     Route::post('/berita', [AsatidDashboardController::class, 'simpanBerita'])->middleware('throttle:20,1')->name('berita.simpan');
     Route::post('/berita/{berita:id}', [AsatidDashboardController::class, 'ubahBerita'])->middleware('throttle:20,1')->name('berita.ubah');
     Route::delete('/berita/{berita:id}', [AsatidDashboardController::class, 'hapusBerita'])->name('berita.hapus');
+    // Kirim Foto (masuk ke Admin > Landing Page > Galeri Foto > Kotak Masuk)
+    Route::get('/foto', [AsatidDashboardController::class, 'foto'])->name('foto');
+    Route::post('/foto', [AsatidDashboardController::class, 'simpanFoto'])->middleware('throttle:20,1')->name('foto.simpan');
+    Route::post('/foto/{album}', [AsatidDashboardController::class, 'ubahFoto'])->whereNumber('album')->middleware('throttle:20,1')->name('foto.ubah');
+    Route::delete('/foto/{album}', [AsatidDashboardController::class, 'hapusFoto'])->whereNumber('album')->name('foto.hapus');
     Route::post('/pesan-saya', [AsatidDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');
     Route::get('/peserta', [AsatidDashboardController::class, 'peserta'])->name('peserta');
     Route::get('/peserta/{siswa}', [AsatidDashboardController::class, 'pesertaShow'])->whereNumber('siswa')->name('peserta.show');

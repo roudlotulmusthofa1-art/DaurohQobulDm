@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Siswa;
 
 use App\Http\Controllers\Concerns\BeritaSaya;
+use App\Http\Controllers\Concerns\FotoSaya;
 use App\Http\Controllers\Controller;
 use App\Models\Munaqosah;
 use App\Models\PendaftaranSiswa;
@@ -20,6 +21,7 @@ use Illuminate\View\View;
 class SiswaDashboardController extends Controller
 {
     use BeritaSaya; // menu Tulis Berita (berita/tulis.blade.php)
+    use FotoSaya;   // menu Kirim Foto (galeri/kirim.blade.php)
 
     public function index(): View
     {

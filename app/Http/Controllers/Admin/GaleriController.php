@@ -3,89 +3,71 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Berita;
 use App\Models\BeritaFoto;
-use App\Models\GaleriFoto;
+use App\Models\GaleriKiriman;
 use App\Support\Galeri;
+use App\Support\KirimFoto;
+use App\Support\TulisBerita;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
-use Throwable;
 
 /**
- * Admin > Landing Page > Galeri Foto (hanya admin yang mengunggah).
- * - Unggahan admin: banyak foto sekaligus (diperkecil di browser) + keterangan & tanggal, ubah, hapus
+ * Admin > Landing Page > Galeri Foto. Semua foto berbentuk ALBUM (GaleriKiriman).
+ * - Kotak Masuk: album kiriman asatid & siswa yang menunggu -> Tampilkan / Tolak (+ catatan)
+ * - Album: semua album yang tampil / ditolak; admin bisa unggah album baru (langsung tampil), ubah, hapus
  * - Dari Berita: foto berita yang sudah ditampilkan otomatis masuk galeri; bisa disembunyikan / ditampilkan lagi
+ * Suka & komentar album ada di halaman /galeri/{id} (admin yang login bisa menghapus komentar di sana).
  * Semua aksi membalas JSON berisi daftar terbaru.
  */
 class GaleriController extends Controller
 {
-    /** Batas foto per sekali unggah */
-    public const MAKS_UNGGAH = 30;
-
     public function index(): View
     {
-        return view('admin.galeri.index', $this->data() + ['maksUnggah' => self::MAKS_UNGGAH]);
+        return view('admin.galeri.index', $this->data() + ['maksFoto' => GaleriKiriman::MAKS_FOTO]);
     }
 
+    /** Album baru dari admin: langsung tampil */
     public function unggah(Request $request): JsonResponse
     {
-        $data = $request->validate([
-            'foto' => ['required', 'array', 'min:1', 'max:' . self::MAKS_UNGGAH],
-            'foto.*' => ['file', 'mimes:jpg,jpeg,png,webp,gif'],
-            'keterangan' => ['nullable', 'string', 'max:200'],
-            'tanggal' => ['nullable', 'date_format:Y-m-d'],
-        ], [
-            'foto.required' => 'Pilih foto dulu.',
-            'foto.max' => 'Sekali unggah paling banyak ' . self::MAKS_UNGGAH . ' foto.',
-            'foto.*.mimes' => 'Foto harus berupa gambar JPG, PNG, WEBP, atau GIF.',
-        ]);
+        $data = KirimFoto::validasi($request);
+        $album = KirimFoto::simpan($request, $data, null, $this->pengirimAdmin() + $this->periksa(GaleriKiriman::TAMPIL));
 
-        $baru = [];
-        try {
-            foreach ($request->file('foto') as $file) {
-                $path = $file->store('galeri', Berita::DISK);
-                if (! $path) {
-                    throw new \RuntimeException('Foto gagal disimpan.');
-                }
-                $baru[] = GaleriFoto::create([
-                    'path' => $path,
-                    'keterangan' => filled($data['keterangan'] ?? null) ? trim($data['keterangan']) : null,
-                    'tanggal' => $data['tanggal'] ?? null,
-                    'diunggah_oleh' => Auth::user()->name,
-                ]);
-            }
-        } catch (Throwable $e) {
-            foreach ($baru as $f) {
-                $f->hapusSemua();
-            }
-            throw $e;
-        }
-
-        return $this->balas(__(':jumlah foto ditambahkan ke galeri.', ['jumlah' => count($baru)]));
+        return $this->balas(__('Album berisi :jumlah foto ditambahkan ke galeri.', ['jumlah' => $album->foto->count()]));
     }
 
-    public function ubah(Request $request, GaleriFoto $foto): JsonResponse
+    /** Ubah album (keterangan, tanggal, tambah / buang foto). Status tidak berubah. */
+    public function ubah(Request $request, GaleriKiriman $album): JsonResponse
     {
-        $data = $request->validate([
-            'keterangan' => ['nullable', 'string', 'max:200'],
-            'tanggal' => ['nullable', 'date_format:Y-m-d'],
-        ]);
-        $foto->update([
-            'keterangan' => filled($data['keterangan'] ?? null) ? trim($data['keterangan']) : null,
-            'tanggal' => $data['tanggal'] ?? null,
-        ]);
+        $data = KirimFoto::validasi($request, false);
+        KirimFoto::simpan($request, $data, $album);
 
-        return $this->balas(__('Foto diperbarui.'));
+        return $this->balas(__('Album diperbarui.'));
     }
 
-    public function hapus(GaleriFoto $foto): JsonResponse
+    public function tampilkan(GaleriKiriman $album): JsonResponse
     {
-        $foto->hapusSemua();
+        $album->update($this->periksa(GaleriKiriman::TAMPIL) + ['catatan_admin' => null]);
 
-        return $this->balas(__('Foto dihapus dari galeri.'));
+        return $this->balas(__('Album ditampilkan di Galeri Foto.'));
+    }
+
+    public function tolak(Request $request, GaleriKiriman $album): JsonResponse
+    {
+        $data = $request->validate(['catatan' => ['nullable', 'string', 'max:1000']]);
+        $album->update($this->periksa(GaleriKiriman::DITOLAK) + [
+            'catatan_admin' => filled($data['catatan'] ?? null) ? trim($data['catatan']) : null,
+        ]);
+
+        return $this->balas(__('Album ditolak. Pengirim bisa memperbaiki lalu mengirim ulang.'));
+    }
+
+    public function hapus(GaleriKiriman $album): JsonResponse
+    {
+        $album->hapusSemua();
+
+        return $this->balas(__('Album dihapus dari galeri.'));
     }
 
     /** Foto berita: sembunyikan dari galeri / tampilkan lagi (beritanya tidak berubah) */
@@ -96,10 +78,30 @@ class GaleriController extends Controller
         return $this->balas($foto->sembunyi_galeri ? __('Foto berita disembunyikan dari galeri.') : __('Foto berita tampil lagi di galeri.'));
     }
 
-    private function data(): array
+    private function pengirimAdmin(): array
+    {
+        $user = Auth::user();
+
+        return TulisBerita::penulis($user, $user->name);
+    }
+
+    /** Kolom pemeriksaan admin. Tampil pertama kali -> tanggal tampil diisi. */
+    private function periksa(string $status): array
     {
         return [
-            'fotoAdmin' => GaleriFoto::latest('id')->get()->map(fn ($f) => Galeri::barisAdmin($f))->values(),
+            'status' => $status,
+            'diperiksa_oleh' => Auth::user()->name,
+            'diperiksa_at' => now(),
+        ] + ($status === GaleriKiriman::TAMPIL ? ['tampil_mulai' => now()] : []);
+    }
+
+    private function data(): array
+    {
+        $album = GaleriKiriman::with('foto')->withCount('komentar')->latest('id')->get();
+
+        return [
+            'kotakMasuk' => $album->where('status', GaleriKiriman::MENUNGGU)->map->baris()->values(),
+            'album' => $album->where('status', '!=', GaleriKiriman::MENUNGGU)->map->baris()->values(),
             'fotoBerita' => Galeri::fotoBerita()->get()->map(fn ($f) => Galeri::barisBerita($f))->values(),
         ];
     }

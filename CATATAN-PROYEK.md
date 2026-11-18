@@ -197,6 +197,14 @@ Kalau awal barisnya `PS D:\laragon\...`, berarti perintah berjalan di **laptop**
 - **Publik:** `/galeri` (`GaleriController`, `galeri/index`; saringan Semua/Unggahan admin/Dari berita, kolom bertumpuk = foto utuh, klik = diperbesar + geser + Baca berita) dan bagian **Galeri Foto** di landing di bawah Berita Terkini (`galeri/partials/galeri-landing`, 8 terbaru). Link navbar HP & footer (Berita & Artikel, Galeri Foto) sudah benar.
 - Migrasi `2026_12_03_100000_create_galeri_foto_table` (database utama; perlu `migrate` + `sesi:migrate`).
 
+### Galeri Foto bentuk ALBUM + Kirim Foto asatid & siswa (2026-11-18)
+- Semua foto galeri sekarang milik **album** (`galeri_kiriman`, model `GaleriKiriman`; `galeri_foto.kiriman_id`). Foto lama otomatis jadi 1 album per foto (status tampil) oleh migrasi `2026_12_05_100000_create_galeri_kiriman_tables` (perlu `migrate` + `sesi:migrate`).
+- **Kirim Foto** (asatid `/asatid/foto`, siswa `/siswa/foto`; trait `Concerns\FotoSaya`, view `galeri/kirim`, kartu di beranda): album (maks 30 foto) + keterangan + tanggal -> status `menunggu`. Ubah/hapus selama belum tampil; ditolak -> perbaiki & kirim ulang.
+- **Admin > Galeri Foto**: tab Kotak Masuk (Tampilkan / Tolak + catatan), Album (unggah admin langsung tampil, ubah, hapus), Dari berita. Notifikasi lonceng `foto_baru`.
+- **Publik**: `/galeri` satu kotak per album (+ saringan "Kiriman asatid & siswa"), `/galeri/{id}` = album + Suka (`galeri_suka`), Bagikan, Komentar (`galeri_komentar`, balas hanya admin & pengirim; admin login bisa hapus semua komentar). Cookie `pengunjung_berita` dipakai bersama berita.
+- Aturan simpan bersama: `App\Support\KirimFoto`; mixin Vue formulir: `galeri/partials/skrip-album` (`window.MIXIN_ALBUM_FOTO`).
+- Terjemahan Arab (2026-11-18): 242 tulisan yang belum punya usulan (Berita, Galeri, Kirim Foto, beranda publik, tukar jadwal, perizinan, notifikasi) ditambahkan ke `lang/usulan-ar.json` -> sekarang semua tulisan punya usulan. Pesan sistem Kirim Foto & komentar galeri sudah dibungkus `__()`.
+
 ### Data Santri: Ketua & Wakil kamar (2026-11-06)
 - Kartu kamar > daftar anggota: tombol ⋮ per santri → Ketua / Wakil / Anggota biasa (`AdminSantriController@jabatanKamar`, rute `admin.santri.jabatan-kamar`). Lencana tampil di daftar anggota, denah kasur, dan kolom Kamar tabel.
 - Kolom `pendaftaran_siswas.jabatan_kamar` (migrasi `2026_11_14_110000_...`). Satu kamar maks 1 ketua & 1 wakil (yang lama otomatis lepas). Pindah kamar → jabatan lepas (model `booted()` + Kelola Massal).

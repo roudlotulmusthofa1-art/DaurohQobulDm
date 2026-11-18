@@ -4,18 +4,22 @@ namespace App\Support;
 
 use App\Models\Berita;
 use App\Models\BeritaFoto;
-use App\Models\GaleriFoto;
+use App\Models\GaleriKiriman;
 use Illuminate\Support\Collection;
 
 /**
- * Isi Galeri Foto = foto unggahan admin (galeri_foto) + foto berita yang sudah ditampilkan admin
- * (sedang tampil maupun selesai tayang, tidak disembunyikan dari galeri). Foto berita tidak disalin.
+ * Isi Galeri Foto (/galeri & landing page):
+ * - album yang sudah ditampilkan admin (unggahan admin + kiriman asatid & siswa), satu kotak per album (foto sampul)
+ * - foto berita yang sudah ditampilkan admin (tidak disembunyikan dari galeri). Foto berita tidak disalin.
  * Urutan: tanggal terbaru dulu.
  */
 class Galeri
 {
+    /** Saringan halaman /galeri (?asal=) */
+    public const ASAL = ['admin', 'kiriman', 'berita'];
+
     /**
-     * @param  string|null  $asal  'admin' | 'berita' | null (semua)
+     * @param  string|null  $asal  'admin' | 'kiriman' (asatid & siswa) | 'berita' | null (semua)
      * @return Collection<int, array>
      */
     public static function semua(?string $asal = null, ?int $batas = null): Collection
@@ -23,11 +27,15 @@ class Galeri
         $hasil = collect();
 
         if ($asal !== 'berita') {
-            $hasil = $hasil->concat(GaleriFoto::latest('id')->when($batas, fn ($q) => $q->take($batas))->get()
-                ->map(fn (GaleriFoto $f) => self::barisAdmin($f)));
+            $hasil = $hasil->concat(GaleriKiriman::tampil()->with('foto')->withCount('komentar')
+                ->when($asal === 'admin', fn ($q) => $q->where('penulis_peran', 'admin'))
+                ->when($asal === 'kiriman', fn ($q) => $q->where('penulis_peran', '!=', 'admin'))
+                ->latest('id')->when($batas, fn ($q) => $q->take($batas))->get()
+                ->filter(fn ($a) => $a->foto->isNotEmpty())
+                ->map(fn (GaleriKiriman $a) => self::barisAlbum($a)));
         }
 
-        if ($asal !== 'admin') {
+        if (! in_array($asal, ['admin', 'kiriman'], true)) {
             $hasil = $hasil->concat(self::fotoBerita(false)->when($batas, fn ($q) => $q->take($batas))->get()
                 ->map(fn (BeritaFoto $f) => self::barisBerita($f)));
         }
@@ -50,22 +58,27 @@ class Galeri
             ->orderBy('urutan')->orderBy('id');
     }
 
-    public static function barisAdmin(GaleriFoto $f): array
+    /** Satu album = satu kotak (foto sampul + jumlah foto) */
+    public static function barisAlbum(GaleriKiriman $a): array
     {
-        $tanggal = $f->tanggal ?? $f->created_at?->copy()->timezone(Berita::ZONA);
+        $tanggal = $a->tanggal_tampil;
 
         return [
-            'kunci' => 'a' . $f->id,
-            'id' => $f->id,
-            'asal' => 'admin',
-            'url' => $f->url,
-            'keterangan' => $f->keterangan,
-            'tanggal' => $f->tanggal?->format('Y-m-d'),
-            'tanggal_teks' => $tanggal?->locale('id')->translatedFormat('d M Y'),
-            'urut' => ($tanggal?->format('Y-m-d') ?? '') . ' ' . $f->created_at?->format('H:i:s') . sprintf('%010d', $f->id),
+            'kunci' => 'k' . $a->id,
+            'id' => $a->id,
+            'asal' => $a->penulis_peran === 'admin' ? 'admin' : 'kiriman',
+            'url' => $a->foto->first()?->url,
+            'keterangan' => $a->keterangan,
+            'tanggal_teks' => $tanggal->locale('id')->translatedFormat('d M Y'),
+            'urut' => $tanggal->format('Y-m-d') . ' ' . ($a->tampil_mulai ?? $a->created_at)?->format('H:i:s') . sprintf('%010d', $a->id),
+            'album_url' => $a->url,
+            'jumlah_foto' => $a->foto->count(),
+            'jumlah_suka' => $a->jumlah_suka,
+            'jumlah_komentar' => (int) ($a->komentar_count ?? 0),
+            'oleh' => $a->penulis_nama,
+            'peran' => Berita::labelPeran($a->penulis_peran),
             'berita_url' => null,
             'berita_judul' => null,
-            'oleh' => $f->diunggah_oleh,
         ];
     }
 
@@ -83,6 +96,7 @@ class Galeri
             'tanggal' => null,
             'tanggal_teks' => $tanggal?->locale('id')->translatedFormat('d M Y'),
             'urut' => ($tanggal?->format('Y-m-d H:i:s') ?? '') . sprintf('%010d', 9999999999 - (int) $f->urutan),
+            'album_url' => null,
             'berita_url' => $b ? route('berita.show', $b->slug) : null,
             'berita_judul' => $b?->judul,
             'sembunyi' => (bool) $f->sembunyi_galeri,

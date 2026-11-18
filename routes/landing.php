@@ -4,15 +4,17 @@ use App\Http\Controllers\Admin\PitaPengumumanController;
 use Illuminate\Support\Facades\Route;
 
 /*
-| Admin > Landing Page > Galeri Foto (hanya admin yang mengunggah)
+| Admin > Landing Page > Galeri Foto (album admin + Kotak Masuk kiriman asatid & siswa)
 | URL: /admin/landing/galeri
 */
 Route::prefix('admin/landing/galeri')->name('admin.galeri.')->middleware(['auth', 'peran:admin'])
     ->controller(\App\Http\Controllers\Admin\GaleriController::class)->group(function () {
         Route::get('/', 'index')->name('index');
         Route::post('/', 'unggah')->name('unggah');
-        Route::put('{foto}', 'ubah')->whereNumber('foto')->name('ubah');
-        Route::delete('{foto}', 'hapus')->whereNumber('foto')->name('hapus');
+        Route::post('{album}', 'ubah')->whereNumber('album')->name('ubah');            // POST (bukan PUT) karena membawa file foto
+        Route::post('{album}/tampilkan', 'tampilkan')->whereNumber('album')->name('tampilkan');
+        Route::post('{album}/tolak', 'tolak')->whereNumber('album')->name('tolak');
+        Route::delete('{album}', 'hapus')->whereNumber('album')->name('hapus');
         Route::patch('berita/{foto}', 'sembunyikan')->whereNumber('foto')->name('sembunyikan'); // foto berita: sembunyikan / tampilkan
     });
 

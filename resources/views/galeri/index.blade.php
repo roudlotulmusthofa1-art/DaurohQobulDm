@@ -1,6 +1,7 @@
 {{--
-    Galeri Foto (/galeri): foto unggahan admin + foto berita yang sudah tampil (App\Support\Galeri).
-    Saringan Semua · Unggahan admin · Dari berita (?asal=). Foto tampil utuh (tidak dipotong), klik = diperbesar + geser.
+    Galeri Foto (/galeri): album yang sudah tampil (admin, asatid & siswa) + foto berita (App\Support\Galeri).
+    Saringan Semua · Unggahan admin · Kiriman asatid & siswa · Dari berita (?asal=). Foto tampil utuh (tidak dipotong).
+    Klik album = halaman album (suka, komentar, bagikan); klik foto berita = diperbesar + geser.
     Vue #galeri-foto; teks dari database ditampilkan lewat v-text.
 --}}
 @extends('layouts.app')
@@ -21,7 +22,7 @@
 
         {{-- Saringan --}}
         <div class="mt-8 flex justify-center gap-2 flex-wrap">
-            @foreach (['' => __('Semua'), 'admin' => __('Unggahan admin'), 'berita' => __('Dari berita')] as $kunci => $nama)
+            @foreach (['' => __('Semua'), 'admin' => __('Unggahan admin'), 'kiriman' => __('Kiriman asatid & siswa'), 'berita' => __('Dari berita')] as $kunci => $nama)
             <a href="{{ route('galeri.index', array_filter(['asal' => $kunci])) }}"
                 class="px-4 py-2 rounded-full text-sm font-bold ring-1 transition-colors {{ (string) $asal === (string) $kunci ? 'bg-teal-700 text-white ring-teal-700' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50' }}">{{ $nama }}</a>
             @endforeach
@@ -33,14 +34,18 @@
         <div id="galeri-foto" class="mt-8" v-cloak>
             {{-- Kolom bertumpuk: tiap foto tampil utuh sesuai bentuk aslinya --}}
             <div class="columns-2 sm:columns-3 lg:columns-4 gap-3">
-                <button v-for="(f, i) in foto" :key="f.kunci" type="button" @click="buka(i)"
+                <component :is="f.album_url ? 'a' : 'button'" v-for="(f, i) in foto" :key="f.kunci" :href="f.album_url || undefined" :type="f.album_url ? undefined : 'button'" @click="!f.album_url && buka(i)"
                     class="group relative block w-full mb-3 break-inside-avoid rounded-xl overflow-hidden bg-slate-200 shadow-sm hover:shadow-lg transition-shadow">
                     <img :src="f.url" :alt="f.keterangan || ''" loading="lazy" class="block w-full h-auto group-hover:scale-105 transition-transform duration-500">
-                    <span v-if="f.keterangan || f.tanggal_teks" class="absolute inset-x-0 bottom-0 p-2.5 pt-8 bg-linear-to-t from-black/70 to-transparent text-left opacity-0 group-hover:opacity-100 transition-opacity">
+                    {{-- Album: jumlah foto (kanan atas) + suka & komentar (kiri bawah) --}}
+                    <span v-if="f.jumlah_foto > 1" class="absolute right-2 top-2 px-2 py-0.5 rounded-full bg-black/55 text-white text-[11px] font-bold" v-text="'▦ ' + f.jumlah_foto"></span>
+                    <span v-if="f.album_url && (f.jumlah_suka || f.jumlah_komentar)" class="absolute left-2 top-2 px-2 py-0.5 rounded-full bg-black/55 text-white text-[11px] font-bold"
+                        v-text="'♥ ' + f.jumlah_suka + '  💬 ' + f.jumlah_komentar"></span>
+                    <span v-if="f.keterangan || f.tanggal_teks || f.oleh" class="absolute inset-x-0 bottom-0 p-2.5 pt-8 bg-linear-to-t from-black/70 to-transparent text-left opacity-0 group-hover:opacity-100 transition-opacity">
                         <span class="block text-xs font-semibold text-white line-clamp-2" v-text="f.keterangan"></span>
-                        <span class="block text-[10px] text-white/70" v-text="f.tanggal_teks"></span>
+                        <span class="block text-[10px] text-white/70" v-text="[f.oleh, f.tanggal_teks].filter(Boolean).join(' · ')"></span>
                     </span>
-                </button>
+                </component>
             </div>
 
             {{-- Foto diperbesar --}}
@@ -51,6 +56,8 @@
                     <p class="text-xs text-white/60" v-text="foto[aktif].tanggal_teks"></p>
                     <a v-if="foto[aktif].berita_url" :href="foto[aktif].berita_url"
                         class="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/15 text-xs font-bold hover:bg-white/25">{{ __('Baca berita') }} &rarr;</a>
+                    <a v-if="foto[aktif].album_url" :href="foto[aktif].album_url"
+                        class="mt-2 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-white/15 text-xs font-bold hover:bg-white/25">{{ __('Buka album') }} &rarr;</a>
                 </div>
                 <button type="button" @click="aktif = null" aria-label="{{ __('Tutup') }}" class="absolute top-4 right-4 w-11 h-11 rounded-full bg-white/15 text-white text-2xl leading-none hover:bg-white/25">&times;</button>
                 <template v-if="foto.length > 1">

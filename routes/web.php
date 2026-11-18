@@ -12,8 +12,15 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 // Pengunjung landing page mengirim pesan ke admin (tombol "Hubungi Admin" / partials/hubungi-admin)
 Route::post('/hubungi-admin', [LandingController::class, 'kirimPesan'])->middleware('throttle:5,1')->name('hubungi-admin');
-// Galeri Foto (Admin > Landing Page > Galeri Foto): foto admin + foto berita yang sudah tampil
-Route::get('/galeri', [\App\Http\Controllers\GaleriController::class, 'index'])->name('galeri.index');
+// Galeri Foto (Admin > Landing Page > Galeri Foto): album admin, asatid & siswa yang sudah tampil + foto berita
+// Album: detail + suka, komentar, bagikan (tanpa login)
+Route::controller(\App\Http\Controllers\GaleriController::class)->prefix('galeri')->name('galeri.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('{album}', 'show')->whereNumber('album')->name('show');
+    Route::post('{album}/suka', 'suka')->whereNumber('album')->middleware('throttle:30,1')->name('suka');
+    Route::post('{album}/komentar', 'komentar')->whereNumber('album')->middleware('throttle:6,1')->name('komentar');
+    Route::delete('komentar/{komentar}', 'hapusKomentar')->whereNumber('komentar')->name('komentar.hapus');
+});
 // Berita (Admin > Landing Page > Berita): daftar, detail, suka, komentar (tanpa login)
 Route::controller(\App\Http\Controllers\BeritaController::class)->prefix('berita')->name('berita.')->group(function () {
     Route::get('/', 'index')->name('index');

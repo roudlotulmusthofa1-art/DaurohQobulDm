@@ -71,6 +71,11 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'peran:siswa'])->gro
     Route::post('/berita', [SiswaDashboardController::class, 'simpanBerita'])->middleware('throttle:20,1')->name('berita.simpan');
     Route::post('/berita/{berita:id}', [SiswaDashboardController::class, 'ubahBerita'])->middleware('throttle:20,1')->name('berita.ubah');
     Route::delete('/berita/{berita:id}', [SiswaDashboardController::class, 'hapusBerita'])->name('berita.hapus');
+    // Kirim Foto (masuk ke Admin > Landing Page > Galeri Foto > Kotak Masuk)
+    Route::get('/foto', [SiswaDashboardController::class, 'foto'])->name('foto');
+    Route::post('/foto', [SiswaDashboardController::class, 'simpanFoto'])->middleware('throttle:20,1')->name('foto.simpan');
+    Route::post('/foto/{album}', [SiswaDashboardController::class, 'ubahFoto'])->whereNumber('album')->middleware('throttle:20,1')->name('foto.ubah');
+    Route::delete('/foto/{album}', [SiswaDashboardController::class, 'hapusFoto'])->whereNumber('album')->name('foto.hapus');
     Route::post('/keluar', [SiswaDashboardController::class, 'logout'])->name('logout');
 });
 

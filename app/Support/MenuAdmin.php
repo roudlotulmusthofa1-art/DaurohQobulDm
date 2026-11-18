@@ -100,7 +100,7 @@ class MenuAdmin
                     ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => __('Kurikulum Terintegrasi'), 'icon' => 'layers'],
                     // Berita Terkini di landing page + Kotak Masuk tulisan asatid & siswa
                     ['route' => 'admin.berita.index',            'active' => 'admin.berita.*',            'label' => __('Berita'), 'icon' => 'newspaper'],
-                    // Galeri Foto (/galeri): unggahan admin + foto berita yang sudah tampil
+                    // Galeri Foto (/galeri): album admin + Kotak Masuk kiriman foto asatid & siswa + foto berita yang sudah tampil
                     ['route' => 'admin.galeri.index',            'active' => 'admin.galeri.*',            'label' => __('Galeri Foto'), 'icon' => 'images'],
                 ],
             ],
