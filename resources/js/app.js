@@ -23,12 +23,33 @@ window.muatPemindaiQr = () => import("html5-qrcode");
  */
 const navbarEl = document.getElementById("navbar-app");
 if (navbarEl && createApp) {
+    // Dibaca SEBELUM mount: Vue mengosongkan isi #navbar-app saat memasang template in-DOM
+    const navbarTransparan = navbarEl.querySelector("header")?.dataset.transparan === "1";
     const app = createApp({
         data() {
             return {
                 openMenu: null,
                 mobileOpen: false,
+                // Halaman sudah digulir? (navbar landing berubah dari transparan jadi kapsul)
+                tergulir: window.scrollY > 24,
+                // Navbar transparan di atas hero hanya di landing page (data-transparan="1")
+                transparan: navbarTransparan,
             };
+        },
+        computed: {
+            // Bentuk kapsul putih mengambang
+            padat() {
+                return !this.transparan || this.tergulir || this.mobileOpen;
+            },
+        },
+        mounted() {
+            window.addEventListener(
+                "scroll",
+                () => {
+                    this.tergulir = window.scrollY > 24;
+                },
+                { passive: true },
+            );
         },
         methods: {
             toggleMenu(name) {

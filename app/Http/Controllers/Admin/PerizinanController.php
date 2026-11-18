@@ -11,13 +11,14 @@ use App\Support\NamaArab;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
  * Admin > Penilaian > Perizinan (khusus admin).
  * - Tombol "Jenis Izin" : admin menulis sendiri nama jenis izin (tabel jenis_izin).
- * - Tombol "Beri Izin"  : santri -> jenis izin -> mulai (tanggal + jam) -> berakhir (tanggal + jam) -> catatan.
+ * - Tombol "Beri Izin"  : santri (boleh beberapa sekaligus / satu kelas / semua) -> jenis izin -> mulai (tanggal + jam) -> berakhir (tanggal + jam) -> catatan.
  * - Tombol "Sudah kembali" pada izin yang berjalan: mencatat waktu kembali (otomatis sekarang, bisa diubah).
  * - Tombol "Pindai Kembali": kartu QR santri dipindai kamera / alat scanner -> izinnya langsung ditandai kembali.
  * Izin yang terlambat otomatis tampil sebagai pelanggaran di Penilaian > Catatan (App\Support\DataCatatan::barisIzin).
@@ -68,14 +69,37 @@ class PerizinanController extends Controller
         return response()->json(['message' => __('Jenis izin dihapus.')]);
     }
 
-    /** POST /admin/penilaian/perizinan — beri izin satu santri */
+    /**
+     * POST /admin/penilaian/perizinan — beri izin ke satu atau beberapa santri sekaligus.
+     * Jenis, waktu & catatan sama untuk semua; tiap santri mendapat satu baris izin sendiri
+     * (jadi "Sudah kembali" & Pindai Kembali tetap per santri).
+     */
     public function simpan(Request $request): JsonResponse
     {
-        $izin = IzinSantri::create($this->isianIzin($request) + ['diberi_oleh' => Auth::id()]);
+        $ids = $request->validate([
+            'siswa_ids'   => ['required', 'array', 'min:1'],
+            'siswa_ids.*' => ['integer', 'distinct', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
+        ], [
+            'siswa_ids.required' => __('Pilih santri dulu.'),
+            'siswa_ids.min'      => __('Pilih santri dulu.'),
+            'siswa_ids.*.exists' => __('Santri tidak ditemukan / belum diterima.'),
+        ])['siswa_ids'];
+
+        $isian = $this->isianIzin($request, null, false) + ['diberi_oleh' => Auth::id()];
+
+        $izinBaru = DB::transaction(fn () => collect($ids)
+            ->map(fn ($id) => IzinSantri::create($isian + ['pendaftaran_siswa_id' => (int) $id])->id)
+            ->all());
+
+        $pesan = count($izinBaru) === 1
+            ? __('Izin :jenis untuk :nama disimpan.', ['jenis' => $isian['jenis'], 'nama' => PendaftaranSiswa::find($ids[0])?->nama_lengkap])
+            : __('Izin :jenis disimpan untuk :jumlah santri.', ['jenis' => $isian['jenis'], 'jumlah' => count($izinBaru)]);
 
         return response()->json([
-            'message' => __('Izin :jenis untuk :nama disimpan.', ['jenis' => $izin->jenis, 'nama' => $izin->siswa?->nama_lengkap]),
-            'baris'   => $this->baris($izin->id),
+            'message'    => $pesan,
+            'baris_baru' => IzinSantri::with(['siswa.kelasMaster', 'pemberi:id,name'])->whereIn('id', $izinBaru)->get()
+                ->tap(fn ($i) => NamaArab::untukUser($i->pluck('diberi_oleh')))
+                ->map(fn (IzinSantri $i) => $i->baris())->values(),
         ]);
     }
 
@@ -100,19 +124,20 @@ class PerizinanController extends Controller
      * Cek isian Beri Izin / Ubah Izin -> kolom tabel izin_santri (waktu disimpan sebagai WIB apa adanya).
      * Saat mengubah, jenis izin yang lama tetap boleh dipakai walau sudah dihapus dari pengaturan.
      */
-    private function isianIzin(Request $request, ?IzinSantri $lama = null): array
+    private function isianIzin(Request $request, ?IzinSantri $lama = null, bool $satuSantri = true): array
     {
         $jenisLama = $lama && $request->input('jenis') === $lama->jenis;
 
-        $data = $request->validate([
-            'siswa_id'        => ['required', 'integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)],
+        $data = $request->validate(array_filter([
+            // Beri Izin banyak santri: santri dicek di simpan() lewat siswa_ids
+            'siswa_id'        => $satuSantri ? ['required', 'integer', Rule::exists('pendaftaran_siswas', 'id')->where('status', PendaftaranSiswa::DITERIMA)] : null,
             'jenis'           => array_filter(['required', 'string', 'max:100', $jenisLama ? null : Rule::exists('jenis_izin', 'nama')]),
             'mulai_tanggal'   => ['required', 'date'],
             'mulai_jam'       => ['required', 'date_format:H:i'],
             'selesai_tanggal' => ['required', 'date', 'after_or_equal:mulai_tanggal'],
             'selesai_jam'     => ['required', 'date_format:H:i'],
             'catatan'         => ['nullable', 'string', 'max:5000'],
-        ], [
+        ]), [
             'siswa_id.required'              => __('Pilih santri dulu.'),
             'siswa_id.exists'                => __('Santri tidak ditemukan / belum diterima.'),
             'jenis.required'                 => __('Pilih jenis izin dulu.'),
@@ -128,8 +153,9 @@ class PerizinanController extends Controller
             throw ValidationException::withMessages(['selesai_jam' => __('Waktu berakhir harus setelah waktu mulai.')]);
         }
 
-        return [
-            'pendaftaran_siswa_id' => $data['siswa_id'],
+        return array_filter([
+            'pendaftaran_siswa_id' => $data['siswa_id'] ?? null,
+        ]) + [
             'jenis'                => $data['jenis'],
             'mulai'                => $mulai,
             'selesai'              => $selesai,

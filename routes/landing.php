@@ -4,6 +4,19 @@ use App\Http\Controllers\Admin\PitaPengumumanController;
 use Illuminate\Support\Facades\Route;
 
 /*
+| Admin > Landing Page > Galeri Foto (hanya admin yang mengunggah)
+| URL: /admin/landing/galeri
+*/
+Route::prefix('admin/landing/galeri')->name('admin.galeri.')->middleware(['auth', 'peran:admin'])
+    ->controller(\App\Http\Controllers\Admin\GaleriController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'unggah')->name('unggah');
+        Route::put('{foto}', 'ubah')->whereNumber('foto')->name('ubah');
+        Route::delete('{foto}', 'hapus')->whereNumber('foto')->name('hapus');
+        Route::patch('berita/{foto}', 'sembunyikan')->whereNumber('foto')->name('sembunyikan'); // foto berita: sembunyikan / tampilkan
+    });
+
+/*
 | Admin > Landing Page > Berita
 | URL: /admin/landing/berita   (tulisan asatid & siswa masuk ke Kotak Masuk di sini)
 */

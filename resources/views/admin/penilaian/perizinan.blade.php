@@ -210,10 +210,26 @@ $saringan = [
         </div>
 
         <div class="p-6 space-y-5">
-            {{-- 1. Santri --}}
+            {{-- 1. Santri (Beri Izin: boleh beberapa sekaligus; Ubah Izin: satu santri) --}}
             <div>
-                <p class="text-sm font-bold text-slate-700"><span class="text-slate-400">1.</span> {{ __('Nama santri') }}</p>
-                <div v-if="santriTerpilih" class="mt-2 flex items-center gap-3 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 p-2.5">
+                <p class="text-sm font-bold text-slate-700"><span class="text-slate-400">1.</span> {{ __('Nama santri') }}
+                    <span v-if="!ubahId" class="font-normal text-slate-400">{{ __('(boleh lebih dari satu)') }}</span></p>
+
+                {{-- Santri yang sudah dicentang --}}
+                <div v-if="!ubahId && (form.siswa_ids || []).length" class="mt-2 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 p-2.5">
+                    <div class="flex items-center justify-between gap-2 px-1">
+                        <span class="text-xs font-bold text-emerald-800" v-text="@js(__(':jumlah santri dipilih')).replace(':jumlah', (form.siswa_ids || []).length)"></span>
+                        <button type="button" @click="form.siswa_ids = []" class="px-2 py-1 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50">{{ __('Kosongkan') }}</button>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-1.5 max-h-28 overflow-y-auto">
+                        <span v-for="s in santriDipilih" :key="s.siswa_id" class="inline-flex items-center gap-1 rounded-full bg-white ring-1 ring-emerald-200 pl-2.5 pr-1 py-0.5 text-xs font-semibold text-slate-700">
+                            <span class="truncate max-w-[10rem]" v-text="s.siswa"></span>
+                            <button type="button" @click="centang(s.siswa_id)" title="{{ __('Batalkan') }}" class="w-5 h-5 rounded-full text-slate-400 hover:bg-rose-50 hover:text-rose-600">&times;</button>
+                        </span>
+                    </div>
+                </div>
+
+                <div v-if="ubahId && santriTerpilih" class="mt-2 flex items-center gap-3 rounded-2xl bg-emerald-50 ring-1 ring-emerald-200 p-2.5">
                     <img v-if="santriTerpilih.foto" :src="santriTerpilih.foto" alt="" class="w-10 h-10 rounded-xl object-cover">
                     <span v-else class="w-10 h-10 rounded-xl bg-emerald-600 text-white font-bold flex items-center justify-center" v-text="inisial(santriTerpilih.siswa)"></span>
                     <span class="flex-1 min-w-0">
@@ -223,11 +239,26 @@ $saringan = [
                     </span>
                     <button type="button" @click="form.siswa_id = null" class="px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-700 hover:bg-emerald-100">{{ __('Ganti') }}</button>
                 </div>
-                <template v-else>
+                <template v-if="!ubahId || !santriTerpilih">
+                    {{-- Saringan kelas + pilih semua (hanya Beri Izin) --}}
+                    <div v-if="!ubahId && kelasPilihan.length" class="mt-2 flex gap-1.5 overflow-x-auto pb-1">
+                        <button v-for="k in [''].concat(kelasPilihan)" :key="k" type="button" @click="saringKelas = k"
+                            class="shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold ring-1"
+                            :class="saringKelas === k ? 'bg-[#0b332c] text-white ring-[#0b332c]' : 'bg-white text-slate-600 ring-slate-200 hover:bg-slate-50'"
+                            v-text="k || @js(__('Semua kelas'))"></button>
+                    </div>
                     <input type="search" v-model="cariSantri" placeholder="{{ __('Cari nama / nomor santri...') }}" class="mt-2 {{ $input }}">
+                    <div v-if="!ubahId && santriCocok.length" class="mt-2 flex items-center justify-between gap-2">
+                        <button type="button" @click="pilihSemua" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 text-xs font-bold hover:bg-emerald-100"
+                            v-text="(semuaTercentang ? @js(__('Batalkan semua')) : @js(__('Pilih semua'))) + ' (' + santriCocok.length + ')'"></button>
+                        <span class="text-[11px] text-slate-400" v-text="saringKelas || @js(__('Semua kelas'))"></span>
+                    </div>
                     <ul class="mt-2 max-h-56 overflow-y-auto rounded-2xl ring-1 ring-slate-100 divide-y divide-slate-100">
                         <li v-for="s in santriCari" :key="s.siswa_id">
-                            <button type="button" @click="form.siswa_id = s.siswa_id" class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-slate-50">
+                            <button type="button" @click="ubahId ? (form.siswa_id = s.siswa_id) : centang(s.siswa_id)" class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-slate-50"
+                                :class="!ubahId && dipilih(s.siswa_id) ? 'bg-emerald-50/60' : ''">
+                                <span v-if="!ubahId" class="w-5 h-5 shrink-0 rounded-md ring-1 flex items-center justify-center text-xs font-bold"
+                                    :class="dipilih(s.siswa_id) ? 'bg-emerald-600 text-white ring-emerald-600' : 'bg-white text-transparent ring-slate-300'">✓</span>
                                 <img v-if="s.foto" :src="s.foto" alt="" class="w-8 h-8 rounded-lg object-cover">
                                 <span v-else class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 text-sm font-bold flex items-center justify-center" v-text="inisial(s.siswa)"></span>
                                 <span class="flex-1 min-w-0">
@@ -481,6 +512,7 @@ $saringan = [
                 ubahId: null,     // berisi id izin saat jendela dipakai untuk Ubah Izin
                 jenisBaru: '',
                 cariSantri: '',
+                saringKelas: '',  // Beri Izin: saring daftar santri per kelas ('' = semua)
                 form: {},
                 kembali: null, // { izin, tanggal, jam }
                 // Pindai Kembali
@@ -521,11 +553,17 @@ $saringan = [
                 },
                 izinTampil() { return this.izinCari.slice(0, this.batas); },
                 santriTerpilih() { return this.santri.find((s) => s.siswa_id === this.form.siswa_id) || null; },
-                santriCari() {
+                // Semua santri yang cocok dengan saringan kelas + pencarian (dipakai "Pilih semua")
+                santriCocok() {
                     const k = kecil(this.cariSantri.trim());
-                    const hasil = k ? this.santri.filter((s) => kecil(s.siswa).includes(k) || kecil(s.nomor).includes(k) || kecil(s.arab).includes(k)) : this.santri;
-                    return hasil.slice(0, 100);
+                    return this.santri
+                        .filter((s) => this.ubahId || !this.saringKelas || s.kelas === this.saringKelas)
+                        .filter((s) => !k || kecil(s.siswa).includes(k) || kecil(s.nomor).includes(k) || kecil(s.arab).includes(k));
                 },
+                santriCari() { return this.santriCocok.slice(0, 100); },
+                kelasPilihan() { return [...new Set(this.santri.map((s) => s.kelas).filter(Boolean))].sort(); },
+                santriDipilih() { return (this.form.siswa_ids || []).map((id) => this.santri.find((s) => s.siswa_id === id)).filter(Boolean); },
+                semuaTercentang() { return this.santriCocok.length > 0 && this.santriCocok.every((s) => this.dipilih(s.siswa_id)); },
                 lamaIzin() {
                     const f = this.form;
                     if (!f.mulai_tanggal || !f.mulai_jam || !f.selesai_tanggal || !f.selesai_jam) return '';
@@ -563,25 +601,38 @@ $saringan = [
                     const akhir = i.kembali_jam ? menit(i.kembali_tanggal, i.kembali_jam) : menit(this.detik.slice(0, 10), this.detik.slice(11, 16));
                     return lama(akhir - menit(i.selesai_tanggal, i.selesai_jam));
                 },
+                dipilih(id) { return (this.form.siswa_ids || []).includes(id); },
+                centang(id) {
+                    const ids = this.form.siswa_ids;
+                    this.form.siswa_ids = ids.includes(id) ? ids.filter((x) => x !== id) : ids.concat(id);
+                },
+                // Centang semua yang tampil (kelas + pencarian); bila sudah tercentang semua -> batalkan semuanya
+                pilihSemua() {
+                    const ids = this.santriCocok.map((s) => s.siswa_id);
+                    this.form.siswa_ids = this.semuaTercentang
+                        ? this.form.siswa_ids.filter((x) => !ids.includes(x))
+                        : [...new Set(this.form.siswa_ids.concat(ids))];
+                },
                 sedangIzin(id) { return this.izinStatus.some((i) => i.siswa_id === id && (i.status === 'sedang' || (i.status === 'terlambat' && !i.kembali_jam))); },
                 bukaIzin() {
                     const sekarang = this.detik;
                     this.ubahId = null;
                     // Jenis terakhir diingat supaya memberi izin beberapa santri berturut-turut lebih cepat
                     this.form = {
-                        siswa_id: null, jenis: this.form.jenis || '',
+                        siswa_id: null, siswa_ids: [], jenis: this.form.jenis || '',
                         mulai_tanggal: sekarang.slice(0, 10), mulai_jam: sekarang.slice(11, 16),
                         selesai_tanggal: sekarang.slice(0, 10), selesai_jam: '',
                         catatan: '',
                     };
                     this.cariSantri = '';
+                    this.saringKelas = '';
                     this.modalIzin = true;
                 },
                 // Jendela yang sama dengan Beri Izin, isiannya diambil dari izin yang dipilih
                 bukaUbah(i) {
                     this.ubahId = i.id;
                     this.form = {
-                        siswa_id: i.siswa_id, jenis: i.jenis,
+                        siswa_id: i.siswa_id, siswa_ids: [], jenis: i.jenis,
                         mulai_tanggal: i.mulai_tanggal, mulai_jam: i.mulai_jam,
                         selesai_tanggal: i.selesai_tanggal, selesai_jam: i.selesai_jam,
                         catatan: i.catatan || '',
@@ -612,7 +663,7 @@ $saringan = [
                 },
                 async simpan() {
                     const f = this.form;
-                    if (!f.siswa_id) return gagal(new Error(@js(__('Pilih santri dulu.'))));
+                    if (this.ubahId ? !f.siswa_id : !f.siswa_ids.length) return gagal(new Error(@js(__('Pilih santri dulu.'))));
                     if (!f.jenis) return gagal(new Error(@js(__('Pilih jenis izin dulu.'))));
                     this.menyimpan = true;
                     try {
@@ -620,7 +671,7 @@ $saringan = [
                             ? await kirim(RUTE.ubah.replace('__ID__', this.ubahId), 'PUT', f)
                             : await kirim(RUTE.simpan, 'POST', f);
                         if (this.ubahId) this.izin = this.izin.map((x) => (x.id === this.ubahId ? json.baris : x));
-                        else this.izin.unshift(json.baris);
+                        else this.izin.unshift(...json.baris_baru);
                         this.izin.sort((a, b) => (b.mulai_tanggal + b.mulai_jam).localeCompare(a.mulai_tanggal + a.mulai_jam) || b.id - a.id);
                         this.modalIzin = false;
                         window.notifikasi?.sukses(json.message);

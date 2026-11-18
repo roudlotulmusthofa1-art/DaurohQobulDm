@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 // Pengunjung landing page mengirim pesan ke admin (tombol "Hubungi Admin" / partials/hubungi-admin)
 Route::post('/hubungi-admin', [LandingController::class, 'kirimPesan'])->middleware('throttle:5,1')->name('hubungi-admin');
+// Galeri Foto (Admin > Landing Page > Galeri Foto): foto admin + foto berita yang sudah tampil
+Route::get('/galeri', [\App\Http\Controllers\GaleriController::class, 'index'])->name('galeri.index');
 // Berita (Admin > Landing Page > Berita): daftar, detail, suka, komentar (tanpa login)
 Route::controller(\App\Http\Controllers\BeritaController::class)->prefix('berita')->name('berita.')->group(function () {
     Route::get('/', 'index')->name('index');

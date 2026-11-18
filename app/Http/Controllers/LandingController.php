@@ -125,7 +125,10 @@ class LandingController extends Controller
         // Berita Terkini (Admin > Landing Page > Berita): 1 besar + 3 kecil
         $beritaTerkini = rescue(fn () => Berita::sedangTampil()->with('foto')->latest('tampil_mulai')->take(4)->get(), collect(), false);
 
-        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid', 'beritaTerkini'));
+        // Galeri Foto (Admin > Landing Page > Galeri Foto + foto berita yang sudah tampil): 8 terbaru
+        $galeriTerbaru = rescue(fn () => \App\Support\Galeri::semua(null, 8), collect(), false);
+
+        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid', 'beritaTerkini', 'galeriTerbaru'));
     }
 
     /**

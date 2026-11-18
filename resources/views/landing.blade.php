@@ -312,6 +312,9 @@
     {{-- ============ BERITA TERKINI ============ --}}
     @include('berita.partials.berita-terkini', ['berita' => $beritaTerkini])
 
+    {{-- ============ GALERI FOTO ============ --}}
+    @include('galeri.partials.galeri-landing', ['foto' => $galeriTerbaru])
+
     {{-- ============ HUBUNGI KAMI ============ --}}
     <section id="kontak" class="bg-linear-to-b from-white to-slate-300 py-20">
         <div class="max-w-5xl mx-auto px-6">

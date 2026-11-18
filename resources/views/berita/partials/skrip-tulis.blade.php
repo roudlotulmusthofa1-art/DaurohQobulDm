@@ -55,6 +55,7 @@
         };
         let jedaCari = null;
 
+        window.perkecilFoto = perkecil; // dipakai juga Admin > Galeri Foto
         window.MIXIN_TULIS_BERITA = {
             data() {
                 return { form: null, galat: '', sibuk: false, memproses: false, hariIni, mencariLokasi: false, cariTempat: '', usulanTempat: [] };

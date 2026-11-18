@@ -36,8 +36,8 @@
                 <p class="text-white font-bold mb-4">{{ __('Menu Cepat') }}</p>
                 <ul class="space-y-3 text-sm">
                     <li><a href="/psb/daftar" class="hover:text-teal-400 transition-colors">{{ __('Pendaftaran Santri') }}</a></li>
-                    <li><a href="#" class="hover:text-teal-400 transition-colors">{{ __('Berita & Artikel') }}</a></li>
-                    <li><a href="#" class="hover:text-teal-400 transition-colors">{{ __('Galeri Foto') }}</a></li>
+                    <li><a href="{{ route('berita.index') }}" class="hover:text-teal-400 transition-colors">{{ __('Berita & Artikel') }}</a></li>
+                    <li><a href="{{ route('galeri.index') }}" class="hover:text-teal-400 transition-colors">{{ __('Galeri Foto') }}</a></li>
                 </ul>
             </div>
 
