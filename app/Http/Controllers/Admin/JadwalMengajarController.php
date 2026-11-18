@@ -122,18 +122,23 @@ class JadwalMengajarController extends Controller
     }
 
     /**
-     * Kartu ditarik ke slot lain di tampilan Grid: "pindah" (ganti hari/jam) atau "salin" (tambah jadwal sama di hari/jam baru).
+     * Kartu ditarik ke slot lain di tampilan Grid: "pindah" (ganti hari/jam), "salin" (tambah jadwal sama di hari/jam baru),
+     * atau "tukar" (slot tujuan sudah berisi pelajaran kelas yang sama: kedua kartu bertukar tempat, kitab & ustadz ikut kartunya).
      * Langsung tersimpan; dijawab JSON supaya halaman tidak dimuat ulang.
      */
     public function geser(Request $request, JadwalMengajar $jadwal)
     {
         $data = $request->validate([
-            'mode' => ['required', Rule::in(['pindah', 'salin'])],
+            'mode' => ['required', Rule::in(['pindah', 'salin', 'tukar'])],
             'hari' => ['required', 'integer', Rule::in(array_keys(JadwalMengajar::HARI))],
             'waktu_pelajaran_id' => ['required', 'integer', Rule::exists('waktu_pelajaran', 'id')],
         ]);
         $baru = ['hari' => (int) $data['hari'], 'waktu_pelajaran_id' => (int) $data['waktu_pelajaran_id']]
             + $jadwal->only(['bulan_ajaran_id', 'kelas_id', 'kitab_id', 'user_id', 'catatan']);
+
+        if ($data['mode'] === 'tukar') {
+            return $this->tukar($jadwal, $baru['hari'], $baru['waktu_pelajaran_id']);
+        }
 
         if ($data['mode'] === 'pindah') {
             $this->cekBentrok($baru, $jadwal->id);
@@ -146,6 +151,54 @@ class JadwalMengajarController extends Controller
         $salinan = JadwalMengajar::create($baru);
 
         return response()->json(['pesan' => __('Jadwal disalin.'), 'id' => $salinan->id]);
+    }
+
+    /**
+     * Tukar tempat dua kartu satu kelas: $jadwal ke slot tujuan, kartu di slot tujuan ke slot asal $jadwal.
+     * Kartunya yang dipindah (bukan isinya), jadi riwayat seperti tanda pelajaran tetap ikut kartunya.
+     */
+    private function tukar(JadwalMengajar $jadwal, int $hari, int $waktuId)
+    {
+        $pasangan = JadwalMengajar::where('bulan_ajaran_id', $jadwal->bulan_ajaran_id)
+            ->where('kelas_id', $jadwal->kelas_id)->where('hari', $hari)->where('waktu_pelajaran_id', $waktuId)
+            ->whereKeyNot($jadwal->id)->first();
+        if (! $pasangan) {
+            throw ValidationException::withMessages(['jadwal' => __('Tidak ada pelajaran kelas ini di tempat tujuan untuk ditukar. Muat ulang halaman lalu coba lagi.')]);
+        }
+
+        $asal = ['hari' => $jadwal->hari, 'waktu_pelajaran_id' => $jadwal->waktu_pelajaran_id];
+        $tujuan = ['hari' => $hari, 'waktu_pelajaran_id' => $waktuId];
+
+        // Bentrok ustadz: ustadz kartu ini di slot tujuan, dan ustadz pasangan di slot asal (kedua kartu tidak dihitung)
+        $kecuali = [$jadwal->id, $pasangan->id];
+        foreach ([[$jadwal, $tujuan], [$pasangan, $asal]] as [$kartu, $slot]) {
+            if (! $kartu->user_id) {
+                continue;
+            }
+            $lain = JadwalMengajar::with('kelas')->where('bulan_ajaran_id', $jadwal->bulan_ajaran_id)
+                ->where('hari', $slot['hari'])->where('waktu_pelajaran_id', $slot['waktu_pelajaran_id'])
+                ->where('user_id', $kartu->user_id)->whereKeyNot($kecuali)->first();
+            if ($lain) {
+                throw ValidationException::withMessages(['jadwal' => __('Tidak bisa ditukar: :ustadz sudah mengajar di kelas :kelas pada jam itu.', [
+                    'ustadz' => $kartu->ustadz?->name ?? __('ustadz'), 'kelas' => $lain->kelas?->nama ?? '-',
+                ])]);
+            }
+        }
+
+        // Satu kelas hanya boleh satu pelajaran per jam (aturan database), jadi kartu ini diparkir dulu di hari 0
+        DB::transaction(function () use ($jadwal, $pasangan, $asal, $tujuan) {
+            $jadwal->update(['hari' => 0]);
+            $pasangan->update($asal);
+            $jadwal->update($tujuan);
+        });
+
+        return response()->json([
+            'pesan' => __('Jadwal ditukar.'),
+            'id' => $jadwal->id,
+            'pasangan_id' => $pasangan->id,
+            'pasangan_hari' => $asal['hari'],
+            'pasangan_waktu' => $asal['waktu_pelajaran_id'],
+        ]);
     }
 
     /** Ganti ustadz di seluruh jadwal bulan ini (mis. ustadz berhalangan). */

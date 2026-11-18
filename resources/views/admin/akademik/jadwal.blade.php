@@ -141,7 +141,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
     @if ($tampilan === 'grid' && $waktuList->isNotEmpty())
     <p class="mb-5 hidden lg:flex items-center gap-2 px-1 text-xs text-slate-500">
         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5"/></svg>
-        <span>{{ __('Geser kartu ke hari/jam lain, lalu pilih') }} <b>{{ __('Pindah') }}</b> {{ __('atau') }} <b>{{ __('Salin') }}</b>. {{ __('Langsung tersimpan.') }} {{ __('Klik ikon pensil untuk mengubah isi jadwal.') }}</span>
+        <span>{{ __('Geser kartu ke hari/jam lain, lalu pilih') }} <b>{{ __('Pindah') }}</b> {{ __('atau') }} <b>{{ __('Salin') }}</b>. {{ __('Bila tempat itu sudah berisi pelajaran kelas yang sama, pilih') }} <b>{{ __('Tukar') }}</b>. {{ __('Langsung tersimpan.') }} {{ __('Klik ikon pensil untuk mengubah isi jadwal.') }}</span>
     </p>
     {{-- Pita merah: ada jadwal bentrok / melebihi frekuensi (kartunya bergaris merah) --}}
     <div v-show="jumlahBentrok" style="display: none" class="flex items-center gap-2 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-800 ring-1 ring-rose-200">
@@ -229,6 +229,12 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             </p>
             <button type="button" @click="tawaran = null" title="{{ __('Batal') }}" class="rounded-lg p-1 text-slate-400 hover:bg-slate-100">✕</button>
         </div>
+        {{-- Tukar: hanya bila slot tujuan berisi pelajaran kelas yang sama --}}
+        <button v-if="tawaran.pasangan" type="button" @click="kirimGeser('tukar')" :disabled="menyimpan"
+            class="mb-1.5 w-full rounded-xl bg-amber-400 px-3 py-2 text-left text-sm font-bold text-[#0b332c] hover:bg-amber-300 disabled:opacity-50">
+            <span class="block">⇄ {{ __('Tukar') }}</span>
+            <span class="block truncate text-[11px] font-semibold opacity-80" v-text="@js(__('dengan')) + ' ' + (tawaran.pasangan.kitab || @js(__('Tanpa kitab'))) + (tawaran.pasangan.ustadz ? ' · ' + tawaran.pasangan.ustadz : '')"></span>
+        </button>
         <div class="grid grid-cols-2 gap-1.5">
             <button type="button" @click="kirimGeser('pindah')" :disabled="menyimpan"
                 class="rounded-xl bg-[#0b332c] px-3 py-2 text-sm font-bold text-white hover:bg-[#135347] disabled:opacity-50">{{ __('Pindah') }}</button>
@@ -513,14 +519,28 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                     if (!j || (j.hari === hari && j.waktu === waktu)) return;
                     this.tawaran = {
                         j, hari, waktu,
+                        // pelajaran kelas yang sama di slot tujuan (bisa ditukar)
+                        pasangan: this.jadwal.find((x) => x.hari === hari && x.waktu === waktu && x.kelas_id === j.kelas_id && x.id !== j.id) || null,
                         x: Math.min(Math.max(e.clientX, 120), window.innerWidth - 120),
-                        y: Math.min(e.clientY + 8, window.innerHeight - 140),
+                        y: Math.min(e.clientY + 8, window.innerHeight - 200),
                     };
                 },
                 // Periksa di layar sebelum dikirim: bentrok kelas, bentrok ustadz, frekuensi kitab. Hasil: pesan, atau null.
-                cekGeser(j, hari, waktu, mode) {
+                cekGeser(j, hari, waktu, mode, pasangan) {
                     const lain = this.jadwal.filter((x) => x.hari === hari && x.waktu === waktu && x.id !== j.id);
                     const namaSlot = HARI[hari] + ', ' + this.namaWaktu(waktu);
+                    // Tukar: cek ustadz kartu ini di slot tujuan & ustadz pasangan di slot asal (kedua kartu tidak dihitung)
+                    if (mode === 'tukar') {
+                        const bebas = (x) => x.id !== j.id && x.id !== pasangan.id;
+                        const cek = [[j, hari, waktu], [pasangan, j.hari, j.waktu]];
+                        for (const [k, h, w] of cek) {
+                            const sama = k.user_id && this.jadwal.find((x) => bebas(x) && x.hari === h && x.waktu === w && x.user_id === k.user_id);
+                            if (sama) {
+                                return @js(__('Tidak bisa ditukar:')) + ' ' + k.ustadz + ' ' + @js(__('sudah mengajar kelas')) + ' ' + sama.kelas + ' ' + @js(__('di')) + ' ' + HARI[h] + ', ' + this.namaWaktu(w) + '.';
+                            }
+                        }
+                        return null;
+                    }
                     if (lain.some((x) => x.kelas_id === j.kelas_id)) {
                         return @js(__('Bentrok: kelas')) + ' ' + j.kelas + ' ' + @js(__('sudah ada pelajaran di')) + ' ' + namaSlot + '.';
                     }
@@ -538,11 +558,12 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 },
                 // Pilih Pindah / Salin: cek dulu, lalu langsung simpan ke server
                 async kirimGeser(mode) {
-                    const { j, hari, waktu } = this.tawaran;
-                    const salah = this.cekGeser(j, hari, waktu, mode);
+                    const { j, hari, waktu, pasangan } = this.tawaran;
+                    const judulGagal = { salin: @js(__('Tidak bisa disalin')), tukar: @js(__('Tidak bisa ditukar')), pindah: @js(__('Tidak bisa dipindah')) }[mode];
+                    const salah = this.cekGeser(j, hari, waktu, mode, pasangan);
                     if (salah) {
                         this.tawaran = null;
-                        notifikasi.gagal(salah, mode === 'salin' ? @js(__('Tidak bisa disalin')) : @js(__('Tidak bisa dipindah')));
+                        notifikasi.gagal(salah, judulGagal);
                         return;
                     }
                     this.menyimpan = true;
@@ -555,10 +576,18 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                         const hasil = await res.json().catch(() => ({}));
                         if (!res.ok) {
                             const pesan = hasil.errors ? Object.values(hasil.errors)[0][0] : (hasil.message || @js(__('Gagal menyimpan. Muat ulang halaman lalu coba lagi.')));
-                            notifikasi.gagal(pesan, mode === 'salin' ? @js(__('Tidak bisa disalin')) : @js(__('Tidak bisa dipindah')));
+                            notifikasi.gagal(pesan, judulGagal);
                             return;
                         }
-                        if (mode === 'pindah') {
+                        if (mode === 'tukar') {
+                            const p = this.jadwal.find((x) => x.id === hasil.pasangan_id);
+                            if (p) {
+                                p.hari = hasil.pasangan_hari;
+                                p.waktu = hasil.pasangan_waktu;
+                            }
+                            j.hari = hari;
+                            j.waktu = waktu;
+                        } else if (mode === 'pindah') {
                             j.hari = hari;
                             j.waktu = waktu;
                         } else {
