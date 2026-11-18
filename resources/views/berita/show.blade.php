@@ -25,6 +25,9 @@
 @php
 $fotoUtama = $berita->foto_utama_url;
 $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
+// Perkiraan lama membaca: ± 200 kata per menit
+$jumlahKata = collect($berita->paragraf)->sum(fn ($p) => count(preg_split('/\s+/u', trim((string) $p), -1, PREG_SPLIT_NO_EMPTY)));
+$menitBaca = max(1, (int) ceil($jumlahKata / 200));
 @endphp
 
 {{-- ================= HEADER ================= --}}
@@ -34,7 +37,7 @@ $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
     @endif
     <div class="absolute inset-0 bg-linear-to-r from-[#0b332c]/85 via-[#0f4a3f]/55 to-[#0b332c]/15"></div>
 
-    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 pt-8 pb-20 sm:pt-12 sm:pb-28">terbaru
+    <div class="relative max-w-5xl mx-auto px-4 sm:px-6 pt-10 pb-24 sm:pt-14 sm:pb-32">
         <nav class="flex items-center gap-2 text-xs sm:text-sm text-white/70 min-w-0">
             <a href="{{ route('landing') }}" class="font-semibold text-white hover:underline shrink-0">{{ __('Beranda') }}</a>
             <span class="shrink-0">/</span>
@@ -42,42 +45,56 @@ $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
             <span class="shrink-0">/</span>
             <span class="truncate">{{ $berita->judul }}</span>
         </nav>
-        <h1 class="mt-5 max-w-3xl text-2xl sm:text-4xl font-extrabold leading-tight">{{ $berita->judul }}</h1>
-        @if ($berita->ringkasan)
-        <p class="mt-3 max-w-2xl text-sm sm:text-base text-white/85 leading-relaxed">{{ $berita->ringkasan }}</p>
+        @if ($berita->kategori)
+        <span class="mt-6 inline-block px-3 py-1 rounded-full bg-white/15 ring-1 ring-white/25 backdrop-blur text-[11px] font-bold tracking-widest uppercase">{{ $berita->kategori }}</span>
         @endif
+        <h1 class="mt-4 max-w-4xl text-3xl sm:text-5xl font-extrabold leading-[1.15] drop-shadow-sm">{{ $berita->judul }}</h1>
+        @if ($berita->ringkasan)
+        <p class="mt-4 max-w-2xl text-base sm:text-lg text-white/90 leading-relaxed">{{ $berita->ringkasan }}</p>
+        @endif
+
+        {{-- Penulis · tanggal · lama membaca --}}
+        <div class="mt-7 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm text-white/85">
+            @if ($berita->penulis_foto)
+            <img src="{{ $berita->penulis_foto }}" alt="" class="w-9 h-9 rounded-full object-cover ring-2 ring-white/60">
+            @else
+            <span class="w-9 h-9 rounded-full bg-white/20 ring-2 ring-white/60 text-white font-bold flex items-center justify-center">{{ mb_strtoupper(mb_substr($berita->penulis_nama, 0, 1)) }}</span>
+            @endif
+            <span class="font-bold text-white">{{ $berita->penulis_nama }}</span>
+            <span class="hidden sm:inline text-white/40">•</span>
+            <span class="w-full sm:w-auto flex items-center gap-3 whitespace-nowrap">
+                <span>{{ $berita->tanggal->locale('id')->translatedFormat('d F Y') }}</span>
+                <span class="text-white/40">•</span>
+                <span>± {{ $menitBaca }} {{ __('menit baca') }}</span>
+            </span>
+        </div>
     </div>
 </header>
 
 <div class="bg-[#f7f5f0] pb-16">
-    @include('berita.partials.pemisah', ['kelas' => 'pt-8'])
-
-    <article class="max-w-5xl mx-auto px-4 sm:px-6 mt-8">
+    <article class="relative max-w-3xl mx-auto px-4 sm:px-6 -mt-14 sm:-mt-20">
+        <div class="bg-white rounded-3xl ring-1 ring-slate-200/70 shadow-xl shadow-slate-900/5 px-5 py-7 sm:px-12 sm:py-12">
         @if ($pratinjau)
         <div class="mb-6 rounded-2xl bg-amber-50 ring-1 ring-amber-200 px-4 py-3 text-sm text-amber-800">
             <b>{{ __('Pratinjau.') }}</b> {{ __('Berita ini belum/tidak sedang tampil di landing page. Hanya admin dan penulis yang bisa membuka halaman ini.') }}
         </div>
         @endif
 
-        {{-- Label --}}
-        <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs">
-            @if ($berita->kategori)
-            <span class="px-2.5 py-1 rounded ring-1 font-bold tracking-wider uppercase {{ $berita->kelas_kategori }}">{{ $berita->kategori }}</span>
-            @endif
-            @if ($berita->lokasi)
+        {{-- Lokasi (tanggal & kategori sudah di header) --}}
+        @if ($berita->lokasi)
+        <div class="mb-5 flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
             {{-- Ada titik peta -> klik membuka Google Maps --}}
             <{{ $berita->punya_peta ? 'a' : 'span' }} @if ($berita->punya_peta) href="{{ $berita->url_maps }}" target="_blank" rel="noopener" title="{{ __('Buka di Google Maps') }}" @endif
                 class="inline-flex items-center gap-1 font-bold tracking-wider text-amber-700 {{ $berita->punya_peta ? 'hover:underline' : '' }}">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z"/></svg>
                 {{ $berita->lokasi }}
             </{{ $berita->punya_peta ? 'a' : 'span' }}>
-            @endif
-            <span class="text-slate-500">{{ $berita->tanggal->locale('id')->translatedFormat('d F Y') }}</span>
         </div>
+        @endif
 
         {{-- Galeri foto --}}
         @if ($berita->foto->isNotEmpty())
-        <div id="galeri-berita" class="mt-5">
+        <div id="galeri-berita">
             <div class="relative w-fit max-w-full mx-auto rounded-2xl overflow-hidden shadow-lg group">
                 <img :src="foto[aktif]" alt="{{ $berita->judul }}" @click="perbesar = true"
                     src="{{ $fotoUtama }}" class="block w-auto max-w-full h-auto max-h-[50vh] cursor-zoom-in">
@@ -114,11 +131,18 @@ $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
         @endif
 
         {{-- Isi --}}
-        <div class="mt-7 space-y-4 text-[15px] sm:text-base leading-relaxed text-slate-700 break-words">
+        {{-- Huruf besar & baris longgar agar nyaman dibaca; paragraf pertama sedikit lebih besar dengan huruf awal besar --}}
+        <div class="mt-8 space-y-6 text-[17px] sm:text-[19px] leading-[1.85] text-slate-800 break-words
+                    [&>p:first-child]:text-[19px] sm:[&>p:first-child]:text-[21px] [&>p:first-child]:text-slate-900
+                    [&>p:first-child]:first-letter:float-left [&>p:first-child]:first-letter:mr-3 [&>p:first-child]:first-letter:mt-1
+                    [&>p:first-child]:first-letter:text-6xl sm:[&>p:first-child]:first-letter:text-7xl [&>p:first-child]:first-letter:leading-[0.8]
+                    [&>p:first-child]:first-letter:font-extrabold [&>p:first-child]:first-letter:text-teal-700">
             @foreach ($berita->paragraf as $p)
             <p>{{ $p }}</p>
             @endforeach
         </div>
+
+        @include('berita.partials.pemisah', ['kelas' => 'mt-10'])
 
         {{-- Peta lokasi (seperti lokasi di status WA) --}}
         @if ($berita->punya_peta)
@@ -147,6 +171,7 @@ $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
                 <p class="text-xs text-teal-700 font-semibold">{{ \App\Models\Berita::labelPeran($berita->penulis_peran) }}</p>
             </div>
         </div>
+        </div>{{-- /kartu kertas --}}
 
         {{-- ================= SUKA · BAGIKAN · KOMENTAR ================= --}}
         <div id="interaksi-berita" class="mt-6" v-cloak>
@@ -218,13 +243,13 @@ $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
 
             {{-- Komentar --}}
             <section class="mt-6 {{ $kartu }} p-5 sm:p-6">
-                <h2 class="font-bold text-slate-800">{{ __('Komentar') }} <span class="text-slate-400 font-semibold" v-text="'(' + komentar.length + ')'"></span></h2>
+                <h2 class="text-lg font-bold text-slate-800">{{ __('Komentar') }} <span class="text-slate-400 font-semibold" v-text="'(' + komentar.length + ')'"></span></h2>
 
                 <form @submit.prevent="kirimKomentar" class="mt-4 space-y-3">
                     <input v-model="form.nama" type="text" maxlength="100" required placeholder="{{ __('Nama Anda') }}"
-                        class="w-full rounded-xl border border-slate-200 bg-[#fbfaf7] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500">
+                        class="w-full rounded-xl border border-slate-200 bg-[#fbfaf7] px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500">
                     <textarea ref="isiKomentar" v-model="form.isi" rows="3" maxlength="2000" required placeholder="{{ __('Tulis komentar…') }}"
-                        class="w-full rounded-xl border border-slate-200 bg-[#fbfaf7] px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500"></textarea>
+                        class="w-full rounded-xl border border-slate-200 bg-[#fbfaf7] px-4 py-2.5 text-base focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500"></textarea>
                     {{-- jebakan bot: tidak terlihat, harus kosong --}}
                     <input v-model="form.situs" type="text" tabindex="-1" autocomplete="off" class="hidden" aria-hidden="true">
                     <div class="flex items-center justify-between gap-3">
@@ -245,7 +270,7 @@ $kartu = 'bg-white rounded-2xl ring-1 ring-slate-200/70 shadow-sm';
                                     <span v-text="k.nama"></span>
                                     <span v-if="k.peran" class="ml-1.5 px-1.5 py-0.5 rounded bg-teal-600 text-white text-[10px] font-bold align-middle" v-text="k.peran"></span>
                                 </p>
-                                <p class="mt-0.5 text-sm text-slate-700 whitespace-pre-line break-words" v-text="k.isi"></p>
+                                <p class="mt-0.5 text-[15px] leading-relaxed text-slate-700 whitespace-pre-line break-words" v-text="k.isi"></p>
                             </div>
                             <p class="mt-1 ml-2 text-[11px] text-slate-400">
                                 <span v-text="k.waktu"></span>

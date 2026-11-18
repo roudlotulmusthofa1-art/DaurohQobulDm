@@ -5,7 +5,11 @@
 --}}
 @if ($berita->isNotEmpty())
 @php $utama = $berita->first(); $lain = $berita->slice(1); @endphp
-<section id="berita" class="bg-[#f7f5f0] py-20">
+<section id="berita" class="relative isolate overflow-hidden bg-linear-to-b from-[#f7f5f0] via-[#fbfaf6] to-white py-20">
+    {{-- Hiasan latar: cahaya hijau & emas + pola titik halus --}}
+    <div aria-hidden="true" class="absolute -z-10 -top-32 -left-32 w-[30rem] h-[30rem] rounded-full bg-teal-300/30 blur-3xl"></div>
+    <div aria-hidden="true" class="absolute -z-10 top-1/3 -right-40 w-[28rem] h-[28rem] rounded-full bg-amber-200/40 blur-3xl"></div>
+    <div aria-hidden="true" class="absolute -z-10 inset-0 bg-[radial-gradient(#0f766e22_1px,transparent_1px)] [background-size:22px_22px] [mask-image:radial-gradient(ellipse_at_center,black_30%,transparent_75%)]"></div>
     <div class="max-w-6xl mx-auto px-4 sm:px-6">
         <div class="text-center">
             <h2 class="text-3xl sm:text-4xl font-extrabold text-[#0b332c]">{{ __('Berita Terkini') }}</h2>

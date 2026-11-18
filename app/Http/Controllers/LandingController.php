@@ -128,10 +128,13 @@ class LandingController extends Controller
         // Berita Terkini (Admin > Landing Page > Berita): 1 besar + 3 kecil
         $beritaTerkini = rescue(fn () => Berita::sedangTampil()->with('foto')->latest('tampil_mulai')->take(4)->get(), collect(), false);
 
+        // Galeri Foto (slider di atas Kontak): 12 foto terbaru dari unggahan admin + foto berita
+        $galeriFoto = rescue(fn () => \App\Support\Galeri::semua(null, 12), collect(), false);
+
         // Kurikulum Dauroh Qobul (data dari menu Akademik): tahun ajaran > bulan > kitab
         $kurikulumDauroh = rescue(fn () => $this->kurikulumDauroh(), [], false);
 
-        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid', 'beritaTerkini', 'kurikulumDauroh'));
+        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid', 'beritaTerkini', 'kurikulumDauroh', 'galeriFoto'));
     }
 
     /**
