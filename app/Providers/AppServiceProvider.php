@@ -38,6 +38,8 @@ class AppServiceProvider extends ServiceProvider
 
         // Permintaan web membaca database & folder file milik sesi aktif (perintah artisan tetap di database utama)
         if (! $this->app->runningInConsole()) {
+            // Percayai proxy (Cloudflare/nginx) lebih awal, supaya alamat foto di storage ikut https
+            \Illuminate\Http\Request::setTrustedProxies(['REMOTE_ADDR'], \Illuminate\Http\Request::HEADER_X_FORWARDED_FOR | \Illuminate\Http\Request::HEADER_X_FORWARDED_HOST | \Illuminate\Http\Request::HEADER_X_FORWARDED_PORT | \Illuminate\Http\Request::HEADER_X_FORWARDED_PROTO);
             \App\Support\SesiAplikasi::terapkan();
         }
 

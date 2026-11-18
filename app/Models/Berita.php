@@ -143,6 +143,14 @@ class Berita extends Model
         return $f?->url;
     }
 
+    /** Foto penulis: alamat lama yang tersimpan lengkap (http://.../storage/...) disesuaikan dengan alamat yang sedang dibuka */
+    public function getPenulisFotoAttribute(?string $nilai): ?string
+    {
+        return $nilai && str_contains($nilai, '/storage/')
+            ? asset('storage/' . Str::after($nilai, '/storage/'))
+            : $nilai;
+    }
+
     /** Ringkasan untuk kartu: ringkasan penulis, atau awal isi berita */
     public function getCuplikanAttribute(): string
     {
