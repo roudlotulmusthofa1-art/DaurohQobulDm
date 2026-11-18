@@ -16,6 +16,7 @@ use Illuminate\View\View;
  * - /berita            semua berita yang sedang tampil
  * - /berita/{slug}     detail + suka, bagikan, komentar
  * Suka & komentar tanpa login. Satu browser dikenali dari cookie "pengunjung_berita" (kode acak).
+ * Balas komentar: hanya admin & penulis berita (sedang login).
  */
 class BeritaController extends Controller
 {
@@ -48,7 +49,8 @@ class BeritaController extends Controller
             'berita' => $berita,
             'pratinjau' => $pratinjau,
             'sudahSuka' => $kunci && \App\Models\BeritaSuka::where('berita_id', $berita->id)->where('kunci', $kunci)->exists(),
-            'komentar' => $berita->komentar()->take(200)->get()->map(fn ($k) => $k->baris($kunci))->all(),
+            'komentar' => $this->daftarKomentar($berita, $kunci),
+            'bolehBalas' => $this->bolehBalas($berita),
             'namaLogin' => $this->namaLogin(),
             'lainnya' => Berita::sedangTampil()->where('id', '!=', $berita->id)->with('foto')->latest('tampil_mulai')->take(3)->get(),
         ]);
@@ -79,6 +81,7 @@ class BeritaController extends Controller
         $data = $request->validate([
             'nama' => ['required', 'string', 'max:100'],
             'isi' => ['required', 'string', 'max:2000'],
+            'induk_id' => ['nullable', 'integer'], // terisi = membalas komentar
             'situs' => ['prohibited'], // jebakan bot
         ], [
             'nama.required' => 'Nama wajib diisi.',
@@ -90,7 +93,17 @@ class BeritaController extends Controller
         $kunci = $this->kunci($request) ?? Str::random(40);
         $user = Auth::user();
 
+        // Balasan: hanya admin & penulis berita, dan hanya untuk komentar utama berita ini
+        $indukId = null;
+        if (! empty($data['induk_id'])) {
+            abort_unless($this->bolehBalas($berita), 403, __('Hanya admin dan penulis berita yang bisa membalas komentar.'));
+            $induk = $berita->komentar()->whereKey($data['induk_id'])->whereNull('induk_id')->first();
+            abort_unless($induk, 422, __('Komentar yang dibalas sudah tidak ada.'));
+            $indukId = $induk->id;
+        }
+
         $berita->komentar()->create([
+            'induk_id' => $indukId,
             'nama' => trim($data['nama']),
             'isi' => trim($data['isi']),
             'user_id' => $user?->id,
@@ -100,8 +113,8 @@ class BeritaController extends Controller
         ]);
 
         return response()->json([
-            'pesan' => __('Komentar terkirim.'),
-            'komentar' => $berita->komentar()->take(200)->get()->map(fn ($k) => $k->baris($kunci))->all(),
+            'pesan' => $indukId ? __('Balasan terkirim.') : __('Komentar terkirim.'),
+            'komentar' => $this->daftarKomentar($berita, $kunci),
         ])->withCookie(cookie()->forever(self::COOKIE, $kunci));
     }
 
@@ -115,8 +128,31 @@ class BeritaController extends Controller
 
         return response()->json([
             'pesan' => __('Komentar dihapus.'),
-            'komentar' => $berita->komentar()->take(200)->get()->map(fn ($k) => $k->baris($kunci))->all(),
+            'komentar' => $this->daftarKomentar($berita, $kunci),
         ]);
+    }
+
+    /** Komentar utama (terbaru dulu) beserta balasannya */
+    private function daftarKomentar(Berita $berita, ?string $kunci): array
+    {
+        return $berita->komentar()->whereNull('induk_id')->with('balasan')->take(200)->get()
+            ->map(fn ($k) => $k->baris($kunci))->all();
+    }
+
+    /** Yang boleh membalas komentar: admin, atau penulis berita ini (siswa: sesinya juga cocok) */
+    private function bolehBalas(Berita $berita): bool
+    {
+        $user = Auth::user();
+        if (! $user) {
+            return false;
+        }
+        if ($user->role === 'admin') {
+            return true;
+        }
+
+        return $berita->penulis_peran === $user->role
+            && (int) $berita->penulis_user_id === (int) $user->id
+            && ($user->role !== 'siswa' || (int) $berita->sesi_id === (int) \App\Support\SesiAplikasi::aktif()?->id);
     }
 
     private function kunci(Request $request): ?string

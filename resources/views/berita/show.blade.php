@@ -187,7 +187,7 @@ $menitBaca = max(1, (int) ceil($jumlahKata / 200));
                     class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-slate-50">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.087.16 2.185.283 3.293.369V21l4.076-4.076a1.526 1.526 0 011.037-.443 48.282 48.282 0 005.68-.494c1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0012 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018z"/></svg>
                     {{ __('Komentar') }}
-                    <span class="text-xs font-semibold text-slate-400" v-text="komentar.length"></span>
+                    <span class="text-xs font-semibold text-slate-400" v-text="jumlahKomentar"></span>
                 </button>
                 <button type="button" @click="bukaBagikan = !bukaBagikan"
                     class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-bold text-slate-600 hover:bg-teal-50 hover:text-teal-700"
@@ -243,7 +243,7 @@ $menitBaca = max(1, (int) ceil($jumlahKata / 200));
 
             {{-- Komentar --}}
             <section class="mt-6 {{ $kartu }} p-5 sm:p-6">
-                <h2 class="text-lg font-bold text-slate-800">{{ __('Komentar') }} <span class="text-slate-400 font-semibold" v-text="'(' + komentar.length + ')'"></span></h2>
+                <h2 class="text-lg font-bold text-slate-800">{{ __('Komentar') }} <span class="text-slate-400 font-semibold" v-text="'(' + jumlahKomentar + ')'"></span></h2>
 
                 <form @submit.prevent="kirimKomentar" class="mt-4 space-y-3">
                     <input v-model="form.nama" type="text" maxlength="100" required placeholder="{{ __('Nama Anda') }}"
@@ -274,8 +274,42 @@ $menitBaca = max(1, (int) ceil($jumlahKata / 200));
                             </div>
                             <p class="mt-1 ml-2 text-[11px] text-slate-400">
                                 <span v-text="k.waktu"></span>
+                                <button v-if="bolehBalas" type="button" @click="bukaBalas(k)" class="ml-3 font-semibold hover:text-teal-700">{{ __('Balas') }}</button>
                                 <button v-if="k.milik_saya" type="button" @click="hapusKomentar(k)" class="ml-3 font-semibold hover:text-rose-600">{{ __('Hapus') }}</button>
                             </p>
+
+                            {{-- Balasan (admin & penulis berita) --}}
+                            <ul v-if="k.balasan && k.balasan.length" class="mt-3 space-y-3 pl-2 sm:pl-4 border-l-2 border-teal-100">
+                                <li v-for="b in k.balasan" :key="b.id" class="flex gap-2.5">
+                                    <span class="w-7 h-7 shrink-0 rounded-full bg-teal-600 text-white font-bold text-xs flex items-center justify-center" v-text="(b.nama || '?').charAt(0).toUpperCase()"></span>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="rounded-2xl bg-teal-50 px-3.5 py-2">
+                                            <p class="text-sm font-bold text-slate-800">
+                                                <span v-text="b.nama"></span>
+                                                <span v-if="b.peran" class="ml-1.5 px-1.5 py-0.5 rounded bg-teal-600 text-white text-[10px] font-bold align-middle" v-text="b.peran"></span>
+                                            </p>
+                                            <p class="mt-0.5 text-[15px] leading-relaxed text-slate-700 whitespace-pre-line break-words" v-text="b.isi"></p>
+                                        </div>
+                                        <p class="mt-1 ml-2 text-[11px] text-slate-400">
+                                            <span v-text="b.waktu"></span>
+                                            <button v-if="b.milik_saya" type="button" @click="hapusKomentar(b)" class="ml-3 font-semibold hover:text-rose-600">{{ __('Hapus') }}</button>
+                                        </p>
+                                    </div>
+                                </li>
+                            </ul>
+
+                            {{-- Kotak tulis balasan --}}
+                            <form v-if="bolehBalas && balas.indukId === k.id" @submit.prevent="kirimBalasan(k)" class="mt-3 space-y-2">
+                                <textarea :ref="'balas' + k.id" v-model="balas.isi" rows="2" maxlength="2000" required placeholder="{{ __('Tulis balasan…') }}"
+                                    class="w-full rounded-xl border border-slate-200 bg-[#fbfaf7] px-3.5 py-2 text-base focus:outline-none focus:ring-2 focus:ring-teal-500/40 focus:border-teal-500"></textarea>
+                                <div class="flex items-center justify-end gap-2">
+                                    <p class="mr-auto text-xs text-rose-600" v-text="balas.galat"></p>
+                                    <button type="button" @click="tutupBalas" class="px-3 py-1.5 rounded-lg text-xs font-bold text-slate-500 hover:bg-slate-100">{{ __('Batal') }}</button>
+                                    <button type="submit" :disabled="balas.sibuk"
+                                        class="px-4 py-1.5 rounded-lg bg-teal-700 text-white text-xs font-bold hover:bg-teal-800 disabled:opacity-50"
+                                        v-text="balas.sibuk ? @js(__('Mengirim…')) : @js(__('Kirim balasan'))"></button>
+                                </div>
+                            </form>
                         </div>
                     </li>
                 </ul>
@@ -337,8 +371,14 @@ $menitBaca = max(1, (int) ceil($jumlahKata / 200));
                 sibuk: false,
                 galat: '',
                 pratinjau: @json($pratinjau),
+                bolehBalas: @json($bolehBalas),
+                balas: { indukId: null, isi: '', sibuk: false, galat: '' },
             }),
             computed: {
+                // komentar + balasannya
+                jumlahKomentar() {
+                    return this.komentar.reduce((n, k) => n + 1 + (k.balasan ? k.balasan.length : 0), 0);
+                },
                 tautan() {
                     return {
                         wa: 'https://wa.me/?text=' + kode(JUDUL + '\n' + URL_BERITA),
@@ -387,6 +427,32 @@ $menitBaca = max(1, (int) ceil($jumlahKata / 200));
                         this.galat = e.message;
                     } finally {
                         this.sibuk = false;
+                    }
+                },
+                bukaBalas(k) {
+                    this.balas = { indukId: k.id, isi: '', sibuk: false, galat: '' };
+                    this.$nextTick(() => {
+                        const el = this.$refs['balas' + k.id];
+                        (Array.isArray(el) ? el[0] : el)?.focus();
+                    });
+                },
+                tutupBalas() {
+                    this.balas = { indukId: null, isi: '', sibuk: false, galat: '' };
+                },
+                async kirimBalasan(k) {
+                    this.balas.galat = '';
+                    this.balas.sibuk = true;
+                    try {
+                        const d = await this.kirim('POST', URL_BERITA + '/komentar', {
+                            nama: this.form.nama, isi: this.balas.isi, induk_id: k.id, situs: '',
+                        });
+                        this.komentar = d.komentar;
+                        this.tutupBalas();
+                        window.notifikasi?.sukses(d.pesan);
+                    } catch (e) {
+                        this.balas.galat = e.message;
+                    } finally {
+                        this.balas.sibuk = false;
                     }
                 },
                 async hapusKomentar(k) {
