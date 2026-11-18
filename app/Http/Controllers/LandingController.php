@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Berita;
+use App\Models\JadwalMengajar;
+use App\Models\Kitab;
+use App\Models\TahunAjaran;
 use App\Models\PendaftaranSiswa;
 use App\Models\PendaftaranAsatid;
 use App\Models\PesanUmum;
@@ -125,10 +128,54 @@ class LandingController extends Controller
         // Berita Terkini (Admin > Landing Page > Berita): 1 besar + 3 kecil
         $beritaTerkini = rescue(fn () => Berita::sedangTampil()->with('foto')->latest('tampil_mulai')->take(4)->get(), collect(), false);
 
-        // Galeri Foto (Admin > Landing Page > Galeri Foto + foto berita yang sudah tampil): 8 terbaru
-        $galeriTerbaru = rescue(fn () => \App\Support\Galeri::semua(null, 8), collect(), false);
+        // Kurikulum Dauroh Qobul (data dari menu Akademik): tahun ajaran > bulan > kitab
+        $kurikulumDauroh = rescue(fn () => $this->kurikulumDauroh(), [], false);
 
-        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid', 'beritaTerkini', 'galeriTerbaru'));
+        return view('landing', compact('stats', 'fitur', 'kurikulum', 'perbandingan', 'kontak', 'jumlahPeserta', 'jumlahAssatid', 'beritaTerkini', 'kurikulumDauroh'));
+    }
+
+    /**
+     * Kurikulum untuk kartu "Kurikulum Dauroh Qobul" di landing page.
+     * - Tahun ajaran & bulan: Akademik > Tahun Ajaran (yang aktif paling depan)
+     * - Kitab per bulan: Akademik > Kurikulum & Kitab (bulan ke kosong = semua bulan)
+     * - Jam per minggu: isian "Frekuensi per minggu" pada kitab
+     * - Jam berapa: jam pelajaran yang dipakai kitab itu di Jadwal Mengajar bulan tersebut
+     */
+    private function kurikulumDauroh(): array
+    {
+        $tahunList = TahunAjaran::with('bulan')->orderByDesc('is_active')->orderByDesc('tanggal_mulai')->get()
+            ->filter(fn ($t) => $t->bulan->isNotEmpty());
+
+        $kitabList = Kitab::where('is_active', true)->whereIn('tahun_ajaran_id', $tahunList->pluck('id'))->orderBy('nama')->get();
+
+        // Jam pelajaran per (bulan, kitab), diambil dari Jadwal Mengajar
+        $waktu = JadwalMengajar::with('waktu')->whereNotNull('kitab_id')
+            ->whereIn('bulan_ajaran_id', $tahunList->flatMap->bulan->pluck('id'))->get()
+            ->filter(fn ($j) => $j->waktu)
+            ->groupBy(fn ($j) => $j->bulan_ajaran_id . '-' . $j->kitab_id)
+            ->map(fn ($grup) => $grup->pluck('waktu')->unique('id')->sortBy('jam_mulai')
+                ->map(fn ($w) => $w->nama . ' · ' . $w->jam_mulai . '–' . $w->jam_selesai)->values()->all());
+
+        return $tahunList->map(fn ($t) => [
+            'id' => $t->id,
+            'nama' => $t->nama,
+            'aktif' => (bool) $t->is_active,
+            'bulan' => $t->bulan->map(fn ($b) => [
+                'id' => $b->id,
+                'urutan' => $b->urutan,
+                'nama' => $b->nama,
+                'aktif' => (bool) $b->is_active,
+                'kitab' => $kitabList->where('tahun_ajaran_id', $t->id)
+                    ->filter(fn ($k) => empty($k->bulan_ke) || in_array($b->urutan, array_map('intval', $k->bulan_ke), true))
+                    ->map(fn ($k) => [
+                        'id' => $k->id,
+                        'nama' => $k->nama,
+                        'nama_arab' => $k->nama_arab,
+                        'jam' => $k->frekuensi,
+                        'waktu' => $waktu[$b->id . '-' . $k->id] ?? [],
+                    ])->values()->all(),
+            ])->values()->all(),
+        ])->values()->all();
     }
 
     /**

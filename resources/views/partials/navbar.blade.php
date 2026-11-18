@@ -12,7 +12,6 @@ $menuNavbar = [
     'profil' => ['label' => __('Profil'), 'ikon' => 'info', 'isi' => [
         ['title' => __('Tentang Kami'), 'ket' => __('Mengenal Dauroh Qobul'), 'ikon' => 'landmark', 'url' => route('landing') . '#tentang'],
         ['title' => __('Visi & Misi'), 'ket' => __('Tujuan dan arah program'), 'ikon' => 'target', 'url' => route('landing') . '#tentang'],
-        ['title' => __('Kurikulum'), 'ket' => __('Kitab dan materi yang dipelajari'), 'ikon' => 'book-open', 'url' => '/kurikulum'],
     ]],
     'informasi' => ['label' => __('Informasi'), 'ikon' => 'newspaper', 'isi' => [
         ['title' => __('Berita & Artikel'), 'ket' => __('Kabar kegiatan terbaru'), 'ikon' => 'newspaper', 'url' => route('berita.index')],
@@ -161,7 +160,7 @@ $menuNavbar = [
                         class="flex items-center gap-3 min-h-14 px-3 py-2 rounded-2xl transition active:scale-[0.98] {{ request()->routeIs('landing') ? 'bg-white shadow-sm ring-1 ring-teal-100 text-teal-800' : 'text-slate-700 hover:bg-white' }}">
                         <span class="w-10 h-10 shrink-0 rounded-xl bg-teal-600 text-white flex items-center justify-center shadow-sm shadow-teal-600/30"><i data-lucide="house" class="w-5 h-5"></i></span>
                         <span class="flex-1 text-[15px] font-bold">{{ __('Beranda') }}</span>
-                        <i data-lucide="chevron-right" class="w-5 h-5 text-slate-300"></i>
+                        
                     </a>
 
                     @foreach ($menuNavbar as $kunci => $menu)

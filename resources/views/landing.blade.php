@@ -187,17 +187,76 @@
                         {{ __('Admin Dauroh') }} <span aria-hidden="true">→</span>
                     </a>
                 </div>
+                {{-- Kurikulum Dauroh Qobul: data dari menu Akademik (LandingController::kurikulumDauroh). Vue #kurikulum-dauroh --}}
                 <div class="rounded-2xl bg-amber-50 p-6">
                     <div class="flex items-center gap-2 text-amber-700 font-bold mb-2">
-                        <i data-lucide="book-open"></i>
-                        {{ __('Kurikulum Marhalah Ibtidaiyyah') }}
+                        <x-ribath-icon name="book-open" class="w-5 h-5" />
+                        {{ __('Kurikulum Dauroh Qobul') }}
                     </div>
-                    <p class="text-sm text-slate-600">
-                        {{ __('Aktivitas') }} <strong>03:30 - 22:30</strong> {{ __('dengan pembinaan menyeluruh') }}
-                    </p>
-                    <a href="#" class="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-amber-700">
-                        {{ __('19 Jam Pembelajaran') }} <span aria-hidden="true">→</span>
-                    </a>
+                    <div id="kurikulum-dauroh" v-cloak>
+                        <template v-if="tahun">
+                            <p class="text-sm text-slate-600">
+                                {{ __('Tahun Ajaran') }} <strong v-text="tahun.nama"></strong>
+                                · <span v-text="tahun.bulan.length"></span> {{ __('bulan') }}
+                                · <span v-text="jumlahKitab(tahun)"></span> {{ __('kitab') }}
+                            </p>
+                            <button type="button" @click="buka = true"
+                                class="inline-flex items-center gap-1 mt-3 text-sm font-semibold text-amber-700 hover:text-amber-800">
+                                {{ __('Lihat Kurikulum') }} <span aria-hidden="true">→</span>
+                            </button>
+                        </template>
+                        <p v-else class="text-sm text-slate-600">{{ __('Kurikulum akan segera diumumkan.') }}</p>
+
+                        {{-- Pop-up kurikulum --}}
+                        <div v-if="buka" class="fixed inset-0 z-80 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4" @click.self="buka = false">
+                            <div class="w-full sm:max-w-2xl max-h-[90vh] flex flex-col bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+                                <div class="flex items-start justify-between gap-4 px-6 pt-6 pb-4 border-b border-slate-100">
+                                    <div>
+                                        <p class="text-xs font-bold tracking-wider text-amber-700 uppercase">{{ __('Kurikulum') }}</p>
+                                        <h3 class="mt-1 text-xl font-extrabold text-[#0b332c]">{{ __('Kurikulum Dauroh Qobul') }}</h3>
+                                    </div>
+                                    <button type="button" @click="buka = false" class="shrink-0 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-lg leading-none" aria-label="{{ __('Tutup') }}">✕</button>
+                                </div>
+
+                                <div class="px-6 pt-4 space-y-3">
+                                    {{-- Pilih tahun ajaran (hanya bila lebih dari satu) --}}
+                                    <div v-if="daftar.length > 1" class="flex flex-wrap gap-2">
+                                        <button v-for="(t, i) in daftar" :key="t.id" type="button" @click="pilihTahun(i)"
+                                            :class="i === iTahun ? 'bg-teal-700 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'"
+                                            class="px-4 py-1.5 rounded-full text-sm font-semibold" v-text="@js(__('TA')) + ' ' + t.nama"></button>
+                                    </div>
+                                    <p v-else class="text-sm font-semibold text-slate-600">{{ __('Tahun Ajaran') }} <span v-text="tahun.nama"></span></p>
+
+                                    {{-- Pilih bulan --}}
+                                    <div class="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                                        <button v-for="(b, i) in tahun.bulan" :key="b.id" type="button" @click="iBulan = i"
+                                            :class="i === iBulan ? 'bg-amber-500 text-white' : 'bg-amber-50 text-amber-800 hover:bg-amber-100'"
+                                            class="shrink-0 px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap" v-text="@js(__('Bulan')) + ' ' + b.urutan + ' · ' + b.nama"></button>
+                                    </div>
+                                </div>
+
+                                <div class="px-6 pb-6 pt-2 overflow-y-auto">
+                                    <ul v-if="bulan && bulan.kitab.length" class="space-y-3">
+                                        <li v-for="k in bulan.kitab" :key="k.id"class="rounded-2xl ring-1 ring-slate-200 p-4">
+                                            <div class="flex flex-wrap items-baseline justify-between gap-x-3">
+                                                <p class="font-bold text-[#0b332c]" v-text="k.nama"></p>
+                                                <p v-if="k.nama_arab" class="text-lg text-slate-700" dir="rtl" v-text="k.nama_arab"></p>
+                                            </div>
+                                            <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-teal-50 text-teal-800 font-semibold">
+                                                    <x-ribath-icon name="clock" class="w-3.5 h-3.5" />
+                                                    <span v-text="k.jam + ' ' + @js(__('jam / minggu'))"></span>
+                                                </span>
+                                                <span v-for="w in k.waktu" :key="w" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-700" v-text="w"></span>
+                                                <span v-if="!k.waktu.length" class="px-2.5 py-1 rounded-full bg-slate-50 text-slate-400">{{ __('Waktu belum diatur') }}</span>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                    <p v-else class="py-8 text-center text-sm text-slate-400">{{ __('Belum ada kitab untuk bulan ini.') }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -312,9 +371,6 @@
     {{-- ============ BERITA TERKINI ============ --}}
     @include('berita.partials.berita-terkini', ['berita' => $beritaTerkini])
 
-    {{-- ============ GALERI FOTO ============ --}}
-    @include('galeri.partials.galeri-landing', ['foto' => $galeriTerbaru])
-
     {{-- ============ HUBUNGI KAMI ============ --}}
     <section id="kontak" class="bg-linear-to-b from-white to-slate-300 py-20">
         <div class="max-w-5xl mx-auto px-6">
@@ -407,5 +463,34 @@
             </div>
         </div>
     </section>
+
+    {{-- Kartu Kurikulum Dauroh Qobul: pilih tahun ajaran & bulan, tampilkan kitabnya --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const daftar = @json($kurikulumDauroh);
+            // Mulai dari bulan yang sedang aktif (kalau ada), kalau tidak bulan pertama
+            const bulanAwal = (t) => Math.max(0, (t?.bulan || []).findIndex((b) => b.aktif));
+
+            Vue.createApp({
+                data: () => ({ daftar, iTahun: 0, iBulan: bulanAwal(daftar[0]), buka: false }),
+                computed: {
+                    tahun() { return this.daftar[this.iTahun] || null; },
+                    bulan() { return this.tahun ? this.tahun.bulan[this.iBulan] : null; },
+                },
+                watch: {
+                    // Halaman di belakang pop-up tidak ikut tergulir
+                    buka(v) { document.body.style.overflow = v ? 'hidden' : ''; },
+                },
+                methods: {
+                    pilihTahun(i) { this.iTahun = i; this.iBulan = bulanAwal(this.daftar[i]); },
+                    // Jumlah kitab dalam satu tahun ajaran (kitab yang diajarkan di beberapa bulan dihitung sekali)
+                    jumlahKitab(t) { return new Set(t.bulan.flatMap((b) => b.kitab.map((k) => k.id))).size; },
+                },
+                mounted() {
+                    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') this.buka = false; });
+                },
+            }).mount('#kurikulum-dauroh');
+        });
+    </script>
 
     @endsection
