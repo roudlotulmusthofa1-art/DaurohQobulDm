@@ -4,6 +4,7 @@
 @source "../../storage/framework/views/*.php";
 @source "../**/*.blade.php";
 @source "../**/*.js";
+@source "../../app/Models/Berita.php"; /* warna label kategori berita (Berita::KELAS_WARNA) */
 
 /*
     Warna & font custom Ribath.

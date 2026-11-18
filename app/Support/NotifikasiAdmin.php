@@ -65,6 +65,12 @@ class NotifikasiAdmin
             'ikon' => 'chat',
             'warna' => 'amber',
         ],
+        'berita_baru' => [
+            'judul' => 'Berita menunggu diperiksa',
+            'keterangan' => 'Asatid atau siswa mengirim berita yang menunggu ditampilkan di landing page.',
+            'ikon' => 'koran',
+            'warna' => 'emerald',
+        ],
         'aktivitas_asatid' => [
             'judul' => 'Aktivitas asatid',
             'keterangan' => 'Asatid masuk/keluar, atau menyimpan, mengubah, dan menghapus data (24 jam terakhir).',
@@ -111,6 +117,7 @@ class NotifikasiAdmin
         'cap' => 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342',
         'bed' => 'M3 7.5V18m18-6v6M3 15h18M3 12h18v-1.5A2.25 2.25 0 0018.75 8.25h-7.5V12M7.5 10.5a1.5 1.5 0 100-3 1.5 1.5 0 000 3z',
         'aktivitas' => 'M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z',
+        'koran' => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z',
         'home' => 'M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25',
     ];
 
@@ -240,6 +247,20 @@ class NotifikasiAdmin
                     $p->created_at, 'pesan_umum:' . $p->id);
             }
             $items[] = static::lainnya('pesan_umum', $n, $q, 'dan :n pesan pengunjung lainnya', route('admin.pesan-peserta.index', ['asal' => 'umum']));
+        }
+
+        // Berita asatid & siswa yang menunggu diperiksa (Landing Page > Berita > Kotak Masuk)
+        if (static::aktif('berita_baru') && \Illuminate\Support\Facades\Schema::connection('pusat')->hasTable('berita')) {
+            $q = \App\Models\Berita::where('status', \App\Models\Berita::MENUNGGU);
+            $total += $n = (clone $q)->count();
+            foreach ((clone $q)->latest('id')->take(5)->get() as $b) {
+                $items[] = static::item('berita_baru',
+                    '<b>' . \App\Support\TeksAman::e($b->penulis_nama) . '</b> (' . \App\Support\TeksAman::e(mb_strtolower(\App\Models\Berita::labelPeran($b->penulis_peran))) . ') mengirim berita: ' . \App\Support\TeksAman::e(\Illuminate\Support\Str::limit($b->judul, 40)),
+                    'Buka Landing Page › Berita › Kotak Masuk',
+                    route('admin.berita.index', ['tab' => 'menunggu']),
+                    $b->created_at, 'berita_baru:' . $b->id);
+            }
+            $items[] = static::lainnya('berita_baru', $n, $q, 'dan :n berita lainnya menunggu diperiksa', route('admin.berita.index', ['tab' => 'menunggu']));
         }
 
         // Aktivitas asatid & siswa 24 jam terakhir (AktivitasPengguna): satu baris per aktivitas (5 terbaru per peran)

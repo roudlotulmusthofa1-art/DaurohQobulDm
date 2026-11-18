@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
     <meta name="theme-color" content="#0F766E">
+    @hasSection('meta')
+    {{-- Halaman yang punya deskripsi & gambar sendiri saat dibagikan (mis. detail berita) --}}
+    @yield('meta')
+    @else
     <meta name="description" content="{{ __('Platform digital untuk pengelolaan Pondok Pesantren Ribath Masjid Riyadh Solo. Monitoring santri, akademik, dan keuangan secara real-time.') }}">
+    @endif
     <title>@yield('title', __('Beranda - Dauroh Qobul Darul Musthofa Tarim'))</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -21,10 +26,13 @@
 
 <body class="antialiased font-sans text-slate-800 bg-white">
 
+    {{-- Halaman dengan @section('tanpaNavbar', true) (mis. detail berita) tampil tanpa pita & top bar --}}
+    @unless (View::hasSection('tanpaNavbar'))
     {{-- Pita Pengumuman (Admin > Landing Page > Pita Pengumuman) — paling atas, di atas navbar --}}
     @include('partials.pita-pengumuman')
 
     @include('partials.navbar')
+    @endunless
 
     {{-- isi halaman ikut turun setinggi Pita Pengumuman --}}
     <main style="padding-top: var(--tinggi-pita, 0px)">

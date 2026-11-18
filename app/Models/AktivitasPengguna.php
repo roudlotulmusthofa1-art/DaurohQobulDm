@@ -46,6 +46,12 @@ class AktivitasPengguna extends Model
         'asatid.tanda.lihat'                 => 'melihat tanda ganti pelajaran',
         'siswa.ganti-password.simpan'        => 'mengganti password',
         'siswa.pesan-saya.kirim'             => 'mengirim pesan ke admin',
+        'asatid.berita.simpan'               => 'mengirim berita ke admin',
+        'asatid.berita.ubah'                 => 'mengubah berita',
+        'asatid.berita.hapus'                => 'menghapus berita',
+        'siswa.berita.simpan'                => 'mengirim berita ke admin',
+        'siswa.berita.ubah'                  => 'mengubah berita',
+        'siswa.berita.hapus'                 => 'menghapus berita',
     ];
 
     public function scopeTerbaru(Builder $q): Builder

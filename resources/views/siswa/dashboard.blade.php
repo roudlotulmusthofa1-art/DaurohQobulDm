@@ -11,6 +11,13 @@ $status = [
     PendaftaranSiswa::DITOLAK => [__('Tidak diterima'), 'bg-rose-50 text-rose-700 ring-rose-100'],
 ][$siswa->status] ?? ['-', 'bg-slate-100 text-slate-500 ring-slate-200'];
 
+// Lencana kartu Tulis Berita: jumlah berita milik siswa ini yang tampil / menunggu
+$jumlahBerita = \App\Models\Berita::jumlahMilik('siswa', $user->id);
+$lencanaBerita = $jumlahBerita['tampil']
+    ? [__(':jumlah berita tampil', ['jumlah' => $jumlahBerita['tampil']]), 'bg-cyan-50 text-cyan-700 ring-cyan-100']
+    : ($jumlahBerita['menunggu']
+        ? [__(':jumlah menunggu diperiksa', ['jumlah' => $jumlahBerita['menunggu']]), 'bg-amber-50 text-amber-700 ring-amber-100']
+        : [__('Tulis berita'), 'bg-slate-100 text-slate-500 ring-slate-200']);
 $kartuMenu = [
     [
         'judul' => __('Profil'),
@@ -58,6 +65,15 @@ $kartuMenu = [
         'cahaya'=> 'bg-violet-400/30',
         'lencana' => [$jumlahPesanSaya ? __(':jumlah pesan terkirim', ['jumlah' => $jumlahPesanSaya]) : __('Tulis pesan'), 'bg-violet-50 text-violet-700 ring-violet-100'],
         'ikon'  => 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5',
+    ],
+    [
+        'judul' => __('Tulis Berita'),
+        'ket'   => __('Kirim berita kegiatan untuk landing page'),
+        'url'   => route('siswa.berita'),
+        'warna' => 'from-cyan-500 to-teal-700',
+        'cahaya'=> 'bg-cyan-400/30',
+        'lencana' => $lencanaBerita,
+        'ikon'  => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z',
     ],
     [
         'judul' => __('Ganti Password'),

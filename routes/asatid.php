@@ -60,6 +60,11 @@ Route::prefix('asatid')->name('asatid.')->middleware(['auth', 'peran:asatid'])->
     });
     Route::get('/pesan', [AsatidDashboardController::class, 'pesan'])->name('pesan'); // Pesan dari Admin
     Route::get('/pesan-saya', [AsatidDashboardController::class, 'pesanSaya'])->name('pesan-saya'); // Pesan untuk Admin
+    // Tulis Berita (masuk ke Admin > Landing Page > Berita > Kotak Masuk)
+    Route::get('/berita', [AsatidDashboardController::class, 'berita'])->name('berita');
+    Route::post('/berita', [AsatidDashboardController::class, 'simpanBerita'])->middleware('throttle:20,1')->name('berita.simpan');
+    Route::post('/berita/{berita:id}', [AsatidDashboardController::class, 'ubahBerita'])->middleware('throttle:20,1')->name('berita.ubah');
+    Route::delete('/berita/{berita:id}', [AsatidDashboardController::class, 'hapusBerita'])->name('berita.hapus');
     Route::post('/pesan-saya', [AsatidDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');
     Route::get('/peserta', [AsatidDashboardController::class, 'peserta'])->name('peserta');
     Route::get('/peserta/{siswa}', [AsatidDashboardController::class, 'pesertaShow'])->whereNumber('siswa')->name('peserta.show');

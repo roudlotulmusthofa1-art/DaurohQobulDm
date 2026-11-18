@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Asatid;
 
+use App\Http\Controllers\Concerns\BeritaSaya;
 use App\Http\Controllers\Controller;
 use App\Models\Kelas;
 use App\Models\PendaftaranAsatid;
@@ -22,6 +23,8 @@ use Illuminate\Support\Facades\Auth;
  */
 class AsatidDashboardController extends Controller
 {
+    use BeritaSaya; // menu Tulis Berita (berita/tulis.blade.php)
+
     /** Beranda: kartu menu */
     public function index()
     {
@@ -336,5 +339,13 @@ class AsatidDashboardController extends Controller
         $berikut = $hariIni->first(fn ($j) => $j->waktu->jam_mulai > $jam);
 
         return $berikut ? ['jadwal' => $berikut, 'sekarang' => false] : null;
+    }
+
+    /** Penulis untuk menu Tulis Berita (trait BeritaSaya) */
+    protected function penulisBerita(): array
+    {
+        $asatid = PendaftaranAsatid::where('user_id', Auth::id())->first();
+
+        return \App\Support\TulisBerita::penulis(Auth::user(), $asatid?->nama_lengkap, $asatid?->foto_url);
     }
 }

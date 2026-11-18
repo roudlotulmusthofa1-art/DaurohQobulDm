@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Siswa;
 
+use App\Http\Controllers\Concerns\BeritaSaya;
 use App\Http\Controllers\Controller;
 use App\Models\Munaqosah;
 use App\Models\PendaftaranSiswa;
@@ -18,6 +19,8 @@ use Illuminate\View\View;
  */
 class SiswaDashboardController extends Controller
 {
+    use BeritaSaya; // menu Tulis Berita (berita/tulis.blade.php)
+
     public function index(): View
     {
         $siswa = $this->siswa();
@@ -168,5 +171,13 @@ class SiswaDashboardController extends Controller
         }
 
         return $items;
+    }
+
+    /** Penulis untuk menu Tulis Berita (trait BeritaSaya) */
+    protected function penulisBerita(): array
+    {
+        $siswa = $this->siswa();
+
+        return \App\Support\TulisBerita::penulis(Auth::user(), $siswa->nama_lengkap, $siswa->foto_url);
     }
 }

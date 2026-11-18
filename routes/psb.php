@@ -66,6 +66,11 @@ Route::prefix('siswa')->name('siswa.')->middleware(['auth', 'peran:siswa'])->gro
     Route::get('/pesan-admin', [SiswaDashboardController::class, 'pesanAdmin'])->name('pesan-admin');
     Route::get('/pesan-saya', [SiswaDashboardController::class, 'pesanSaya'])->name('pesan-saya');
     Route::post('/pesan-saya', [SiswaDashboardController::class, 'kirimPesan'])->middleware('throttle:10,1')->name('pesan-saya.kirim');
+    // Tulis Berita (masuk ke Admin > Landing Page > Berita > Kotak Masuk)
+    Route::get('/berita', [SiswaDashboardController::class, 'berita'])->name('berita');
+    Route::post('/berita', [SiswaDashboardController::class, 'simpanBerita'])->middleware('throttle:20,1')->name('berita.simpan');
+    Route::post('/berita/{berita:id}', [SiswaDashboardController::class, 'ubahBerita'])->middleware('throttle:20,1')->name('berita.ubah');
+    Route::delete('/berita/{berita:id}', [SiswaDashboardController::class, 'hapusBerita'])->name('berita.hapus');
     Route::post('/keluar', [SiswaDashboardController::class, 'logout'])->name('logout');
 });
 

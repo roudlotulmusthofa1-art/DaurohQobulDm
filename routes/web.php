@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [LandingController::class, 'index'])->name('landing');
 // Pengunjung landing page mengirim pesan ke admin (tombol "Hubungi Admin" / partials/hubungi-admin)
 Route::post('/hubungi-admin', [LandingController::class, 'kirimPesan'])->middleware('throttle:5,1')->name('hubungi-admin');
+// Berita (Admin > Landing Page > Berita): daftar, detail, suka, komentar (tanpa login)
+Route::controller(\App\Http\Controllers\BeritaController::class)->prefix('berita')->name('berita.')->group(function () {
+    Route::get('/', 'index')->name('index');
+    Route::get('{berita}', 'show')->name('show');
+    Route::post('{berita}/suka', 'suka')->middleware('throttle:30,1')->name('suka');
+    Route::post('{berita}/komentar', 'komentar')->middleware('throttle:6,1')->name('komentar');
+    Route::delete('komentar/{komentar}', 'hapusKomentar')->whereNumber('komentar')->name('komentar.hapus');
+});
 
 // route untuk Masuk/Login
 

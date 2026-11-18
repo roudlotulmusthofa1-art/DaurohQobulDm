@@ -98,6 +98,8 @@ class MenuAdmin
                     ['route' => 'admin.landing-hero.index',      'active' => 'admin.landing-hero.*',      'label' => __('Hero & Statistik'), 'icon' => 'layout-template'],
                     ['route' => 'admin.landing-fitur.index',     'active' => 'admin.landing-fitur.*',     'label' => __('Fitur Unggulan'), 'icon' => 'sparkles'],
                     ['route' => 'admin.landing-kurikulum.index', 'active' => 'admin.landing-kurikulum.*', 'label' => __('Kurikulum Terintegrasi'), 'icon' => 'layers'],
+                    // Berita Terkini di landing page + Kotak Masuk tulisan asatid & siswa
+                    ['route' => 'admin.berita.index',            'active' => 'admin.berita.*',            'label' => __('Berita'), 'icon' => 'newspaper'],
                 ],
             ],
             [

@@ -8,7 +8,14 @@ $hariIni = now()->locale('id')->translatedFormat('l, d F Y');
 $jam = (int) now()->format('H');
 $salam = $jam < 11 ? __('Selamat pagi') : ($jam < 15 ? __('Selamat siang') : ($jam < 18 ? __('Selamat sore') : __('Selamat malam')));
 
-// Kartu menu (9 kartu = laptop 3 x 3). 'separuh' = di laptop selebar setengah baris; 'penuhHp' = di HP selebar layar.
+// Kartu menu (11 kartu = laptop 3 x 3 + 2 kartu 'separuh'). 'separuh' = di laptop selebar setengah baris; 'penuhHp' = di HP selebar layar.
+// Lencana kartu Tulis Berita: jumlah berita milik asatid ini yang tampil / menunggu
+$jumlahBerita = \App\Models\Berita::jumlahMilik('asatid', $user->id);
+$lencanaBerita = $jumlahBerita['tampil']
+    ? [__(':jumlah berita tampil', ['jumlah' => $jumlahBerita['tampil']]), 'bg-cyan-50 text-cyan-700 ring-cyan-100']
+    : ($jumlahBerita['menunggu']
+        ? [__(':jumlah menunggu diperiksa', ['jumlah' => $jumlahBerita['menunggu']]), 'bg-amber-50 text-amber-700 ring-amber-100']
+        : [__('Tulis berita'), 'bg-slate-100 text-slate-500 ring-slate-200']);
 $kartuMenu = [
     [
         'judul' => __('Profil'),
@@ -101,6 +108,16 @@ $kartuMenu = [
         'ikon'  => 'M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5',
     ],
     [
+        'judul' => __('Tulis Berita'),
+        'ket'   => __('Kirim berita kegiatan untuk landing page'),
+        'url'   => route('asatid.berita'),
+        'warna' => 'from-cyan-500 to-teal-700',
+        'cahaya'=> 'bg-cyan-400/30',
+        'lencana' => $lencanaBerita,
+        'ikon'  => 'M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25M16.5 7.5V18a2.25 2.25 0 002.25 2.25M16.5 7.5V4.875c0-.621-.504-1.125-1.125-1.125H4.125C3.504 3.75 3 4.254 3 4.875V18a2.25 2.25 0 002.25 2.25h13.5M6 7.5h3v3H6v-3z',
+        'separuh' => true, // laptop: 9 kartu 3 x 3 + baris terakhir 2 kartu (Tulis Berita & Ganti Password)
+    ],
+    [
         'judul' => __('Ganti Password'),
         'ket'   => __('Ubah password untuk masuk ke akun Anda'),
         'url'   => route('asatid.ganti-password'),
@@ -108,7 +125,8 @@ $kartuMenu = [
         'cahaya'=> 'bg-slate-400/30',
         'lencana' => [__('Keamanan akun'), 'bg-slate-100 text-slate-600 ring-slate-200'],
         'ikon'  => 'M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z',
-        'penuhHp' => true, // HP: 9 kartu di 2 kolom -> kartu terakhir selebar layar
+        'separuh' => true,
+        'penuhHp' => true, // HP: 11 kartu di 2 kolom -> kartu terakhir selebar layar
     ],
 ];
 @endphp
@@ -146,8 +164,8 @@ $kartuMenu = [
             'shadow-[0_1px_2px_rgba(16,24,40,0.04),0_12px_32px_-16px_rgba(11,51,44,0.18)]',
             'transition duration-300 hover:-translate-y-1 hover:shadow-[0_24px_48px_-20px_rgba(11,51,44,0.35)] hover:ring-emerald-200',
             // HP: 2 kolom ('penuhHp' = selebar layar). Laptop: 3 kolom; 'separuh' = setengah baris.
-            'col-span-2 lg:col-span-2' => !empty($k['penuhHp']) && empty($k['separuh']),
-            'lg:col-span-2' => empty($k['penuhHp']) && empty($k['separuh']),
+            'col-span-2' => !empty($k['penuhHp']),
+            'lg:col-span-2' => empty($k['separuh']),
             'lg:col-span-3' => !empty($k['separuh']),
         ])>
         {{-- cahaya warna di pojok --}}

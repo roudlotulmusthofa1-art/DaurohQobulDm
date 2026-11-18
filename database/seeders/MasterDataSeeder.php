@@ -76,7 +76,6 @@ class MasterDataSeeder extends Seeder
             ['nama' => 'Pengumuman', 'warna' => 'bg-amber-100'],
             ['nama' => 'Kajian',     'warna' => 'bg-blue-100'],
             ['nama' => 'Prestasi',   'warna' => 'bg-violet-100'],
-            ['nama' => 'Alumni',     'warna' => 'bg-pink-100'],
         ]);
 
         $this->command?->info('Master Data contoh: 9 menu × 5 data.');

@@ -4,6 +4,23 @@ use App\Http\Controllers\Admin\PitaPengumumanController;
 use Illuminate\Support\Facades\Route;
 
 /*
+| Admin > Landing Page > Berita
+| URL: /admin/landing/berita   (tulisan asatid & siswa masuk ke Kotak Masuk di sini)
+*/
+Route::prefix('admin/landing/berita')->name('admin.berita.')->middleware(['auth', 'peran:admin'])
+    ->controller(\App\Http\Controllers\Admin\BeritaController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
+        Route::post('/', 'store')->name('store');
+        Route::post('{berita:id}', 'update')->name('update');            // POST (bukan PUT) karena membawa file foto
+        Route::post('{berita:id}/tampilkan', 'tampilkan')->name('tampilkan');
+        Route::post('{berita:id}/turunkan', 'turunkan')->name('turunkan');
+        Route::post('{berita:id}/tolak', 'tolak')->name('tolak');
+        Route::delete('{berita:id}', 'destroy')->name('destroy');
+        Route::get('{berita:id}/komentar', 'komentar')->name('komentar');
+        Route::delete('komentar/{komentar}', 'hapusKomentar')->name('komentar.hapus');
+    });
+
+/*
 | Admin > Landing Page > Pita Pengumuman
 | URL: /admin/landing/pita-pengumuman
 */
