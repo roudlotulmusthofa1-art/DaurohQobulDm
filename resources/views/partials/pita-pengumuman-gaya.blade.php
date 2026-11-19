@@ -5,18 +5,18 @@
 --}}
 <script>
     window.PITA_GAYA = {
-        hijau: { nama: @js(__('Hijau')), contoh: 'bg-emerald-700', latar: 'bg-linear-to-r from-emerald-900 via-teal-700 to-emerald-900 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-amber-400 text-emerald-950 hover:bg-amber-300', titik: 'bg-amber-300' },
-        emas:  { nama: @js(__('Emas')),  contoh: 'bg-amber-500',   latar: 'bg-linear-to-r from-amber-500 via-yellow-400 to-amber-500 text-amber-950', lencana: 'bg-amber-950/10 ring-1 ring-amber-950/20', kotak: 'bg-amber-950/15', tombol: 'bg-amber-950 text-amber-50 hover:bg-amber-900', titik: 'bg-amber-950' },
-        biru:  { nama: @js(__('Biru')),  contoh: 'bg-blue-700',    latar: 'bg-linear-to-r from-sky-800 via-blue-700 to-indigo-800 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-blue-800 hover:bg-blue-50', titik: 'bg-sky-300' },
-        merah: { nama: @js(__('Merah')), contoh: 'bg-rose-600',    latar: 'bg-linear-to-r from-rose-700 via-red-600 to-rose-700 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-rose-700 hover:bg-rose-50', titik: 'bg-yellow-300' },
-        ungu:  { nama: @js(__('Ungu')),  contoh: 'bg-violet-700',  latar: 'bg-linear-to-r from-violet-800 via-purple-700 to-fuchsia-800 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-violet-800 hover:bg-violet-50', titik: 'bg-fuchsia-300' },
-        gelap: { nama: @js(__('Gelap')), contoh: 'bg-slate-900',   latar: 'bg-linear-to-r from-slate-950 via-slate-800 to-slate-950 text-white', lencana: 'bg-white/10 ring-1 ring-white/20', kotak: 'bg-white/10', tombol: 'bg-emerald-400 text-slate-950 hover:bg-emerald-300', titik: 'bg-emerald-400' },
+        hijau: { nama: @js(__('Hijau')), contoh: 'bg-emerald-700', latar: 'bg-linear-to-r from-emerald-900 via-teal-700 to-emerald-900 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-amber-400 text-emerald-950 hover:bg-amber-300', titik: 'bg-amber-300', aksen: 'bg-emerald-600 text-white', aksenTombol: 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-700/30', garis: 'bg-emerald-500' },
+        emas:  { nama: @js(__('Emas')),  contoh: 'bg-amber-500',   latar: 'bg-linear-to-r from-amber-500 via-yellow-400 to-amber-500 text-amber-950', lencana: 'bg-amber-950/10 ring-1 ring-amber-950/20', kotak: 'bg-amber-950/15', tombol: 'bg-amber-950 text-amber-50 hover:bg-amber-900', titik: 'bg-amber-950', aksen: 'bg-amber-400 text-amber-950', aksenTombol: 'bg-amber-500 text-amber-950 hover:bg-amber-400 shadow-amber-600/30', garis: 'bg-amber-400' },
+        biru:  { nama: @js(__('Biru')),  contoh: 'bg-blue-700',    latar: 'bg-linear-to-r from-sky-800 via-blue-700 to-indigo-800 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-blue-800 hover:bg-blue-50', titik: 'bg-sky-300', aksen: 'bg-blue-600 text-white', aksenTombol: 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-700/30', garis: 'bg-blue-500' },
+        merah: { nama: @js(__('Merah')), contoh: 'bg-rose-600',    latar: 'bg-linear-to-r from-rose-700 via-red-600 to-rose-700 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-rose-700 hover:bg-rose-50', titik: 'bg-yellow-300', aksen: 'bg-rose-600 text-white', aksenTombol: 'bg-rose-600 text-white hover:bg-rose-700 shadow-rose-700/30', garis: 'bg-rose-500' },
+        ungu:  { nama: @js(__('Ungu')),  contoh: 'bg-violet-700',  latar: 'bg-linear-to-r from-violet-800 via-purple-700 to-fuchsia-800 text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-violet-800 hover:bg-violet-50', titik: 'bg-fuchsia-300', aksen: 'bg-violet-600 text-white', aksenTombol: 'bg-violet-600 text-white hover:bg-violet-700 shadow-violet-700/30', garis: 'bg-violet-500' },
+        gelap: { nama: @js(__('Gelap')), contoh: 'bg-slate-900',   latar: 'bg-linear-to-r from-slate-950 via-slate-800 to-slate-950 text-white', lencana: 'bg-white/10 ring-1 ring-white/20', kotak: 'bg-white/10', tombol: 'bg-emerald-400 text-slate-950 hover:bg-emerald-300', titik: 'bg-emerald-400', aksen: 'bg-slate-900 text-white', aksenTombol: 'bg-slate-900 text-white hover:bg-slate-800 shadow-slate-900/30', garis: 'bg-emerald-400' },
     };
 
     // Warna sendiri (latar dari kode warna admin): kelas tulisan & tombol mengikuti terang/gelapnya warna
     window.PITA_GAYA_SENDIRI = {
-        gelap:  { nama: @js(__('Warna sendiri')), contoh: '', latar: 'text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-slate-900 hover:bg-slate-100', titik: 'bg-white' },
-        terang: { nama: @js(__('Warna sendiri')), contoh: '', latar: 'text-slate-900', lencana: 'bg-black/10 ring-1 ring-black/15', kotak: 'bg-black/10', tombol: 'bg-slate-900 text-white hover:bg-slate-800', titik: 'bg-slate-900' },
+        gelap:  { nama: @js(__('Warna sendiri')), contoh: '', latar: 'text-white', lencana: 'bg-white/15 ring-1 ring-white/25', kotak: 'bg-black/25', tombol: 'bg-white text-slate-900 hover:bg-slate-100', titik: 'bg-white', aksen: '', aksenTombol: 'hover:brightness-110', garis: '' },
+        terang: { nama: @js(__('Warna sendiri')), contoh: '', latar: 'text-slate-900', lencana: 'bg-black/10 ring-1 ring-black/15', kotak: 'bg-black/10', tombol: 'bg-slate-900 text-white hover:bg-slate-800', titik: 'bg-slate-900', aksen: '', aksenTombol: 'hover:brightness-95', garis: '' },
     };
 
     // Ikon per jenis (gaya Heroicons outline)
@@ -52,6 +52,31 @@
                 if (p.warna !== 'sendiri') return {};
                 const hex = /^#[0-9a-f]{6}$/i.test(p.warna_hex || '') ? p.warna_hex : '#0f766e';
                 return { background: 'linear-gradient(90deg, ' + hex + ', color-mix(in srgb, ' + hex + ' 72%, black))' };
+            },
+            // Warna aksen (lencana, tombol, garis sisa waktu) untuk warna sendiri; warna bawaan pakai kelas Tailwind
+            aksenPita(p) {
+                if (p.warna !== 'sendiri') return {};
+                const hex = /^#[0-9a-f]{6}$/i.test(p.warna_hex || '') ? p.warna_hex : '#0f766e';
+                return { background: hex, color: this.terangPita(p) ? '#0f172a' : '#ffffff' };
+            },
+            // Hitung mundur per kotak: { hari, jam, menit, detik } (dua digit)
+            kotakPita(p) {
+                const target = Date.parse(this.fasePita(p) === 'akan' ? p.mulai : p.selesai);
+                const detik = isNaN(target) ? 0 : Math.max(0, Math.floor((target - this.sekarangPita) / 1000));
+                const dua = (n) => String(n).padStart(2, '0');
+                return {
+                    hari: Math.floor(detik / 86400),
+                    jam: dua(Math.floor((detik % 86400) / 3600)),
+                    menit: dua(Math.floor((detik % 3600) / 60)),
+                    detik: dua(detik % 60),
+                };
+            },
+            // Sisa waktu acara yang sedang berlangsung, dalam persen (null bila tidak bisa dihitung)
+            persenPita(p) {
+                const mulai = Date.parse(p.mulai);
+                const selesai = Date.parse(p.selesai);
+                if (this.fasePita(p) !== 'berlangsung' || isNaN(mulai) || isNaN(selesai) || selesai <= mulai) return null;
+                return Math.max(0, Math.min(100, ((selesai - this.sekarangPita) / (selesai - mulai)) * 100));
             },
             ikonPita(p) {
                 return window.PITA_IKON[p.jenis] || window.PITA_IKON.info;

@@ -7,7 +7,7 @@
     {{-- kilau lembut --}}
     <div class="pointer-events-none absolute inset-0 opacity-25 bg-[radial-gradient(circle_at_12%_50%,rgba(255,255,255,0.35),transparent_35%)]"></div>
 
-    <div class="relative max-w-7xl mx-auto pl-4 sm:pl-6 lg:pl-8 py-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[13px]"
+    <div class="relative max-w-7xl mx-auto pl-4 sm:pl-6 lg:pl-8 py-2 flex flex-wrap lg:flex-nowrap items-center lg:justify-center gap-x-4 gap-y-1.5 text-[13px]"
         :class="bisaTutup || banyakPita > 1 ? 'pr-20 sm:pr-24' : 'pr-4 sm:pr-6'">
 
         {{-- Lencana jenis --}}
@@ -21,7 +21,7 @@
         </span>
 
         {{-- Judul + keterangan + tanggal --}}
-        <span class="min-w-0 flex-1 basis-64 leading-snug">
+        <span class="min-w-0 flex-1 basis-64 lg:flex-initial lg:basis-auto leading-snug">
             <span class="font-bold" v-text="pita.judul || @js(__('Judul pengumuman'))"></span>
             <span v-if="pita.keterangan" class="opacity-90" v-text="' — ' + pita.keterangan"></span>
             <span class="flex items-center gap-1 text-[12px] opacity-80 mt-0.5">
@@ -31,10 +31,24 @@
         </span>
 
         {{-- Hitung mundur --}}
-        <span v-if="pita.hitung_mundur" class="inline-flex items-center gap-1.5 shrink-0">
-            <span class="text-[11px] opacity-80" v-text="labelSisaPita(pita)"></span>
-            <span v-if="sisaPita(pita).hari > 0" class="rounded-md px-1.5 py-0.5 font-bold tabular-nums" :class="gayaPita(pita).kotak" v-text="sisaPita(pita).hari + ' ' + @js(__('hari'))"></span>
-            <span class="rounded-md px-1.5 py-0.5 font-bold font-mono tabular-nums" :class="gayaPita(pita).kotak" v-text="sisaPita(pita).jam"></span>
+        <span v-if="pita.hitung_mundur" class="inline-flex items-center gap-1 shrink-0">
+            <span class="text-[10px] leading-tight opacity-80 max-w-[3.6rem] mr-0.5" v-text="labelSisaPita(pita)"></span>
+            <span v-if="kotakPita(pita).hari > 0" class="flex flex-col items-center min-w-[2.1rem] rounded-lg px-1 py-0.5" :class="gayaPita(pita).kotak">
+                <span class="text-[13px] font-bold font-mono tabular-nums leading-none" v-text="kotakPita(pita).hari"></span>
+                <span class="text-[9px] uppercase tracking-wide leading-none mt-0.5 opacity-75">{{ __('hari') }}</span>
+            </span>
+            <span class="flex flex-col items-center min-w-[2.1rem] rounded-lg px-1 py-0.5" :class="gayaPita(pita).kotak">
+                <span class="text-[13px] font-bold font-mono tabular-nums leading-none" v-text="kotakPita(pita).jam"></span>
+                <span class="text-[9px] uppercase tracking-wide leading-none mt-0.5 opacity-75">{{ __('jam') }}</span>
+            </span>
+            <span class="flex flex-col items-center min-w-[2.1rem] rounded-lg px-1 py-0.5" :class="gayaPita(pita).kotak">
+                <span class="text-[13px] font-bold font-mono tabular-nums leading-none" v-text="kotakPita(pita).menit"></span>
+                <span class="text-[9px] uppercase tracking-wide leading-none mt-0.5 opacity-75">{{ __('mnt') }}</span>
+            </span>
+            <span class="flex flex-col items-center min-w-[2.1rem] rounded-lg px-1 py-0.5" :class="gayaPita(pita).kotak">
+                <span class="text-[13px] font-bold font-mono tabular-nums leading-none" v-text="kotakPita(pita).detik"></span>
+                <span class="text-[9px] uppercase tracking-wide leading-none mt-0.5 opacity-75">{{ __('dtk') }}</span>
+            </span>
         </span>
 
         {{-- Tombol --}}

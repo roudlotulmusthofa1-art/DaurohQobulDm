@@ -39,6 +39,8 @@ $pitaRingkas = $pitaTampilan['ukuran'] === 'ringkas';
         if (!el || !window.Vue) return;
 
         const DI_ATAS = el.dataset.posisi === 'atas';
+        const headerNavbar = document.querySelector('#navbar-app header');
+        const NAVBAR_TRANSPARAN = !!headerNavbar && headerNavbar.getAttribute('data-transparan') === '1';
         const KUNCI = 'pita_ditutup';
         const bacaTertutup = () => {
             try { return JSON.parse(sessionStorage.getItem(KUNCI) || '[]'); } catch (e) { return []; }
@@ -55,7 +57,11 @@ $pitaRingkas = $pitaTampilan['ukuran'] === 'ringkas';
                 const header = document.querySelector('#navbar-app header');
                 el.style.top = (header ? header.offsetHeight : 80) + 'px';
             }
-            akar.setProperty('--tinggi-pita', tinggi + 'px');
+            // Halaman dengan navbar transparan di atas hero (landing): isi halaman TIDAK didorong turun,
+            // supaya foto hero tetap mulai dari paling atas dan navbar terlihat sama dengan/tanpa pita.
+            akar.setProperty('--tinggi-pita', (NAVBAR_TRANSPARAN ? 0 : tinggi) + 'px');
+            // Sebagai gantinya, isi hero (logo & judul) yang turun setinggi pita
+            akar.setProperty('--tinggi-pita-hero', (NAVBAR_TRANSPARAN ? tinggi : 0) + 'px');
         };
 
         window.Vue.createApp({
@@ -108,9 +114,19 @@ $pitaRingkas = $pitaTampilan['ukuran'] === 'ringkas';
             },
         }).mount(el);
 
-        // Tinggi pita juga bisa berubah karena lebar layar (teks turun baris)
+        // Tinggi pita juga bisa berubah karena lebar layar (teks turun baris).
+        // Navbar mengecil jadi kapsul saat digulir -> pita (di bawah) ikut naik mengikuti tinggi navbar.
         window.addEventListener('resize', aturTinggi);
-        if (window.ResizeObserver) new ResizeObserver(aturTinggi).observe(el);
+        const header = document.querySelector('#navbar-app header');
+        if (window.ResizeObserver) {
+            const pengamat = new ResizeObserver(aturTinggi);
+            pengamat.observe(el);
+            if (header && !DI_ATAS) pengamat.observe(header);
+        } else if (header && !DI_ATAS) {
+            // Browser lama tanpa ResizeObserver: ukur ulang setelah animasi navbar selesai
+            header.addEventListener('transitionend', aturTinggi);
+            window.addEventListener('scroll', () => setTimeout(aturTinggi, 550), { passive: true });
+        }
     });
 </script>
 <style>

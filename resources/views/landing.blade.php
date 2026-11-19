@@ -33,6 +33,9 @@
         <div
             class="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 sm:pt-20 lg:pt-24 pb-12 sm:pb-16 text-center text-white scale-100 lg:scale-110 translate-y-0 lg:-translate-y-10">
 
+            {{-- Jarak setinggi Pita Pengumuman (0 bila tidak ada / ditutup), supaya logo tidak tertutup pita --}}
+            <div style="height: var(--tinggi-pita-hero, 0px)"></div>
+
             <div
                 class="mx-auto w-40 h-40 rounded-2xl bg-white/80 shadow-lg flex items-center justify-center mb-8 mt-24">
                 <img src="{{ asset('images/Logo Dar.png') }}" alt="{{ __('Logo') }}" class=" w-32 h-32">
