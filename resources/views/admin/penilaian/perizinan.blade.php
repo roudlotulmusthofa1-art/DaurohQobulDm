@@ -20,8 +20,9 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 $input = 'w-full rounded-xl bg-[#f8fbfa] ring-1 ring-slate-200/80 border-0 px-3 py-2.5 text-sm text-slate-700 focus:ring-2 focus:ring-emerald-500 outline-none';
 $saringan = [
     ''          => __('Semua'),
-    'sedang'    => __('Sedang izin'),
-    'terlambat' => __('Terlambat'),
+    'sedang'        => __('Sedang izin'),
+    'belum_kembali' => __('Belum kembali'),
+    'terlambat'     => __('Terlambat'),
     'tepat'     => __('Tepat waktu'),
     'belum'     => __('Belum mulai'),
 ];
@@ -77,10 +78,10 @@ $saringan = [
                 <p class="text-[11px] font-semibold text-rose-700">{{ __('Terlambat') }}</p>
                 <p class="mt-0.5 text-2xl font-extrabold text-rose-700 tabular-nums" v-text="jumlah.terlambat"></p>
             </button>
-            <div class="rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100 p-3">
+            <button type="button" @click="tanggal = detik.slice(0, 10)" class="text-left rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100 p-3 hover:ring-slate-300">
                 <p class="text-[11px] font-semibold text-slate-500">{{ __('Izin hari ini') }}</p>
                 <p class="mt-0.5 text-2xl font-extrabold text-slate-800 tabular-nums" v-text="jumlah.hariIni"></p>
-            </div>
+            </button>
         </div>
     </section>
 
@@ -98,7 +99,14 @@ $saringan = [
                     @endforeach
                 </div>
             </div>
-            <input type="search" v-model="cari" placeholder="{{ __('Cari santri, jenis izin, catatan...') }}" class="lg:max-w-xs {{ $input }}">
+            <div class="flex flex-col sm:flex-row gap-2 lg:max-w-lg lg:w-full">
+                <input type="search" v-model="cari" placeholder="{{ __('Cari santri, jenis izin, catatan...') }}" class="min-w-0 flex-1 {{ $input }}">
+                <div class="flex gap-2">
+                    <input type="date" v-model="tanggal" title="{{ __('Saring tanggal izin') }}" class="min-w-0 flex-1 sm:w-44 sm:flex-none {{ $input }}">
+                    <button v-if="tanggal" type="button" @click="tanggal = ''" title="{{ __('Hapus tanggal') }}"
+                        class="shrink-0 w-10 rounded-xl bg-white ring-1 ring-slate-200 text-slate-500 hover:bg-slate-50">✕</button>
+                </div>
+            </div>
         </div>
 
         <ul class="mt-3 divide-y divide-slate-100">
@@ -154,7 +162,8 @@ $saringan = [
             </li>
         </ul>
 
-        <p v-if="!izinCari.length" class="mt-6 text-center text-sm text-slate-400">{{ __('Belum ada izin. Tekan "Beri Izin" untuk memulai.') }}</p>
+        <p v-if="!izinCari.length && (status || tanggal || cari.trim())" class="mt-6 text-center text-sm text-slate-400">{{ __('Tidak ada izin yang cocok dengan saringan.') }}</p>
+        <p v-else-if="!izinCari.length" class="mt-6 text-center text-sm text-slate-400">{{ __('Belum ada izin. Tekan "Beri Izin" untuk memulai.') }}</p>
         <div v-if="izinCari.length > batas" class="mt-4 text-center">
             <button type="button" @click="batas += 50" class="px-5 py-2.5 rounded-2xl bg-white ring-1 ring-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50">
                 {{ __('Tampilkan lebih banyak') }}
@@ -503,6 +512,7 @@ $saringan = [
                 jamIni: @json($jamIni),
                 detik: sekarangWib(), // diperbarui tiap 30 detik supaya status ikut berubah
                 status: '',
+                tanggal: '', // saringan tanggal: izin yang berlangsung pada tanggal ini ('' = semua)
                 cari: '',
                 batas: 50,
                 menyimpan: false,
@@ -548,7 +558,11 @@ $saringan = [
                 },
                 izinCari() {
                     const k = kecil(this.cari.trim());
-                    return this.izinStatus.filter((i) => (!this.status || i.status === this.status)
+                    const t = this.tanggal;
+                    return this.izinStatus.filter((i) => (!this.status
+                            // "Belum kembali" = sudah mulai tapi belum ditandai kembali (sedang izin / lewat batas)
+                            || (this.status === 'belum_kembali' ? (!i.kembali_jam && i.status !== 'belum') : i.status === this.status))
+                        && (!t || (i.mulai_tanggal <= t && i.selesai_tanggal >= t))
                         && (!k || [i.siswa, i.nomor, i.jenis, i.catatan, i.kelas].some((t) => kecil(t).includes(k))));
                 },
                 izinTampil() { return this.izinCari.slice(0, this.batas); },
