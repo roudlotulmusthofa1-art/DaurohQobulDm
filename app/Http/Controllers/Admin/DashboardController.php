@@ -7,6 +7,7 @@ use App\Models\Absensi;
 use App\Models\AbsensiDetail;
 use App\Models\BulanAjaran;
 use App\Models\JadwalMengajar;
+use App\Models\KalenderPendidikan;
 use App\Models\Kamar;
 use App\Models\Kelas;
 use App\Models\PendaftaranAsatid;
@@ -93,6 +94,7 @@ class DashboardController extends Controller
             'sesi' => SesiAplikasi::aktif(),
             'hariIni' => $hariIni,
             'hijriyah' => Absensi::hijriyah($hariIni->toDateString()),
+            'kalender' => KalenderPendidikan::ringkasDasbor($hariIni), // sedang berjalan + akan datang
             'angka' => [
                 'diterima' => (int) ($status[PendaftaranSiswa::DITERIMA] ?? 0),
                 'menunggu' => (int) ($status[PendaftaranSiswa::MENUNGGU] ?? 0),

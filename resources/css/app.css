@@ -5,6 +5,7 @@
 @source "../**/*.blade.php";
 @source "../**/*.js";
 @source "../../app/Models/Berita.php"; /* warna label kategori berita (Berita::KELAS_WARNA) */
+@source "../../app/Models/JenisKalender.php"; /* warna jenis kegiatan kalender (JenisKalender::KELAS_WARNA) */
 
 /*
     Warna & font custom Ribath.

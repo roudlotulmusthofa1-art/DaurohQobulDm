@@ -122,6 +122,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::post('selesai', 'selesai')->name('selesai');       // tandai / batalkan hafal seluruh kitab
         Route::delete('{hafalan}', 'hapus')->whereNumber('hafalan')->name('hapus');
     });
+    // Kalender Pendidikan: kegiatan per tanggal (Masehi + Hijriyah)
+    Route::controller(\App\Http\Controllers\Admin\KalenderPendidikanController::class)->prefix('kalender-pendidikan')->name('kalender.')->group(function () {
+        Route::get('/', 'index')->name('index');                  // ?bulan=2026-11 atau ?hijri=1448-6
+        Route::get('hijriyah', 'hijriyah')->name('hijriyah');     // JSON: tulisan Hijriyah untuk formulir
+        Route::post('/', 'simpan')->name('simpan');
+        Route::put('jenis', 'simpanJenis')->name('jenis');       // daftar Jenis & Warna (buatan admin)
+        Route::put('{kalender}', 'ubah')->whereNumber('kalender')->name('ubah');
+        Route::delete('{kalender}', 'hapus')->whereNumber('kalender')->name('hapus');
+    });
 
     // Landing Page > Hero & Statistik (angka di bagian atas beranda)
     Route::get('landing-hero', [\App\Http\Controllers\Admin\LandingHeroController::class, 'index'])->name('landing-hero.index');

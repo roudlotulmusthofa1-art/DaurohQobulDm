@@ -133,6 +133,9 @@ $warnaStatus = [PendaftaranSiswa::DITERIMA => 'bg-emerald-50 text-emerald-700', 
         {{-- ===== Pergantian pelajaran (jadwal hari ini + tanda ganti pelajaran ke guru) ===== --}}
         @include('admin.partials.pergantian-pelajaran', ['kelasKartu' => 'bg-white rounded-2xl shadow-sm'])
 
+        {{-- ===== Kalender Pendidikan (ringkas) ===== --}}
+        @include('admin.partials.kalender-dasbor', ['kelasKartu' => 'bg-white rounded-2xl shadow-sm', 'ringkas' => true])
+
         {{-- ===== Pesan peserta ===== --}}
         <section>
             <div class="flex items-center justify-between mb-2">

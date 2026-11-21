@@ -124,7 +124,11 @@ class TeksTampilan
             'admin-absensi'  => ['Absensi::STATUS' => $statusAbsensi],
             'asatid-absensi' => ['Absensi::STATUS' => $statusAbsensi],
             'asatid-lain'    => ['Absensi::STATUS' => $statusAbsensi, 'JadwalMengajar::HARI' => $hari],
-            'admin-akademik' => ['JadwalMengajar::HARI' => $hari],
+            'admin-akademik' => [
+                'JadwalMengajar::HARI' => $hari,
+                'BulanAjaran::NAMA_HIJRIYAH' => \App\Models\BulanAjaran::NAMA_HIJRIYAH,   // nama bulan di Kalender Pendidikan
+                'JenisKalender::WARNA' => array_values(\App\Models\JenisKalender::WARNA),  // nama warna di Jenis & Warna
+            ],
             'admin-penilaian'  => ['NilaiHarian::ASPEK' => $aspekNilai],
             'asatid-penilaian' => ['NilaiHarian::ASPEK' => $aspekNilai],
             'admin-atur'     => [

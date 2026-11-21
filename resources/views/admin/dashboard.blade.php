@@ -96,9 +96,11 @@ $statKartu = [
         @endforeach
     </div>
 
-    <div class="grid gap-6">
+    <div class="grid xl:grid-cols-2 gap-6 items-start">
         {{-- ===== Pergantian pelajaran (jadwal hari ini + tanda ganti pelajaran ke guru) ===== --}}
         @include('admin.partials.pergantian-pelajaran', ['kelasKartu' => $kartu])
+        {{-- ===== Kalender Pendidikan (ringkas), di sebelah kanan ===== --}}
+        @include('admin.partials.kalender-dasbor', ['kelasKartu' => $kartu])
     </div>
 
     <div class="grid xl:grid-cols-2 gap-6">
