@@ -32,26 +32,31 @@ class LaporanAbsensiController extends Controller
         $hitung = $this->hitungStatus(clone $sesi);
         $total = array_sum($hitung);
 
-        $perKelas = $this->rekapKelompok(clone $sesi, 'kelas_id', Absensi::KELAS,
-            Kelas::pluck('nama', 'id'));
-        $perKegiatan = $this->rekapKelompok(clone $sesi, 'jenis_kegiatan_id', Absensi::KEGIATAN,
-            JenisKegiatan::pluck('nama', 'id'));
+        $perKelas = $this->rekapKelompok(
+            clone $sesi,
+            'kelas_id',
+            Absensi::KELAS,
+            Kelas::pluck('nama', 'id')
+        );
+        $perKegiatan = $this->rekapKelompok(
+            clone $sesi,
+            'jenis_kegiatan_id',
+            Absensi::KEGIATAN,
+            JenisKegiatan::pluck('nama', 'id')
+        );
         $perPeserta = $this->rekapPeserta(clone $sesi);
         $harian = $this->rekapHarian(clone $sesi);
 
-        $perhatian = $perPeserta->filter(fn ($p) => $p['persen'] < 75 || $p['alfa'] >= 3)->take(8);
+        $perhatian = $perPeserta->filter(fn($p) => $p['persen'] < 75 || $p['alfa'] >= 3)->take(8);
 
         // Tabel peserta: cari + halaman
         $kata = mb_strtolower(trim((string) $request->q));
-        $tersaring = $kata === '' ? $perPeserta
-            : $perPeserta->filter(fn ($p) => str_contains(mb_strtolower($p['nama']), $kata) || str_contains(mb_strtolower((string) $p['nomor']), $kata));
-        $halaman = max((int) $request->query('hal', 1), 1);
-        $tabelPeserta = new LengthAwarePaginator($tersaring->forPage($halaman, 15)->values(), $tersaring->count(), 15, $halaman,
-            ['path' => $request->url(), 'pageName' => 'hal', 'query' => $request->except('hal')]);
+        $tabelPeserta = $kata === '' ? $perPeserta
+            : $perPeserta->filter(fn($p) => str_contains(mb_strtolower($p['nama']), $kata) || str_contains(mb_strtolower((string) $p['nomor']), $kata))->values();
 
         $daftarSesi = (clone $sesi)->with(['kelas', 'pelajaran', 'kitab', 'waktuPelajaran', 'kegiatan', 'pengabsen'])
             ->withCount('detail')
-            ->withCount(['detail as hadir_count' => fn ($q) => $q->whereIn('status', ['hadir', 'terlambat'])])
+            ->withCount(['detail as hadir_count' => fn($q) => $q->whereIn('status', ['hadir', 'terlambat'])])
             ->terbaru()
             ->paginate(10, ['*'], 'sesi')
             ->withQueryString();
@@ -81,8 +86,8 @@ class LaporanAbsensiController extends Controller
     public function show(Absensi $absensi)
     {
         $absensi->load(['kelas', 'pelajaran', 'kitab', 'waktuPelajaran', 'kegiatan', 'pengabsen', 'detail.siswa.kelasMaster']);
-        $detail = $absensi->detail->sortBy(fn ($d) => $d->siswa?->nama_lengkap)->values();
-        $hitung = collect(Absensi::STATUS)->map(fn ($s, $k) => $detail->where('status', $k)->count())->all();
+        $detail = $absensi->detail->sortBy(fn($d) => $d->siswa?->nama_lengkap)->values();
+        $hitung = collect(Absensi::STATUS)->map(fn($s, $k) => $detail->where('status', $k)->count())->all();
 
         return view('admin.laporan-absensi.show', [
             'absensi' => $absensi,
@@ -126,7 +131,7 @@ class LaporanAbsensiController extends Controller
 
     private function saringan(Request $request): array
     {
-        $tanggal = fn ($v, $bawaan) => rescue(fn () => $v ? Carbon::parse($v)->toDateString() : $bawaan, $bawaan, false);
+        $tanggal = fn($v, $bawaan) => rescue(fn() => $v ? Carbon::parse($v)->toDateString() : $bawaan, $bawaan, false);
 
         // Pakai tanggal WIB (server memakai UTC, 7 jam di belakang)
         $dari = $tanggal($request->dari, now('Asia/Jakarta')->startOfMonth()->toDateString());
@@ -149,9 +154,9 @@ class LaporanAbsensiController extends Controller
     {
         return Absensi::query()
             ->whereBetween('tanggal', [$f['dari'], $f['sampai']])
-            ->when($f['jenis'], fn ($q, $j) => $q->where('jenis', $j))
-            ->when($f['kelas_id'], fn ($q, $id) => $q->where('kelas_id', $id))
-            ->when($f['jenis_kegiatan_id'], fn ($q, $id) => $q->where('jenis_kegiatan_id', $id));
+            ->when($f['jenis'], fn($q, $j) => $q->where('jenis', $j))
+            ->when($f['kelas_id'], fn($q, $id) => $q->where('kelas_id', $id))
+            ->when($f['jenis_kegiatan_id'], fn($q, $id) => $q->where('jenis_kegiatan_id', $id));
     }
 
     /** Detail absensi dari sesi-sesi yang tersaring */
@@ -167,7 +172,7 @@ class LaporanAbsensiController extends Controller
     {
         $n = $this->detail($sesi)->selectRaw('d.status, count(*) as n')->groupBy('d.status')->pluck('n', 'status');
 
-        return collect(Absensi::STATUS)->map(fn ($s, $k) => (int) ($n[$k] ?? 0))->all();
+        return collect(Absensi::STATUS)->map(fn($s, $k) => (int) ($n[$k] ?? 0))->all();
     }
 
     private function persen(array $hitung): ?int
@@ -188,7 +193,7 @@ class LaporanAbsensiController extends Controller
             ->selectRaw("$kolom as kunci, count(*) as n")->groupBy($kolom)->pluck('n', 'kunci');
 
         return $baris->map(function ($rows, $kunci) use ($nama, $jumlahSesi) {
-            $hitung = collect(Absensi::STATUS)->map(fn ($s, $k) => (int) ($rows->firstWhere('status', $k)->n ?? 0))->all();
+            $hitung = collect(Absensi::STATUS)->map(fn($s, $k) => (int) ($rows->firstWhere('status', $k)->n ?? 0))->all();
 
             return ['nama' => $nama[$kunci] ?? 'Terhapus', 'sesi' => (int) ($jumlahSesi[$kunci] ?? 0), 'total' => array_sum($hitung), 'persen' => $this->persen($hitung)] + $hitung;
         })->sortBy('persen')->values();
@@ -204,7 +209,7 @@ class LaporanAbsensiController extends Controller
         $siswa = PendaftaranSiswa::with('kelasMaster')->whereIn('id', $baris->keys())->get()->keyBy('id');
 
         return $baris->map(function ($rows, $id) use ($siswa) {
-            $hitung = collect(Absensi::STATUS)->map(fn ($s, $k) => (int) ($rows->firstWhere('status', $k)->n ?? 0))->all();
+            $hitung = collect(Absensi::STATUS)->map(fn($s, $k) => (int) ($rows->firstWhere('status', $k)->n ?? 0))->all();
             $s = $siswa[$id] ?? null;
 
             return [
@@ -226,7 +231,7 @@ class LaporanAbsensiController extends Controller
         return $this->detail($sesi)
             ->selectRaw("a.tanggal, sum(case when d.status in ('hadir','terlambat') then 1 else 0 end) as hadir, count(*) as total")
             ->groupBy('a.tanggal')->orderBy('a.tanggal')->get()
-            ->map(fn ($r) => [
+            ->map(fn($r) => [
                 'tanggal' => Carbon::parse($r->tanggal),
                 'persen' => $r->total ? (int) round($r->hadir / $r->total * 100) : 0,
                 'total' => (int) $r->total,
@@ -269,7 +274,7 @@ class LaporanAbsensiController extends Controller
             $k[] = ['Kegiatan dengan kehadiran terendah <b>' . \App\Support\TeksAman::e($rendah['nama']) . '</b> (' . $rendah['persen'] . '%).', 'teal'];
         }
 
-        $jumlahPerhatian = $perPeserta->filter(fn ($p) => $p['persen'] < 75 || $p['alfa'] >= 3)->count();
+        $jumlahPerhatian = $perPeserta->filter(fn($p) => $p['persen'] < 75 || $p['alfa'] >= 3)->count();
         $k[] = $jumlahPerhatian
             ? ['<b>' . $jumlahPerhatian . '</b> peserta perlu perhatian (kehadiran di bawah 75% atau alfa 3 kali lebih).', 'amber']
             : ['Tidak ada peserta yang kehadirannya di bawah 75%.', 'emerald'];

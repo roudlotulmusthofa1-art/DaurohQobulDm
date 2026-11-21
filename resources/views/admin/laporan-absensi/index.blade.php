@@ -342,9 +342,9 @@ $labelStatus = fn ($k) => __(Absensi::STATUS[$k][0]);
                 </tbody>
             </table>
         </div>
-        @if ($tabelPeserta->hasPages())
+        {{-- @if ($tabelPeserta->hasPages())
         <div class="px-5 py-4 border-t border-slate-100">{{ $tabelPeserta->links() }}</div>
-        @endif
+        @endif --}}
     </section>
 
     @endif
