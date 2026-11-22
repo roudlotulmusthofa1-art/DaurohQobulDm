@@ -5,7 +5,6 @@ namespace App\Models;
 use Carbon\Carbon;
 use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -17,18 +16,72 @@ class KalenderPendidikan extends Model
 {
     protected $table = 'kalender_pendidikan';
 
-    protected $fillable = ['judul', 'jenis_id', 'tanggal_mulai', 'tanggal_selesai', 'keterangan', 'dibuat_oleh'];
+    protected $fillable = ['judul', 'warna', 'tanggal_mulai', 'tanggal_selesai', 'keterangan', 'dibuat_oleh'];
 
     protected $casts = [
         'tanggal_mulai' => 'date',
         'tanggal_selesai' => 'date',
-        'jenis_id' => 'integer',
     ];
 
-    /** Jenis kegiatan buatan admin (nama + warna). Kosong = "Tanpa jenis". */
-    public function jenis(): BelongsTo
+    // ================= Warna kegiatan =================
+
+    /** Warna bawaan kegiatan baru */
+    public const WARNA_AWAL = '#059669';
+
+    /** Nama warna (12) x kecerahan (terang, sedang, tua) => kode hex. Selain ini admin boleh memilih warna bebas. */
+    public const NAMA_WARNA = ['Merah', 'Oranye', 'Kuning', 'Hijau muda', 'Hijau', 'Hijau toska', 'Biru langit', 'Biru', 'Ungu', 'Merah muda', 'Cokelat', 'Abu-abu'];
+
+    public const KECERAHAN = ['terang', 'sedang', 'tua'];
+
+    public const PALET = [
+        ['#f87171', '#dc2626', '#991b1b'], ['#fb923c', '#ea580c', '#9a3412'], ['#fbbf24', '#d97706', '#92400e'],
+        ['#a3e635', '#65a30d', '#3f6212'], ['#34d399', '#059669', '#065f46'], ['#2dd4bf', '#0d9488', '#115e59'],
+        ['#38bdf8', '#0284c7', '#075985'], ['#60a5fa', '#2563eb', '#1e40af'], ['#a78bfa', '#7c3aed', '#5b21b6'],
+        ['#f472b6', '#db2777', '#9d174d'], ['#c08457', '#92633a', '#5c3d22'], ['#94a3b8', '#475569', '#1e293b'],
+    ];
+
+    /** Pilihan warna untuk formulir, urut per kecerahan: [['hex', 'label'], ...] (36 warna) */
+    public static function pilihanWarna(): array
     {
-        return $this->belongsTo(JenisKalender::class, 'jenis_id');
+        $hasil = [];
+        foreach (self::KECERAHAN as $k => $kecerahan) {
+            foreach (self::PALET as $i => $tiga) {
+                $hasil[] = ['hex' => $tiga[$k], 'label' => __(self::NAMA_WARNA[$i]) . ' · ' . __($kecerahan)];
+            }
+        }
+
+        return $hasil;
+    }
+
+    /** Kode warna yang sah ("#a1b2c3"); selain itu = warna bawaan */
+    public static function rapikanWarna(?string $hex): string
+    {
+        return is_string($hex) && preg_match('/^#[0-9a-fA-F]{6}$/', $hex) ? strtolower($hex) : self::WARNA_AWAL;
+    }
+
+    /** Campur warna hex dengan putih/hitam: $ke = '#ffffff' atau '#000000', $porsi 0..1 */
+    private static function campur(string $hex, string $ke, float $porsi): string
+    {
+        $a = sscanf($hex, '#%02x%02x%02x');
+        $b = sscanf($ke, '#%02x%02x%02x');
+
+        return sprintf('#%02x%02x%02x', ...array_map(fn ($x, $y) => (int) round($x + ($y - $x) * $porsi), $a, $b));
+    }
+
+    /**
+     * Gaya (atribut style) dari satu warna:
+     * pita = latar muda + tulisan tua + garis tepi (dipakai bersama kelas ring-1), titik = bulatan, garis = garis kemajuan.
+     */
+    public static function gayaWarna(?string $hex): array
+    {
+        $hex = self::rapikanWarna($hex);
+
+        return [
+            'pita' => 'background-color:' . self::campur($hex, '#ffffff', 0.82) . ';color:' . self::campur($hex, '#000000', 0.5)
+                . ';--tw-ring-color:' . self::campur($hex, '#ffffff', 0.55),
+            'titik' => 'background-color:' . $hex,
+            'garis' => 'background-color:' . $hex,
+        ];
     }
 
     // ================= Hijriyah =================
@@ -112,14 +165,11 @@ class KalenderPendidikan extends Model
     /** Data satu kegiatan untuk Vue (tanggal Masehi + Hijriyah + kemajuan) */
     public function untukTampilan(?CarbonInterface $hariIni = null): array
     {
-        $jenis = $this->jenis_id ? $this->jenis : null;
-
         return [
             'id' => $this->id,
             'judul' => $this->judul,
-            'jenis_id' => $jenis?->id,
-            'label_jenis' => $jenis?->nama ?? __('Tanpa jenis'),
-            'kelas' => JenisKalender::kelas($jenis?->warna),
+            'warna' => self::rapikanWarna($this->warna),
+            'gaya' => self::gayaWarna($this->warna),
             'mulai' => $this->tanggal_mulai->toDateString(),
             'selesai' => $this->tanggal_selesai->toDateString(),
             'mulai_teks' => $this->tanggal_mulai->locale(app()->getLocale())->translatedFormat('d M Y'),
@@ -137,15 +187,15 @@ class KalenderPendidikan extends Model
      */
     public static function ringkasDasbor(CarbonInterface $hariIni): array
     {
-        if (! Schema::hasColumn('kalender_pendidikan', 'jenis_id')) {
+        if (! Schema::hasColumn('kalender_pendidikan', 'warna')) {
             return ['berjalan' => [], 'akanDatang' => []];
         }
 
         $tgl = $hariIni->toDateString();
 
-        $berjalan = static::with('jenis')->whereDate('tanggal_mulai', '<=', $tgl)->whereDate('tanggal_selesai', '>=', $tgl)
+        $berjalan = static::whereDate('tanggal_mulai', '<=', $tgl)->whereDate('tanggal_selesai', '>=', $tgl)
             ->orderBy('tanggal_selesai')->take(6)->get();
-        $akanDatang = static::with('jenis')->whereDate('tanggal_mulai', '>', $tgl)
+        $akanDatang = static::whereDate('tanggal_mulai', '>', $tgl)
             ->whereDate('tanggal_mulai', '<=', $hariIni->copy()->addDays(30)->toDateString())
             ->orderBy('tanggal_mulai')->take(5)->get();
 

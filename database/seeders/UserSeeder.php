@@ -17,8 +17,8 @@ class UserSeeder extends Seeder
         User::updateOrCreate(
         ['email' => 'roudlotulmusthofa1@gmail.com'],
         [
-            'name' => 'Toyyib Otoy',
-            'password' => Hash::make('1234567890'),
+            'name' => 'Toyyib Faisol',
+            'password' => Hash::make('0toy19101991'),
             'role' => 'admin',
         ],
         );

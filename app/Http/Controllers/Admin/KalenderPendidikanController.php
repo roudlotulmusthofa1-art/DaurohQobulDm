@@ -3,14 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\JenisKalender;
 use App\Models\KalenderPendidikan;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -81,7 +78,7 @@ class KalenderPendidikanController extends Controller
             $d->addDay();
         }
 
-        $tabelAda = Schema::hasColumn('kalender_pendidikan', 'jenis_id');
+        $tabelAda = Schema::hasColumn('kalender_pendidikan', 'warna');
 
         return view('admin.akademik.kalender-pendidikan', [
             'patokan' => $patokan,
@@ -91,8 +88,8 @@ class KalenderPendidikanController extends Controller
             'akhir' => $akhir->toDateString(),
             'hari' => $hari,
             'kegiatan' => $tabelAda ? $this->semuaKegiatan() : [],
-            'jenis' => JenisKalender::daftar(),
-            'warna' => JenisKalender::pilihanWarna(),
+            'warna' => KalenderPendidikan::pilihanWarna(),
+            'warnaAwal' => KalenderPendidikan::WARNA_AWAL,
             'tautan' => [
                 'sebelum' => route('admin.kalender.index', $sebelum),
                 'sesudah' => route('admin.kalender.index', $sesudah),
@@ -110,46 +107,8 @@ class KalenderPendidikanController extends Controller
     {
         $hariIni = now('Asia/Jakarta')->startOfDay();
 
-        return KalenderPendidikan::with('jenis')->orderBy('tanggal_mulai')->orderBy('id')->get()
+        return KalenderPendidikan::orderBy('tanggal_mulai')->orderBy('id')->get()
             ->map(fn ($k) => $k->untukTampilan($hariIni))->values()->all();
-    }
-
-    /**
-     * PUT /admin/kalender-pendidikan/jenis : simpan daftar Jenis & Warna sekaligus.
-     * Kiriman: jenis = [{id (kosong = baru), nama, warna}, ...] urut seperti di layar.
-     * Jenis yang tidak dikirim lagi = dihapus; kegiatannya jadi "Tanpa jenis".
-     */
-    public function simpanJenis(Request $request): JsonResponse
-    {
-        $data = $request->validate([
-            'jenis' => ['present', 'array', 'max:50'],
-            'jenis.*.id' => ['nullable', 'integer'],
-            'jenis.*.nama' => ['required', 'string', 'max:60'],
-            'jenis.*.warna' => ['required', Rule::in(array_keys(JenisKalender::WARNA))],
-        ], [
-            'jenis.*.nama.required' => __('Nama jenis wajib diisi.'),
-        ]);
-
-        DB::transaction(function () use ($data) {
-            $baris = collect($data['jenis']);
-            $tetap = $baris->pluck('id')->filter()->map(fn ($id) => (int) $id)->all();
-            JenisKalender::whereNotIn('id', $tetap)->get()->each(function ($j) {
-                $j->kegiatan()->update(['jenis_id' => null]);
-                $j->delete();
-            });
-
-            foreach ($baris->values() as $i => $b) {
-                $isi = ['nama' => trim($b['nama']), 'warna' => $b['warna'], 'urutan' => $i];
-                $lama = ! empty($b['id']) ? JenisKalender::find($b['id']) : null;
-                $lama ? $lama->update($isi) : JenisKalender::create($isi);
-            }
-        });
-
-        return response()->json([
-            'pesan' => __('Jenis & warna disimpan.'),
-            'jenis' => JenisKalender::daftar(),
-            'kegiatan' => $this->semuaKegiatan(),
-        ]);
     }
 
     /** GET /admin/kalender-pendidikan/hijriyah?tanggal=2026-11-21 : tulisan Hijriyah untuk isian formulir */
@@ -186,17 +145,22 @@ class KalenderPendidikanController extends Controller
 
     private function valid(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'judul' => ['required', 'string', 'max:150'],
-            'jenis_id' => ['nullable', 'integer', 'exists:jenis_kalender,id'],
+            'warna' => ['required', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'tanggal_mulai' => ['required', 'date_format:Y-m-d'],
             'tanggal_selesai' => ['required', 'date_format:Y-m-d', 'after_or_equal:tanggal_mulai'],
             'keterangan' => ['nullable', 'string', 'max:2000'],
         ], [
             'judul.required' => __('Nama kegiatan wajib diisi.'),
+            'warna.required' => __('Pilih warna kegiatan.'),
+            'warna.regex' => __('Pilih warna kegiatan.'),
             'tanggal_mulai.required' => __('Tanggal mulai wajib diisi.'),
             'tanggal_selesai.required' => __('Tanggal selesai wajib diisi.'),
             'tanggal_selesai.after_or_equal' => __('Tanggal selesai tidak boleh sebelum tanggal mulai.'),
         ]);
+        $data['warna'] = strtolower($data['warna']);
+
+        return $data;
     }
 }

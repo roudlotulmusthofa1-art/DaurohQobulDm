@@ -44,9 +44,8 @@ $rentang = fn (array $k, string $a, string $b) => $k['mulai'] === $k['selesai'] 
             @forelse ($kalender['berjalan'] as $k)
             <div class="mt-2 rounded-2xl bg-[#f8fbfa] ring-1 ring-slate-100 px-3.5 py-3">
                 <div class="flex items-center gap-2 min-w-0">
-                    <span class="w-2.5 h-2.5 shrink-0 rounded-full {{ $k['kelas']['titik'] }}"></span>
+                    <span class="w-2.5 h-2.5 shrink-0 rounded-full" style="{{ $k['gaya']['titik'] }}"></span>
                     <p class="font-bold text-sm text-slate-800 truncate">{{ $k['judul'] }}</p>
-                    <span class="ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ring-1 {{ $k['kelas']['pita'] }}">{{ $k['label_jenis'] }}</span>
                 </div>
                 <p class="mt-1 text-[11px] text-slate-500">{{ $rentang($k, 'mulai_teks', 'selesai_teks') }}</p>
                 <p class="text-[11px] text-amber-700">{{ $rentang($k, 'mulai_hijriyah', 'selesai_hijriyah') }}</p>
@@ -54,7 +53,7 @@ $rentang = fn (array $k, string $a, string $b) => $k['mulai'] === $k['selesai'] 
                     <span class="text-emerald-700">{{ $teksKemajuan($k['kemajuan']) }}</span>
                     <span class="text-slate-400 tabular-nums">{{ $k['kemajuan']['persen'] }}%</span>
                 </div>
-                <div class="mt-1 h-1.5 rounded-full bg-slate-200/70 overflow-hidden"><div class="h-full rounded-full {{ $k['kelas']['garis'] }}" style="width: {{ $k['kemajuan']['persen'] }}%"></div></div>
+                <div class="mt-1 h-1.5 rounded-full bg-slate-200/70 overflow-hidden"><div class="h-full rounded-full" style="{{ $k['gaya']['garis'] }}; width: {{ $k['kemajuan']['persen'] }}%"></div></div>
             </div>
             @empty
             <p class="mt-2 text-sm text-slate-400">{{ __('Tidak ada kegiatan hari ini.') }}</p>
@@ -66,7 +65,7 @@ $rentang = fn (array $k, string $a, string $b) => $k['mulai'] === $k['selesai'] 
             <p class="text-[11px] font-bold uppercase tracking-wide text-sky-700">{{ __('Akan datang') }}</p>
             @forelse ($kalender['akanDatang'] as $k)
             <div class="mt-2 flex items-start gap-3 rounded-2xl px-1 py-1.5">
-                <span class="mt-1.5 w-2.5 h-2.5 shrink-0 rounded-full {{ $k['kelas']['titik'] }}"></span>
+                <span class="mt-1.5 w-2.5 h-2.5 shrink-0 rounded-full" style="{{ $k['gaya']['titik'] }}"></span>
                 <div class="min-w-0 flex-1">
                     <p class="font-semibold text-sm text-slate-800 truncate">{{ $k['judul'] }}</p>
                     <p class="text-[11px] text-slate-500">{{ $rentang($k, 'mulai_teks', 'selesai_teks') }} · {{ $k['kemajuan']['lama'] }} {{ __('hari') }}</p>

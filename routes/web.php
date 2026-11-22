@@ -127,7 +127,6 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
         Route::get('/', 'index')->name('index');                  // ?bulan=2026-11 atau ?hijri=1448-6
         Route::get('hijriyah', 'hijriyah')->name('hijriyah');     // JSON: tulisan Hijriyah untuk formulir
         Route::post('/', 'simpan')->name('simpan');
-        Route::put('jenis', 'simpanJenis')->name('jenis');       // daftar Jenis & Warna (buatan admin)
         Route::put('{kalender}', 'ubah')->whereNumber('kalender')->name('ubah');
         Route::delete('{kalender}', 'hapus')->whereNumber('kalender')->name('hapus');
     });

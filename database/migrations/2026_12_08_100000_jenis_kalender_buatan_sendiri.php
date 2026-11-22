@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schema;
 
 /**
  * Kalender Pendidikan: jenis kegiatan dibuat admin sendiri (nama + warna), menggantikan 6 jenis bawaan.
- * - jenis_kalender                   : nama, warna (kunci JenisKalender::WARNA), urutan
+ * - jenis_kalender                   : nama, warna (nama warna Tailwind; tidak dipakai lagi sejak 2026_12_09), urutan
  * - kalender_pendidikan.jenis_id     : jenis kegiatan (kosong = "Tanpa jenis"; jenis dihapus = kosong)
  * - kolom lama jenis & jenis_lain dihapus (belum pernah dipakai di server).
  * Per sesi (php artisan sesi:migrate).
