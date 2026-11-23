@@ -62,6 +62,13 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v3"/></svg>
                     {{ __('Cetak Kartu QR') }}
                 </a>
+
+                {{-- Export / Cetak daftar santri: Print, PDF, Word --}}
+                <button type="button" @click="bukaEkspor"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-amber-300 text-[#3b2a00] text-sm font-bold hover:bg-amber-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    {{ __('Export / Cetak') }}
+                </button>
             </div>
         </div>
     </div>
@@ -659,6 +666,46 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
     </div>
 
 
+    {{-- ================= MODAL: EXPORT / CETAK ================= --}}
+    <div v-if="ekspor.buka" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4" @click.self="ekspor.buka = false">
+        <div class="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl space-y-4">
+            <div class="flex items-center justify-between">
+                <h2 class="text-lg font-bold text-gray-800">{{ __('Export / Cetak Data Santri') }}</h2>
+                <button type="button" @click="ekspor.buka = false" class="rounded-lg p-1.5 text-gray-400 hover:bg-gray-100">✕</button>
+            </div>
+            <label class="block text-sm font-medium text-gray-700">{{ __('Susun data') }}
+                <select v-model="ekspor.kelompok" class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                    <option value="semua">{{ __('Semua santri') }}</option>
+                    <option value="kelas">{{ __('Per kelas') }}</option>
+                    <option value="kamar">{{ __('Per kamar') }}</option>
+                </select>
+            </label>
+            <label v-if="ekspor.kelompok === 'kelas'" class="block text-sm font-medium text-gray-700">{{ __('Kelas') }}
+                <select v-model="ekspor.kelas" class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                    <option value="">{{ __('Semua kelas') }}</option>
+                    <option value="kosong">{{ __('Belum ada kelas') }}</option>
+                    <option v-for="k in kelasOptions" :key="k.id" :value="k.id" v-text="k.nama"></option>
+                </select>
+            </label>
+            <label v-if="ekspor.kelompok === 'kamar'" class="block text-sm font-medium text-gray-700">{{ __('Kamar') }}
+                <select v-model="ekspor.kamar" class="mt-1 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm">
+                    <option value="">{{ __('Semua kamar') }}</option>
+                    <option value="kosong">{{ __('Belum ada kamar') }}</option>
+                    <option v-for="k in kamarOptions" :key="k.id" :value="k.id" v-text="k.nama"></option>
+                </select>
+            </label>
+            <label v-if="ekspor.kelompok !== 'semua'" class="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input type="checkbox" v-model="ekspor.pisah" class="accent-emerald-600"> {{ __('Setiap kelompok mulai di halaman baru') }}
+            </label>
+            <p v-if="jumlahFilterAktif || pencarian" class="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">{{ __('Filter dan pencarian yang sedang aktif ikut terpakai.') }}</p>
+            <div class="grid grid-cols-3 gap-2">
+                <button type="button" @click="jalankanEkspor('cetak')" class="rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">{{ __('Print') }}</button>
+                <button type="button" @click="jalankanEkspor('pdf')" class="rounded-xl bg-rose-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-rose-700">PDF</button>
+                <button type="button" @click="jalankanEkspor('word')" class="rounded-xl bg-sky-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-sky-700">Word</button>
+            </div>
+        </div>
+    </div>
+
     {{-- ================= MODAL: TAMBAH CEPAT ================= --}}
     <div v-if="tambah.buka" class="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 p-4"
         @mousedown.self="tambah.buka = false">
@@ -771,6 +818,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 // Data asli dari controller
                 santriList: @json($santri),
                 urlKartuQr: @json(route('admin.santri.kartu-qr')), // halaman cetak kartu QR
+                urlEkspor: @json(route('admin.santri.export')),    // Print / PDF / Word
+                ekspor: { buka: false, kelompok: 'semua', kelas: '', kamar: '', pisah: true },
                 kelasOptions: @json($kelasOptions),
                 kamarOptions: @json($kamarOptions),
                 pencarian: '',
@@ -911,6 +960,26 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         },
         },
         methods: {
+            // Buka pilihan Export; kelas/kamar mengikuti filter yang sedang dipakai
+            bukaEkspor() {
+                const f = this.filter;
+                this.ekspor = { buka: true, kelompok: f.kamar ? 'kamar' : (f.kelas ? 'kelas' : 'semua'), kelas: f.kelas, kamar: f.kamar, pisah: true };
+            },
+            // Print dibuka di tab baru; PDF dan Word langsung terunduh
+            jalankanEkspor(format) {
+                const e = this.ekspor;
+                const f = this.filter;
+                const isi = {
+                    format, kelompok: e.kelompok, pisah: e.pisah ? 1 : 0,
+                    kelas: e.kelompok === 'kelas' ? e.kelas : f.kelas,
+                    kamar: e.kelompok === 'kamar' ? e.kamar : f.kamar,
+                    status: f.status, syarat: f.syarat, q: this.pencarian,
+                };
+                const alamat = this.urlEkspor + '?' + new URLSearchParams(Object.entries(isi).filter(([, nilai]) => nilai !== '' && nilai !== null));
+                if (format === 'cetak') window.open(alamat, '_blank');
+                else window.location.href = alamat;
+                this.ekspor.buka = false;
+            },
             // Jabatan santri di kamar yang sedang dibuka (hanya tampil di kartu kamar)
             jabatanKamar(santri, grup) {
                 return grup.jenis === 'kamar' && JABATAN[santri.jabatan_kamar] ? santri.jabatan_kamar : null;

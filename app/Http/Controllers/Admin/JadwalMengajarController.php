@@ -11,6 +11,7 @@ use App\Models\PendaftaranAsatid;
 use App\Models\TahunAjaran;
 use App\Models\User;
 use App\Models\WaktuPelajaran;
+use App\Support\EksporDokumen;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -63,6 +64,67 @@ class JadwalMengajarController extends Controller
             'tampilan' => $tampilan,
             'bulanLain' => $bulan ? BulanAjaran::with('tahunAjaran')->whereKeyNot($bulan->id)->withCount('jadwal')->having('jadwal_count', '>', 0)->get() : collect(),
         ]);
+    }
+
+    /**
+     * GET /admin/jadwal/export — Print, PDF, atau Word.
+     * kelompok: semua (satu tabel) | kelas | ustadz (satu tabel untuk tiap kelas/ustadz).
+     */
+    public function export(Request $request)
+    {
+        $v = $request->validate([
+            'format'   => ['required', Rule::in(EksporDokumen::FORMAT)],
+            'bulan'    => ['required', 'integer', Rule::exists('bulan_ajaran', 'id')],
+            'kelompok' => ['nullable', Rule::in(['semua', 'kelas', 'ustadz'])],
+            'kelas'    => ['nullable', 'integer'],
+            'ustadz'   => ['nullable', 'integer'],
+            'pisah'    => ['nullable', 'boolean'],
+        ]);
+        $kelompok = $v['kelompok'] ?? 'semua';
+        $bulan = BulanAjaran::with('tahunAjaran')->findOrFail($v['bulan']);
+
+        $jadwal = JadwalMengajar::with(['kelas', 'kitab'])
+            ->where('bulan_ajaran_id', $bulan->id)
+            ->when($v['kelas'] ?? null, fn ($q, $k) => $q->where('kelas_id', $k))
+            ->when($kelompok === 'ustadz' ? ($v['ustadz'] ?? null) : null, fn ($q, $u) => $q->where('user_id', $u))
+            ->get();
+
+        $ustadzList = $this->ustadzList();
+        $namaUstadz = $ustadzList->pluck('nama', 'id');
+        $arabUstadz = $ustadzList->pluck('arab', 'id');
+        $urutKelas = Kelas::ordered()->pluck('id')->flip();
+        $semuaWaktu = WaktuPelajaran::ordered()->get();
+
+        // Satu kelompok = satu tabel; hanya jam yang berisi pelajaran yang ditampilkan
+        $buatGrup = fn ($isi, $judul, $arab = null) => [
+            'judul' => $judul,
+            'arab' => $arab,
+            'waktu' => $semuaWaktu->whereIn('id', $isi->pluck('waktu_pelajaran_id'))->values(),
+            'slot' => $isi->sortBy(fn ($j) => $urutKelas[$j->kelas_id] ?? 999)->groupBy(fn ($j) => $j->waktu_pelajaran_id . '-' . $j->hari),
+            'tampilKelas' => $kelompok !== 'kelas',
+            'tampilUstadz' => $kelompok !== 'ustadz',
+        ];
+
+        $grup = match ($kelompok) {
+            'kelas' => $jadwal->groupBy('kelas_id')
+                ->sortBy(fn ($isi, $id) => $urutKelas[$id] ?? 999)
+                ->map(fn ($isi) => $buatGrup($isi, $isi->first()->kelas?->nama ?? '-'))->values(),
+            'ustadz' => $jadwal->groupBy(fn ($j) => $j->user_id ?? 0)
+                ->sortBy(fn ($isi, $id) => $id ? ($namaUstadz[$id] ?? '') : "\u{10FFFF}") // belum ada ustadz di akhir
+                ->map(fn ($isi, $id) => $buatGrup($isi, $namaUstadz[$id] ?? __('Belum ada ustadz'), $arabUstadz[$id] ?? null))->values(),
+            default => $jadwal->isEmpty() ? collect() : collect([$buatGrup($jadwal, null)]),
+        };
+
+        $namaKelompok = ['semua' => __('Semua Kelas'), 'kelas' => __('Per Kelas'), 'ustadz' => __('Per Ustadz')][$kelompok];
+
+        return EksporDokumen::kirim('admin.export.jadwal', [
+            'judul'      => __('Jadwal Pelajaran') . ' · ' . $namaKelompok,
+            'keterangan' => $bulan->nama . ' · ' . __('TA') . ' ' . $bulan->tahunAjaran?->nama,
+            'grup'       => $grup,
+            'hariList'   => collect(JadwalMengajar::HARI)->only($jadwal->pluck('hari')->unique()->all())->all(),
+            'namaUstadz' => $namaUstadz,
+            'pisah'      => $request->boolean('pisah'),
+        ], $v['format'], 'jadwal-pelajaran-' . $kelompok, true);
     }
 
     public function store(Request $request)

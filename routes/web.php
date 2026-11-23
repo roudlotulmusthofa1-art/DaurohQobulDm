@@ -49,6 +49,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Manajemen Data
     Route::post('santri/massal', [AdminSantriController::class, 'massal'])->name('santri.massal'); // tombol Kelola Massal
     Route::get('santri/kartu-qr', [AdminSantriController::class, 'kartuQr'])->name('santri.kartu-qr'); // cetak kartu QR (semua / terpilih / satu)
+    Route::get('santri/export', [AdminSantriController::class, 'export'])->name('santri.export'); // Print / PDF / Word
     Route::post('santri/{santri}/jabatan-kamar', [AdminSantriController::class, 'jabatanKamar'])->whereNumber('santri')->name('santri.jabatan-kamar'); // Ketua / Wakil kamar
     Route::resource('santri', AdminSantriController::class);
     // Data Asatid: daftar, detail, terima/tolak, hapus, dan link pendaftaran khusus
@@ -94,6 +95,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     // Kurikulum & Kitab
     Route::resource('kurikulum', \App\Http\Controllers\Admin\KurikulumController::class)->only(['index', 'store', 'update', 'destroy']);
     // Jadwal Mengajar
+    Route::get('jadwal/export', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'export'])->name('jadwal.export'); // Print / PDF / Word
     Route::post('jadwal/salin', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'salin'])->name('jadwal.salin');
     Route::post('jadwal/{jadwal}/geser', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'geser'])->name('jadwal.geser');
     Route::post('jadwal/ganti-ustadz', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'gantiUstadz'])->name('jadwal.ganti-ustadz');

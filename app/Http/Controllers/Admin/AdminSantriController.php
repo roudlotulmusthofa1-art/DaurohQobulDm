@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Kamar;
 use App\Models\Kelas;
 use App\Models\PendaftaranSiswa;
+use App\Support\EksporDokumen;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -77,6 +78,93 @@ class AdminSantriController extends Controller
             'profil'  => \App\Models\Pengaturan::profilPesantren(),
             'pilihan' => $ids->isNotEmpty(), // dibuka untuk santri tertentu saja
         ]);
+    }
+
+    /**
+     * GET /admin/santri/export — Print, PDF, atau Word.
+     * kelompok: semua | kelas | kamar. Saringan kelas, kamar, status, syarat, dan pencarian ikut terpakai.
+     */
+    public function export(Request $request)
+    {
+        $v = $request->validate([
+            'format'   => ['required', Rule::in(EksporDokumen::FORMAT)],
+            'kelompok' => ['nullable', Rule::in(['semua', 'kelas', 'kamar'])],
+            'kelas'    => ['nullable', 'string', 'max:20'],
+            'kamar'    => ['nullable', 'string', 'max:20'],
+            'status'   => ['nullable', Rule::in(['aktif', 'belum punya akun'])],
+            'syarat'   => ['nullable', 'string', 'max:50'],
+            'q'        => ['nullable', 'string', 'max:100'],
+            'pisah'    => ['nullable', 'boolean'],
+        ]);
+        $kelompok = $v['kelompok'] ?? 'semua';
+
+        // Saring dengan aturan yang sama seperti panel Filter di halaman Data Santri
+        $saring = function ($q, ?string $nilai, string $kolom) {
+            if ($nilai === 'kosong') {
+                $q->whereNull($kolom);
+            } elseif ($nilai) {
+                $q->where($kolom, (int) $nilai);
+            }
+        };
+        $santri = PendaftaranSiswa::with(['kelasMaster', 'kamarMaster'])
+            ->where('status', PendaftaranSiswa::DITERIMA)
+            ->tap(fn ($q) => $saring($q, $v['kelas'] ?? null, 'kelas_id'))
+            ->tap(fn ($q) => $saring($q, $v['kamar'] ?? null, 'kamar_id'))
+            ->when(($v['status'] ?? null) === 'aktif', fn ($q) => $q->whereNotNull('user_id'))
+            ->when(($v['status'] ?? null) === 'belum punya akun', fn ($q) => $q->whereNull('user_id'))
+            ->orderBy('nama_lengkap')
+            ->get();
+
+        $syarat = $v['syarat'] ?? '';
+        $kurang = fn ($s) => collect(PendaftaranSiswa::SYARAT)->reject(fn ($nama, $kolom) => $s->$kolom)->keys();
+        $santri = $santri->filter(fn ($s) => match (true) {
+            $syarat === 'kurang' => $kurang($s)->isNotEmpty(),
+            $syarat === 'lengkap' => $kurang($s)->isEmpty(),
+            array_key_exists($syarat, PendaftaranSiswa::SYARAT) => $kurang($s)->contains($syarat),
+            default => true,
+        });
+
+        if ($kata = mb_strtolower(trim($v['q'] ?? ''))) {
+            $santri = $santri->filter(fn ($s) => str_contains(mb_strtolower(implode(' ', [
+                $s->nama_lengkap, $s->nama_lengkap_arab, $s->nomor_pendaftaran, $s->kelasMaster?->nama, $s->kamarMaster?->nama, $s->nama_wali,
+            ])), $kata));
+        }
+        $santri = $santri->values();
+
+        $grup = match ($kelompok) {
+            'kelas' => $this->grupSantri($santri, Kelas::ordered()->get(), 'kelas_id', __('Belum ada kelas')),
+            'kamar' => $this->grupSantri($santri, Kamar::ordered()->get(), 'kamar_id', __('Belum ada kamar')),
+            default => $santri->isEmpty() ? collect() : collect([['judul' => null, 'santri' => $santri]]),
+        };
+
+        $namaKelompok = ['semua' => __('Semua Santri'), 'kelas' => __('Per Kelas'), 'kamar' => __('Per Kamar')][$kelompok];
+
+        return EksporDokumen::kirim('admin.export.santri', [
+            'judul'      => __('Data Santri') . ' · ' . $namaKelompok,
+            'keterangan' => __(':jumlah santri', ['jumlah' => $santri->count()]),
+            'grup'       => $grup,
+            'pisah'      => $request->boolean('pisah'),
+        ], $v['format'], 'data-santri-' . $kelompok);
+    }
+
+    /** Kelompokkan santri mengikuti urutan Master Data; yang belum punya kelas/kamar di paling akhir */
+    private function grupSantri($santri, $master, string $kolom, string $judulKosong)
+    {
+        $grup = $master->map(fn ($m) => ['judul' => $m->nama, 'santri' => $santri->where($kolom, $m->id)->values()]);
+        $grup->push(['judul' => $judulKosong, 'santri' => $santri->whereNull($kolom)->values()]);
+
+        return $grup->filter(fn ($g) => $g['santri']->isNotEmpty())
+            ->map(function ($g) use ($kolom) {
+                if ($kolom === 'kamar_id') {
+                    // Di kamar: Ketua, Wakil, lalu urut nomor kasur
+                    $g['santri'] = $g['santri']->sortBy([
+                        fn ($a, $b) => (['ketua' => 0, 'wakil' => 1][$a->jabatan_kamar] ?? 9) <=> (['ketua' => 0, 'wakil' => 1][$b->jabatan_kamar] ?? 9),
+                        fn ($a, $b) => ($a->nomor_kasur ?: 999) <=> ($b->nomor_kasur ?: 999),
+                    ])->values();
+                }
+
+                return $g;
+            })->values();
     }
 
     /** POST /admin/santri — tombol "Tambah Cepat": langsung jadi santri (status diterima) */

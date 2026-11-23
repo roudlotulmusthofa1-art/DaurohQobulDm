@@ -63,6 +63,10 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
     <x-header-admin :label="__('Akademik')" :judul="__('Jadwal Mengajar')"
         :keterangan="__('Bulan ke-:urutan', ['urutan' => $bulan->urutan]) . ' · ' . $bulan->nama . ' · ' . __('TA') . ' ' . $bulan->tahunAjaran?->nama">
         <x-slot:aksi>
+                <button type="button" @click="bukaDialog('dialog-ekspor')" class="inline-flex items-center gap-2 rounded-2xl bg-emerald-400 px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-emerald-300 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                    {{ __('Export / Cetak') }}
+                </button>
                 <button type="button" @click="bukaDialog('dialog-salin')" class="inline-flex items-center gap-2 rounded-2xl bg-sky-400 px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-sky-300 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/></svg>
                     {{ __('Salin Jadwal') }}
@@ -309,6 +313,41 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
     </form>
 </dialog>
 
+{{-- ===== Dialog export / cetak jadwal ===== --}}
+<dialog id="dialog-ekspor" ref="dialog-ekspor" class="dialog-akademik" @click.self="tutupDialog">
+    <div class="p-5 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-extrabold text-slate-800">{{ __('Export / Cetak Jadwal') }}</h2>
+            <button type="button" @click="tutupDialog" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">✕</button>
+        </div>
+        <p class="text-sm text-slate-500">{{ __('Periode:') }} <b>{{ $bulan->nama }}</b></p>
+        <label class="block"><span class="{{ $label }}">{{ __('Susun jadwal') }}</span>
+            <select v-model="ekspor.kelompok" class="{{ $input }}">
+                <option value="semua">{{ __('Semua dalam satu tabel') }}</option>
+                <option value="kelas">{{ __('Per kelas') }}</option>
+                <option value="ustadz">{{ __('Per ustadz') }}</option>
+            </select></label>
+        <label class="block"><span class="{{ $label }}">{{ __('Kelas') }}</span>
+            <select v-model="ekspor.kelas" class="{{ $input }}">
+                <option value="">{{ __('Semua kelas') }}</option>
+                @foreach ($kelasList as $k)<option value="{{ $k->id }}">{{ $k->nama }}</option>@endforeach
+            </select></label>
+        <label v-if="ekspor.kelompok === 'ustadz'" class="block"><span class="{{ $label }}">{{ __('Ustadz') }}</span>
+            <select v-model="ekspor.ustadz" class="{{ $input }}">
+                <option value="">{{ __('Semua ustadz') }}</option>
+                @foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}</option>@endforeach
+            </select></label>
+        <label v-if="ekspor.kelompok !== 'semua'" class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+            <input type="checkbox" v-model="ekspor.pisah" class="accent-emerald-600"> {{ __('Setiap kelompok mulai di halaman baru') }}
+        </label>
+        <div class="grid grid-cols-3 gap-2 pt-2">
+            <button type="button" @click="jalankanEkspor('cetak')" class="rounded-xl bg-emerald-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-emerald-700">{{ __('Print') }}</button>
+            <button type="button" @click="jalankanEkspor('pdf')" class="rounded-xl bg-rose-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-rose-700">PDF</button>
+            <button type="button" @click="jalankanEkspor('word')" class="rounded-xl bg-sky-600 px-3 py-2.5 text-sm font-bold text-white hover:bg-sky-700">Word</button>
+        </div>
+    </div>
+</dialog>
+
 {{-- ===== Dialog salin jadwal ===== --}}
 <dialog id="dialog-salin" ref="dialog-salin" class="dialog-akademik" @click.self="tutupDialog">
     <form method="POST" action="{{ route('admin.jadwal.salin') }}" class="p-5 sm:p-6 space-y-4">
@@ -441,6 +480,8 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                     menyimpan: false,   // sedang mengirim ke server
                     form: kosongkanForm(),
                     alamatUbah: @json(route('admin.jadwal.update', '__ID__')),
+                    // Pilihan Export: awalnya mengikuti tampilan dan kelas yang sedang dibuka
+                    ekspor: { kelompok: @json($tampilan === 'grid' ? 'semua' : $tampilan), kelas: @json((string) $kelasFilter), ustadz: '', pisah: true },
                 };
             },
             computed: {
@@ -499,6 +540,15 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             },
             methods: {
                 ...metodeHalaman, // bukaDialog, tutupDialog, kirimForm, pindahHalaman, konfirmasi
+                // Print dibuka di tab baru; PDF dan Word langsung terunduh
+                jalankanEkspor(format) {
+                    const e = this.ekspor;
+                    const isi = { format, bulan: @json($bulan->id), kelompok: e.kelompok, kelas: e.kelas, ustadz: e.kelompok === 'ustadz' ? e.ustadz : '', pisah: e.pisah ? 1 : 0 };
+                    const alamat = @json(route('admin.jadwal.export')) + '?' + new URLSearchParams(Object.entries(isi).filter(([, nilai]) => nilai !== ''));
+                    if (format === 'cetak') window.open(alamat, '_blank');
+                    else window.location.href = alamat;
+                    this.$refs['dialog-ekspor'].close();
+                },
                 // Kartu di satu slot (hari + jam), diurutkan sesuai urutan kelas
                 isiSlot(hari, waktu) {
                     return this.jadwalTampil.filter((j) => j.hari === hari && j.waktu === waktu)
