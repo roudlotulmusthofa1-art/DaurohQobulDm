@@ -31,7 +31,7 @@
                     <div class="slot">
                         <div class="kitab">{!! $teks($j->kitab?->nama ?? '-') !!}</div>
                         @if ($g['tampilKelas'])<div class="kecil">{!! $teks($j->kelas?->nama ?? '-') !!}</div>@endif
-                        @if ($g['tampilUstadz'])<div class="kecil">{!! $teks($namaUstadz[$j->user_id] ?? __('Belum ada ustadz')) !!}</div>@endif
+                        @if ($g['tampilUstadz'])<div class="kecil">{!! $teks(($arabUstadz[$j->user_id] ?? null) ?: ($namaUstadz[$j->user_id] ?? __('Belum ada ustadz'))) !!}</div>@endif
                     </div>
                     @endforeach
                 </td>

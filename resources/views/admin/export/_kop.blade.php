@@ -13,4 +13,4 @@
     </tr>
 </table>
 <h1 class="judul">{{ $judul }}</h1>
-<p class="keterangan">{{ $keterangan }} · {{ __('Dicetak') }} {{ $dicetak }}</p>
+<p class="keterangan">{{ $keterangan }} </p>

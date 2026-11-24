@@ -44,7 +44,9 @@ $dataJadwal = $jadwal->map(fn ($j) => [
 $dataWaktu = $waktuList->map(fn ($w) => ['id' => $w->id, 'nama' => $w->nama, 'urutan' => $w->urutan, 'jam' => $w->jam_mulai ? $w->jam_mulai . '–' . $w->jam_selesai : null])->values();
 $dataKelas = $kelasList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama])->values();
 // Pilihan kitab di form: kitab kurikulum bulan ini (tahun ajaran & bulan ke cocok) ditandai "cocok"
-$dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'cocok' => $kitabBulanIni->contains($k->id)])->values();
+$dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'frekuensi' => $k->frekuensi, 'cocok' => $kitabBulanIni->contains($k->id)])->values();
+// Daftar ustadz untuk form: dipisah "kosong" / "sudah mengajar" sesuai hari & jam yang dipilih
+$dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, 'arab' => $u->arab])->values();
 @endphp
 
 <div id="halaman-jadwal">
@@ -294,14 +296,32 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             <label class="col-span-2"><span class="{{ $label }}">{{ __('Kitab') }} <span class="font-normal text-slate-400">{{ __('(dari Kurikulum bulan ini)') }}</span></span>
                 <select name="kitab_id" v-model="form.kitab_id" class="{{ $input }}">
                     <option value="">{{ __('— Tanpa kitab —') }}</option>
-                    <option v-for="k in pilihanKitab" :key="k.id" :value="String(k.id)" v-text="k.cocok ? k.nama : k.nama + ' ' + @js(__('(bukan kurikulum bulan ini)'))"></option>
+                    {{-- Kitab yang jatahnya (frekuensi) di kelas ini sudah penuh tidak bisa dipilih --}}
+                    <option v-for="k in pilihanKitab" :key="k.id" :value="String(k.id)" :disabled="sisaKitab(k) !== null && sisaKitab(k) <= 0 && String(k.id) !== form.kitab_id" v-text="labelKitab(k)"></option>
                 </select></label>
             <label class="col-span-2"><span class="{{ $label }}">{{ __('Ustadz') }} <span class="font-normal text-slate-400">{{ __('(akun asatid yang diterima)') }}</span></span>
                 <select name="user_id" v-model="form.user_id" class="{{ $input }}">
                     <option value="">{{ __('— Belum ditentukan —') }}</option>
-                    @foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}{{ $u->arab ? ' — ' . $u->arab : '' }}</option>@endforeach
+                    {{-- Ustadz yang kosong di hari & jam yang dipilih --}}
+                    <optgroup :label="@js(__('Kosong di')) + ' ' + namaSlotForm">
+                        <option v-for="u in ustadzKosong" :key="u.id" :value="String(u.id)" v-text="u.nama + (u.arab ? ' — ' + u.arab : '')"></option>
+                    </optgroup>
+                    {{-- Ustadz yang sudah mengajar kelas lain di jam itu (tidak bisa dipilih) --}}
+                    <optgroup v-if="ustadzTerisi.length" label="{{ __('Sudah mengajar di jam ini') }}">
+                        <option v-for="u in ustadzTerisi" :key="u.id" :value="String(u.id)" :disabled="String(u.id) !== form.user_id" v-text="u.nama + ' — ' + @js(__('mengajar')) + ' ' + ustadzSibuk[u.id]"></option>
+                    </optgroup>
                 </select>
+                <span v-if="form.user_id && ustadzSibuk[form.user_id]" class="mt-1 block text-[11px] font-semibold text-rose-600"
+                    v-text="@js(__('Bentrok: ustadz ini sudah mengajar kelas')) + ' ' + ustadzSibuk[form.user_id] + ' ' + @js(__('di jam ini. Pilih ustadz yang kosong.'))"></span>
                 @if ($ustadzList->isEmpty())<span class="mt-1 block text-[11px] text-amber-700">{{ __('Belum ada asatid yang diterima di Manajemen Data › Data Asatid.') }}</span>@endif
+            </label>
+            {{-- Jam tujuan sudah berisi pelajaran kelas yang sama: pilih Tukar (keduanya bertukar tempat) --}}
+            <label v-if="pasanganForm" class="col-span-2 flex items-start gap-2.5 rounded-xl bg-amber-50 p-3 ring-1 ring-amber-200 cursor-pointer">
+                <input type="checkbox" name="tukar" value="1" v-model="form.tukar" class="mt-0.5 h-4 w-4 accent-amber-600">
+                <span class="text-xs text-amber-900">
+                    <b class="block" v-text="@js(__('Tukar dengan')) + ' ' + (pasanganForm.kitab || @js(__('Tanpa kitab'))) + (pasanganForm.ustadz ? ' · ' + pasanganForm.ustadz : '')"></b>
+                    <span v-text="form.tukar ? @js(__('Pelajaran itu pindah ke hari & jam lama jadwal ini.')) : @js(__('Jam ini sudah ada pelajaran kelas yang sama. Centang untuk menukar, atau pilih jam lain.'))"></span>
+                </span>
             </label>
             <label class="col-span-2"><span class="{{ $label }}">{{ __('Catatan') }}</span>
                 <input name="catatan" v-model="form.catatan" maxlength="255" class="{{ $input }}"></label>
@@ -449,6 +469,8 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
         const WAKTU = @json($dataWaktu);   // jam pelajaran
         const KELAS = @json($dataKelas);
         const KITAB = @json($dataKitab);
+        const USTADZ = @json($dataUstadz);
+        const SIBUK_KELAS_LAIN = @json($sibukKelasLain); // jam mengajar ustadz di kelas yang tidak tampil (filter kelas)
         const ALAMAT_HAPUS = @json(route('admin.jadwal.destroy', '__ID__'));
         const ALAMAT_GESER = @json(route('admin.jadwal.geser', '__ID__')); // Pindah / Salin kartu (langsung tersimpan)
         const CSRF = @json(csrf_token());
@@ -461,7 +483,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
             ['bg-rose-50 ring-rose-200', 'text-rose-800', 'bg-rose-500'],
             ['bg-teal-50 ring-teal-200', 'text-teal-800', 'bg-teal-500'],
         ];
-        const kosongkanForm = () => ({ id: null, hari: '1', waktu_pelajaran_id: String(WAKTU[0]?.id ?? ''), kelas_id: '', kitab_id: '', user_id: '', catatan: '' });
+        const kosongkanForm = () => ({ id: null, hari: '1', waktu_pelajaran_id: String(WAKTU[0]?.id ?? ''), kelas_id: '', kitab_id: '', user_id: '', catatan: '', tukar: false });
 
         const app = Vue.createApp({
             data() {
@@ -537,6 +559,34 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 pilihanKitab() {
                     return KITAB.filter((k) => k.cocok || String(k.id) === String(this.form.kitab_id));
                 },
+                // Nama hari & jam yang sedang dipilih di form, mis. "Senin, Jam ke-2"
+                namaSlotForm() {
+                    return (HARI[this.form.hari] ?? '') + ', ' + this.namaWaktu(Number(this.form.waktu_pelajaran_id));
+                },
+                // Saat mengubah jadwal & hari/jam diganti: pelajaran kelas yang sama di jam tujuan (bisa ditukar)
+                pasanganForm() {
+                    const f = this.form;
+                    const asal = f.id && this.jadwal.find((x) => x.id === f.id);
+                    if (!asal || (String(asal.hari) === f.hari && String(asal.waktu) === f.waktu_pelajaran_id)) return null;
+                    return this.jadwal.find((x) => x.id !== f.id && String(x.hari) === f.hari && String(x.waktu) === f.waktu_pelajaran_id && String(x.kelas_id) === f.kelas_id) || null;
+                },
+                // { idUstadz: 'nama kelas' } -> ustadz yang sudah mengajar di hari & jam pilihan form
+                ustadzSibuk() {
+                    const f = this.form;
+                    const tukarId = f.tukar && this.pasanganForm ? this.pasanganForm.id : null; // pelajaran yang ditukar akan pergi dari jam ini
+                    const sibuk = {};
+                    [...SIBUK_KELAS_LAIN, ...this.jadwal].forEach((x) => {
+                        if (x.id === f.id || x.id === tukarId || !x.user_id) return;
+                        if (String(x.hari) === f.hari && String(x.waktu) === f.waktu_pelajaran_id) sibuk[x.user_id] = x.kelas;
+                    });
+                    return sibuk;
+                },
+                ustadzKosong() {
+                    return USTADZ.filter((u) => !this.ustadzSibuk[u.id]);
+                },
+                ustadzTerisi() {
+                    return USTADZ.filter((u) => this.ustadzSibuk[u.id]);
+                },
             },
             methods: {
                 ...metodeHalaman, // bukaDialog, tutupDialog, kirimForm, pindahHalaman, konfirmasi
@@ -560,6 +610,21 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 },
                 namaWaktu(id) {
                     return WAKTU.find((w) => w.id === id)?.nama ?? '';
+                },
+                // Sisa jatah kitab di kelas pilihan form (frekuensi − jadwal kitab itu di kelas ini), null bila tidak dibatasi
+                sisaKitab(k) {
+                    if (!k.frekuensi || !this.form.kelas_id) return null;
+                    const dipakai = this.jadwal.filter((x) => x.id !== this.form.id && String(x.kelas_id) === this.form.kelas_id && x.kitab_id === k.id).length;
+                    return k.frekuensi - dipakai;
+                },
+                // Tulisan pilihan kitab, mis. "Jurumiyah (sisa 1 dari 3)" atau "Safinah (penuh 2/2)"
+                labelKitab(k) {
+                    let teks = k.nama + (k.cocok ? '' : ' ' + @js(__('(bukan kurikulum bulan ini)')));
+                    const sisa = this.sisaKitab(k);
+                    if (sisa === null) return teks;
+                    return teks + (sisa > 0
+                        ? ' (' + @js(__('sisa')) + ' ' + sisa + ' ' + @js(__('dari')) + ' ' + k.frekuensi + ')'
+                        : ' (' + @js(__('penuh')) + ' ' + (k.frekuensi - sisa) + '/' + k.frekuensi + ')');
                 },
                 // Kartu dijatuhkan di slot lain: tampilkan menu Pindah / Salin di dekat kursor
                 lepas(hari, waktu, e) {
@@ -658,7 +723,7 @@ $dataKitab = $kitabList->map(fn ($k) => ['id' => $k->id, 'nama' => $k->nama, 'co
                 bukaUbah(j) {
                     this.form = {
                         id: j.id, hari: String(j.hari), waktu_pelajaran_id: String(j.waktu), kelas_id: String(j.kelas_id),
-                        kitab_id: j.kitab_id ? String(j.kitab_id) : '', user_id: j.user_id ? String(j.user_id) : '', catatan: j.catatan ?? '',
+                        kitab_id: j.kitab_id ? String(j.kitab_id) : '', user_id: j.user_id ? String(j.user_id) : '', catatan: j.catatan ?? '', tukar: false,
                     };
                     this.bukaDialog('dialog-jadwal');
                 },

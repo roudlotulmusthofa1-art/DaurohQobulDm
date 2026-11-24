@@ -61,6 +61,11 @@ class JadwalMengajarController extends Controller
             'namaUstadz' => $namaUstadz,
             'arabUstadz' => $arabUstadz,
             'kelasFilter' => $kelasFilter,
+            // Saat filter kelas aktif: jam mengajar ustadz di kelas lain, supaya form tahu ustadz mana yang tidak kosong
+            'sibukKelasLain' => $bulan && $kelasFilter
+                ? JadwalMengajar::with('kelas')->where('bulan_ajaran_id', $bulan->id)->where('kelas_id', '!=', $kelasFilter)->whereNotNull('user_id')->get()
+                    ->map(fn ($j) => ['hari' => (int) $j->hari, 'waktu' => (int) $j->waktu_pelajaran_id, 'user_id' => $j->user_id, 'kelas' => $j->kelas?->nama])->values()
+                : collect(),
             'tampilan' => $tampilan,
             'bulanLain' => $bulan ? BulanAjaran::with('tahunAjaran')->whereKeyNot($bulan->id)->withCount('jadwal')->having('jadwal_count', '>', 0)->get() : collect(),
         ]);
@@ -119,10 +124,11 @@ class JadwalMengajarController extends Controller
 
         return EksporDokumen::kirim('admin.export.jadwal', [
             'judul'      => __('Jadwal Pelajaran') . ' · ' . $namaKelompok,
-            'keterangan' => $bulan->nama . ' · ' . __('TA') . ' ' . $bulan->tahunAjaran?->nama,
+            'keterangan' => __('Tahun Ajaran') . ' ' . $bulan->tahunAjaran?->nama . ('H'),
             'grup'       => $grup,
             'hariList'   => collect(JadwalMengajar::HARI)->only($jadwal->pluck('hari')->unique()->all())->all(),
             'namaUstadz' => $namaUstadz,
+            'arabUstadz' => $arabUstadz,
             'pisah'      => $request->boolean('pisah'),
         ], $v['format'], 'jadwal-pelajaran-' . $kelompok, true);
     }
@@ -139,6 +145,12 @@ class JadwalMengajarController extends Controller
     public function update(Request $request, JadwalMengajar $jadwal)
     {
         $data = $this->validasi($request);
+        // Centang "Tukar": jam tujuan berisi pelajaran kelas yang sama -> keduanya bertukar tempat
+        if ($request->boolean('tukar')) {
+            $this->tukarKartu($jadwal, (int) $data['hari'], (int) $data['waktu_pelajaran_id'], $data);
+
+            return back()->with('success', 'Jadwal ditukar.');
+        }
         $this->cekBentrok($data, $jadwal->id);
         $jadwal->update($data);
 
@@ -199,7 +211,16 @@ class JadwalMengajarController extends Controller
             + $jadwal->only(['bulan_ajaran_id', 'kelas_id', 'kitab_id', 'user_id', 'catatan']);
 
         if ($data['mode'] === 'tukar') {
-            return $this->tukar($jadwal, $baru['hari'], $baru['waktu_pelajaran_id']);
+            $asal = ['hari' => $jadwal->hari, 'waktu_pelajaran_id' => $jadwal->waktu_pelajaran_id];
+            $pasangan = $this->tukarKartu($jadwal, $baru['hari'], $baru['waktu_pelajaran_id']);
+
+            return response()->json([
+                'pesan' => __('Jadwal ditukar.'),
+                'id' => $jadwal->id,
+                'pasangan_id' => $pasangan->id,
+                'pasangan_hari' => $asal['hari'],
+                'pasangan_waktu' => $asal['waktu_pelajaran_id'],
+            ]);
         }
 
         if ($data['mode'] === 'pindah') {
@@ -218,9 +239,14 @@ class JadwalMengajarController extends Controller
     /**
      * Tukar tempat dua kartu satu kelas: $jadwal ke slot tujuan, kartu di slot tujuan ke slot asal $jadwal.
      * Kartunya yang dipindah (bukan isinya), jadi riwayat seperti tanda pelajaran tetap ikut kartunya.
+     * $isiBaru = isi form (kitab, ustadz, catatan baru). Kosong = isi kartu tidak diganti (geser kartu).
+     * Hasil: kartu pasangan (sekarang di slot asal $jadwal).
      */
-    private function tukar(JadwalMengajar $jadwal, int $hari, int $waktuId)
+    private function tukarKartu(JadwalMengajar $jadwal, int $hari, int $waktuId, array $isiBaru = []): JadwalMengajar
     {
+        if (isset($isiBaru['kelas_id']) && (int) $isiBaru['kelas_id'] !== (int) $jadwal->kelas_id) {
+            throw ValidationException::withMessages(['jadwal' => __('Tukar hanya bisa dengan pelajaran kelas yang sama.')]);
+        }
         $pasangan = JadwalMengajar::where('bulan_ajaran_id', $jadwal->bulan_ajaran_id)
             ->where('kelas_id', $jadwal->kelas_id)->where('hari', $hari)->where('waktu_pelajaran_id', $waktuId)
             ->whereKeyNot($jadwal->id)->first();
@@ -231,36 +257,41 @@ class JadwalMengajarController extends Controller
         $asal = ['hari' => $jadwal->hari, 'waktu_pelajaran_id' => $jadwal->waktu_pelajaran_id];
         $tujuan = ['hari' => $hari, 'waktu_pelajaran_id' => $waktuId];
 
-        // Bentrok ustadz: ustadz kartu ini di slot tujuan, dan ustadz pasangan di slot asal (kedua kartu tidak dihitung)
+        // Bentrok ustadz: ustadz (baru) kartu ini di slot tujuan, dan ustadz pasangan di slot asal (kedua kartu tidak dihitung)
         $kecuali = [$jadwal->id, $pasangan->id];
-        foreach ([[$jadwal, $tujuan], [$pasangan, $asal]] as [$kartu, $slot]) {
-            if (! $kartu->user_id) {
+        $ustadzBaru = array_key_exists('user_id', $isiBaru) ? $isiBaru['user_id'] : $jadwal->user_id;
+        foreach ([[$ustadzBaru, $tujuan], [$pasangan->user_id, $asal]] as [$userId, $slot]) {
+            if (! $userId) {
                 continue;
             }
             $lain = JadwalMengajar::with('kelas')->where('bulan_ajaran_id', $jadwal->bulan_ajaran_id)
                 ->where('hari', $slot['hari'])->where('waktu_pelajaran_id', $slot['waktu_pelajaran_id'])
-                ->where('user_id', $kartu->user_id)->whereKeyNot($kecuali)->first();
+                ->where('user_id', $userId)->whereKeyNot($kecuali)->first();
             if ($lain) {
                 throw ValidationException::withMessages(['jadwal' => __('Tidak bisa ditukar: :ustadz sudah mengajar di kelas :kelas pada jam itu.', [
-                    'ustadz' => $kartu->ustadz?->name ?? __('ustadz'), 'kelas' => $lain->kelas?->nama ?? '-',
+                    'ustadz' => User::find($userId)?->name ?? __('ustadz'), 'kelas' => $lain->kelas?->nama ?? '-',
                 ])]);
             }
         }
 
+        // Kitab baru: cek frekuensi di kelas ini (kartu ini tidak dihitung)
+        $kitabBaru = $isiBaru['kitab_id'] ?? null;
+        if ($kitabBaru && (int) $kitabBaru !== (int) $jadwal->kitab_id && ($kitab = Kitab::find($kitabBaru))) {
+            $sudah = JadwalMengajar::where('bulan_ajaran_id', $jadwal->bulan_ajaran_id)
+                ->where('kelas_id', $jadwal->kelas_id)->where('kitab_id', $kitab->id)->whereKeyNot($jadwal->id)->count();
+            if ($sudah >= $kitab->frekuensi) {
+                throw ValidationException::withMessages(['jadwal' => "Kitab {$kitab->nama} di kelas ini sudah {$sudah} kali seminggu (batas frekuensi {$kitab->frekuensi})."]);
+            }
+        }
+
         // Satu kelas hanya boleh satu pelajaran per jam (aturan database), jadi kartu ini diparkir dulu di hari 0
-        DB::transaction(function () use ($jadwal, $pasangan, $asal, $tujuan) {
+        DB::transaction(function () use ($jadwal, $pasangan, $asal, $tujuan, $isiBaru) {
             $jadwal->update(['hari' => 0]);
             $pasangan->update($asal);
-            $jadwal->update($tujuan);
+            $jadwal->update(array_merge($isiBaru, $tujuan));
         });
 
-        return response()->json([
-            'pesan' => __('Jadwal ditukar.'),
-            'id' => $jadwal->id,
-            'pasangan_id' => $pasangan->id,
-            'pasangan_hari' => $asal['hari'],
-            'pasangan_waktu' => $asal['waktu_pelajaran_id'],
-        ]);
+        return $pasangan;
     }
 
     /** Ganti ustadz di seluruh jadwal bulan ini (mis. ustadz berhalangan). */

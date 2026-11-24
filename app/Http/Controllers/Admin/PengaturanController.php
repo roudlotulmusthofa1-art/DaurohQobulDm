@@ -571,16 +571,26 @@ class PengaturanController extends Controller
     {
         $data = $request->validate([
             'halaman' => ['required', 'string', Rule::in(array_keys(TeksTampilan::HALAMAN))],
-            'teks' => ['array'],
-            'teks.*' => ['required', 'string', 'max:2000'],
-            'arab' => ['array'],
-            'arab.*' => ['nullable', 'string', 'max:2000'],
-        ], [
-            'arab.*.max' => 'Terjemahan terlalu panjang (maks. 2000 huruf).',
+            // Satu isian JSON: [[teks Indonesia, teks Arab], ...]
+            // (bukan ratusan isian terpisah: PHP membatasi 1000 isian per form, dan spasi/baris baru di tulisan tetap utuh)
+            'terjemahan' => ['required', 'json'],
         ]);
 
-        foreach ($data['teks'] ?? [] as $i => $teks) {
-            Terjemahan::simpanSatu($teks, $data['arab'][$i] ?? null);
+        $daftar = [];
+        foreach (json_decode($data['terjemahan'], true) ?: [] as $baris) {
+            [$teks, $arab] = array_pad((array) $baris, 2, null);
+            if (! is_string($teks) || trim($teks) === '') {
+                continue;
+            }
+            $arab = is_string($arab) ? $arab : null;
+            if (mb_strlen((string) $arab) > 2000) {
+                return back()->withErrors(['terjemahan' => 'Terjemahan terlalu panjang (maks. 2000 huruf).']);
+            }
+            $daftar[$teks] = $arab;
+        }
+
+        foreach ($daftar as $teks => $arab) {
+            Terjemahan::simpanSatu((string) $teks, $arab);
         }
         Terjemahan::lupakanCache();
 

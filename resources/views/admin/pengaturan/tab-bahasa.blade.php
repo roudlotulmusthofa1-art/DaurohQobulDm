@@ -73,7 +73,6 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
                 <p class="mt-1 text-[11px] text-amber-700">Tulis juga {{ implode(', ', array_unique($isian[0])) }} di terjemahan, persis seperti ini (diganti otomatis).</p>
                 @endif
                 <p class="mt-1 text-[11px] text-slate-400 break-all">{{ implode(' · ', $b['file']) }}</p>
-                <input type="hidden" name="teks[{{ $i }}]" value="{{ $b['teks'] }}">
             </div>
             <div class="flex items-start gap-3">
                 @if ($b['usulan'] !== '')
@@ -86,7 +85,7 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
                     <span class="text-[10px] text-slate-400">{{ __('usulan') }}</span>
                 </div>
                 @endif
-                <textarea name="arab[{{ $i }}]" rows="1" dir="rtl" lang="ar" v-model="isi[{{ $i }}]" :readonly="pakai[{{ $i }}]"
+                <textarea rows="1" dir="rtl" lang="ar" v-model="isi[{{ $i }}]" :readonly="pakai[{{ $i }}]"
                     placeholder="اكتب الترجمة هنا…"
                     class="w-full rounded-xl ring-1 ring-slate-200 border-0 px-3.5 py-2 text-[15px] focus:ring-2 focus:ring-emerald-500 outline-none resize-y"
                     :class="pakai[{{ $i }}] ? 'bg-emerald-50 text-emerald-800' : 'bg-[#f8fbfa] text-slate-800'"></textarea>
@@ -94,6 +93,9 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
         </div>
         @endforeach
     </div>
+
+    {{-- Semua terjemahan dikirim sebagai satu isian JSON (PHP membatasi 1000 isian per form; spasi & baris baru tetap utuh) --}}
+    <input type="hidden" name="terjemahan" :value="paketTerjemahan">
 
     <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4 bg-[#f5f9f7] border-t border-slate-100">
         <p class="text-xs text-slate-500">Sudah diterjemahkan: <b class="text-slate-700">{{ $jumlahTerjemah }}</b> dari {{ $jumlahBaris }} tulisan.</p>
@@ -110,11 +112,12 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
     window.tabPengaturan = {
         data() {
             const usulan = @json($barisBahasa->pluck('usulan'));
-            const isi = @json($barisBahasa->map(fn ($b, $i) => (string) old('arab.' . $i, $b['arab'])));
+            const isi = @json($barisBahasa->pluck('arab'));
             // Tombol tampil hidup bila yang tersimpan sama persis dengan usulan
             const pakai = isi.map((t, i) => usulan[i] !== '' && t === usulan[i]);
             return {
                 cari: '',
+                teksAsli: @json($barisBahasa->pluck('teks')), // tulisan Indonesia persis (spasi & baris baru utuh)
                 teksIndonesia: @json($barisBahasa->pluck('teks')->map(fn ($t) => mb_strtolower($t))),
                 usulan,
                 isi,
@@ -127,6 +130,10 @@ Dimuat dari admin/pengaturan/index.blade.php. Variabel gaya ($kartu, $input, $la
             // Tombol "Pakai semua usulan" hidup bila semua baris yang punya usulan sedang memakainya
             semuaUsulan() {
                 return this.usulan.every((u, i) => u === '' || this.pakai[i]);
+            },
+            // Isian yang dikirim saat Simpan: [[teks Indonesia, teks Arab], ...]
+            paketTerjemahan() {
+                return JSON.stringify(this.teksAsli.map((t, i) => [t, this.isi[i] ?? '']));
             },
         },
         methods: {
