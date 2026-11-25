@@ -294,27 +294,64 @@ class JadwalMengajarController extends Controller
         return $pasangan;
     }
 
-    /** Ganti ustadz di seluruh jadwal bulan ini (mis. ustadz berhalangan). */
-    public function gantiUstadz(Request $request)
+    /**
+     * Ubah Sekaligus: ganti ustadz dan/atau kitab di banyak jadwal yang dicentang (dari jendela "Ubah Sekaligus").
+     * Dipakai mis. ustadz berhalangan, atau mengganti pelajaran + ustadznya di satu kelas.
+     * Ditolak bila ustadz baru bentrok di jam yang sama, atau kitab baru melebihi frekuensinya di suatu kelas.
+     */
+    public function ubahSekaligus(Request $request)
     {
         $data = $request->validate([
             'bulan_ajaran_id' => ['required', 'integer', Rule::exists('bulan_ajaran', 'id')],
-            'dari' => ['required', 'integer'],
-            'ke' => ['required', 'integer', 'different:dari', Rule::exists('users', 'id')->where('role', PendaftaranAsatid::ROLE)],
-        ], ['ke.different' => 'Pilih ustadz pengganti yang berbeda.']);
+            'ids' => ['required', 'array', 'min:1'],
+            'ids.*' => ['integer'],
+            'user_id' => ['nullable', 'integer', Rule::exists('users', 'id')->where('role', PendaftaranAsatid::ROLE)],
+            'kitab_id' => ['nullable', 'integer', Rule::exists('kitab', 'id')],
+        ], [
+            'ids.required' => 'Centang dulu jadwal yang mau diubah.',
+            'user_id.exists' => 'Ustadz harus akun asatid yang sudah diterima.',
+        ]);
 
-        $jadwal = JadwalMengajar::where('bulan_ajaran_id', $data['bulan_ajaran_id'])->where('user_id', $data['dari'])->get();
-        $bentrok = $jadwal->filter(fn ($j) => JadwalMengajar::where('bulan_ajaran_id', $j->bulan_ajaran_id)
-            ->where('hari', $j->hari)->where('waktu_pelajaran_id', $j->waktu_pelajaran_id)
-            ->where('user_id', $data['ke'])->exists());
-
-        if ($bentrok->isNotEmpty()) {
-            throw ValidationException::withMessages(['ke' => "Ustadz pengganti sudah mengajar di {$bentrok->count()} jam yang sama. Atur jadwal itu dulu."]);
+        if (empty($data['user_id']) && empty($data['kitab_id'])) {
+            throw ValidationException::withMessages(['jadwal' => 'Pilih ustadz baru atau kitab baru dulu.']);
         }
 
-        JadwalMengajar::whereIn('id', $jadwal->pluck('id'))->update(['user_id' => $data['ke']]);
+        $dipilih = JadwalMengajar::with('kelas')->where('bulan_ajaran_id', $data['bulan_ajaran_id'])->whereIn('id', $data['ids'])->get();
+        if ($dipilih->isEmpty()) {
+            throw ValidationException::withMessages(['jadwal' => 'Jadwal yang dicentang tidak ditemukan. Muat ulang halaman lalu coba lagi.']);
+        }
+        $lainnya = JadwalMengajar::with('kelas')->where('bulan_ajaran_id', $data['bulan_ajaran_id'])->whereNotIn('id', $dipilih->pluck('id'))->get();
 
-        return back()->with('success', "{$jadwal->count()} jadwal dipindahkan ke ustadz pengganti.");
+        // Ustadz baru: tidak boleh sudah mengajar di jam yang sama, dan tidak boleh dapat dua kelas di satu jam
+        if (! empty($data['user_id'])) {
+            foreach ($dipilih->groupBy(fn ($j) => $j->hari . '-' . $j->waktu_pelajaran_id) as $isi) {
+                $j = $isi->first();
+                $namaJam = (JadwalMengajar::HARI[$j->hari] ?? '') . ' ' . (WaktuPelajaran::find($j->waktu_pelajaran_id)?->nama ?? '');
+                if ($isi->count() > 1) {
+                    throw ValidationException::withMessages(['jadwal' => "Bentrok: ustadz baru akan mengajar {$isi->count()} kelas sekaligus di {$namaJam}. Hilangkan centang salah satunya."]);
+                }
+                $sama = $lainnya->first(fn ($x) => $x->hari == $j->hari && $x->waktu_pelajaran_id == $j->waktu_pelajaran_id && $x->user_id == $data['user_id']);
+                if ($sama) {
+                    throw ValidationException::withMessages(['jadwal' => "Bentrok: ustadz baru sudah mengajar kelas " . ($sama->kelas?->nama ?? '-') . " di {$namaJam}."]);
+                }
+            }
+        }
+
+        // Kitab baru: jumlahnya per kelas tidak boleh melebihi frekuensi kitab
+        if (! empty($data['kitab_id']) && ($kitab = Kitab::find($data['kitab_id'])) && $kitab->frekuensi) {
+            foreach ($dipilih->groupBy('kelas_id') as $kelasId => $isi) {
+                $jumlah = $isi->count() + $lainnya->where('kelas_id', $kelasId)->where('kitab_id', $kitab->id)->count();
+                if ($jumlah > $kitab->frekuensi) {
+                    $namaKelas = $isi->first()->kelas?->nama ?? '-';
+                    throw ValidationException::withMessages(['jadwal' => "Kitab {$kitab->nama} di kelas {$namaKelas} akan menjadi {$jumlah} kali seminggu (batas frekuensi {$kitab->frekuensi})."]);
+                }
+            }
+        }
+
+        $ubah = array_filter(['user_id' => $data['user_id'] ?? null, 'kitab_id' => $data['kitab_id'] ?? null]);
+        JadwalMengajar::whereIn('id', $dipilih->pluck('id'))->update($ubah);
+
+        return back()->with('success', "{$dipilih->count()} jadwal berhasil diubah.");
     }
 
     /* ---------------- Bantuan ---------------- */

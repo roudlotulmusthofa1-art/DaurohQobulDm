@@ -73,9 +73,9 @@ $dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, '
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75"/></svg>
                     {{ __('Salin Jadwal') }}
                 </button>
-                <button type="button" @click="bukaDialog('dialog-ganti')" class="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#3b2a00] hover:bg-amber-200 transition-colors">
+                <button type="button" @click="bukaMassal()" class="inline-flex items-center gap-2 rounded-2xl bg-amber-300 px-4 py-2.5 text-sm font-bold text-[#3b2a00] hover:bg-amber-200 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7.5 21L3 16.5m0 0L7.5 12M3 16.5h13.5m0-13.5L21 7.5m0 0L16.5 12M21 7.5H7.5"/></svg>
-                    {{ __('Ganti Ustadz') }}
+                    {{ __('Ubah Sekaligus') }}
                 </button>
                 <button type="button" @click="bukaTambah()" class="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-sm font-bold text-[#0b332c] hover:bg-emerald-100 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
@@ -397,27 +397,108 @@ $dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, '
     </form>
 </dialog>
 
-{{-- ===== Dialog ganti ustadz ===== --}}
-<dialog id="dialog-ganti" ref="dialog-ganti" class="dialog-akademik" @click.self="tutupDialog">
-    <form method="POST" action="{{ route('admin.jadwal.ganti-ustadz') }}" class="p-5 sm:p-6 space-y-4">
+{{-- ===== Dialog Ubah Sekaligus =====
+     1) saring jadwal (kelas / ustadz / kitab / hari)  2) centang jadwalnya  3) pilih ustadz baru dan/atau kitab baru.
+     Bentrok ustadz & frekuensi kitab diperiksa di layar (baris merah), lalu diperiksa lagi di server. --}}
+<dialog id="dialog-massal" ref="dialog-massal" class="dialog-akademik" style="width: min(720px, calc(100vw - 2rem))" @click.self="tutupDialog">
+    <form method="POST" action="{{ route('admin.jadwal.ubah-sekaligus') }}" class="p-5 sm:p-6 space-y-4" @submit="kirimMassal">
         @csrf
         <input type="hidden" name="bulan_ajaran_id" value="{{ $bulan->id }}">
+        <input v-for="id in massalTerpilih.map((j) => j.id)" :key="id" type="hidden" name="ids[]" :value="id">
         <div class="flex items-center justify-between">
-            <h2 class="text-lg font-extrabold text-slate-800">{{ __('Ganti Ustadz') }}</h2>
+            <h2 class="text-lg font-extrabold text-slate-800">{{ __('Ubah Jadwal Sekaligus') }}</h2>
             <button type="button" @click="tutupDialog" class="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100">✕</button>
         </div>
-        <p class="text-sm text-slate-500">{{ __('Semua jadwal ustadz lama di') }} <b>{{ $bulan->nama }}</b> {{ __('dipindahkan ke ustadz pengganti.') }}</p>
-        @php $ustadzBerjadwal = $jadwal->pluck('user_id')->filter()->unique(); @endphp
-        <label class="block"><span class="{{ $label }}">{{ __('Ustadz lama') }}</span>
-            <select name="dari" required class="{{ $input }}">
-                @forelse ($ustadzList->whereIn('id', $ustadzBerjadwal) as $u)<option value="{{ $u->id }}">{{ $u->nama }}{{ $u->arab ? ' — ' . $u->arab : '' }} ({{ __(':jumlah jadwal', ['jumlah' => $jadwal->where('user_id', $u->id)->count()]) }})</option>
-                @empty<option value="">{{ __('Belum ada ustadz yang dijadwalkan') }}</option>@endforelse
-            </select></label>
-        <label class="block"><span class="{{ $label }}">{{ __('Ustadz pengganti') }}</span>
-            <select name="ke" required class="{{ $input }}">@foreach ($ustadzList as $u)<option value="{{ $u->id }}">{{ $u->nama }}{{ $u->arab ? ' — ' . $u->arab : '' }}</option>@endforeach</select></label>
-        <div class="flex justify-end gap-2 pt-2">
+        <p class="text-sm text-slate-500">{{ __('Ganti ustadz dan/atau kitab di banyak jadwal sekaligus.') }} {{ __('Periode:') }} <b>{{ $bulan->nama }}</b></p>
+
+        {{-- Langkah 1: saring --}}
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-amber-700">{{ __('1. Saring jadwal') }}</p>
+            <div class="mt-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <label class="block"><span class="{{ $label }}">{{ __('Kelas') }}</span>
+                    <select v-model="massal.kelas" class="{{ $input }}">
+                        <option value="">{{ __('Semua kelas') }}</option>
+                        <option v-for="k in massalPilihanKelas" :key="k.id" :value="String(k.id)" v-text="k.nama"></option>
+                    </select></label>
+                <label class="block"><span class="{{ $label }}">{{ __('Ustadz') }}</span>
+                    <select v-model="massal.ustadz" class="{{ $input }}">
+                        <option value="">{{ __('Semua ustadz') }}</option>
+                        <option value="0">{{ __('Belum ada ustadz') }}</option>
+                        <option v-for="u in massalPilihanUstadzLama" :key="u.id" :value="String(u.id)" v-text="u.nama + ' (' + u.jumlah + ')'"></option>
+                    </select></label>
+                <label class="block"><span class="{{ $label }}">{{ __('Kitab') }}</span>
+                    <select v-model="massal.kitab" class="{{ $input }}">
+                        <option value="">{{ __('Semua kitab') }}</option>
+                        <option value="0">{{ __('Tanpa kitab') }}</option>
+                        <option v-for="k in massalPilihanKitabLama" :key="k.id" :value="String(k.id)" v-text="k.nama"></option>
+                    </select></label>
+                <label class="block"><span class="{{ $label }}">{{ __('Hari') }}</span>
+                    <select v-model="massal.hari" class="{{ $input }}">
+                        <option value="">{{ __('Semua hari') }}</option>
+                        <option v-for="(nama, no) in hari" :key="no" :value="String(no)" v-text="nama"></option>
+                    </select></label>
+            </div>
+        </div>
+
+        {{-- Langkah 2: centang --}}
+        <div>
+            <div class="flex items-center justify-between gap-2">
+                <p class="text-xs font-bold uppercase tracking-wider text-amber-700"
+                    v-text="@js(__('2. Centang jadwalnya')) + ' (' + massalTerpilih.length + '/' + massalCocok.length + ')'"></p>
+                <div v-if="massalCocok.length" class="flex gap-2 text-xs font-semibold">
+                    <button type="button" class="text-emerald-700 hover:underline" @click="massal.dicentang = massalCocok.map((j) => j.id)">{{ __('Centang semua') }}</button>
+                    <button type="button" class="text-slate-500 hover:underline" @click="massal.dicentang = []">{{ __('Hapus centang') }}</button>
+                </div>
+            </div>
+            <div class="mt-1 max-h-64 overflow-y-auto rounded-xl ring-1 ring-slate-200 divide-y divide-slate-100">
+                <label v-for="j in massalCocok" :key="j.id" class="flex items-start gap-2.5 px-3 py-2 text-sm cursor-pointer hover:bg-slate-50"
+                    :class="{ 'bg-rose-50': massalPesan[j.id] && massal.dicentang.includes(j.id) }">
+                    <input type="checkbox" class="mt-1 rounded text-emerald-600" :value="j.id" v-model="massal.dicentang">
+                    <span class="min-w-0">
+                        <span class="block text-slate-800">
+                            <b v-text="hari[j.hari] + ' · ' + namaWaktu(j.waktu)"></b>
+                            <span class="text-slate-500" v-text="' · ' + j.kelas"></span>
+                        </span>
+                        <span class="block text-xs text-slate-600" v-text="(j.kitab || @js(__('Tanpa kitab'))) + ' — ' + (j.ustadz || @js(__('Belum ada ustadz')))"></span>
+                        <span v-if="massalPesan[j.id] && massal.dicentang.includes(j.id)" class="block text-xs font-semibold text-rose-600" v-text="massalPesan[j.id]"></span>
+                    </span>
+                </label>
+                <p v-if="!massalCocok.length" class="px-3 py-6 text-center text-sm text-slate-400">{{ __('Tidak ada jadwal yang cocok dengan saringan.') }}</p>
+            </div>
+        </div>
+
+        {{-- Langkah 3: ubah menjadi --}}
+        <div>
+            <p class="text-xs font-bold uppercase tracking-wider text-amber-700">{{ __('3. Ubah menjadi') }}</p>
+            <div class="mt-1 grid sm:grid-cols-2 gap-2">
+                <label class="block"><span class="{{ $label }}">{{ __('Ustadz baru') }}</span>
+                    <select name="user_id" v-model="massal.ustadzBaru" class="{{ $input }}">
+                        <option value="">{{ __('— Ustadz tidak diubah —') }}</option>
+                        <optgroup v-if="massalUstadzBaru.kosong.length" label="{{ __('Kosong di semua jam yang dicentang') }}">
+                            <option v-for="u in massalUstadzBaru.kosong" :key="u.id" :value="String(u.id)" v-text="u.label"></option>
+                        </optgroup>
+                        <optgroup v-if="massalUstadzBaru.bentrok.length" label="{{ __('Bentrok di sebagian jam') }}">
+                            <option v-for="u in massalUstadzBaru.bentrok" :key="u.id" :value="String(u.id)" v-text="u.label"></option>
+                        </optgroup>
+                    </select></label>
+                <label class="block"><span class="{{ $label }}">{{ __('Kitab baru') }}</span>
+                    <select name="kitab_id" v-model="massal.kitabBaru" class="{{ $input }}">
+                        <option value="">{{ __('— Kitab tidak diubah —') }}</option>
+                        <optgroup label="{{ __('Kurikulum bulan ini') }}">
+                            <option v-for="k in massalKitabBaru.cocok" :key="k.id" :value="String(k.id)" v-text="k.nama + (k.frekuensi ? ' (' + k.frekuensi + 'x/' + @js(__('minggu')) + ')' : '')"></option>
+                        </optgroup>
+                        <optgroup v-if="massalKitabBaru.lain.length" label="{{ __('Kitab lain') }}">
+                            <option v-for="k in massalKitabBaru.lain" :key="k.id" :value="String(k.id)" v-text="k.nama + (k.frekuensi ? ' (' + k.frekuensi + 'x/' + @js(__('minggu')) + ')' : '')"></option>
+                        </optgroup>
+                    </select></label>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-end gap-2 pt-2">
+            <p v-if="massalAlasan" class="mr-auto text-xs font-semibold text-amber-700" v-text="massalAlasan"></p>
             <button type="button" @click="tutupDialog" class="rounded-xl px-4 py-2.5 text-sm font-semibold text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50">{{ __('Batal') }}</button>
-            <button class="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-600">{{ __('Ganti') }}</button>
+            <button class="rounded-xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-white hover:bg-amber-600"
+                :class="{ 'opacity-60': massalAlasan }" v-text="@js(__('Terapkan ke')) + ' ' + massalTerpilih.length + ' ' + @js(__('jadwal'))"></button>
         </div>
     </form>
 </dialog>
@@ -484,6 +565,9 @@ $dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, '
             ['bg-teal-50 ring-teal-200', 'text-teal-800', 'bg-teal-500'],
         ];
         const kosongkanForm = () => ({ id: null, hari: '1', waktu_pelajaran_id: String(WAKTU[0]?.id ?? ''), kelas_id: '', kitab_id: '', user_id: '', catatan: '', tukar: false });
+        // Isi awal jendela Ubah Sekaligus: saringan (kelas/ustadz/kitab/hari), jadwal yang dicentang, ustadz & kitab baru
+        const kosongkanMassal = (kelas) => ({ kelas: kelas ? String(kelas) : '', ustadz: '', kitab: '', hari: '', dicentang: [], ustadzBaru: '', kitabBaru: '' });
+        const urutWaktu = (id) => WAKTU.find((w) => w.id === id)?.urutan ?? 0;
 
         const app = Vue.createApp({
             data() {
@@ -501,6 +585,7 @@ $dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, '
                     tawaran: null,      // menu Pindah/Salin: { j, hari, waktu, x, y }
                     menyimpan: false,   // sedang mengirim ke server
                     form: kosongkanForm(),
+                    massal: kosongkanMassal(@json($kelasFilter)), // jendela Ubah Sekaligus
                     alamatUbah: @json(route('admin.jadwal.update', '__ID__')),
                     // Pilihan Export: awalnya mengikuti tampilan dan kelas yang sedang dibuka
                     ekspor: { kelompok: @json($tampilan === 'grid' ? 'semua' : $tampilan), kelas: @json((string) $kelasFilter), ustadz: '', pisah: true },
@@ -586,6 +671,105 @@ $dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, '
                 },
                 ustadzTerisi() {
                     return USTADZ.filter((u) => this.ustadzSibuk[u.id]);
+                },
+
+                /* ----- Ubah Sekaligus ----- */
+                // Pilihan saringan: hanya kelas / ustadz / kitab yang ada di jadwal bulan ini
+                massalPilihanKelas() {
+                    return KELAS.filter((k) => this.jadwal.some((j) => j.kelas_id === k.id));
+                },
+                massalPilihanUstadzLama() {
+                    return USTADZ.map((u) => ({ ...u, jumlah: this.jadwal.filter((j) => j.user_id === u.id).length })).filter((u) => u.jumlah);
+                },
+                massalPilihanKitabLama() {
+                    const ada = {};
+                    this.jadwal.forEach((j) => { if (j.kitab_id) ada[j.kitab_id] = j.kitab; });
+                    return Object.entries(ada).map(([id, nama]) => ({ id, nama })).sort((a, b) => a.nama.localeCompare(b.nama));
+                },
+                // Jadwal yang cocok dengan saringan, urut hari -> jam -> kelas
+                massalCocok() {
+                    const m = this.massal;
+                    const sama = (nilai, saring) => saring === '' || String(nilai ?? 0) === saring;
+                    return this.jadwal
+                        .filter((j) => sama(j.kelas_id, m.kelas) && sama(j.user_id, m.ustadz) && sama(j.kitab_id, m.kitab) && sama(j.hari, m.hari))
+                        .sort((a, b) => a.hari - b.hari || urutWaktu(a.waktu) - urutWaktu(b.waktu) || a.warna - b.warna);
+                },
+                massalTerpilih() {
+                    return this.massalCocok.filter((j) => this.massal.dicentang.includes(j.id));
+                },
+                // { "hari-jam": { idUstadz: 'nama kelas' } } -> ustadz yang mengajar di jam itu, di luar jadwal yang dicentang
+                massalSibuk() {
+                    const dipilih = new Set(this.massalTerpilih.map((j) => j.id));
+                    const sibuk = {};
+                    [...this.jadwal, ...SIBUK_KELAS_LAIN].forEach((x) => {
+                        if (!x.user_id || dipilih.has(x.id)) return;
+                        (sibuk[x.hari + '-' + x.waktu] ??= {})[x.user_id] = x.kelas;
+                    });
+                    return sibuk;
+                },
+                // Jam (hari-jam) yang dicentang lebih dari sekali (beda kelas): satu ustadz tidak bisa mengajar dua kelas sekaligus
+                massalJamGanda() {
+                    const hitung = {};
+                    this.massalTerpilih.forEach((j) => { hitung[j.hari + '-' + j.waktu] = (hitung[j.hari + '-' + j.waktu] ?? 0) + 1; });
+                    return hitung;
+                },
+                // Pilihan ustadz baru, dipisah "kosong di semua jam" dan "bentrok di sebagian jam"
+                massalUstadzBaru() {
+                    const jumlahJadwal = {};
+                    [...this.jadwal, ...SIBUK_KELAS_LAIN].forEach((x) => { if (x.user_id) jumlahJadwal[x.user_id] = (jumlahJadwal[x.user_id] ?? 0) + 1; });
+                    const hasil = { kosong: [], bentrok: [] };
+                    USTADZ.forEach((u) => {
+                        const bentrok = this.massalTerpilih.filter((j) => this.massalSibuk[j.hari + '-' + j.waktu]?.[u.id]).length;
+                        const jumlah = jumlahJadwal[u.id] ?? 0;
+                        let label = u.nama + ' — ' + (jumlah ? jumlah + ' ' + @js(__('jadwal')) : @js(__('belum punya jadwal')));
+                        if (bentrok) label += ' · ' + @js(__('bentrok')) + ' ' + bentrok + ' ' + @js(__('jam'));
+                        (bentrok ? hasil.bentrok : hasil.kosong).push({ ...u, label });
+                    });
+                    return hasil;
+                },
+                massalKitabBaru() {
+                    return { cocok: KITAB.filter((k) => k.cocok), lain: KITAB.filter((k) => !k.cocok) };
+                },
+                // { idJadwal: 'pesan bentrok' } untuk jadwal yang dicentang, sesuai ustadz baru & kitab baru
+                massalPesan() {
+                    const m = this.massal;
+                    const pesan = {};
+                    if (m.ustadzBaru) {
+                        this.massalTerpilih.forEach((j) => {
+                            const slot = j.hari + '-' + j.waktu;
+                            const kelasLain = this.massalSibuk[slot]?.[m.ustadzBaru];
+                            if (kelasLain) pesan[j.id] = @js(__('Bentrok: ustadz baru sudah mengajar kelas')) + ' ' + kelasLain + ' ' + @js(__('di jam ini'));
+                            else if (this.massalJamGanda[slot] > 1) pesan[j.id] = @js(__('Bentrok: ustadz baru akan mengajar dua kelas di jam ini. Hilangkan centang salah satunya.'));
+                        });
+                    }
+                    const kitab = m.kitabBaru && KITAB.find((k) => String(k.id) === m.kitabBaru);
+                    if (kitab && kitab.frekuensi) {
+                        const dipilih = new Set(this.massalTerpilih.map((j) => j.id));
+                        const perKelas = {};
+                        this.massalTerpilih.forEach((j) => (perKelas[j.kelas_id] ??= []).push(j));
+                        Object.entries(perKelas).forEach(([kelasId, isi]) => {
+                            const jumlah = isi.length + this.jadwal.filter((x) => !dipilih.has(x.id) && String(x.kelas_id) === kelasId && x.kitab_id === kitab.id).length;
+                            if (jumlah > kitab.frekuensi) {
+                                isi.forEach((j) => pesan[j.id] ??= @js(__('Kitab')) + ' ' + kitab.nama + ' ' + @js(__('di kelas ini akan menjadi')) + ' ' + jumlah + ' ' + @js(__('kali seminggu (batas frekuensi')) + ' ' + kitab.frekuensi + ')');
+                            }
+                        });
+                    }
+                    return pesan;
+                },
+                // Alasan belum bisa diterapkan (tampil di samping tombol), atau '' bila siap
+                massalAlasan() {
+                    const m = this.massal;
+                    if (!this.massalTerpilih.length) return @js(__('Centang dulu jadwal yang mau diubah.'));
+                    if (!m.ustadzBaru && !m.kitabBaru) return @js(__('Pilih ustadz baru atau kitab baru.'));
+                    const merah = this.massalTerpilih.filter((j) => this.massalPesan[j.id]).length;
+                    if (merah) return merah + ' ' + @js(__('jadwal bentrok (tanda merah). Hilangkan centangnya atau pilih yang lain.'));
+                    return '';
+                },
+            },
+            watch: {
+                // Saringan berubah -> semua jadwal yang cocok langsung dicentang
+                massalCocok(daftar) {
+                    this.massal.dicentang = daftar.map((j) => j.id);
                 },
             },
             methods: {
@@ -726,6 +910,19 @@ $dataUstadz = $ustadzList->map(fn ($u) => ['id' => $u->id, 'nama' => $u->nama, '
                         kitab_id: j.kitab_id ? String(j.kitab_id) : '', user_id: j.user_id ? String(j.user_id) : '', catatan: j.catatan ?? '', tukar: false,
                     };
                     this.bukaDialog('dialog-jadwal');
+                },
+                // Buka jendela Ubah Sekaligus (saringan kelas mengikuti kelas yang sedang dibuka)
+                bukaMassal() {
+                    this.massal = kosongkanMassal(this.kelasFilter);
+                    this.massal.dicentang = this.massalCocok.map((j) => j.id);
+                    this.bukaDialog('dialog-massal');
+                },
+                // Tombol Terapkan: bila belum siap, tampilkan alasannya dan jangan kirim
+                kirimMassal(e) {
+                    if (this.massalAlasan) {
+                        e.preventDefault();
+                        notifikasi.gagal(this.massalAlasan, @js(__('Belum bisa diterapkan')));
+                    }
                 },
                 // Tekan Esc = tutup menu Pindah/Salin
                 tutupTawaran(e) {

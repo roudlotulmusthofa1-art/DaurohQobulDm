@@ -98,7 +98,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'peran:admin'])->gro
     Route::get('jadwal/export', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'export'])->name('jadwal.export'); // Print / PDF / Word
     Route::post('jadwal/salin', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'salin'])->name('jadwal.salin');
     Route::post('jadwal/{jadwal}/geser', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'geser'])->name('jadwal.geser');
-    Route::post('jadwal/ganti-ustadz', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'gantiUstadz'])->name('jadwal.ganti-ustadz');
+    Route::post('jadwal/ubah-sekaligus', [\App\Http\Controllers\Admin\JadwalMengajarController::class, 'ubahSekaligus'])->name('jadwal.ubah-sekaligus');
     Route::resource('jadwal', \App\Http\Controllers\Admin\JadwalMengajarController::class)->only(['index', 'store', 'update', 'destroy']);
     // Munaqosah: musyawarah asatid (Musyrifin Dauroh -> Lajnah Qobul Darul Musthofa)
     Route::controller(\App\Http\Controllers\Admin\MunaqosahController::class)->prefix('munaqosah')->name('munaqosah.')->group(function () {
