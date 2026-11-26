@@ -243,7 +243,7 @@
                     <p class="min-w-0 truncate text-[16px] font-extrabold text-white" v-pre>{{ $judulHp }}</p>
                 </div>
                 <div class="hidden lg:block">
-                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]" v-pre>@yield('page-heading', __('Selamat Datang, :nama 👋', ['nama' => auth()->user()->name ?? 'Admin']))</h1>
+                    <h1 class="text-[26px] font-bold tracking-tight text-[#0f1f1a]" v-pre>@yield('page-heading', __('Selamat Datang, :nama ', ['nama' => auth()->user()->name ?? 'Admin']))</h1>
                 </div>
 
                 <div class="flex items-center gap-2 lg:gap-3">
