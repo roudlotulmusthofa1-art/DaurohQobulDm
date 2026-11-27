@@ -479,10 +479,16 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/></svg>
                     @{{ santri.tanggal_masuk }}
                 </span>
-                <span v-if="santri.wali" class="inline-flex items-center gap-1 min-w-0">
-                    <svg class="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path stroke-linecap="round" stroke-linejoin="round" d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2"/></svg>
-                    <span class="truncate">@{{ santri.wali }}</span>
-                </span>
+                <button v-if="santri.asal" type="button" @click="pencarian = santri.asal"
+                                    class="inline-flex items-center gap-1 min-w-0 hover:text-teal-700">
+                                    <svg class="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" stroke-width="2"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round"
+                                            d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z" />
+                                        <circle cx="12" cy="9.5" r="2.5" />
+                                    </svg>
+                                    <span class="truncate">@{{ santri.asal }}</span>
+                                </button>
             </div>
 
             {{-- Persyaratan: angka terpenuhi + nama syarat yang belum --}}
@@ -542,7 +548,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                         <th class="px-4 py-5 font-medium text-base">{{ __('Kamar') }}</th>
                         <th class="px-4 py-5 font-medium text-base whitespace-nowrap">{{ __('No. Kasur') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Tanggal Masuk') }}</th>
-                        <th class="px-4 py-5 font-medium text-base">{{ __('Wali Santri') }}</th>
+
+                        <th class="px-4 py-5 font-medium text-base">{{ __('Asal') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Persyaratan') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Status') }}</th>
                         <th class="px-4 py-5 font-medium text-base">{{ __('Aksi') }}</th>
@@ -609,7 +616,12 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                             <span v-else class="text-xs text-gray-300">-</span>
                         </td>
                         <td class="px-4 py-3 text-gray-600">@{{ santri.tanggal_masuk }}</td>
-                        <td class="px-4 py-3 text-gray-400">@{{ santri.wali || '-' }}</td>
+                        <td class="px-4 py-3 text-gray-600">
+                                                    <button v-if="santri.asal" type="button" @click="pencarian = santri.asal"
+                                                        class="hover:text-teal-700 hover:underline" title="{{ __('Tampilkan semua santri dengan data ini') }}">@{{
+                                                        santri.asal }}</button>
+                                                    <span v-else class="text-gray-300">-</span>
+                                                </td>
                         {{-- Persyaratan: 3/5 + syarat yang belum dicentang --}}
                         <td class="px-4 py-3 min-w-[11rem]">
                             <span class="inline-block rounded-full px-2 py-0.5 text-[11px] font-bold"

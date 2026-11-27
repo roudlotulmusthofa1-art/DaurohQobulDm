@@ -296,7 +296,7 @@ class AdminSantriController extends Controller
             'jabatan_kamar' => $s->kamar_id ? $s->jabatan_kamar : null, // ketua | wakil | null
             'jabatan_url'   => route('admin.santri.jabatan-kamar', $s),
             'tanggal_masuk' => ($s->diproses_at ?? $s->created_at)?->translatedFormat('d M Y'),
-            'wali'          => $s->nama_wali,
+            'asal' => $s->provinsi,
             'status'        => $s->user_id ? 'aktif' : 'belum punya akun',
             // Kolom persyaratan yang BELUM dicentang admin, mis. ['syarat_paspor', 'syarat_raport']
             'syarat_kurang' => collect(PendaftaranSiswa::SYARAT)->reject(fn ($nama, $kolom) => $s->$kolom)->keys()->values(),
