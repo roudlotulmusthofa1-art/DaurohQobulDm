@@ -70,6 +70,14 @@ $labelWa = [__('No. WhatsApp'), __('No. WhatsApp Wali'), __('No. WhatsApp Muarri
 // Bagian yang kartunya selebar halaman (isinya banyak)
 $seksiPenuh = ['Wali & Muarrif', 'Data Tambahan'];
 
+// Khusus admin: isi data bisa diklik -> Data Santri menampilkan semua santri dengan data yang sama
+// (mis. klik nama pondok = semua santri yang pernah mondok di sana). Contoh alamat: admin/santri?q=Lirboyo
+$bisaCari = ($admin ?? false);
+$urlCari = fn ($nilai) => route('admin.santri.index', ['q' => $nilai]);
+// Label yang TIDAK dijadikan tautan (isinya hampir selalu berbeda tiap santri)
+$tanpaCari = [__('Nama Lengkap (Indonesia)'), __('Nama Lengkap (Arab)'), __('Tanggal Lahir'), __('Email'), __('Persentase Muslim di Daerah')];
+$kelasTautan = 'hover:text-emerald-700 hover:underline decoration-emerald-300 underline-offset-4';
+
 // riwayat_pondok & riwayat_kitab disimpan sebagai JSON (di model sudah di-cast ke array)
 $pondok = $p->riwayat_pondok ?? [];
 $kitab = $p->riwayat_kitab ?? [];
@@ -475,7 +483,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
             </div>
             <p class="relative mt-4 text-xs font-medium text-white/70">{{ __('Kelas Ditempatkan') }}</p>
+            @if ($bisaCari && $p->kelasMaster)
+            <a href="{{ route('admin.santri.index', ['kelas' => $p->kelas_id]) }}" title="{{ __('Tampilkan semua santri di kelas ini') }}"
+                class="relative block text-lg font-bold hover:underline underline-offset-4">{{ $p->kelasMaster->nama }}</a>
+            @else
             <p class="relative text-lg font-bold">{{ $p->kelasMaster?->nama ?? __('Belum dipilih') }}</p>
+            @endif
 
         </div>
 
@@ -487,7 +500,12 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
 
             </div>
             <p class="relative mt-4 text-xs font-medium text-white/75">{{ __('Kamar Ditempatkan') }}</p>
+            @if ($bisaCari && $p->kamarMaster)
+            <a href="{{ route('admin.santri.index', ['kamar' => $p->kamar_id]) }}" title="{{ __('Tampilkan semua santri di kamar ini') }}" dir="auto"
+                class="relative block text-lg font-bold hover:underline underline-offset-4">{{ $p->kamarMaster->nama }}</a>
+            @else
             <p class="relative text-lg font-bold" dir="auto">{{ $p->kamarMaster?->nama ?? __('Belum dipilih') }}</p>
+            @endif
             <p class="relative mt-1 text-[11px] text-white/70">{{ __('Kasur:') }} {{ $p->nomor_kasur ? __('No.') . ' ' . $p->nomor_kasur : __('Belum dipilih') }}</p>
         </div>
     </div>
@@ -529,16 +547,28 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                     <span class="absolute left-0 top-4 bottom-4 w-1 rounded-r-full bg-gradient-to-b from-amber-400 to-orange-400"></span>
                     <div class="flex items-center gap-2 mb-3">
                         <span class="w-7 h-7 rounded-full bg-amber-400 text-white text-xs font-bold flex items-center justify-center">{{ $i + 1 }}</span>
-                        <p class="font-bold text-slate-800 truncate" dir="auto">{{ $r['asal_pondok'] ?? '-' }}</p>
+                        <p class="font-bold text-slate-800 truncate" dir="auto">
+                            @if ($bisaCari && ! empty($r['asal_pondok']))
+                            <a href="{{ $urlCari($r['asal_pondok']) }}" class="{{ $kelasTautan }}" title="{{ __('Tampilkan semua santri dengan data ini') }}">{{ $r['asal_pondok'] }}</a>
+                            @else {{ $r['asal_pondok'] ?? '-' }} @endif
+                        </p>
                     </div>
                     <dl class="grid grid-cols-2 gap-x-4 gap-y-3 text-sm">
                         <div>
                             <dt class="text-[11px] uppercase tracking-wider text-slate-400">{{ __('Nama Pengasuh') }}</dt>
-                            <dd class="mt-0.5 font-semibold text-slate-700" dir="auto">{{ $r['nama_pengasuh'] ?? '-' }}</dd>
+                            <dd class="mt-0.5 font-semibold text-slate-700" dir="auto">
+                                @if ($bisaCari && ! empty($r['nama_pengasuh']))
+                                <a href="{{ $urlCari($r['nama_pengasuh']) }}" class="{{ $kelasTautan }}" title="{{ __('Tampilkan semua santri dengan data ini') }}">{{ $r['nama_pengasuh'] }}</a>
+                                @else {{ $r['nama_pengasuh'] ?? '-' }} @endif
+                            </dd>
                         </div>
                         <div>
                             <dt class="text-[11px] uppercase tracking-wider text-slate-400">{{ __('Daerah / Kota') }}</dt>
-                            <dd class="mt-0.5 font-semibold text-slate-700" dir="auto">{{ $r['nama_daerah'] ?? '-' }}</dd>
+                            <dd class="mt-0.5 font-semibold text-slate-700" dir="auto">
+                                @if ($bisaCari && ! empty($r['nama_daerah']))
+                                <a href="{{ $urlCari($r['nama_daerah']) }}" class="{{ $kelasTautan }}" title="{{ __('Tampilkan semua santri dengan data ini') }}">{{ $r['nama_daerah'] }}</a>
+                                @else {{ $r['nama_daerah'] ?? '-' }} @endif
+                            </dd>
                         </div>
                         <div class="col-span-2">
                             <dt class="text-[11px] uppercase tracking-wider text-slate-400">{{ __('Lama Belajar') }}</dt>
@@ -584,6 +614,8 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                                 </svg>
                             </a>
                         </span>
+                        @elseif ($nilai && $bisaCari && ! in_array($label, $tanpaCari) && ! in_array($label, $labelWa))
+                        <a href="{{ $urlCari($nilai) }}" class="{{ $kelasTautan }}" title="{{ __('Tampilkan semua santri dengan data ini') }}">{{ $nilai }}</a>
                         @else
                         {{ $nilai ?: '-' }}
                         @endif
@@ -618,7 +650,11 @@ $kartu = 'bg-white rounded-3xl ring-1 ring-[#0b332c]/[0.06] shadow-[0_1px_2px_rg
                             <td class="py-3 px-4">
                                 <span class="w-6 h-6 rounded-lg bg-slate-100 text-slate-500 text-xs font-semibold flex items-center justify-center">{{ $i + 1 }}</span>
                             </td>
-                            <td class="py-3 px-4 font-semibold text-slate-800" dir="auto">{{ $k['nama_kitab'] ?? '-' }}</td>
+                            <td class="py-3 px-4 font-semibold text-slate-800" dir="auto">
+                                @if ($bisaCari && ! empty($k['nama_kitab']))
+                                <a href="{{ $urlCari($k['nama_kitab']) }}" class="{{ $kelasTautan }}" title="{{ __('Tampilkan semua santri dengan data ini') }}">{{ $k['nama_kitab'] }}</a>
+                                @else {{ $k['nama_kitab'] ?? '-' }} @endif
+                            </td>
                             <td class="py-3 px-4 text-slate-600" dir="auto">{{ $k['fan_kitab'] ?? '-' }}</td>
                             <td class="py-3 px-4" dir="auto">
                                 @if (($k['sudah_diujikan'] ?? '') === 'sudah')

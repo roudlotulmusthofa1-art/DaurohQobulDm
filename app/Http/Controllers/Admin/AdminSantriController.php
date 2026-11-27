@@ -125,9 +125,8 @@ class AdminSantriController extends Controller
         });
 
         if ($kata = mb_strtolower(trim($v['q'] ?? ''))) {
-            $santri = $santri->filter(fn ($s) => str_contains(mb_strtolower(implode(' ', [
-                $s->nama_lengkap, $s->nama_lengkap_arab, $s->nomor_pendaftaran, $s->kelasMaster?->nama, $s->kamarMaster?->nama, $s->nama_wali,
-            ])), $kata));
+            // Sama seperti kotak pencarian di layar: semua data detail santri ikut dicari
+            $santri = $santri->filter(fn ($s) => str_contains(mb_strtolower($this->teksCari($s)), $kata));
         }
         $santri = $santri->values();
 
@@ -303,7 +302,38 @@ class AdminSantriController extends Controller
             'syarat_kurang' => collect(PendaftaranSiswa::SYARAT)->reject(fn ($nama, $kolom) => $s->$kolom)->keys()->values(),
             'detail_url'    => route('admin.pendaftaran.show', $s),
             'hapus_url'     => route('admin.pendaftaran.destroy', $s), // tombol tempat sampah
+            'cari'          => $this->teksCari($s), // semua data detail, untuk kotak pencarian
         ];
+    }
+
+    /**
+     * Gabungan semua data di halaman detail santri (pribadi, alamat, wali, pendidikan,
+     * riwayat pondok & kitab, data tambahan) supaya bisa dicari, mis. nama pondok asal.
+     */
+    private function teksCari(PendaftaranSiswa $s): string
+    {
+        $pondok = collect($s->riwayat_pondok ?? [])
+            ->flatMap(fn ($r) => [$r['asal_pondok'] ?? null, $r['nama_pengasuh'] ?? null, $r['nama_daerah'] ?? null]);
+        $kitab = collect($s->riwayat_kitab ?? [])->pluck('nama_kitab');
+
+        return collect([
+            $s->nama_lengkap, $s->nama_lengkap_arab, $s->nomor_pendaftaran,
+            $s->kelasMaster?->nama, $s->kamarMaster?->nama,
+            $s->tempat_lahir, $s->no_hp, $s->email,
+            $s->provinsi, $s->kota, $s->kecamatan, $s->kelurahan, $s->alamat,
+            $s->nama_wali, $s->pekerjaan_wali, $s->hubungan_wali, $s->no_hp_wali,
+            $s->nama_muarrif, $s->no_hp_muarrif, $s->nama_butuh, $s->no_hp_nya,
+            // Data berkode: tulisan aslinya + terjemahannya (sama seperti yang tampil di halaman detail)
+            ...collect([
+                PendaftaranSiswa::STATUS_PERNIKAHAN[$s->status_pernikahan] ?? null,
+                PendaftaranSiswa::PENDIDIKAN_TERAKHIR[$s->pendidikan_terakhir] ?? null,
+                PendaftaranSiswa::PERNAH_DAUROH[$s->pernah_dauroh] ?? null,
+            ])->filter()->flatMap(fn ($teks) => [$teks, __($teks)])->all(),
+            $s->nama_sekolah, $s->nama_daerah,
+            $s->marhalah, $s->lama_belajar, $s->kesehatan, $s->status_ekonomi, $s->alumni,
+        ])->merge($pondok)->merge($kitab)
+            ->filter(fn ($nilai) => is_scalar($nilai) && $nilai !== '')
+            ->implode(' | ');
     }
 
     /** Pilihan kamar aktif, lengkap dengan isi/kapasitas, mis. "Kamar Umar (3/12)" */

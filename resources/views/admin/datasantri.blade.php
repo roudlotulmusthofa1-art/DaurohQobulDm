@@ -337,7 +337,7 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input type="text" v-model="pencarian" placeholder="{{ __('Cari santri (nama latin/Arab, no. pendaftaran, kelas, kamar, wali)...') }}"
+            <input type="text" v-model="pencarian" placeholder="{{ __('Cari santri (nama, pondok asal, kota, sekolah, kelas, kamar, wali)...') }}"
                 class="w-full border border-ribath-green-light rounded-lg pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ribath-green focus:border-transparent">
         </div>
         <button type="button" @click="filterTerbuka = !filterTerbuka"
@@ -459,12 +459,14 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 
             {{-- Keterangan singkat: kelas, kamar, kasur, tanggal masuk, wali --}}
             <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-slate-500">
-                <span v-if="santri.kelas" class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-md"
-                    :class="warnaBadgeKelas(santri.kelas)">@{{ santri.kelas }}</span>
+                <button v-if="santri.kelas" type="button" @click="saringKlik('kelas', santri.kelas_id)" title="{{ __('Tampilkan semua santri di kelas ini') }}"
+                    class="inline-block text-[11px] font-medium px-2 py-0.5 rounded-md hover:ring-1 hover:ring-current"
+                    :class="warnaBadgeKelas(santri.kelas)">@{{ santri.kelas }}</button>
                 <span v-else class="text-amber-600">{{ __('Kelas') }}: {{ __('Belum dipilih') }}</span>
                 <span class="inline-flex items-center gap-1">
                     <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10.5 12 3l9 7.5V21H3z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9 21v-6h6v6"/></svg>
-                    <span v-if="santri.kamar">@{{ santri.kamar }}</span>
+                    <button v-if="santri.kamar" type="button" @click="saringKlik('kamar', santri.kamar_id)" title="{{ __('Tampilkan semua santri di kamar ini') }}"
+                        class="hover:text-teal-700 hover:underline">@{{ santri.kamar }}</button>
                     <span v-else class="text-amber-600">{{ __('Belum dipilih') }}</span>
                     <span v-if="santri.kamar && JABATAN[santri.jabatan_kamar]" class="rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1"
                         :class="JABATAN[santri.jabatan_kamar].lencana" v-text="JABATAN[santri.jabatan_kamar].label"></span>
@@ -587,14 +589,16 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                             </div>
                         </td>
                         <td class="px-4 py-3">
-                            <span v-if="santri.kelas" class="inline-block text-xs font-medium px-2.5 py-1 rounded-md"
+                            <button v-if="santri.kelas" type="button" @click="saringKlik('kelas', santri.kelas_id)" title="{{ __('Tampilkan semua santri di kelas ini') }}"
+                                class="inline-block text-xs font-medium px-2.5 py-1 rounded-md hover:ring-1 hover:ring-current"
                                 :class="warnaBadgeKelas(santri.kelas)">
                                 @{{ santri.kelas }}
-                            </span>
+                            </button>
                             <span v-else class="text-xs text-amber-600">{{ __('Belum dipilih') }}</span>
                         </td>
                         <td class="px-4 py-3 text-gray-600">
-                            <span v-if="santri.kamar">@{{ santri.kamar }}</span>
+                            <button v-if="santri.kamar" type="button" @click="saringKlik('kamar', santri.kamar_id)" title="{{ __('Tampilkan semua santri di kamar ini') }}"
+                                class="hover:text-teal-700 hover:underline">@{{ santri.kamar }}</button>
                             <span v-else class="text-xs text-amber-600">{{ __('Belum dipilih') }}</span>
                             <span v-if="santri.kamar && JABATAN[santri.jabatan_kamar]" class="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold ring-1 whitespace-nowrap"
                                 :class="JABATAN[santri.jabatan_kamar].lencana" v-text="JABATAN[santri.jabatan_kamar].label"></span>
@@ -810,6 +814,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
         wakil: { label: @js(__('Wakil')), lencana: 'bg-sky-100 text-sky-800 ring-sky-300', titik: 'bg-sky-500', baris: 'ring-sky-200 bg-sky-50/70', pilih: 'bg-sky-500 text-white ring-sky-500' },
     };
     const URUT_JABATAN = { ketua: 0, wakil: 1 };
+    // ?kelas=3 / ?kamar=5 dari halaman detail santri -> angka id (kosong bila tidak ada)
+    const angkaDariAlamat = (nama) => { const v = parseInt(new URLSearchParams(location.search).get(nama), 10); return Number.isNaN(v) ? '' : v; };
     const formKosong = () => ({ nama_lengkap: '', nama_wali: '', no_hp_wali: '', kota: '', kelas_id: null, kamar_id: null });
 
     createApp({
@@ -822,11 +828,12 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 ekspor: { buka: false, kelompok: 'semua', kelas: '', kamar: '', pisah: true },
                 kelasOptions: @json($kelasOptions),
                 kamarOptions: @json($kamarOptions),
-                pencarian: '',
+                // Bisa dari alamat: ?q=Lirboyo (dipakai tautan di halaman detail santri)
+                pencarian: new URLSearchParams(location.search).get('q') || '',
                 filterTerbuka: false,
                 syaratList: @json($syaratList), // { kolom: 'Nama syarat' }
                 // syarat: '' | 'kurang' | 'lengkap' | kolom syarat (mis. 'syarat_paspor'). Bisa dari alamat: ?syarat=kurang
-                filter: { kelas: '', kamar: '', status: '', syarat: new URLSearchParams(location.search).get('syarat') || '' },
+                filter: { kelas: angkaDariAlamat('kelas'), kamar: angkaDariAlamat('kamar'), status: '', syarat: new URLSearchParams(location.search).get('syarat') || '' },
                 kelolaMassal: false,
                 pilihSemua: false,
                 terpilih: [],
@@ -950,7 +957,8 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
 
                         // 4) Kotak pencarian
                         if (!kata) return true;
-                        return [santri.nama, santri.nama_arab, santri.nomor, santri.kelas, santri.kamar, santri.wali]
+                        // santri.cari = gabungan semua data detail (pondok asal, kota, sekolah, dll.)
+                        return [santri.nama, santri.nama_arab, santri.nomor, santri.kelas, santri.kamar, santri.wali, santri.cari]
                                                 .some(nilai => rapikan(nilai).includes(kata));
                         });
                         },
@@ -1001,6 +1009,10 @@ Vue 3 (window.Vue dari resources/js/app.js) hanya mengatur pencarian & centang.
                 } finally {
                     this.jabatanMenyimpan = null;
                 }
+            },
+            // Klik label kelas/kamar di tabel: tampilkan semua santri di kelas/kamar itu (klik lagi = batal)
+            saringKlik(jenis, id) {
+                this.filter[jenis] = this.filter[jenis] === id ? '' : id;
             },
             // ----- Persyaratan -----
             // Klik tombol syarat di kotak ringkasan: saring tabel (klik lagi = batal)
