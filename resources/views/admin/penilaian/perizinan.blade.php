@@ -268,7 +268,7 @@ $saringan = [
                                 :class="!ubahId && dipilih(s.siswa_id) ? 'bg-emerald-50/60' : ''">
                                 <span v-if="!ubahId" class="w-5 h-5 shrink-0 rounded-md ring-1 flex items-center justify-center text-xs font-bold"
                                     :class="dipilih(s.siswa_id) ? 'bg-emerald-600 text-white ring-emerald-600' : 'bg-white text-transparent ring-slate-300'">✓</span>
-                                <img v-if="s.foto" :src="s.foto" alt="" class="w-8 h-8 rounded-lg object-cover">
+                                <img v-if="s.foto" :src="s.foto" :data-perbesar="s.siswa" alt="" class="w-8 h-8 rounded-lg object-cover">
                                 <span v-else class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 text-sm font-bold flex items-center justify-center" v-text="inisial(s.siswa)"></span>
                                 <span class="flex-1 min-w-0">
                                     <span class="block text-sm font-semibold text-slate-800 truncate" v-text="s.siswa"></span>

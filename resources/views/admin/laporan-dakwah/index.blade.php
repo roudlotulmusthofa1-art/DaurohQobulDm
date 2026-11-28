@@ -104,7 +104,8 @@ $keterangan = __("Ringkasan hasil penilaian khitoba' dan khurujud dakwah semua s
         <ul v-if="tampil === 'rekap'" class="mt-3 divide-y divide-slate-100">
             <li v-for="r in rekapCari" :key="r.siswa_id" class="py-3.5 flex flex-col sm:flex-row sm:items-start gap-3">
                 <div class="flex items-center gap-3 sm:w-64 shrink-0 min-w-0">
-                    <img v-if="r.foto" :src="r.foto" alt="" class="w-10 h-10 rounded-xl object-cover">
+                    <img v-if="r.foto" :src="r.foto" alt="" @click="fotoBesar = r.foto"
+                        class="w-10 h-10 rounded-xl object-cover cursor-zoom-in">
                     <span v-else class="w-10 h-10 rounded-xl bg-slate-200 text-slate-600 font-bold flex items-center justify-center" v-text="inisial(r.siswa)"></span>
                     <span class="min-w-0">
                         <button type="button" @click="lihatSantri(r)" class="block font-semibold text-slate-800 truncate hover:underline text-left" v-text="r.siswa"></button>
@@ -185,6 +186,18 @@ $keterangan = __("Ringkasan hasil penilaian khitoba' dan khurujud dakwah semua s
                 </button>
             </div>
         </template>
+        {{-- Foto diperbesar --}}
+        <div v-if="fotoBesar" @click="fotoBesar = null"
+            class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 cursor-zoom-out">
+            <img :src="fotoBesar" alt="" class="max-w-full max-h-full rounded-2xl shadow-2xl">
+            <button type="button"
+                class="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/15 hover:bg-white/25 text-white flex items-center justify-center"
+                aria-label="{{ __('Tutup foto') }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+            </button>
+        </div>
     </section>
 </div>
 </div>
@@ -211,6 +224,7 @@ $keterangan = __("Ringkasan hasil penilaian khitoba' dan khurujud dakwah semua s
                 cari: '',
                 santriDipilih: null,
                 batas: 50,
+                fotoBesar: null,
             }),
             computed: {
                 nilaiJenis() { return this.jenis ? this.nilai.filter((n) => n.jenis === this.jenis) : this.nilai; },

@@ -174,7 +174,7 @@ $info = [
         <div class="mt-4 divide-y divide-slate-100">
             <div v-for="p in daftar" :key="p.id" class="py-3">
                 <button type="button" @click="buka = buka === p.id ? null : p.id" class="w-full flex items-center gap-3 text-left">
-                    <img v-if="p.foto" :src="p.foto" alt="" class="w-11 h-11 rounded-2xl object-cover ring-1 ring-slate-200">
+                    <img v-if="p.foto" :src="p.foto" :data-perbesar="p.nama" alt="" class="w-11 h-11 rounded-2xl object-cover ring-1 ring-slate-200">
                     <span v-else class="w-11 h-11 shrink-0 rounded-2xl bg-slate-100 text-slate-500 font-bold flex items-center justify-center" v-text="inisial(p.nama)"></span>
                     <span class="flex-1 min-w-0">
                         <span class="block text-sm font-semibold text-slate-800 truncate" v-text="p.nama"></span>

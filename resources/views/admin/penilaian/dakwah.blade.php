@@ -237,7 +237,7 @@ $panel = [
                     <ul class="mt-2 max-h-56 overflow-y-auto rounded-2xl ring-1 ring-slate-100 divide-y divide-slate-100">
                         <li v-for="s in santriCari" :key="s.siswa_id">
                             <button type="button" @click="form.siswa_id = s.siswa_id" class="w-full flex items-center gap-3 px-3 py-2 text-left hover:bg-slate-50">
-                                <img v-if="s.foto" :src="s.foto" alt="" class="w-8 h-8 rounded-lg object-cover">
+                                <img v-if="s.foto" :src="s.foto" :data-perbesar="s.siswa" alt="" class="w-8 h-8 rounded-lg object-cover">
                                 <span v-else class="w-8 h-8 rounded-lg bg-slate-200 text-slate-600 text-sm font-bold flex items-center justify-center" v-text="inisial(s.siswa)"></span>
                                 <span class="flex-1 min-w-0">
                                     <span class="block text-sm font-semibold text-slate-800 truncate" v-text="s.siswa"></span>
